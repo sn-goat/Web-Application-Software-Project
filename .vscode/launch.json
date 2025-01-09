@@ -1,0 +1,38 @@
+{
+    "version": "1.0.0",
+    "configurations": [
+        {
+            "name": "Debug server (Attach)",
+            "port": 9229,
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "restart": true,
+            "sourceMaps": true,
+            "localRoot": "${workspaceFolder}/server",
+            "type": "node"
+        },
+        {
+            "name": "Launch Client With Debug",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/client"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Test Server with Debug",
+            "request": "launch",
+            "command": "npm run test",
+            "cwd": "${workspaceFolder}/server"
+        },
+        {
+            "name": "Attach Client Test With Debug",
+            "request": "launch",
+            "type": "chrome",
+            "url": "http://localhost:9876",
+            "webRoot": "${workspaceFolder}/client"
+        },
+    ]
+}
