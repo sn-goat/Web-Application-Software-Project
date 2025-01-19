@@ -1,28 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vue de création d'une partie</title>
-</head>
 <body>
-  <h1 class="title">Vue de création d'une partie</h1>
-  <div class="container">
-    <div class="filter">Filtre de sélection (mode classique ou CTF) et (taille)</div>
-    <div class="details">
-      <div class="map">Map</div>
-      <div class="info">
-        <p>Infos</p>
-        <p>Nom</p>
-        <p>Mode</p>
-        <p>Taille</p>
-        <p>Date dernière modification</p>
+<h1 class="title">Vue de création d'une partie</h1>
+<div class="container">
+  <div class="filter">Filtre de sélection (mode classique ou CTF) et (taille)</div>
+  
+  <!-- Option 1 -->
+  <div class="parent-options">
+    <div
+      class="option"
+      (mouseenter)="showDetails($event, 'details-1')"
+      (mouseleave)="hideDetails($event, 'details-1')"
+      routerLink="/game"
+    >
+      <span>Nom</span>
+      <div class="details" id="details-1">
+        <div class="map">Map</div>
+        <div class="info">
+          <p>Infos</p>
+          <p>Nom</p>
+          <p>Mode</p>
+          <p>Taille</p>
+          <p>Date dernière modification</p>
+        </div>
       </div>
     </div>
-    <div class="option">Nom</div>
-    <div class="option">Nom</div>
+  
+    <!-- Option 2 -->
+    <div
+      class="option"
+      (mouseenter)="showDetails($event, 'details-2')"
+      (mouseleave)="hideDetails($event, 'details-2')"
+      routerLink="/game"
+    >
+      <span>Nom</span>
+        <div class="details" id="details-2">
+        <div class="map">Map</div>
+        <div class="info">
+          <p>Infos</p>
+          <p>Nom</p>
+          <p>Mode</p>
+          <p>Taille</p>
+          <p>Date dernière modification</p>
+        </div>
+      </div>
+    </div>
   </div>
+  
   <button class="retour" routerLink="/home">Retour</button>
-
+</div>
 </body>
-</html>
