@@ -40,19 +40,19 @@ h1 {
 }
 
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(10px, 1fr));
-    gap: 10px;
-    width: 80%; /* Ajustez la largeur selon vos besoins */
-    height: 650px; 
-    background-color: #f0f0f0;
+    display: flex;
+    width: 650px; 
+    height: 650px;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
 
-.grid > div {
-    background-color: #ccc;
-    border: 1px solid #999;
-    height: 100%;
-}
+// .grid > div {
+//     background-color: #ccc;
+//     border: 1px solid #999;
+//     height: 100%;
+// }
 
 .object-card {
     width: 15%; 
