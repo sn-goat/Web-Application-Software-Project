@@ -1,0 +1,110 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #0d0215; /* Darker purple background */
+    color: #d8f3dc; /* Light mint text color */
+  }
+  
+  .title {
+    font-size: 2rem;
+    color: #00a896; /* Mint color for the title */
+    margin-bottom: 20px;
+  }
+  
+  .container {
+    width: 80%;
+    max-width: 1200px;
+    background-color: #0d0215; /* Match body background */
+    border: 2px solid #00a896; /* Subtle mint border */
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 8px #00a896; /* Subtler glow effect */
+  }
+  
+  .filter {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 2px solid #00a896;
+    border-radius: 10px;
+    color: #d8f3dc;
+    background-color: #0d0215;
+    box-shadow: 0 0 5px #00a896;
+  }
+  
+  .details {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 2px solid #00a896;
+    border-radius: 10px;
+    box-shadow: 0 0 5px #00a896;
+  }
+  
+  .map {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #ffffff; /* Changed border to white */
+    border-radius: 10px;
+    height: 150px;
+    color: #d8f3dc;
+    background-color: #0d0215;
+    box-shadow: 0 0 5px #ffffff; /* Subtle white glow */
+  }
+  
+  .info {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border: 2px solid #ffffff; /* Changed border to white */
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #0d0215;
+    color: #d8f3dc;
+    box-shadow: 0 0 5px #ffffff; /* Subtle white glow */
+  }
+  
+  .option {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #00a896;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 10px;
+    background-color: #0d0215;
+    color: #d8f3dc;
+    box-shadow: 0 0 5px #00a896;
+  }
+  
+  .retour {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #0d0215;
+    background-color: #00a896;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .retour:hover {
+    background-color: #d8f3dc;
+    color: #0d0215;
+  }
+  
