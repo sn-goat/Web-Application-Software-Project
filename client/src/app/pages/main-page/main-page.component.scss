@@ -1,44 +1,111 @@
 .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
-    height: auto;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #1a1625;
+    color: #7ee0d0;
 }
 
 .justified {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+
+img {
+    width: 500px;
+    height: 300px;
+    margin: 20px 0;
+    object-fit: contain;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .button {
-    margin-top: 10px;
+    background-color: rgba(126, 224, 208, 0.1);;
+    color: #7ee0d0;
+    padding: 15px 30px;
+    border: 1px solid #7ee0d0;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
     text-align: center;
+    transition: background-color 0.3s;
+    box-shadow: 0 0 10px rgba(126, 224, 208, 0.2);
+}
+
+.button:hover {
+    background-color: rgba(126, 224, 208, 0.2);
+    box-shadow: 0 0 20px rgba(126, 224, 208, 0.2);
+    transform: translateY(-2px);
 }
 
 .team-name {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
-    color: green;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
 }
 
 .header-item {
-    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 20px 0;
     text-align: center;
+    color: #7ee0d0;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
 }
 
 .footer-item {
+    margin-top: auto;
     text-align: center;
+    padding: 20px;
+    width: 100%;
 }
 
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
+.footer-item p {
+    margin: 0;
+    line-height: 1.5;
+    color: #7ee0d0;
+    line-height: 1.5;
+    opacity: 0.8;
 }
 
-.server-message {
-    justify-content: center;
-    width: 20%;
-    min-width: min-content;
+.footer-item span {
+    color: #7ee0d0;
+    transition: color 0.3s ease;
+}
+
+.footer-item span:hover {
+    color: #ffd700;
+}
+
+
+
+@media (max-width: 768px) {
+    img {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 500px;
+    }
+
+    .header-item {
+        font-size: 2rem;
+    }
+
+    .button-container {
+        max-width: 250px;
+    }
 }

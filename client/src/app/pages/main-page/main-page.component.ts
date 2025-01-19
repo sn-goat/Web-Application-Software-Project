@@ -13,10 +13,13 @@ import { map } from 'rxjs/operators';
     imports: [RouterLink],
 })
 export class MainPageComponent {
-    readonly title: string = 'LOG2990';
+    readonly title: string = 'POLYTOPIA';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    imagePath: string;
 
-    constructor(private readonly communicationService: CommunicationService) {}
+    constructor(private readonly communicationService: CommunicationService) {
+        this.imagePath = '/assets/POLYTOPIA_game_logo.png';
+    }
 
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
