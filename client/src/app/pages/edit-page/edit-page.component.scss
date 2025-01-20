@@ -39,6 +39,21 @@ h1 {
     justify-content: space-between;
 }
 
+.grid {
+    display: flex;
+    width: 650px; 
+    height: 650px;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+// .grid > div {
+//     background-color: #ccc;
+//     border: 1px solid #999;
+//     height: 100%;
+// }
+
 .object-card {
     width: 15%; 
     background-color: #f9f9f9;
