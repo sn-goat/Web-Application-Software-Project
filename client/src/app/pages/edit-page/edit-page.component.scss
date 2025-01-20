@@ -30,29 +30,19 @@ h1 {
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
     padding: 20px;
     margin-top: 20px;
-    width: 100%;
-    max-width: 800px;
+    width: 90%;
+    height: 90vh;
 }
 
 .content {
     display: flex;
+    width: 100%;
+    height: 100%;
     justify-content: space-between;
 }
 
-.grid {
-    display: flex;
-    width: 650px; 
-    height: 650px;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
 
-// .grid > div {
-//     background-color: #ccc;
-//     border: 1px solid #999;
-//     height: 100%;
-// }
+
 
 .object-card {
     width: 15%; 
@@ -65,7 +55,13 @@ h1 {
 .footer-card {
     margin-top: 20px;
     width: 100%;
-    max-width: 800px;
+    max-width: 90%;
+    background-color: #1a162520;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    margin-top: 20px;
+    height: auto;
 }
 
 #editForm {
