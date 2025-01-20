@@ -7,7 +7,7 @@ export interface BoardCell {
     item: string;
 }
 
-export interface BoardGame {
+export interface Board {
     _id: string;
     name: string;
     description: string;
