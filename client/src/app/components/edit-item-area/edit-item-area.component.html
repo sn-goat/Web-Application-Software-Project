@@ -1,0 +1,20 @@
+<div class="tabs">
+    <button class="tab-button" (click)="showGrid('TilesGrid')">Tiles</button>
+    <button class="tab-button" (click)="showGrid('ItemsGrid')">Items</button>
+</div>
+@if(selectedGrid==="TilesGrid"){
+    <div class="object-grid">
+        <!-- Images d'objets ici -->
+        <img src="../../../assets/tiles/Wall.png" alt="Floor">
+        <img src="../../../assets/tiles/Water.png" alt="Water">
+        <img src="../../../assets/tiles/Ice.png" alt="Ice">
+    </div>
+}@else if(selectedGrid==="ItemsGrid"){
+    <div class="object-grid">
+        <!-- Images d'objets ici -->
+        <img src="../../../assets/objects/Chest.png" alt="Chest">
+        <img src="../../../assets/objects/Golden Sword.png" alt="Sword">
+        <img src="../../../assets/objects/Iron Shield.png" alt="Shield">
+        <!-- Ajoutez plus d'images selon vos besoins -->
+    </div>
+}

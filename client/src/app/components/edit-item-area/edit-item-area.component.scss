@@ -1,0 +1,12 @@
+.object-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 5px;
+}
+
+.object-grid img {
+    width: 100%;
+    height: auto;
+    border: 4px solid #000;
+    border-radius: 4px;
+}

@@ -1,0 +1,15 @@
+<form id="editForm">
+    <div class="form-group">
+        <label for="mapName">Nom de la carte :</label>
+        <input type="text" id="mapName" name="mapName"  required>
+    </div>
+    <div class="form-group">
+        <label for="hasModeCTF">Mode CTF :</label>
+        <input type="checkbox" id="hasModeCTF" name="hasModeCTF">
+    </div>
+    <div class="form-group">
+        <label for="mapDescription">Description de la carte:</label>
+        <textarea id="mapDescription" name="mapDescription" rows="4" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary" (click)="onSubmit()">Enregistrer</button>
+</form>
