@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent {
-    readonly defaultSize: number = 20;
+    readonly defaultSize: number = 10;
     cellSize: string = '';
 
     boardGame: BoardGame = {

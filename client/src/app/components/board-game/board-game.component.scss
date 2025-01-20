@@ -4,6 +4,7 @@
     width: 90%;
     height: 90%;
     align-items: center;
+    padding: 10px;
 }
 
 
@@ -14,6 +15,6 @@
 
 .row > * {
     flex-grow: 1;
+    aspect-ratio: 1/1;
     justify-self: center;
-    background-size: cover;
 }

@@ -1,12 +1,8 @@
-:host {
-    display: flex;
-    flex-grow: 1;
-    background-color: #fff;
+.cell { 
     aspect-ratio: 1/1;
-    align-items: center;
-    justify-content: center;
-    border-radius: 1px;
+    display: flex;
 }
+
 
 
 img{
