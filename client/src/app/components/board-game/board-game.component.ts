@@ -11,8 +11,7 @@ import { CommonModule } from '@angular/common';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent {
-    readonly defaultSize: number = 10;
-    readonly gridSize: number = 650;
+    readonly defaultSize: number = 20;
     cellSize: string = '';
 
     boardGame: BoardGame = {
@@ -39,9 +38,5 @@ export class BoardGameComponent {
             }
             this.boardGame.boardCells.push(row);
         }
-    }
-
-    calculateCellSize() {
-        this.cellSize = `${Math.floor(this.gridSize / this.defaultSize)}px`;
     }
 }

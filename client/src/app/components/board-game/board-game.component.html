@@ -1,11 +1,12 @@
-<div class="grid" >
-    <div class="row" *ngFor="let row of boardGame.boardCells; let rowIndex = index">
-        <app-board-cell  
-        class="cell" 
-        *ngFor="let cell of row;let colIndex = index" 
-        [cell]="cell"
-        [style.width]="cellSize"
-        [style.height]="cellSize"
-        ></app-board-cell>
-    </div>
+<div class="grid">
+    @for (row of boardGame.boardCells; track row) {
+        <div class="row">
+            @for (cell of row; track cell) {
+                <app-board-cell class="cell" [cell]="cell"></app-board-cell>
+            }
+        </div>
+    } @empty {
+        <div>No cells available.</div>
+    }
 </div>
+
