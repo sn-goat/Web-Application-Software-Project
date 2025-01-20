@@ -2,57 +2,13 @@
     <h1>Vue Édition</h1>
     <div class="card">
         <div class="content">
-            <div class="grid">
-                <!-- Grille de contenu ici -->
-            </div>
-            
+            <app-edit-map-area class="app-edit-map-area"></app-edit-map-area>
             <div class="object-card">
-                <div class="tabs">
-                    <button class="tab-button" (click)="showGrid('TilesGrid')">Tiles</button>
-                    <button class="tab-button" (click)="showGrid('ItemsGrid')">Items</button>
-                </div>
-                @if(selectedGrid==="TilesGrid"){
-                    <div class="object-grid">
-                        <!-- Images d'objets ici -->
-                        <img src="../../../assets/tiles/Wall.png" alt="Floor">
-                        <img src="../../../assets/tiles/Water.png" alt="Water">
-                        <img src="../../../assets/tiles/Ice.png" alt="Ice">
-                    </div>
-                }@else if(selectedGrid==="ItemsGrid"){
-                    <div class="object-grid">
-                        <!-- Images d'objets ici -->
-                        <img src="../../../assets/objects/Chest.png" alt="Chest">
-                        <img src="../../../assets/objects/Golden Sword.png" alt="Sword">
-                        <img src="../../../assets/objects/Iron Shield.png" alt="Shield">
-                        <!-- Ajoutez plus d'images selon vos besoins -->
-                    </div>
-                }
+                <app-edit-item-area class="app-edit-item-area"></app-edit-item-area>
             </div>
         </div>
     </div>
     <div class="card footer-card">
-        <form id="editForm">
-            <div class="form-group">
-                <label for="mapName">Nom de la carte :</label>
-                <input type="text" id="mapName" name="mapName"  required>
-            </div>
-            <div class="form-group">
-                <label for="mapSize">Taille de la carte :</label>
-                <select id="mapSize" name="mapSize" required>
-                    <option value=10>Petite</option>
-                    <option value=15>Moyenne</option>
-                    <option value=20>Grande</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="hasModeCTF">Mode CTF :</label>
-                <input type="checkbox" id="hasModeCTF" name="hasModeCTF">
-            </div>
-            <div class="form-group">
-                <label for="mapDescription">Description de la carte:</label>
-                <textarea id="mapDescription" name="mapDescription" rows="4" required></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" (click)="onSubmit()">Enregistrer</button>
-        </form>
+        <app-edit-form class="app-edit-form"></app-edit-form>
     </div>
 </div>
