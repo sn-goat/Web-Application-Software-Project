@@ -1,0 +1,15 @@
+mat-grid-list {
+  width: 100%;
+}
+
+mat-grid-tile {
+  display: flex;
+  justify-content: center;
+}
+
+.full-width-card {
+  width: 90%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 30 30 30 30
+}
