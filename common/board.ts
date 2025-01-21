@@ -11,7 +11,7 @@ export interface Board {
     _id: string;
     name: string;
     description: string;
-    sizeBoard: number;
+    size: number;
     isCTF: boolean;
     board: BoardCell[][];
     status: BoardStatus;
