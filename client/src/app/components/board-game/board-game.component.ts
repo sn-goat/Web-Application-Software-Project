@@ -3,6 +3,7 @@ import { BoardCellComponent } from '@app/components/board-cell/board-cell.compon
 import { BoardGame } from '@app/interfaces/board/board-game';
 import { BoardCell } from '@app/interfaces/board/board-cell';
 import { CommonModule } from '@angular/common';
+import { Tiles, Items } from '@app/enum/tile';
 
 @Component({
     selector: 'app-board-game',
@@ -33,7 +34,8 @@ export class BoardGameComponent {
             for (let j = 0; j < size; j++) {
                 row.push({
                     position: { x: i, y: j },
-                    type: 'Empty',
+                    tile: Tiles.Default,
+                    item: Items.NoItem,
                 });
             }
             this.boardGame.boardCells.push(row);

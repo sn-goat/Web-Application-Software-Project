@@ -4,10 +4,9 @@
 </div>
 @if(selectedGrid==="TilesGrid"){
     <div class="object-grid">
-        <!-- Images d'objets ici -->
-        <img src="../../../assets/tiles/Wall.png" alt="Floor">
-        <img src="../../../assets/tiles/Water.png" alt="Water">
-        <img src="../../../assets/tiles/Ice.png" alt="Ice">
+        <app-edit-tool url="../../../assets/tiles/Wall.png" alternate="Floor"></app-edit-tool>
+        <app-edit-tool url="../../../assets/tiles/Water.png" alternate="Water"></app-edit-tool>
+        <app-edit-tool url="../../../assets/tiles/Ice.png" alternate="Ice"></app-edit-tool>
     </div>
 }@else if(selectedGrid==="ItemsGrid"){
     <div class="object-grid">
@@ -15,6 +14,5 @@
         <img src="../../../assets/objects/Chest.png" alt="Chest">
         <img src="../../../assets/objects/Golden Sword.png" alt="Sword">
         <img src="../../../assets/objects/Iron Shield.png" alt="Shield">
-        <!-- Ajoutez plus d'images selon vos besoins -->
     </div>
 }
