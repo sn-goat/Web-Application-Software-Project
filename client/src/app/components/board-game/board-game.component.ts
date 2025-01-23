@@ -12,7 +12,7 @@ import { Tiles, Items } from '@app/enum/tile';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent {
-    readonly defaultSize: number = 10;
+    readonly defaultSize: number = 20;
     cellSize: string = '';
 
     boardGame: BoardGame = {

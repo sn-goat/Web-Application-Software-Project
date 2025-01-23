@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { EditToolComponent } from '@app/components/edit-tool/edit-tool.component';
+import { Tiles, Items } from '@app/enum/tile';
 
 @Component({
     selector: 'app-edit-item-area',
@@ -8,6 +9,8 @@ import { EditToolComponent } from '@app/components/edit-tool/edit-tool.component
     imports: [EditToolComponent],
 })
 export class EditItemAreaComponent {
+    selectedTool: Tiles | Items = Tiles.Default;
+
     selectedGrid = 'TilesGrid';
     showGrid(gridId: string) {
         this.selectedGrid = gridId;

@@ -4,15 +4,15 @@
 </div>
 @if(selectedGrid==="TilesGrid"){
     <div class="object-grid">
-        <app-edit-tool url="../../../assets/tiles/Wall.png" alternate="Floor"></app-edit-tool>
-        <app-edit-tool url="../../../assets/tiles/Water.png" alternate="Water"></app-edit-tool>
-        <app-edit-tool url="../../../assets/tiles/Ice.png" alternate="Ice"></app-edit-tool>
+        <app-edit-tool url="../../../assets/tiles/Wall.png" type="Tile" alternate="Floor"></app-edit-tool>
+        <app-edit-tool url="../../../assets/tiles/Water.png" type="Tile" alternate="Water"></app-edit-tool>
+        <app-edit-tool url="../../../assets/tiles/Ice.png" type="Tile" alternate="Ice"></app-edit-tool>
     </div>
 }@else if(selectedGrid==="ItemsGrid"){
     <div class="object-grid">
         <!-- Images d'objets ici -->
-        <img src="../../../assets/objects/Chest.png" alt="Chest">
-        <img src="../../../assets/objects/Golden Sword.png" alt="Sword">
-        <img src="../../../assets/objects/Iron Shield.png" alt="Shield">
+        <app-edit-tool url="../../../assets/objects/Chest.png" type="Item" alternate="Chest"></app-edit-tool>
+        <app-edit-tool url="../../../assets/objects/Sword.png" type="Item" alternate="Sword"></app-edit-tool>
+        <app-edit-tool url="../../../assets/objects/Shield.png" type="Item" alternate="Shield"></app-edit-tool>
     </div>
 }

@@ -1,15 +1,15 @@
 import { Tiles, Items } from '@app/enum/tile';
 
-export const TILES_URL = {
+export const TILES = {
     [Tiles.Default]: 'default',
-    [Tiles.Water]: ['water'],
-    [Tiles.Wall]: ['wall'],
-    [Tiles.OpenDoor]: ['openDoor'],
-    [Tiles.CloseDoor]: ['closeDoor'],
+    [Tiles.Water]: 'water',
+    [Tiles.Wall]: 'wall',
+    [Tiles.OpenDoor]: 'openDoor',
+    [Tiles.CloseDoor]: 'closeDoor',
     [Tiles.Ice]: 'ice',
 };
 
-export const ITEMS_URL = {
+export const ITEMS = {
     [Items.Attribute]: 'attribute',
     [Items.Game]: 'game',
     [Items.Condition]: 'condition',
