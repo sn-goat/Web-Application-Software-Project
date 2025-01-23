@@ -53,7 +53,7 @@
         <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
         <div class="portrait-display">
           <img
-            src="./asset/portraits/portrait-1.png"
+            [src]="getCurrentPortraitImage()"
             alt="Portrait"
             class="portrait-image"
           />

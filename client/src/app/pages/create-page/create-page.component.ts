@@ -9,6 +9,8 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink, CommonModule],
 })
 export class CreatePageComponent {
+  Portrait: string = '/assets/portrait1.png'
+
   showDetails(event: MouseEvent, detailsId: string) {
     const details = document.getElementById(detailsId);
     const option = (event.target as HTMLElement).closest('.option') as HTMLElement;
@@ -37,7 +39,7 @@ export class CreatePageComponent {
   currentPortraitIndex = 0;
 
   getCurrentPortraitImage(): string {
-    return `assets/portraits/portrait-${this.currentPortraitIndex + 1}.png`;
+    return `/assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
   }
 
   openPopup() {
