@@ -7,11 +7,11 @@ export enum TileType {
 }
 
 export enum BoardVisibility {
-    Public,
-    Private,
+    Public = 'Public',
+    Private = 'Private',
 }
 
 export enum BoardStatus {
-    Ongoing,
-    Completed,
+    Ongoing = 'Ongoing',
+    Completed = 'Completed',
 }
