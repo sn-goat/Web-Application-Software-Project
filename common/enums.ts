@@ -1,9 +1,9 @@
 export enum TileType {
-    Ice,
-    Water,
-    Wall,
-    Closed_Door,
-    Opened_Door,
+    Ice = 'Ice',
+    Water = 'Water',
+    Wall = 'Wall',
+    Closed_Door = 'Closed_Door',
+    Opened_Door = 'Opened_Door',
 }
 
 export enum BoardVisibility {
