@@ -18,7 +18,7 @@ export class Board {
 
     @ApiProperty({ description: 'Number representing the size of a single board column', examples: ['16', '18', '20'] })
     @Prop({ required: true })
-    sizeBoard: number;
+    size: number;
 
     @ApiProperty({ description: 'Is the board made for the CTF game mode' })
     @Prop({ required: true, default: false })
