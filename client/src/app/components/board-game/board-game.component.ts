@@ -1,9 +1,9 @@
-import { Component, HostListener } from '@angular/core';
-import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import { BoardGame } from '@app/interfaces/board/board-game';
-import { BoardCell } from '@app/interfaces/board/board-cell';
 import { CommonModule } from '@angular/common';
-import { Tiles, Items } from '@app/enum/tile';
+import { Component, HostListener, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
+import { Items, Tiles } from '@app/enum/tile';
+import { BoardCell } from '@app/interfaces/board/board-cell';
+import { BoardGame } from '@app/interfaces/board/board-game';
 
 @Component({
     selector: 'app-board-game',
@@ -11,24 +11,20 @@ import { Tiles, Items } from '@app/enum/tile';
     styleUrls: ['./board-game.component.scss'],
     imports: [CommonModule, BoardCellComponent],
 })
-export class BoardGameComponent {
-    readonly defaultSize: number = 20;
+export class BoardGameComponent implements OnInit, OnChanges {
+    @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
     cellSize: string = '';
     isMouseDown: boolean = false;
 
     boardGame: BoardGame = {
         _id: '',
         name: '',
-        size: this.defaultSize,
+        size: 0,
         description: '',
         boardCells: [],
         status: 'Ongoing',
         visibility: 'Public',
     };
-    constructor() {
-        this.generateBoard(this.defaultSize);
-    }
-
     @HostListener('mousedown')
     onMouseDown() {
         this.isMouseDown = true;
@@ -38,10 +34,22 @@ export class BoardGameComponent {
     onMouseUp() {
         this.isMouseDown = false;
     }
+
     @HostListener('mouseleave')
     onMouseLeave() {
         this.isMouseDown = false;
     }
+
+    ngOnInit() {
+        this.updateBoardGame();
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['importedData']) {
+            this.updateBoardGame();
+        }
+    }
+
     generateBoard(size: number) {
         for (let i = 0; i < size; i++) {
             const row: BoardCell[] = [];
@@ -54,5 +62,19 @@ export class BoardGameComponent {
             }
             this.boardGame.boardCells.push(row);
         }
+    }
+
+    updateBoardGame() {
+        this.boardGame = {
+            _id: '',
+            name: this.importedData.name,
+            size: this.importedData.size,
+            description: this.importedData.description,
+            boardCells: [],
+            status: 'Ongoing',
+            visibility: 'Public',
+        };
+
+        this.generateBoard(this.boardGame.size);
     }
 }

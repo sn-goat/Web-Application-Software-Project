@@ -1,14 +1,15 @@
 <div class="container justified">
-    <h1>Vue Édition</h1>
+    <h1>Vue Édition du jeu {{ data.name }}</h1>
+    <h3>{{ data.description }}</h3>
     <div class="card">
         <div class="content">
-            <app-board-game></app-board-game>
+            <app-board-game [importedData]="data"></app-board-game>
             <div class="object-card">
                 <app-edit-item-area class="app-edit-item-area"></app-edit-item-area>
             </div>
         </div>
     </div>
-    <div class="card footer-card">
+    <!-- <div class="card footer-card">
         <app-edit-form class="app-edit-form"></app-edit-form>
-    </div>
+    </div> -->
 </div>
