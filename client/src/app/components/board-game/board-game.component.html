@@ -2,7 +2,7 @@
     @for (row of boardGame.boardCells; track row) {
         <div class="row">
             @for (cell of row; track cell) {
-                <app-board-cell class="cell" [cell]="cell"></app-board-cell>
+                <app-board-cell class="cell" [cell]="cell" [isMouseDown]="isMouseDown"></app-board-cell>
             }
         </div>
     } @empty {

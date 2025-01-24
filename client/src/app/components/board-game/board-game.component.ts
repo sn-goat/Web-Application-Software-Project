@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { BoardGame } from '@app/interfaces/board/board-game';
 import { BoardCell } from '@app/interfaces/board/board-cell';
@@ -14,6 +14,7 @@ import { Tiles, Items } from '@app/enum/tile';
 export class BoardGameComponent {
     readonly defaultSize: number = 20;
     cellSize: string = '';
+    isMouseDown: boolean = false;
 
     boardGame: BoardGame = {
         _id: '',
@@ -28,6 +29,19 @@ export class BoardGameComponent {
         this.generateBoard(this.defaultSize);
     }
 
+    @HostListener('mousedown')
+    onMouseDown() {
+        this.isMouseDown = true;
+    }
+
+    @HostListener('mouseup')
+    onMouseUp() {
+        this.isMouseDown = false;
+    }
+    @HostListener('mouseleave')
+    onMouseLeave() {
+        this.isMouseDown = false;
+    }
     generateBoard(size: number) {
         for (let i = 0; i < size; i++) {
             const row: BoardCell[] = [];

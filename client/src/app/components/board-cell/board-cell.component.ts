@@ -13,18 +13,32 @@ import { takeUntil } from 'rxjs/operators';
     imports: [CommonModule],
 })
 export class BoardCellComponent implements OnDestroy {
+    @Input() isMouseDown!: boolean;
     @Input() cell!: BoardCell;
     imageUrl: string = './assets/tiles/Wall.png';
     private destroy$ = new Subject<void>();
-    private isMouseDown = false;
 
     constructor(private editToolMouse: EditToolMouse) {}
 
+    @HostListener('mouseover')
+    onMouseOver() {
+        if (this.isMouseDown) {
+            this.updateCell();
+        }
+    }
+
     @HostListener('mousedown')
     onMouseDown() {
-        this.isMouseDown = true;
-        this.destroy$ = new Subject<void>();
+        this.updateCell();
+    }
 
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    private updateCell() {
+        this.destroy$ = new Subject<void>();
         this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe((isTile: boolean) => {
             if (isTile) {
                 this.cell.tile = Tiles.Default;
@@ -33,32 +47,6 @@ export class BoardCellComponent implements OnDestroy {
                 this.cell.item = Items.NoItem;
             }
         });
-        console.log("down")
-    }
-
-    @HostListener('mouseup')
-    onMouseUp() {
-        this.isMouseDown = false;
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    @HostListener('mousemove', ['$event'])
-    onMouseOver(event: MouseEvent) {
-        if (this.isMouseDown) {
-            this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe((isTile: boolean) => {
-                if (isTile) {
-                    this.cell.tile = Tiles.Default;
-                    this.editToolMouse.itemUrl$.pipe(takeUntil<string>(this.destroy$)).subscribe((url: string) => (this.imageUrl = url));
-                } else {
-                    this.cell.item = Items.NoItem;
-                }
-            });
-            console.log('Mouse is over the cell while pressed down', event);
-        }
-    }
-
-    ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
     }
