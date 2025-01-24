@@ -1,6 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { Router, RouterLink } from '@angular/router';
+import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { CommunicationService } from '@app/services/communication.service';
 import { Message } from '@common/message';
 import { BehaviorSubject } from 'rxjs';
@@ -16,7 +18,25 @@ export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(private readonly communicationService: CommunicationService) {}
+    constructor(
+        private readonly communicationService: CommunicationService,
+        private dialog: MatDialog,
+        private router: Router,
+    ) {}
+
+    openForm(): void {
+        const dialogRef = this.dialog.open(FormDialogComponent, {
+            width: '280px',
+            data: { name: '', description: '', size: '10' },
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                // Navigate to /edit with the data as query params
+                this.router.navigate(['/edit'], { queryParams: result });
+            }
+        });
+    }
 
     sendTimeToServer(): void {
         const newTimeMessage: Message = {

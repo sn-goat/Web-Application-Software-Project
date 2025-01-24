@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>Create Game</h2>
+
+<mat-dialog-content>
+    <form #gameForm="ngForm">
+        <!-- Name Field -->
+        <mat-form-field class="full-width" appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput placeholder="Enter name" [(ngModel)]="data.name" name="name" required />
+            <mat-error *ngIf="gameForm.submitted && !data.name"> Name is required </mat-error>
+        </mat-form-field>
+
+        <!-- Description Field -->
+        <mat-form-field class="full-width" appearance="fill">
+            <mat-label>Description</mat-label>
+            <input matInput placeholder="Enter description" [(ngModel)]="data.description" name="description" required />
+            <mat-error *ngIf="gameForm.submitted && !data.description"> Description is required </mat-error>
+        </mat-form-field>
+
+        <!-- Radio Buttons for Size -->
+        <div style="margin-top: 1em">
+            <mat-label>Choose a size:</mat-label>
+            <br />
+            <mat-radio-group [(ngModel)]="data.size" name="size">
+                <mat-radio-button value="10">Small (10x10)</mat-radio-button>
+                <mat-radio-button value="15">Medium (15x15)</mat-radio-button>
+                <mat-radio-button value="20">Large (20x20)</mat-radio-button>
+            </mat-radio-group>
+        </div>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-button [mat-dialog-close]="data" [disabled]="!data.name || !data.description">Submit</button>
+</mat-dialog-actions>
