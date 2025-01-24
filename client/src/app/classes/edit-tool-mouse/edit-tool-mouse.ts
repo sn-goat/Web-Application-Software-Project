@@ -7,8 +7,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class EditToolMouse {
     isTile$: Observable<boolean>;
     itemUrl$: Observable<string>;
+    tileUrl$: Observable<string>;
     private isTile = new BehaviorSubject<boolean>(false);
     private itemUrl = new BehaviorSubject<string>('');
+    private tileUrl = new BehaviorSubject<string>('');
 
     constructor() {
         this.isTile$ = this.isTile.asObservable();
@@ -23,4 +25,7 @@ export class EditToolMouse {
         this.itemUrl.next(itemUrl);
     }
 
+    updateTileUrl(tileUrl: string) {
+        this.tileUrl.next(tileUrl);
+    }
 }

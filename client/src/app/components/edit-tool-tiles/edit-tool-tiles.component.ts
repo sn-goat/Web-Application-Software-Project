@@ -2,11 +2,12 @@ import { Component, Input } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 
 @Component({
-    selector: 'app-edit-tool',
-    templateUrl: './edit-tool.component.html',
-    styleUrl: './edit-tool.component.scss',
+    selector: 'app-edit-tool-item',
+    templateUrl: './edit-tool-item.component.html',
+    styleUrl: './edit-tool-item.component.scss',
+    imports: [],
 })
-export class EditToolComponent {
+export class EditToolItemComponent {
     @Input() type: string;
     @Input() url: string;
     @Input() alternate: string;
@@ -14,7 +15,7 @@ export class EditToolComponent {
     constructor(private editToolMouse: EditToolMouse) {}
 
     onClick() {
-        this.editToolMouse.updateIsTile(this.type === 'Tile');
-        this.editToolMouse.updateItemUrl(this.url);
+        this.editToolMouse.updateIsTile(true);
+        this.editToolMouse.updateTileUrl(this.url);
     }
 }
