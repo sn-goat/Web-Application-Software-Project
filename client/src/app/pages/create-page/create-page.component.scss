@@ -134,7 +134,7 @@ body {
 }
 
 .popup-content {
-  background-color: #fff;
+  background-color: #0d0215;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -170,6 +170,34 @@ body {
   max-height: 100%;
   object-fit: contain;
   width: 150px;
+}
+
+.name-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  gap: 5px;
+}
+
+.name-input {
+  width: 200px;
+  padding: 10px;
+  border: 2px solid #00a896;
+  border-radius: 5px;
+  background-color: #0d0215;
+  color: #d8f3dc;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.name-input::placeholder {
+  color: #8f8f8f;
+}
+
+.name-input:focus {
+  outline: none;
+  border-color: #d8f3dc;
 }
 
 .retour {
