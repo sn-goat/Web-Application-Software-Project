@@ -12,12 +12,12 @@ export interface Board {
     name: string;
     description: string;
     size: number;
-    category: string;
+    category: string | null;
     isCTF: boolean;
     board: BoardCell[][];
     status: BoardStatus;
     visibility: BoardVisibility;
-    image: string | null;
+    image: string;
     createdAt?: Date;
     updatedAt?: Date;
 }

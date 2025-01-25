@@ -20,6 +20,10 @@ export class Board {
     @Prop({ required: true })
     size: number;
 
+    @ApiProperty({ description: 'Tag associated with the board' })
+    @Prop({})
+    category: string;
+
     @ApiProperty({ description: 'Is the board made for the CTF game mode' })
     @Prop({ required: true, default: false })
     isCTF: boolean;
@@ -35,6 +39,10 @@ export class Board {
     @ApiProperty({ description: 'Whether the board is available to everyone' })
     @Prop({ required: true, enum: ['Public', 'Private'] })
     visibility: BoardVisibility;
+
+    @ApiProperty({ description: 'Link or name for board miniature' })
+    @Prop({})
+    image: string;
 
     @ApiProperty({ description: 'Date when the board was created' })
     @Prop({ type: Date, required: true })
