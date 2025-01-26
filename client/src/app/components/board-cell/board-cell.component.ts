@@ -44,10 +44,10 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.editToolMouse.selectedUrl$.pipe(takeUntil(this.destroy$)).subscribe(url => {
+        this.editToolMouse.selectedUrl$.pipe(takeUntil(this.destroy$)).subscribe((url) => {
             this.selectedUrl = url;
         });
-        this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe(isTile => {
+        this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe((isTile) => {
             this.isTile = isTile;
         });
     }
