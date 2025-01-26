@@ -14,7 +14,8 @@ import { BoardGame } from '@app/interfaces/board/board-game';
 export class BoardGameComponent implements OnInit, OnChanges {
     @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
     cellSize: string = '';
-    isMouseDown: boolean = false;
+    isMouseRightDown: boolean = false;
+    isMouseLeftDown: boolean = false;
 
     boardGame: BoardGame = {
         _id: '',
@@ -25,19 +26,28 @@ export class BoardGameComponent implements OnInit, OnChanges {
         status: 'Ongoing',
         visibility: 'Public',
     };
-    @HostListener('mousedown')
-    onMouseDown() {
-        this.isMouseDown = true;
+    @HostListener('mousedown', ['$event'])
+    onMouseDown(event: MouseEvent) {
+        if (event.button === 2) {
+            this.isMouseRightDown = true;
+        } else if (event.button === 0) {
+            this.isMouseLeftDown = true;
+        }
     }
 
-    @HostListener('mouseup')
-    onMouseUp() {
-        this.isMouseDown = false;
+    @HostListener('mouseup', ['$event'])
+    onMouseUp(event: MouseEvent) {
+        if (event.button === 0) {
+            this.isMouseLeftDown = false;
+        }
+        if (event.button === 2) {
+            this.isMouseRightDown = false;
+        }
     }
-
     @HostListener('mouseleave')
     onMouseLeave() {
-        this.isMouseDown = false;
+        this.isMouseLeftDown = false;
+        this.isMouseRightDown = false;
     }
 
     ngOnInit() {

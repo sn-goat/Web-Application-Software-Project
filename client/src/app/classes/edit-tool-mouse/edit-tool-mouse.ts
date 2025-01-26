@@ -6,26 +6,24 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class EditToolMouse {
     isTile$: Observable<boolean>;
-    itemUrl$: Observable<string>;
-    tileUrl$: Observable<string>;
+    selectedUrl$: Observable<string>;
     private isTile = new BehaviorSubject<boolean>(false);
-    private itemUrl = new BehaviorSubject<string>('');
-    private tileUrl = new BehaviorSubject<string>('');
+    private selectedUrl = new BehaviorSubject<string>('');
 
     constructor() {
         this.isTile$ = this.isTile.asObservable();
-        this.itemUrl$ = this.itemUrl.asObservable();
+        this.selectedUrl$ = this.selectedUrl.asObservable();
     }
 
     updateIsTile(isTile: boolean) {
         this.isTile.next(isTile);
     }
 
-    updateItemUrl(itemUrl: string) {
-        this.itemUrl.next(itemUrl);
-    }
-
-    updateTileUrl(tileUrl: string) {
-        this.tileUrl.next(tileUrl);
+    updateSelectedUrl(selectedUrl: string) {
+        if (this.selectedUrl.value === selectedUrl) {
+            this.selectedUrl.next('');
+        } else {
+            this.selectedUrl.next(selectedUrl);
+        }
     }
 }

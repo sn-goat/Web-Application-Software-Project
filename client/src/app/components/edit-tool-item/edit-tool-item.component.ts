@@ -16,6 +16,6 @@ export class EditToolItemComponent {
 
     onClick() {
         this.editToolMouse.updateIsTile(false);
-        this.editToolMouse.updateItemUrl(this.url);
+        this.editToolMouse.updateSelectedUrl(this.url);
     }
 }
