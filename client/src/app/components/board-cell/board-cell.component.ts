@@ -16,7 +16,7 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     @Input() isMouseRightDown!: boolean;
     @Input() isMouseLeftDown!: boolean;
     @Input() cell!: BoardCell;
-    imageUrl: string = './assets/tiles/Wall.png';
+    imageUrl: string = './assets/tiles/Base.png';
     private selectedUrl: string = '';
     private isTile: boolean = false;
     private destroy$ = new Subject<void>();
@@ -31,17 +31,17 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent) {
         if (event.button === 2) {
-            this.revertToWall();
+            this.revertToDefault();
         } else if (event.button === 0) {
             this.applyTile();
         }
     }
 
     ngOnInit() {
-        this.editToolMouse.selectedUrl$.pipe(takeUntil(this.destroy$)).subscribe(url => {
+        this.editToolMouse.selectedUrl$.pipe(takeUntil(this.destroy$)).subscribe((url) => {
             this.selectedUrl = url;
         });
-        this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe(isTile => {
+        this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe((isTile) => {
             this.isTile = isTile;
         });
     }
@@ -58,15 +58,15 @@ export class BoardCellComponent implements OnInit, OnDestroy {
         }
     }
 
-    private revertToWall() {
+    private revertToDefault() {
         this.cell.tile = Tiles.Default;
-        this.imageUrl = './assets/tiles/Wall.png';
+        this.imageUrl = './assets/tiles/Base.png';
         this.cell.item = Items.NoItem;
     }
 
     private updateCell() {
         if (this.isMouseRightDown) {
-            this.revertToWall();
+            this.revertToDefault();
         } else if (this.isMouseLeftDown) {
             this.applyTile();
         }
