@@ -14,7 +14,7 @@
   <cdk-virtual-scroll-viewport itemSize="120" class="virtual-scroll-viewport">
     <div class="grid-container">
       @for (map of getFilteredAndSortedItems(); track map) {
-        <div class="list-item">
+        <div class="list-item" (click)="onDivClick()">
           <div class="item-image">
             <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
           </div>
@@ -34,7 +34,7 @@
               <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
             </div>
           </div>
-          <div class="item-actions">
+          <div class="item-actions" *ngIf="showActions">
             <!-- Visibility Button -->
             <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
               <img

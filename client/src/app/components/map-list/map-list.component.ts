@@ -1,8 +1,8 @@
 import { ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 enum BoardStatus {
     Draft = 'Draft',
@@ -44,7 +44,10 @@ export interface GameMap {
     imports: [CommonModule, FormsModule, ScrollingModule],
 })
 export class MapListComponent implements OnInit {
-    items: GameMap[] = [];
+    @Input() items: GameMap[] = [];
+    @Input() showActions: boolean = true;
+    @Input() onlyVisible: boolean = false;
+    @Output() divClicked = new EventEmitter<void>();
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
@@ -53,6 +56,10 @@ export class MapListComponent implements OnInit {
         private readonly viewportRuler: ViewportRuler,
         private readonly cdr: ChangeDetectorRef,
     ) {}
+
+    onDivClick() {
+        this.divClicked.emit();
+    }
 
     ngOnInit(): void {
         this.http.get<GameMap[]>('assets/mockMapData.json').subscribe({
@@ -74,11 +81,15 @@ export class MapListComponent implements OnInit {
     }
 
     getFilteredAndSortedItems(): GameMap[] {
-        const filtered = this.items.filter(
+        let filtered = this.items.filter(
             (item) =>
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase()),
         );
+
+        if (this.onlyVisible) {
+            filtered = filtered.filter((item) => item.visibility === 'Public');
+        }
 
         return filtered.sort((a, b) => {
             switch (this.sortBy) {
