@@ -1,5 +1,19 @@
-<div class="cell">
-    <img 
-    [src]="imageUrl"
-    >
+<div 
+class="cell" 
+(dragover)="onDragOver($event)"
+(drop)="onDrop($event)">
+    <div class="image-container">
+        <img
+        class="base-image"
+        [src]="imageUrl"
+        >
+        @if (itemUrl) {
+            <img 
+            class="image-stack"
+            draggable="true"
+            (dragstart)="onDragStart($event)"
+            [src]="itemUrl"
+            >
+        }
+    </div>
 </div>

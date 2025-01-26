@@ -5,6 +5,7 @@ import { Items, Tiles } from '@app/enum/tile';
 import { BoardCell } from '@app/interfaces/board/board-cell';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 
 @Component({
     selector: 'app-board-cell',
@@ -16,12 +17,17 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     @Input() isMouseRightDown!: boolean;
     @Input() isMouseLeftDown!: boolean;
     @Input() cell!: BoardCell;
+
     imageUrl: string = './assets/tiles/Wall.png';
+    itemUrl: string = '';
     private selectedUrl: string = '';
     private isTile: boolean = false;
     private destroy$ = new Subject<void>();
 
-    constructor(private editToolMouse: EditToolMouse) {}
+    constructor(
+        private editToolMouse: EditToolMouse,
+        private editDragDrop: EditDragDrop,
+    ) {}
 
     @HostListener('mouseover')
     onMouseOver() {
@@ -49,6 +55,26 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        this.itemUrl = '';
+    }
+
+    onDrop(event: DragEvent) {
+        const startItemName = 24;
+        const endItemName = 4;
+        event.preventDefault();
+        const image = event.dataTransfer ? event.dataTransfer.getData('text/plain') : '';
+        if (image) {
+            this.editDragDrop.addWasDragged(image.substring(startItemName, image.length - endItemName));
+        }
+        this.itemUrl = image;
+    }
+
+    onDragStart(event: DragEvent) {
+        event.dataTransfer?.setData('text/plain', this.itemUrl);
     }
 
     private applyTile() {
