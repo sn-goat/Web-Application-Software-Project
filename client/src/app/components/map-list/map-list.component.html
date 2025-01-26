@@ -1,0 +1,67 @@
+<div class="map-list-container">
+  <div class="search-bar">
+    <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
+    <div class="filter-sort">
+      <select [(ngModel)]="sortBy" class="sort-select">
+        <option value="createdAt">Created Date</option>
+        <option value="name">Name</option>
+        <option value="status">Status</option>
+        <option value="size">Size</option>
+      </select>
+    </div>
+  </div>
+
+  <cdk-virtual-scroll-viewport itemSize="120" class="virtual-scroll-viewport">
+    <div class="grid-container">
+      @for (map of getFilteredAndSortedItems(); track map) {
+        <div class="list-item">
+          <div class="item-image">
+            <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
+          </div>
+          <div class="item-content">
+            <div class="item-header">
+              <h3 class="item-title">{{ map.name }}</h3>
+              <span class="item-date">{{ map.createdAt | date: "MMM d, y" }}</span>
+            </div>
+            <p class="item-description">{{ map.description }}</p>
+            <div class="item-details">
+              <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
+              <span class="item-ctf">{{ map.isCTF ? "CTF Enabled" : "CTF Disabled" }}</span>
+            </div>
+            <div class="item-footer">
+              <span class="item-category">{{ map.category }}</span>
+              <span class="item-status" [ngClass]="map.status.toLowerCase()">{{ map.status }}</span>
+              <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <!-- Visibility Button -->
+            <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
+              <img
+                [src]="map.visibility === 'Public'
+                        ? 'https://www.shareicon.net/data/512x512/2015/09/12/100039_visibility_512x512.png'
+                        : 'https://www.svgrepo.com/show/453442/visibility-off.svg'"
+                [alt]="map.visibility"
+                class="button-icon"
+              />
+            </button>
+            <!-- Edit Button -->
+            <button class="edit-btn" (click)="onEdit(map)" title="Edit">
+              <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
+            </button>
+            <!-- Delete Button -->
+            <button class="delete-btn" (click)="onDelete(map)" title="Delete">
+              <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </cdk-virtual-scroll-viewport>
+
+  @if (getFilteredAndSortedItems().length === 0) {
+    <div class="empty-state">
+      <p>No items found</p>
+    </div>
+  }
+</div>
