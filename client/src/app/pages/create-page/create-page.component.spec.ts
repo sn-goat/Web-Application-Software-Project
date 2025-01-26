@@ -1,34 +1,22 @@
-import { HttpResponse } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Routes, provideRouter } from '@angular/router';
-import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
-import { CommunicationService } from '@app/services/communication.service';
-import { of, throwError } from 'rxjs';
-import SpyObj = jasmine.SpyObj;
+import { FormsModule } from '@angular/forms';
+import { provideHttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
+import { MapListComponent } from '@app/components/map-list/map-list.component';
+import { CreatePageComponent } from './create-page.component';
 
-const routes: Routes = [];
+const BASE_STAT = 4;
+const UPGRADED_STAT = 6;
 
-describe('MainPageComponent', () => {
+describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
-    let communicationServiceSpy: SpyObj<CommunicationService>;
 
     beforeEach(async () => {
-        communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
-        communicationServiceSpy.basicGet.and.returnValue(of({ title: '', body: '' }));
-        communicationServiceSpy.basicPost.and.returnValue(of(new HttpResponse<string>({ status: 201, statusText: 'Created' })));
-
         await TestBed.configureTestingModule({
-            imports: [CreatePageComponent],
-            providers: [
-                {
-                    provide: CommunicationService,
-                    useValue: communicationServiceSpy,
-                },
-                provideHttpClientTesting(),
-                provideRouter(routes),
-            ],
+            imports: [RouterLink, CommonModule, FormsModule, MapListComponent, CreatePageComponent],
+            providers: [provideHttpClient()],
         }).compileComponents();
     });
 
@@ -42,34 +30,65 @@ describe('MainPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have as title 'LOG2990'", () => {
-        expect(component.title).toEqual('LOG2990');
+    it('should open and close popup', () => {
+        component.openPopup();
+        expect(component.isPopupVisible).toBeTrue();
+        component.closePopup();
+        expect(component.isPopupVisible).toBeFalse();
     });
 
-    it('should call basicGet when calling getMessagesFromServer', () => {
-        component.getMessagesFromServer();
-        expect(communicationServiceSpy.basicGet).toHaveBeenCalled();
+    it('should navigate portraits correctly', () => {
+        component.currentPortraitIndex = 0;
+        component.navigatePortrait('next');
+        expect(component.currentPortraitIndex).toBe(1);
+        component.navigatePortrait('prev');
+        expect(component.currentPortraitIndex).toBe(0);
     });
 
-    it('should call basicPost when calling sendTimeToServer', () => {
-        component.sendTimeToServer();
-        expect(communicationServiceSpy.basicPost).toHaveBeenCalled();
+    it('should select and deselect life', () => {
+        component.rapiditySelected = false;
+        component.selectLife();
+        expect(component.lifeSelected).toBeTrue();
+        expect(component.stats.life).toBe(UPGRADED_STAT);
+        component.selectLife();
+        expect(component.lifeSelected).toBeFalse();
+        expect(component.stats.life).toBe(BASE_STAT);
     });
 
-    it('should handle basicPost that returns a valid HTTP response', () => {
-        component.sendTimeToServer();
-        component.message.subscribe((res) => {
-            expect(res).toContain('201 : Created');
-        });
+    it('should select and deselect rapidity', () => {
+        component.lifeSelected = false;
+        component.selectRapidity();
+        expect(component.rapiditySelected).toBeTrue();
+        expect(component.stats.rapidity).toBe(UPGRADED_STAT);
+        component.selectRapidity();
+        expect(component.rapiditySelected).toBeFalse();
+        expect(component.stats.rapidity).toBe(BASE_STAT);
     });
 
-    it('should handle basicPost that returns an invalid HTTP response', () => {
-        communicationServiceSpy.basicPost.and.returnValue(throwError(() => new Error('test')));
-        component.sendTimeToServer();
-        component.message.subscribe({
-            next: (res) => {
-                expect(res).toContain('Le serveur ne répond pas');
-            },
-        });
+    it('should select and deselect attack', () => {
+        component.defenseSelected = false;
+        component.selectAttack();
+        expect(component.attackSelected).toBeTrue();
+        expect(component.stats.attack).toBe('D6');
+        component.selectAttack();
+        expect(component.attackSelected).toBeFalse();
+        expect(component.stats.attack).toBe('D4');
+    });
+
+    it('should select and deselect defense', () => {
+        component.attackSelected = false;
+        component.selectDefense();
+        expect(component.defenseSelected).toBeTrue();
+        expect(component.stats.defense).toBe('D6');
+        component.selectDefense();
+        expect(component.defenseSelected).toBeFalse();
+        expect(component.stats.defense).toBe('D4');
+    });
+
+    it('should return correct portrait image', () => {
+        component.currentPortraitIndex = 0;
+        expect(component.getCurrentPortraitImage()).toBe('/assets/portraits/portrait1.png');
+        component.currentPortraitIndex = 5;
+        expect(component.getCurrentPortraitImage()).toBe('/assets/portraits/portrait6.png');
     });
 });

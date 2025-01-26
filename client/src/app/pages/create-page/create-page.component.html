@@ -1,70 +1,43 @@
-<body>
-  <h1 class="title">Vue de création d'une partie</h1>
-  <div class="container">
-    <div class="filter">Filtre de sélection (mode classique ou CTF) et (taille)</div>
+<app-map-list class="map-list" [showActions]="false" [onlyVisible]="true" (divClicked)="openPopup()"></app-map-list>
+<!-- Popup -->
+<div class="popup" *ngIf="isPopupVisible">
+  <div class="popup-content">
+    <!-- Portrait Navigation -->
 
-    <!-- Option 1 -->
-    <div class="parent-options">
-      <div class="option" (mouseenter)="showDetails($event, 'details-1')"
-        (mouseleave)="hideDetails($event, 'details-1')" (click)="openPopup()">
-        <span>Nom</span>
-        <div class="details" id="details-1">
-          <div class="map">Map</div>
-          <div class="info">
-            <p>Infos</p>
-            <p>Nom</p>
-            <p>Mode</p>
-            <p>Taille</p>
-            <p>Date dernière modification</p>
-          </div>
-        </div>
+    <div class="portrait-container">
+      <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
+      <div class="portrait-display">
+        <img [src]="getCurrentPortraitImage()" alt="Portrait" class="portrait-image" />
       </div>
-
-      <!-- Popup -->
-      <div class="popup" *ngIf="isPopupVisible">
-        <div class="popup-content">
-          <!-- Portrait Navigation -->
-
-          <div class="portrait-container">
-            <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
-            <div class="portrait-display">
-              <img [src]="getCurrentPortraitImage()" alt="Portrait" class="portrait-image" />
-            </div>
-            <button class="arrow-button" (click)="navigatePortrait('next')">→</button>
-          </div>
-
-          <!-- Name Input -->
-          <div class="name-container">
-            <label for="player-name">Who are you ?</label>
-            <input type="text" id="player-name" [(ngModel)]="playerName" placeholder="Enter your name"
-              class="name-input" />
-          </div>
-
-          <!-- Stat Selection -->
-          <div class="stat-container">
-            <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()"
-              [disabled]="rapiditySelected">
-              Vie: {{ stats.life }}
-            </button>
-            <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()"
-              [disabled]="lifeSelected">
-              Rapidité: {{ stats.rapidity }}
-            </button>
-            <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()"
-              [disabled]="defenseSelected">
-              Vie: {{ stats.attack }}
-            </button>
-            <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()"
-              [disabled]="attackSelected">
-              Rapidité: {{ stats.defense }}
-            </button>
-          </div>
-
-          <!-- Close Popup -->
-          <button class="close-popup-button" (click)="closePopup()">Close</button>
-        </div>
-      </div>
-
-      <button class="retour" routerLink="/home">Retour</button>
+      <button class="arrow-button" (click)="navigatePortrait('next')">→</button>
     </div>
-</body>
+
+    <!-- Name Input -->
+    <div class="name-container">
+      <label for="player-name">Who are you ?</label>
+      <input type="text" id="player-name" [(ngModel)]="playerName" placeholder="Enter your name" class="name-input" />
+    </div>
+
+    <!-- Stat Selection -->
+    <div class="stat-container">
+      <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()" [disabled]="rapiditySelected">
+        Vie: {{ stats.life }}
+      </button>
+      <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()"
+        [disabled]="lifeSelected">
+        Rapidité: {{ stats.rapidity }}
+      </button>
+      <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()"
+        [disabled]="defenseSelected">
+        Attaque: {{ stats.attack }}
+      </button>
+      <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()"
+        [disabled]="attackSelected">
+        Défense: {{ stats.defense }}
+      </button>
+    </div>
+
+    <!-- Close Popup -->
+    <button class="close-popup-button" (click)="closePopup()">Close</button>
+  </div>
+</div>
