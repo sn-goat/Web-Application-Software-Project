@@ -1,25 +1,19 @@
 <div class="container justified">
-    <h1 class="header-item">Bienvenue au cours {{ title }}</h1>
-    <img src="https://bit.ly/3QofL1J" alt="Logo Projet" />
+    <h1 class="header-item"> {{ title }}</h1>
+    <img [src]="gameLogoPath"  alt="Logo Jeu" />
     <section id="server-message" class="justified">
-        <p>Petit message du serveur : {{ message.getValue() }}</p>
-        <div class="justified">
-            <button class="button" (click)="getMessagesFromServer()">Récupérer un message du serveur</button>
-            <button class="button" (click)="sendTimeToServer()">Envoyer un message au serveur</button>
-            <button class="button" routerLink="/material">Voir la page démo Angular Material</button>
-            <button class="button" routerLink="/admin">Voir la page d'admin</button>
+        <div class="button-container ">
+            <button class="button" routerLink="/game"> Joindre une partie </button>
+            <button class="button" routerLink="/creation"> Créer une partie</button>
+            <button class="button" routerLink="/admin"> Administer les jeux</button>
         </div>
     </section>
 
-    <button class="button" routerLink="/game">Jouer!</button>
-    <button class="button" routerLink="/creation">Create</button>
-
-
     <footer class="footer-item">
-        <h4 class="team-name">Équipe Poly</h4>
+        <h4 class="team-name">Équipe 112</h4>
         <p>
-            <span>Coéquipier #1</span>, <span>Coéquipier #2</span>, <span>Coéquipier #3</span>,
-            <span>Coéquipier #4</span>, <span>Coéquipier #5</span>, <span>Coéquipier #6</span>
+            <span>Léonard Renoud</span>, <span>Arnaud Grandisson</span>, <span>Sergile Junior Domguia Nyouvop</span>, 
+            <span>Shanmukh Iyer</span>, <span>Hossam Moustafa</span>, <span>Hubert Khouzam</span>
         </p>
     </footer>
 </div>

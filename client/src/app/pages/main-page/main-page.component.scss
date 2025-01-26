@@ -1,44 +1,119 @@
+
+$primary-bg: #1a1625;
+$primary-text: #7ee0d0;
+$accent-gold: #ffd700;
+$glow-teal: rgba(126, 224, 208, 0.2);
+$glow-gold: rgba(255, 215, 0, 0.2);
+
+
 .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-height: 100vh;
-    height: auto;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: $primary-bg;
+    color: $primary-text;
 }
 
 .justified {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
+    width: 100%;
+}
+
+img {
+    width: 500px;
+    height: 300px;
+    margin: 20px 0;
+    object-fit: contain;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 300px;
 }
 
 .button {
-    margin-top: 10px;
+    background-color: $glow-teal;
+    color: $primary-text;
+    padding: 15px 30px;
+    border: 1px solid $primary-text;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
     text-align: center;
+    transition: background-color 0.3s;
+    box-shadow: 0 0 10px $glow-teal
+}
+
+.button:hover {
+    background-color: $glow-teal;
+    box-shadow: 0 0 20px $glow-teal;
+    transform: translateY(-2px);
 }
 
 .team-name {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
-    color: green;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: $accent-gold;
+    text-shadow: 0 0 10px $glow-gold;
 }
 
 .header-item {
-    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 20px 0;
     text-align: center;
+    color: $primary-text;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px $glow-gold;
 }
 
 .footer-item {
+    margin-top: auto;
     text-align: center;
+    padding: 20px;
+    width: 100%;
 }
 
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
+.footer-item p {
+    margin: 0;
+    line-height: 1.5;
+    color: $primary-text;
+    line-height: 1.5;
+    opacity: 0.8;
 }
 
-.server-message {
-    justify-content: center;
-    width: 20%;
-    min-width: min-content;
+.footer-item span {
+    color: $primary-text;
+    transition: color 0.3s ease;
+}
+
+.footer-item span:hover {
+    color: $accent-gold;
+}
+
+
+
+@media (max-width: 768px) {
+    img {
+        width: 100% !important;
+        height: auto !important;
+        max-width: 500px;
+    }
+
+    .header-item {
+        font-size: 2rem;
+    }
+
+    .button-container {
+        max-width: 250px;
+    }
 }
