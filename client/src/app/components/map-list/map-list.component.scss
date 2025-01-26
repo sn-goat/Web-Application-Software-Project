@@ -71,7 +71,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
-    height: 400px;
+    height: 450px;
 }
 
 .list-item:hover {
@@ -133,14 +133,29 @@ body {
     overflow: hidden;
 }
 
+.item-details {
+    display: flex;
+    gap: 12px;
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.item-size, .item-ctf {
+    background: $glow-teal;
+    padding: 4px 12px;
+    border-radius: 16px;
+    color: $primary-text;
+}
+
 .item-footer {
     display: flex;
     align-items: center;
     gap: 12px;
     margin-top: auto;
+    flex-wrap: wrap;
 }
 
-.item-category {
+.item-category{
     background: $glow-teal;
     padding: 4px 12px;
     border-radius: 16px;
@@ -149,19 +164,20 @@ body {
     border: 1px solid $glow-teal;
 }
 
-.item-status {
+.item-status, .item-visibility {
+    background: $glow-teal;
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 12px;
-    font-weight: 500;
     color: $primary-text;
+    border: 1px solid $glow-teal;
 
-    &.non-visible {
+    &.draft, &.private {
         background: $glow-teal;
         border: 1px solid $glow-teal;
     }
 
-    &.visible {
+    &.published, &.public {
         background: $glow-gold;
         border: 1px solid $glow-teal;
     }
@@ -175,7 +191,8 @@ body {
 }
 
 .edit-btn,
-.delete-btn {
+.delete-btn,
+.visibility-btn {
     width: 36px;
     height: 36px;
     border: 1px solid $glow-teal;
@@ -214,6 +231,20 @@ body {
     }
 }
 
+.visibility-btn {
+    background: $glow-teal;
+
+    &:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px $glow-teal;
+    }
+
+    &:active {
+        transform: scale(1);
+        box-shadow: none;
+    }
+}
+
 .button-icon {
     width: 100%;
     height: 100%;
@@ -239,6 +270,6 @@ body {
 
     .list-item {
         height: auto;
-        min-height: 350px;
+        min-height: 400px;
     }
 }
