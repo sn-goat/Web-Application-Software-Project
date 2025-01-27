@@ -11,6 +11,7 @@ import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
+import { AttentePageComponent } from '@app/pages/attente-page/attente-page.component';
 
 
 
@@ -28,6 +29,7 @@ const routes: Routes = [
     { path: 'material', component: MaterialPageComponent },
     { path: 'edit', component: EditPageComponent },
     { path: 'creation', component: CreatePageComponent  },
+    { path: 'attente', component: AttentePageComponent  },
     { path: 'admin', component: AdminPageComponent },
     { path: '**', redirectTo: '/home' },
 ];

@@ -15,29 +15,39 @@
     <!-- Name Input -->
     <div class="name-container">
       <label for="player-name">Who are you ?</label>
-      <input type="text" id="player-name" [(ngModel)]="playerName" placeholder="Enter your name" class="name-input" />
+      <input type="text" id="player-name" [(ngModel)]="playerName" placeholder="Enter your name" class="name-input" maxlength="20"/>
     </div>
 
-    <!-- Stat Selection -->
-    <div class="stat-container">
-      <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()" [disabled]="rapiditySelected">
+  <!-- Stat Selection -->
+  <div class="stat-container">
+    <div class="tooltip">
+      <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()">
         Vie: {{ stats.life }}
       </button>
-      <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()"
-        [disabled]="lifeSelected">
+      <span class="tooltiptext">Augmente la vie de 2 points</span>
+    </div>
+    <div class="tooltip">
+      <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()">
         Rapidité: {{ stats.rapidity }}
       </button>
-      <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()"
-        [disabled]="defenseSelected">
+      <span class="tooltiptext">Augmente la rapidité de 2 points</span>
+    </div>
+    <div class="tooltip">
+      <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()">
         Attaque: {{ stats.attack }}
       </button>
-      <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()"
-        [disabled]="attackSelected">
+      <span class="tooltiptext">Augmente l'attaque à D6</span>
+    </div>
+    <div class="tooltip">
+      <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()">
         Défense: {{ stats.defense }}
       </button>
+      <span class="tooltiptext">Augmente la défense à D6</span>
     </div>
+  </div>
 
     <!-- Close Popup -->
     <button class="close-popup-button" (click)="closePopup()">Close</button>
+    <button *ngIf="areTwoStatsSelected()" class="join-button" routerLink="/attente">Join</button>
   </div>
 </div>

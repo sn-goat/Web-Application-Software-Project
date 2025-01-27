@@ -51,44 +51,59 @@ export class CreatePageComponent {
     }
 
     selectLife() {
-        if (!this.rapiditySelected) {
-            this.lifeSelected = !this.lifeSelected;
-            if (this.lifeSelected) {
-                this.stats.life += 2;
-            } else {
-                this.stats.life -= 2;
-            }
+        if (this.rapiditySelected) {
+            this.rapiditySelected = false;
+            this.stats.rapidity = 4;
+        }
+        this.lifeSelected = !this.lifeSelected;
+        if (this.lifeSelected) {
+            this.stats.life += 2;
+        } else {
+            this.stats.life -= 2;
         }
     }
+
     selectRapidity() {
-        if (!this.lifeSelected) {
-            this.rapiditySelected = !this.rapiditySelected;
-            if (this.rapiditySelected) {
-                this.stats.rapidity += 2;
-            } else {
-                this.stats.rapidity -= 2;
-            }
+        if (this.lifeSelected) {
+            this.lifeSelected = false;
+            this.stats.life = 4;
+        }
+        this.rapiditySelected = !this.rapiditySelected;
+        if (this.rapiditySelected) {
+            this.stats.rapidity += 2;
+        } else {
+            this.stats.rapidity -= 2;
         }
     }
 
     selectAttack() {
-        if (!this.defenseSelected) {
-            this.attackSelected = !this.attackSelected;
-            if (this.attackSelected) {
-                this.stats.attack = 'D6';
-            } else {
-                this.stats.attack = 'D4';
-            }
+        if (this.defenseSelected) {
+            this.defenseSelected = false;
+            this.stats.defense = 'D4';
+        }
+        this.attackSelected = !this.attackSelected;
+        if (this.attackSelected) {
+            this.stats.attack = 'D6';
+        } else {
+            this.stats.attack = 'D4';
         }
     }
+
     selectDefense() {
-        if (!this.attackSelected) {
-            this.defenseSelected = !this.defenseSelected;
-            if (this.defenseSelected) {
-                this.stats.defense = 'D6';
-            } else {
-                this.stats.defense = 'D4';
-            }
+        if (this.attackSelected) {
+            this.attackSelected = false;
+            this.stats.attack = 'D4';
         }
+        this.defenseSelected = !this.defenseSelected;
+        if (this.defenseSelected) {
+            this.stats.defense = 'D6';
+        } else {
+            this.stats.defense = 'D4';
+        }
+    }
+
+    areTwoStatsSelected(): boolean {
+        const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
+        return this.playerName.trim().length > 0 && selectedStats.filter(stat => stat).length === 2;
     }
 }
