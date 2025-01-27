@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Router, RouterLink } from '@angular/router';
-import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-main-page',
@@ -15,25 +13,8 @@ export class MainPageComponent {
     gameLogoError: boolean = false;
     private gameLogoElement: HTMLImageElement | null = null;
 
-    constructor(
-        private dialog: MatDialog,
-        private router: Router,
-    ) {
+    constructor() {
         this.verifyImage();
-    }
-
-    openForm(): void {
-        const dialogRef = this.dialog.open(FormDialogComponent, {
-            width: '280px',
-            data: { name: '', description: '', size: '10' },
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-                // Navigate to /edit with the data as query params
-                this.router.navigate(['/edit'], { queryParams: result });
-            }
-        });
     }
 
     handleGameLogoError() {
