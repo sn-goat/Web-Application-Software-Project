@@ -1,11 +1,11 @@
-import { ScrollingModule } from '@angular/cdk/scrolling';
+import { ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
+import { MapService } from '@app/services/map.service';
 
 enum BoardStatus {
     Draft = 'Draft',
@@ -55,10 +55,11 @@ export class MapListComponent implements OnInit {
     sortBy: string = 'createdAt';
 
     constructor(
-        private readonly http: HttpClient,
         private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
         private readonly dialog: MatDialog,
+        private viewportRuler: ViewportRuler,
+        private mapService: MapService,
     ) {}
 
     onDivClick() {
@@ -66,18 +67,22 @@ export class MapListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.http.get<GameMap[]>('assets/mockMapData.json').subscribe({
-            next: (data) => {
-                this.items = data.map((item) => ({
+        this.mapService.getAllMaps().subscribe(
+            (maps) => {
+                this.items = maps.map((item) => ({
                     ...item,
                     status: item.status === 'Draft' ? BoardStatus.Draft : BoardStatus.Published,
                     visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
                     createdAt: item.createdAt ? new Date(item.createdAt) : null,
                     updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
                 }));
+                this.viewportRuler.change(1); // Force recalculation of viewport size
                 this.cdr.detectChanges(); // Manually trigger change detection
             },
-        });
+            (error) => {
+                console.error('Error fetching maps:', error);
+            }
+        );
     }
 
     getFilteredAndSortedItems(): GameMap[] {

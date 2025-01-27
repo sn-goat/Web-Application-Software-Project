@@ -31,7 +31,7 @@ export class CreatePageComponent {
     };
 
     getCurrentPortraitImage(): string {
-        return `/assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
+        return `./assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
     }
 
     openPopup() {
