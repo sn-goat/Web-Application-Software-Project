@@ -13,8 +13,9 @@
 
   <cdk-virtual-scroll-viewport itemSize="120" class="virtual-scroll-viewport">
     <div class="grid-container">
+      <!-- Map Cards -->
       @for (map of getFilteredAndSortedItems(); track map) {
-        <div class="list-item" (click)="onDivClick()">
+        <div class="list-item">
           <div class="item-image">
             <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
           </div>
@@ -45,20 +46,25 @@
                 class="button-icon"
               />
             </button>
-            <!-- Edit Button -->
             <button class="edit-btn" (click)="onEdit(map)" title="Edit">
               <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
             </button>
-            <!-- Delete Button -->
             <button class="delete-btn" (click)="onDelete(map)" title="Delete">
               <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
             </button>
           </div>
         </div>
       }
+
+      <!-- Add Map Card -->
+      <div *ngIf="showActions" class="list-item new-map-card" (click)="createNewMap()">
+        <div class="add-icon">+</div>
+        <p class="add-text">Create New Map</p>
+      </div>
     </div>
   </cdk-virtual-scroll-viewport>
 
+  <!-- Empty State -->
   @if (getFilteredAndSortedItems().length === 0) {
     <div class="empty-state">
       <p>No items found</p>

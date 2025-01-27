@@ -16,7 +16,7 @@ body {
 
 .map-list-container {
     width: 100%;
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background: $primary-bg;
@@ -29,6 +29,34 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     padding: 20px 0;
+}
+
+.new-map-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(126, 224, 208, 0.1);
+    border: 2px dashed rgba(126, 224, 208, 0.3);
+    transition: all 0.3s ease;
+}
+
+.new-map-card:hover {
+    background: rgba(126, 224, 208, 0.2);
+    transform: translateY(-2px);
+}
+
+.add-icon {
+    font-size: 48px;
+    color: #7ee0d0;
+    margin-bottom: 10px;
+}
+
+.add-text {
+    color: #7ee0d0;
+    font-size: 16px;
+    margin: 0;
 }
 
 .search-bar {

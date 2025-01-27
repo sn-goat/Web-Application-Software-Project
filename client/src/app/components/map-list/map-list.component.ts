@@ -1,8 +1,11 @@
-import { ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 
 enum BoardStatus {
     Draft = 'Draft',
@@ -53,13 +56,10 @@ export class MapListComponent implements OnInit {
 
     constructor(
         private readonly http: HttpClient,
-        private readonly viewportRuler: ViewportRuler,
+        private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
+        private readonly dialog: MatDialog,
     ) {}
-
-    onDivClick() {
-        this.divClicked.emit();
-    }
 
     ngOnInit(): void {
         this.http.get<GameMap[]>('assets/mockMapData.json').subscribe({
@@ -74,22 +74,18 @@ export class MapListComponent implements OnInit {
                 this.cdr.detectChanges(); // Manually trigger change detection
             },
         });
-
-        setTimeout(() => {
-            this.viewportRuler.change(1); // Force recalculation of viewport size
-        }, 0);
     }
 
     getFilteredAndSortedItems(): GameMap[] {
-        let filtered = this.items.filter(
-            (item) =>
+        const filtered = this.items.filter((item) => {
+            const matchesSearch =
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                item.description.toLowerCase().includes(this.searchQuery.toLowerCase()),
-        );
+                item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-        if (this.onlyVisible) {
-            filtered = filtered.filter((item) => item.visibility === 'Public');
-        }
+            const isPublished = this.showActions || item.status === BoardStatus.Published;
+
+            return matchesSearch && isPublished;
+        });
 
         return filtered.sort((a, b) => {
             switch (this.sortBy) {
@@ -107,26 +103,37 @@ export class MapListComponent implements OnInit {
         });
     }
 
-    onEdit(item: GameMap): void {
-        item.status = item.status === BoardStatus.Draft ? BoardStatus.Published : BoardStatus.Draft;
-        this.cdr.detectChanges();
-        // todo : envoyer editing info a db
+    onEdit(map: GameMap): void {
+        this.router.navigate(['/edit'], { queryParams: { id: map._id } });
     }
 
-    onDelete(item: GameMap): void {
-        if (confirm('Are you sure you want to delete this item?')) {
-            this.items = this.items.filter((i) => i._id !== item._id);
+    onDelete(map: GameMap): void {
+        if (confirm(`Are you sure you want to delete "${map.name}"?`)) {
+            this.items = this.items.filter((item) => item._id !== map._id);
             this.cdr.detectChanges();
         }
+    }
+
+    toggleVisibility(map: GameMap): void {
+        map.visibility = map.visibility === BoardVisibility.Public ? BoardVisibility.Private : BoardVisibility.Public;
+        this.cdr.detectChanges();
+    }
+
+    createNewMap(): void {
+        const dialogRef = this.dialog.open(FormDialogComponent, {
+            width: '280px',
+            data: { name: '', description: '', size: 10, category: '', isCTF: false },
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+                this.router.navigate(['/edit'], { queryParams: result });
+            }
+        });
     }
 
     handleImageError(event: Event): void {
         const target = event.target as HTMLImageElement;
         target.src = 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba';
-    }
-
-    toggleVisibility(item: GameMap): void {
-        item.visibility = item.visibility === BoardVisibility.Public ? BoardVisibility.Private : BoardVisibility.Public;
-        this.cdr.detectChanges();
     }
 }
