@@ -1,4 +1,4 @@
-import { Vec2 } from '@app/interfaces/vec2';
+import { Vec2 } from '@common/vec2';
 import { Tiles, Items } from '@app/enum/tile';
 
 export interface BoardCell {
