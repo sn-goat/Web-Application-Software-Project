@@ -1,12 +1,7 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterLink } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
-import { CommunicationService } from '@app/services/communication.service';
-import { Message } from '@common/message';
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'app-main-page',
@@ -15,14 +10,17 @@ import { map } from 'rxjs/operators';
     imports: [RouterLink],
 })
 export class MainPageComponent {
-    readonly title: string = 'LOG2990';
-    message: BehaviorSubject<string> = new BehaviorSubject<string>('');
+    readonly title: string = 'POLYTOPIA';
+    gameLogoPath: string = '/assets/POLYTOPIA_game_logo.png';
+    gameLogoError: boolean = false;
+    private gameLogoElement: HTMLImageElement | null = null;
 
     constructor(
-        private readonly communicationService: CommunicationService,
         private dialog: MatDialog,
         private router: Router,
-    ) {}
+    ) {
+        this.verifyImage();
+    }
 
     openForm(): void {
         const dialogRef = this.dialog.open(FormDialogComponent, {
@@ -38,33 +36,16 @@ export class MainPageComponent {
         });
     }
 
-    sendTimeToServer(): void {
-        const newTimeMessage: Message = {
-            title: 'Hello from the client',
-            body: 'Time is : ' + new Date().toString(),
-        };
-        // Important de ne pas oublier "subscribe" ou l'appel ne sera jamais lancé puisque personne l'observe
-        this.communicationService.basicPost(newTimeMessage).subscribe({
-            next: (response) => {
-                const responseString = `Le serveur a reçu la requête a retourné un code ${response.status} : ${response.statusText}`;
-                this.message.next(responseString);
-            },
-            error: (err: HttpErrorResponse) => {
-                const responseString = `Le serveur ne répond pas et a retourné : ${err.message}`;
-                this.message.next(responseString);
-            },
-        });
+    handleGameLogoError() {
+        this.gameLogoError = true;
     }
 
-    getMessagesFromServer(): void {
-        this.communicationService
-            .basicGet()
-            // Cette étape transforme l'objet Message en un seul string
-            .pipe(
-                map((message: Message) => {
-                    return `${message.title} ${message.body}`;
-                }),
-            )
-            .subscribe(this.message);
+    verifyImage() {
+        this.gameLogoElement = new Image();
+        this.gameLogoElement.src = this.gameLogoPath;
+
+        this.gameLogoElement.onerror = () => {
+            this.handleGameLogoError();
+        };
     }
 }
