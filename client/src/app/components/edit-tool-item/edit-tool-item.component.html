@@ -1,5 +1,11 @@
-<img 
-(click)="onClick()"
-[src]="url" 
-[alt]="alternate"
->
+<div class="object">
+    <img 
+    (click)="onClick()"
+    [src]="url" 
+    [alt]="alternate"
+    class="draggable-image"
+    [draggable]="isDraggable"
+    [class.item-moved]="!isDraggable"
+    (dragstart)="onDragStart($event)"
+    >
+</div>

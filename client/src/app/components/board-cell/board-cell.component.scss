@@ -1,13 +1,34 @@
 .cell { 
     aspect-ratio: 1/1;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000; 
+    position: relative;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.base-image, .image-stack {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensure images cover the cell without distorting */
+}
+
+.image-stack {
+    z-index: 1; /* Ensure the stacked image appears on top */
 }
 
 
-
-img{
+.base-image {
     justify-self: center;
-    background-size: cover;
     -webkit-user-drag: none;
     user-select: none;
     -moz-user-select: none;
