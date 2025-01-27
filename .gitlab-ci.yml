@@ -122,7 +122,7 @@ pages:
         - npm ci --cache .npm --prefer-offline
         - npm run deploy -- --base-href $BASE_HREF
         - mkdir ../public
-        - mv dist/client/* ../public/
+        - mv dist/client/browser* ../public/
     artifacts:
         paths:
             - public
