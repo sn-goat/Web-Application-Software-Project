@@ -1,10 +1,10 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 
 enum BoardStatus {
@@ -61,6 +61,10 @@ export class MapListComponent implements OnInit {
         private readonly dialog: MatDialog,
     ) {}
 
+    onDivClick() {
+        this.divClicked.emit();
+    }
+
     ngOnInit(): void {
         this.http.get<GameMap[]>('assets/mockMapData.json').subscribe({
             next: (data) => {
@@ -77,7 +81,7 @@ export class MapListComponent implements OnInit {
     }
 
     getFilteredAndSortedItems(): GameMap[] {
-        const filtered = this.items.filter((item) => {
+        let filtered = this.items.filter((item) => {
             const matchesSearch =
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -86,6 +90,10 @@ export class MapListComponent implements OnInit {
 
             return matchesSearch && isPublished;
         });
+
+        if (this.onlyVisible) {
+            filtered = filtered.filter((item) => item.visibility === 'Public');
+        }
 
         return filtered.sort((a, b) => {
             switch (this.sortBy) {
