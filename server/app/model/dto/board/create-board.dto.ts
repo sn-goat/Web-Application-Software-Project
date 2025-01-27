@@ -11,7 +11,10 @@ export class CreateBoardDto {
     @ApiProperty({ description: 'Board description' })
     description: string;
 
-    @ApiProperty({ description: 'Number representing the size of a single board column', examples: ['16', '18', '20'] })
+    @ApiProperty({ description: 'Tag associated with the board' })
+    category: string;
+
+    @ApiProperty({ description: 'Number representing the size of a single board column', examples: ['10', '16', '20'] })
     size: number;
 
     @ApiProperty({ description: 'Is the board made for the CTF game mode' })
@@ -25,4 +28,7 @@ export class CreateBoardDto {
 
     @ApiProperty({ description: 'Whether the board is available to everyone' })
     visibility: BoardVisibility;
+
+    @ApiProperty({ description: 'Miniature image of the board' })
+    image: string;
 }
