@@ -3,11 +3,11 @@ import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 
 @Component({
     selector: 'app-edit-tool-item',
-    templateUrl: './edit-tool-item.component.html',
-    styleUrl: './edit-tool-item.component.scss',
+    templateUrl: './edit-tool-tiles.component.html',
+    styleUrl: './edit-tool-tiles.component.scss',
     imports: [],
 })
-export class EditToolItemComponent {
+export class EditToolTilesComponent {
     @Input() type: string;
     @Input() url: string;
     @Input() alternate: string;
