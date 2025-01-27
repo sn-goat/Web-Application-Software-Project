@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TEAM_MEMBERS } from '@app/constants/team-members';
 
 @Component({
     selector: 'app-main-page',
@@ -9,24 +10,11 @@ import { RouterLink } from '@angular/router';
 })
 export class MainPageComponent {
     readonly title: string = 'POLYTOPIA';
-    gameLogoPath: string = '/assets/POLYTOPIA_game_logo.png';
+    readonly teamMembers: string[] = TEAM_MEMBERS;
+    readonly gameLogoPath: string = '/assets/POLYTOPIA_game_logo.png';
     gameLogoError: boolean = false;
-    private gameLogoElement: HTMLImageElement | null = null;
 
-    constructor() {
-        this.verifyImage();
-    }
-
-    handleGameLogoError() {
+    handleGameLogoError(): void {
         this.gameLogoError = true;
-    }
-
-    verifyImage() {
-        this.gameLogoElement = new Image();
-        this.gameLogoElement.src = this.gameLogoPath;
-
-        this.gameLogoElement.onerror = () => {
-            this.handleGameLogoError();
-        };
     }
 }

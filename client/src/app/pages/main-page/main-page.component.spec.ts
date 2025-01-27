@@ -1,8 +1,9 @@
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Routes, provideRouter } from '@angular/router';
+import { Routes, provideRouter, RouterLink } from '@angular/router';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { CommunicationService } from '@app/services/communication.service';
+import { TEAM_MEMBERS } from '@app/constants/team-members';
 import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
@@ -15,7 +16,7 @@ describe('MainPageComponent', () => {
     beforeEach(async () => {
         communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
         await TestBed.configureTestingModule({
-            imports: [MainPageComponent],
+            imports: [MainPageComponent, RouterLink],
             providers: [
                 {
                     provide: CommunicationService,
@@ -37,20 +38,57 @@ describe('MainPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have as title 'POLYTOPIA'", () => {
-        expect(component.title).toEqual('POLYTOPIA');
+    it('should initialize with correct title', () => {
+        expect(component.title).toBe('POLYTOPIA');
     });
 
-    it('should have a game logo path valid', () => {
-        expect(component.gameLogoPath).toEqual('/assets/POLYTOPIA_game_logo.png');
+    it('should initialize with correct team members', () => {
+        expect(component.teamMembers).toEqual(TEAM_MEMBERS);
     });
 
-    it('should load the game logo proprely', () => {
-        expect(component.gameLogoError).toBeFalsy();
+    it('should initialize with correct game logo path', () => {
+        expect(component.gameLogoPath).toBe('/assets/POLYTOPIA_game_logo.png');
     });
 
-    it('gameLogoError should be true if there is an error when loading the logo', () => {
+    it('should initialize with gameLogoError as false', () => {
+        expect(component.gameLogoError).toBeFalse();
+    });
+
+    it('should set gameLogoError to true when handleGameLogoError is called', () => {
+        expect(component.gameLogoError).toBeFalse();
         component.handleGameLogoError();
-        expect(component.gameLogoError).toBeTruthy();
+        expect(component.gameLogoError).toBeTrue();
+    });
+
+    it('should trigger handleGameLogoError when image error occurs', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        const img = compiled.querySelector('img');
+        expect(component.gameLogoError).toBeFalse();
+        img?.dispatchEvent(new Event('error'));
+        fixture.detectChanges();
+        expect(component.gameLogoError).toBeTrue();
+    });
+
+    it('should contain RouterLink in the imports', () => {
+        const componentDecorator = Reflect.getOwnPropertyDescriptor(MainPageComponent, '__annotations__')?.value[0];
+        expect(componentDecorator.imports).toContain(RouterLink);
+    });
+
+    it('should render title in the template', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        expect(compiled.textContent).toContain('POLYTOPIA');
+    });
+
+    it('should render game logo with correct src', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        const img = compiled.querySelector('img');
+        expect(img?.src).toContain('/assets/POLYTOPIA_game_logo.png');
+    });
+
+    it('should render team members list', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        TEAM_MEMBERS.forEach((member) => {
+            expect(compiled.textContent).toContain(member);
+        });
     });
 });
