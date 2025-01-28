@@ -54,13 +54,10 @@ export class BoardGameComponent implements OnInit, OnChanges {
 
     @HostListener('mousemove', ['$event'])
     onMouseMove(event: MouseEvent) {
-        const cellSize = 540 / this.boardGame.size;
         const rect = this.elRef.nativeElement.getBoundingClientRect();
         const x = Math.floor(event.clientX - rect.left);
         const y = Math.floor(event.clientY - rect.top);
-        const tileX = Math.floor(x / cellSize);
-        const tileY = Math.floor(y / cellSize);
-        this.tilesCoord.emit({ x: tileX, y: tileY });
+        this.tilesCoord.emit(this.getCellMouseOver({ x, y }));
     }
 
     ngOnInit() {
@@ -101,10 +98,11 @@ export class BoardGameComponent implements OnInit, OnChanges {
         this.generateBoard(this.boardGame.size);
     }
 
-    // private transformMouseCoordsToTileCoords(x: number, y: number){
-    //     const tileSize = 540 / this.boardGame.size;
-    //     const tileX = Math.floor(x / tileSize);
-    //     const tileY = Math.floor(y / tileSize);
-    //     return { x: tileX, y: tileY };
-    // }
+    getCellMouseOver(coord: { x: number; y: number }) {
+        const cellSize = 540 / this.boardGame.size;
+        const tileX = Math.floor(coord.x / cellSize);
+        const tileY = Math.floor(coord.y / cellSize);
+        const tileCoord = { x: tileX, y: tileY };
+        return tileCoord;
+    }
 }
