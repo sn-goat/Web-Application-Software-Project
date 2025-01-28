@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, EventEmitter, ElementRef} from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Items, Tiles } from '@app/enum/tile';
 import { BoardCell } from '@app/interfaces/board/board-cell';
@@ -13,19 +13,21 @@ import { BoardGame } from '@app/interfaces/board/board-game';
 })
 export class BoardGameComponent implements OnInit, OnChanges {
     @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
-    cellSize: string = '';
+    @Output() tilesCoord = new EventEmitter<{ x: number; y: number }>();
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
-
     boardGame: BoardGame = {
         _id: '',
         name: '',
-        size: 0,
+        size: 15,
         description: '',
         boardCells: [],
         status: 'Ongoing',
         visibility: 'Public',
     };
+
+    constructor(private elRef: ElementRef) {}
+
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent) {
         if (event.button === 2) {
@@ -48,6 +50,17 @@ export class BoardGameComponent implements OnInit, OnChanges {
     onMouseLeave() {
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
+    }
+
+    @HostListener('mousemove', ['$event'])
+    onMouseMove(event: MouseEvent) {
+        const cellSize = 540 / this.boardGame.size;
+        const rect = this.elRef.nativeElement.getBoundingClientRect();
+        const x = Math.floor(event.clientX - rect.left);
+        const y = Math.floor(event.clientY - rect.top);
+        const tileX = Math.floor(x / cellSize);
+        const tileY = Math.floor(y / cellSize);
+        this.tilesCoord.emit({ x: tileX, y: tileY });
     }
 
     ngOnInit() {
@@ -87,4 +100,11 @@ export class BoardGameComponent implements OnInit, OnChanges {
 
         this.generateBoard(this.boardGame.size);
     }
+
+    // private transformMouseCoordsToTileCoords(x: number, y: number){
+    //     const tileSize = 540 / this.boardGame.size;
+    //     const tileX = Math.floor(x / tileSize);
+    //     const tileY = Math.floor(y / tileSize);
+    //     return { x: tileX, y: tileY };
+    // }
 }

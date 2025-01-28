@@ -8,14 +8,23 @@
                 <br/>
                 <label for="Description">Description: </label>
                 <textarea id="Description" type="text" rows="4"> </textarea>
+                <label for="x">X : </label>
+                <input id="x" type="text" value={{coord.x}}/>
+                <br/>
+                <label for="y">Y : </label>
+                <input id="y" type="text" value={{coord.y}}/>
+                <br/>
+                
             </form>
         </mat-drawer>
         <mat-drawer-content >
             <mat-grid-list cols="10" rowHeight=1:5>
                 <mat-grid-tile class="board-container" colspan="8">
-                    <app-board-game [importedData]="data" ></app-board-game>
+                    <app-board-game [importedData]="data" (tilesCoord)="selecteCoord($event)"></app-board-game>
                 </mat-grid-tile>
-                <mat-grid-tile class="tools-container" colspan="2">2</mat-grid-tile>
+                <mat-grid-tile class="tools-container" colspan="2">
+                    <app-edit-item-area></app-edit-item-area>
+                </mat-grid-tile>
             </mat-grid-list>  
         </mat-drawer-content>
     </mat-drawer-container> 
