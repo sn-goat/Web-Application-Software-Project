@@ -63,14 +63,15 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     }
 
     onDrop(event: DragEvent) {
-        const startItemName = 24;
-        const endItemName = 4;
         event.preventDefault();
         const image = event.dataTransfer ? event.dataTransfer.getData('text/plain') : '';
         if (image) {
-            this.editDragDrop.addWasDragged(image.substring(startItemName, image.length - endItemName));
+            const imageUrl = this.editDragDrop.findWasDragged(image);
+            if (imageUrl) {
+                this.editDragDrop.addWasDragged(imageUrl);
+                this.itemUrl = image;
+            }
         }
-        this.itemUrl = image;
     }
 
     onDragStart(event: DragEvent) {

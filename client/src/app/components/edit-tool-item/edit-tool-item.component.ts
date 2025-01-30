@@ -20,7 +20,7 @@ export class EditToolItemComponent {
         private editDragDrop: EditDragDrop,
     ) {
         this.editDragDrop.wasDragged$.subscribe((wasDragged) => {
-            this.isDraggable = wasDragged.find((type) => type === this.alternate) === undefined;
+            this.isDraggable = wasDragged.find((type) => type === this.url) === undefined;
         });
     }
 

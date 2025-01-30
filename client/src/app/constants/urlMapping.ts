@@ -22,3 +22,13 @@ export const ITEM_TO_TYPE = {
     [DEFAULT_PATH_ITEMS + 'Flag.png']: Items.Flag,
     [DEFAULT_PATH_ITEMS + '']: Items.StartingPoint,
 };
+
+export const ITEM_URL = [
+    DEFAULT_PATH_ITEMS + 'Sword.png',
+    DEFAULT_PATH_ITEMS + 'Shield.png',
+    DEFAULT_PATH_ITEMS + 'Leather Boot.png',
+    DEFAULT_PATH_ITEMS + 'Monster Egg.png',
+    DEFAULT_PATH_ITEMS + 'Pearl.png',
+    DEFAULT_PATH_ITEMS + 'Bow.png',
+    DEFAULT_PATH_ITEMS + 'Flag.png',
+];

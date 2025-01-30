@@ -18,7 +18,7 @@
             </form>
         </mat-drawer>
         <mat-drawer-content >
-            <mat-grid-list cols="10" rowHeight=1:5>
+            <mat-grid-list cols="10" rowHeight=1:7>
                 <mat-grid-tile class="board-container" colspan="8">
                     <app-board-game [importedData]="data" (tilesCoord)="selecteCoord($event)"></app-board-game>
                 </mat-grid-tile>
