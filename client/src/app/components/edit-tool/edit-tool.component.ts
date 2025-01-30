@@ -8,13 +8,15 @@ import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 })
 export class EditToolComponent {
     @Input() type: string;
-    @Input() url: string;
     @Input() alternate: string;
+
+    src = './assets/tiles/';
+    fileType = '.png';
 
     constructor(private editToolMouse: EditToolMouse) {}
 
     onClick() {
-        this.editToolMouse.updateIsTile(this.type === 'Tile');
-        this.editToolMouse.updateSelectedUrl(this.url);
+        this.editToolMouse.updateIsTile(true);
+        this.editToolMouse.updateSelectedTool(this.type);
     }
 }

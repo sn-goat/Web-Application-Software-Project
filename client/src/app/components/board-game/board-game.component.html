@@ -1,8 +1,8 @@
 <div class="grid">
-    @for (row of boardGame.boardCells; track row) {
+    @for (row of boardGame.board; track row) {
         <div class="row">
             @for (cell of row; track cell) {
-                <app-board-cell class="cell" [cell]="cell" [isMouseRightDown]="isMouseRightDown" [isMouseLeftDown]="isMouseLeftDown"></app-board-cell>
+                <app-board-cell class="cell" [cell]="cell" [itemMap]="itemMap" [board]="boardGame.board" [isMouseRightDown]="isMouseRightDown" [isMouseLeftDown]="isMouseLeftDown"></app-board-cell>
             }
         </div>
     } @empty {

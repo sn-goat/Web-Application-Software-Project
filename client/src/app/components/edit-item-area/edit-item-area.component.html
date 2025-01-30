@@ -3,10 +3,10 @@
         <mat-card-title>Tuiles</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-        <app-edit-tool url="./assets/tiles/Wall.png" type="Tile" alternate="Floor"></app-edit-tool>
-        <app-edit-tool url="./assets/tiles/Water.png" type="Tile" alternate="Water"></app-edit-tool>
-        <app-edit-tool url="./assets/tiles/Ice.png" type="Tile" alternate="Ice"></app-edit-tool>
-        <app-edit-tool url="./assets/tiles/ClosedDoor.png" type="Tile" alternate="ClosedDoor"></app-edit-tool>
+        <app-edit-tool [type]="tileType.Wall" [alternate]="tileType.Wall"></app-edit-tool>
+        <app-edit-tool [type]="tileType.Water" [alternate]="tileType.Water"></app-edit-tool>
+        <app-edit-tool [type]="tileType.Ice" type="Tile" [alternate]="tileType.Ice"></app-edit-tool>
+        <app-edit-tool [type]="tileType.Closed_Door" type="Tile" [alternate]="tileType.Closed_Door"></app-edit-tool>
     </mat-card-content>
 </mat-card>
 <mat-card appearance="outlined">
@@ -14,12 +14,12 @@
         <mat-card-title>Objets</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-        <app-edit-tool-item url="./assets/items/Bow.png" type="Item" alternate="Bow"></app-edit-tool-item>
-        <app-edit-tool-item url="./assets/items/Sword.png" type="Item" alternate="Sword"></app-edit-tool-item>
-        <app-edit-tool-item url="./assets/items/Shield.png" type="Item" alternate="Shield"></app-edit-tool-item>
-        <app-edit-tool-item url="./assets/items/Pearl.png" type="Item" alternate="Pearl"></app-edit-tool-item>
-        <app-edit-tool-item url="./assets/items/Monster Egg.png" type="Item" alternate="Monster Egg"></app-edit-tool-item>
-        <app-edit-tool-item url="./assets/items/Leather Boot.png" type="Item" alternate="Leather Boot"></app-edit-tool-item>
-        <app-edit-tool-item url="./assets/items/Flag.png" type="Item" alternate="Flag"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Bow" [alternate]="itemType.Bow"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Flag" [alternate]="itemType.Flag"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Leather_Boot" [alternate]="itemType.Leather_Boot"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Monster_Egg" [alternate]="itemType.Monster_Egg"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Pearl" [alternate]="itemType.Pearl"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Shield" [alternate]="itemType.Shield"></app-edit-tool-item>
+        <app-edit-tool-item [type]="itemType.Sword" [alternate]="itemType.Sword"></app-edit-tool-item>
     </mat-card-content>
 </mat-card>

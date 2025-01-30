@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
-import { Items, Tiles } from '@app/enum/tile';
-import { BoardCell } from '@app/interfaces/board/board-cell';
+import {ItemType, TileType } from'../../../../../common/enums';
+import { BoardCell } from '../../../../../common/board';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
+import { Vec2 } from '@common/vec2';
 
 @Component({
     selector: 'app-board-cell',
@@ -16,11 +17,16 @@ import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 export class BoardCellComponent implements OnInit, OnDestroy {
     @Input() isMouseRightDown!: boolean;
     @Input() isMouseLeftDown!: boolean;
-    @Input() cell!: BoardCell;
+    @Input() cell: BoardCell;
+    @Input() itemMap: Map<ItemType, Vec2[]>;
+    @Input() board: BoardCell[][];
 
-    imageUrl: string = './assets/tiles/Base.png';
-    itemUrl: string = '';
-    private selectedUrl: string = '';
+    readonly srcItem = './assets/items/';
+    readonly srcTile = './assets/tiles/';
+    readonly fileType = '.png';
+    readonly baseTileUrl = './assets/tiles/Base.png';
+    tileUrl = this.baseTileUrl;
+    private selectedTool: string = '';
     private isTile: boolean = false;
     private destroy$ = new Subject<void>();
 
@@ -44,8 +50,8 @@ export class BoardCellComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.editToolMouse.selectedUrl$.pipe(takeUntil(this.destroy$)).subscribe((url) => {
-            this.selectedUrl = url;
+        this.editToolMouse.selectedTool$.pipe(takeUntil(this.destroy$)).subscribe((tool) => {
+            this.selectedTool = tool;
         });
         this.editToolMouse.isTile$.pipe(takeUntil(this.destroy$)).subscribe((isTile) => {
             this.isTile = isTile;
@@ -59,36 +65,51 @@ export class BoardCellComponent implements OnInit, OnDestroy {
 
     onDragOver(event: DragEvent) {
         event.preventDefault();
-        this.itemUrl = '';
     }
 
     onDrop(event: DragEvent) {
         event.preventDefault();
-        const image = event.dataTransfer ? event.dataTransfer.getData('text/plain') : '';
-        if (image) {
-            const imageUrl = this.editDragDrop.findWasDragged(image);
-            if (imageUrl) {
-                this.editDragDrop.addWasDragged(imageUrl);
-                this.itemUrl = image;
+        const item = this.editDragDrop.getCurrentItem();
+        if (item) {
+            if (this.cell.item !== item) {
+                this.editDragDrop.removeWasDragged(this.cell.item);
+            }
+            this.editDragDrop.addWasDragged(item);
+            this.cell.item = item as ItemType;
+            const itemPositions = this.itemMap.get(this.cell.item);
+            if (itemPositions) {
+                itemPositions.push(this.cell.position);
+                const pos = itemPositions[0];
+                if (pos.x !== -1 && pos.y !== -1) {
+                    this.board[pos.x][pos.y].item = ItemType.Default;
+                }
+                itemPositions.shift();
+                this.itemMap.set(this.cell.item, itemPositions);
+
+                itemPositions.forEach((position) => {
+                    console.log(position.x, position.y);
+                });
             }
         }
+        this.editDragDrop.setCurrentItem('');
     }
 
     onDragStart(event: DragEvent) {
-        event.dataTransfer?.setData('text/plain', this.itemUrl);
+        event.preventDefault();
+        this.editDragDrop.setCurrentItem(this.cell.item);
     }
 
     private applyTile() {
-        if (this.isTile && this.selectedUrl !== '') {
-            this.cell.tile = Tiles.Default;
-            this.imageUrl = this.selectedUrl;
+        if (this.isTile && this.selectedTool !== '') {
+            this.cell.tile = this.selectedTool as TileType;
+            this.tileUrl = this.srcTile + this.selectedTool + this.fileType;
         }
     }
 
     private revertToDefault() {
-        this.cell.tile = Tiles.Default;
-        this.imageUrl = './assets/tiles/Base.png';
-        this.cell.item = Items.NoItem;
+        this.cell.tile = TileType.Default;
+        this.tileUrl = this.baseTileUrl;
+        this.cell.item = ItemType.Default;
     }
 
     private updateCell() {

@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, EventEmitter, ElementRef} from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import { Items, Tiles } from '@app/enum/tile';
-import { BoardCell } from '@app/interfaces/board/board-cell';
-import { BoardGame } from '@app/interfaces/board/board-game';
+import {ItemType, TileType, BoardStatus, BoardVisibility } from'../../../../../common/enums';
+import { Board, BoardCell } from '../../../../../common/board';
+import { Vec2 } from '@common/vec2';
 
 @Component({
     selector: 'app-board-game',
@@ -16,17 +16,34 @@ export class BoardGameComponent implements OnInit, OnChanges {
     @Output() tilesCoord = new EventEmitter<{ x: number; y: number }>();
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
-    boardGame: BoardGame = {
+
+    readonly itemMap: Map<ItemType, Vec2[]> = new Map();
+
+    readonly celleSize = 540;
+    boardGame: Board = {
         _id: '',
         name: '',
-        size: 15,
         description: '',
-        boardCells: [],
-        status: 'Ongoing',
-        visibility: 'Public',
+        size: 15,
+        category: '',
+        isCTF: false,
+        board: [],
+        status: BoardStatus.Ongoing,
+        visibility: BoardVisibility.Public,
+        image: '',
+        createdAt: new Date().getDate().toString(),
+        updatedAt: '',
     };
 
-    constructor(private elRef: ElementRef) {}
+    constructor(private elRef: ElementRef) {
+        this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Shield, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Flag, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Monster_Egg, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Leather_Boot, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
+    }
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent) {
@@ -76,30 +93,35 @@ export class BoardGameComponent implements OnInit, OnChanges {
             for (let j = 0; j < size; j++) {
                 row.push({
                     position: { x: i, y: j },
-                    tile: Tiles.Default,
-                    item: Items.NoItem,
+                    tile: TileType.Default,
+                    item: ItemType.Default,
                 });
             }
-            this.boardGame.boardCells.push(row);
+            this.boardGame.board.push(row);
         }
     }
 
     updateBoardGame() {
         this.boardGame = {
-            _id: '',
+            _id: this.boardGame._id,
             name: this.importedData.name,
-            size: this.importedData.size,
             description: this.importedData.description,
-            boardCells: [],
-            status: 'Ongoing',
-            visibility: 'Public',
+            size: this.importedData.size,
+            category: this.boardGame.category,
+            isCTF: this.boardGame.isCTF,
+            board: this.boardGame.board,
+            status: BoardStatus.Ongoing,
+            visibility: BoardVisibility.Public,
+            image: this.boardGame.image,
+            createdAt: this.boardGame.createdAt,
+            updatedAt: new Date().getDate().toString(),
         };
 
         this.generateBoard(this.boardGame.size);
     }
 
     getCellMouseOver(coord: { x: number; y: number }) {
-        const cellSize = 540 / this.boardGame.size;
+        const cellSize = this.celleSize / this.boardGame.size;
         const tileX = Math.floor(coord.x / cellSize);
         const tileY = Math.floor(coord.y / cellSize);
         const tileCoord = { x: tileX, y: tileY };

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { EditToolComponent } from '@app/components/edit-tool/edit-tool.component';
 import { EditToolItemComponent } from '@app/components/edit-tool-item/edit-tool-item.component';
-import { Tiles, Items } from '@app/enum/tile';
+import { ItemType, TileType } from '../../../../../common/enums';
 
 @Component({
     selector: 'app-edit-item-area',
@@ -11,7 +11,8 @@ import { Tiles, Items } from '@app/enum/tile';
     imports: [EditToolComponent, EditToolItemComponent, MatCardModule],
 })
 export class EditItemAreaComponent {
-    selectedTool: Tiles | Items = Tiles.Default;
+    readonly itemType = ItemType;
+    readonly tileType = TileType;
 
     selectedGrid = 'TilesGrid';
     showGrid(gridId: string) {
