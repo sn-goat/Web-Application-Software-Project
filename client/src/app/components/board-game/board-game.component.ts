@@ -43,6 +43,7 @@ export class BoardGameComponent implements OnInit, OnChanges {
         this.itemMap.set(ItemType.Monster_Egg, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Leather_Boot, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Pearl, [{ x: -1, y: -1 }]);
     }
 
     @HostListener('mousedown', ['$event'])
