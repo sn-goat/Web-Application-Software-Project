@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, EventEmitter, ElementRef} from '@angular/core';
+import { Component, HostListener, Input, OnChanges, OnInit, OnDestroy, SimpleChanges, ElementRef } from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import {ItemType, TileType, BoardStatus, BoardVisibility } from'../../../../../common/enums';
-import { Board, BoardCell } from '../../../../../common/board';
+import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
+import { ItemType, TileType, BoardStatus, BoardVisibility } from '@common/enums';
+import { Subject, takeUntil } from 'rxjs';
+import { Board, BoardCell } from '@common/board';
 import { Vec2 } from '@common/vec2';
 
 @Component({
@@ -11,15 +13,17 @@ import { Vec2 } from '@common/vec2';
     styleUrls: ['./board-game.component.scss'],
     imports: [CommonModule, BoardCellComponent],
 })
-export class BoardGameComponent implements OnInit, OnChanges {
+export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
-    @Output() tilesCoord = new EventEmitter<{ x: number; y: number }>();
+
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
 
+    previousCoord: Vec2 = { x: -1, y: -1 };
+    currentCoord: Vec2 = { x: -1, y: -1 };
+
     readonly itemMap: Map<ItemType, Vec2[]> = new Map();
 
-    readonly celleSize = 540;
     boardGame: Board = {
         _id: '',
         name: '',
@@ -35,7 +39,13 @@ export class BoardGameComponent implements OnInit, OnChanges {
         updatedAt: '',
     };
 
-    constructor(private elRef: ElementRef) {
+    private selectedTile: TileType | null = null;
+    private destroy$ = new Subject<void>();
+
+    constructor(
+        private elRef: ElementRef,
+        private editToolMouse: EditToolMouse,
+    ) {
         this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Shield, [{ x: -1, y: -1 }]);
@@ -53,6 +63,9 @@ export class BoardGameComponent implements OnInit, OnChanges {
         } else if (event.button === 0) {
             this.isMouseLeftDown = true;
         }
+        this.previousCoord = { x: event.clientX, y: event.clientY };
+        const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y);
+        this.updateCell(cellPosition.x, cellPosition.y);
     }
 
     @HostListener('mouseup', ['$event'])
@@ -63,22 +76,29 @@ export class BoardGameComponent implements OnInit, OnChanges {
         if (event.button === 2) {
             this.isMouseRightDown = false;
         }
+        this.previousCoord = { x: -1, y: -1 };
+        this.currentCoord = { x: -1, y: -1 };
     }
+
     @HostListener('mouseleave')
     onMouseLeave() {
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
+        this.previousCoord = { x: -1, y: -1 };
+        this.currentCoord = { x: -1, y: -1 };
     }
 
     @HostListener('mousemove', ['$event'])
     onMouseMove(event: MouseEvent) {
-        const rect = this.elRef.nativeElement.getBoundingClientRect();
-        const x = Math.floor(event.clientX - rect.left);
-        const y = Math.floor(event.clientY - rect.top);
-        this.tilesCoord.emit(this.getCellMouseOver({ x, y }));
+        this.currentCoord = { x: event.clientX, y: event.clientY };
+        this.applyIntermadiateTiles(this.previousCoord, this.currentCoord);
+        this.previousCoord = this.currentCoord;
     }
 
     ngOnInit() {
+        this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
+            this.selectedTile = tile;
+        });
         this.updateBoardGame();
     }
 
@@ -88,7 +108,12 @@ export class BoardGameComponent implements OnInit, OnChanges {
         }
     }
 
-    generateBoard(size: number) {
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    private generateBoard(size: number) {
         for (let i = 0; i < size; i++) {
             const row: BoardCell[] = [];
             for (let j = 0; j < size; j++) {
@@ -102,7 +127,7 @@ export class BoardGameComponent implements OnInit, OnChanges {
         }
     }
 
-    updateBoardGame() {
+    private updateBoardGame() {
         this.boardGame = {
             _id: this.boardGame._id,
             name: this.importedData.name,
@@ -121,11 +146,53 @@ export class BoardGameComponent implements OnInit, OnChanges {
         this.generateBoard(this.boardGame.size);
     }
 
-    getCellMouseOver(coord: { x: number; y: number }) {
-        const cellSize = this.celleSize / this.boardGame.size;
-        const tileX = Math.floor(coord.x / cellSize);
-        const tileY = Math.floor(coord.y / cellSize);
-        const tileCoord = { x: tileX, y: tileY };
+    private screenToBoard(x: number, y: number): Vec2 {
+        const rect = this.elRef.nativeElement.getBoundingClientRect();
+        const coordX = Math.floor(x - rect.left);
+        const coordY = Math.floor(y - rect.top);
+        const cellWidth = rect.width / this.boardGame.size;
+        const cellHeight = rect.height / this.boardGame.size;
+
+        const tileX = Math.floor(coordX / cellWidth);
+        const tileY = Math.floor(coordY / cellHeight);
+        const tileCoord: Vec2 = { x: tileX, y: tileY };
         return tileCoord;
+    }
+
+    private applyIntermadiateTiles(previousCoord: Vec2, currentCoord: Vec2) {
+        const firstCell = this.screenToBoard(previousCoord.x, previousCoord.y);
+        const finalCell = this.screenToBoard(currentCoord.x, currentCoord.y);
+
+        const seen: Set<Vec2> = new Set([firstCell, finalCell]);
+        const slope = (currentCoord.y - previousCoord.y) / (currentCoord.x - previousCoord.x);
+        const step = previousCoord.x < currentCoord.x ? 1 : -1;
+
+        for (let x = previousCoord.x; x < currentCoord.x; x += step) {
+            const y: number = slope * (x - previousCoord.x) + previousCoord.y;
+            const tileCoord = this.screenToBoard(x, y);
+            if (!seen.has(tileCoord)) {
+                this.updateCell(tileCoord.x, tileCoord.y);
+            }
+        }
+
+        this.updateCell(finalCell.x, finalCell.y);
+    }
+
+    private applyTile(col: number, row: number) {
+        if (this.selectedTile !== null) {
+            this.boardGame.board[row][col].tile = this.selectedTile as TileType;
+        }
+    }
+
+    private revertToDefault(col: number, row: number) {
+        this.boardGame.board[row][col].tile = TileType.Default;
+    }
+
+    private updateCell(col: number, row: number) {
+        if (this.isMouseRightDown) {
+            this.revertToDefault(col, row);
+        } else if (this.isMouseLeftDown) {
+            this.applyTile(col, row);
+        }
     }
 }

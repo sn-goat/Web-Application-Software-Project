@@ -4,7 +4,7 @@ export enum TileType {
     Wall = 'Wall',
     Closed_Door = 'ClosedDoor',
     Opened_Door = 'OpenedDoor',
-    Default = '',
+    Default = 'Base',
 }
 
 export enum ItemType {

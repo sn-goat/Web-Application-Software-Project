@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 
 @Component({
     selector: 'app-edit-tool',
@@ -12,11 +11,4 @@ export class EditToolComponent {
 
     src = './assets/tiles/';
     fileType = '.png';
-
-    constructor(private editToolMouse: EditToolMouse) {}
-
-    onClick() {
-        this.editToolMouse.updateIsTile(true);
-        this.editToolMouse.updateSelectedTool(this.type);
-    }
 }

@@ -3,10 +3,10 @@
         <mat-card-title>Tuiles</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-        <app-edit-tool [type]="tileType.Wall" [alternate]="tileType.Wall"></app-edit-tool>
-        <app-edit-tool [type]="tileType.Water" [alternate]="tileType.Water"></app-edit-tool>
-        <app-edit-tool [type]="tileType.Ice" type="Tile" [alternate]="tileType.Ice"></app-edit-tool>
-        <app-edit-tool [type]="tileType.Closed_Door" type="Tile" [alternate]="tileType.Closed_Door"></app-edit-tool>
+        <app-edit-tool-tiles [type]="tileType.Wall"></app-edit-tool-tiles>
+        <app-edit-tool-tiles [type]="tileType.Water"></app-edit-tool-tiles>
+        <app-edit-tool-tiles [type]="tileType.Ice"></app-edit-tool-tiles>
+        <app-edit-tool-tiles [type]="tileType.Closed_Door"></app-edit-tool-tiles>
     </mat-card-content>
 </mat-card>
 <mat-card appearance="outlined">

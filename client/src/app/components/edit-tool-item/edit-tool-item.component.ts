@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 
 @Component({
@@ -17,18 +16,10 @@ export class EditToolItemComponent {
 
     isDraggable = true;
 
-    constructor(
-        private editToolMouse: EditToolMouse,
-        private editDragDrop: EditDragDrop,
-    ) {
+    constructor(private editDragDrop: EditDragDrop) {
         this.editDragDrop.wasDragged$.subscribe((wasDragged) => {
             this.isDraggable = wasDragged.find((type) => type === this.type) === undefined;
         });
-    }
-
-    onClick() {
-        this.editToolMouse.updateIsTile(false);
-        this.editToolMouse.updateSelectedTool(this.type);
     }
 
     onDragStart(event: DragEvent) {

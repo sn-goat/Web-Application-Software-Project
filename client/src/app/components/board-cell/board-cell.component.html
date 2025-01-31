@@ -5,7 +5,7 @@ class="cell"
     <div class="image-container">
         <img
         class="base-image"
-        [src]="tileUrl"
+        [src]="srcTiles + cell.tile + fileType"
         >
         @if (cell.item) {
             <img 
