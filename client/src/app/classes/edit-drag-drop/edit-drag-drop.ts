@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { BoardCell } from '@common/board';
+import { ItemType } from '@common/enums';
+import { Vec2 } from '@common/vec2';
 import { ITEMS_TYPES } from '@app/constants/types';
 
 @Injectable({
@@ -9,6 +12,7 @@ export class EditDragDrop {
     wasDragged$: Observable<string[]>;
     currentItem$: Observable<string>;
 
+    private isSet = false;
     private wasDragged = new BehaviorSubject<string[]>([]);
     private currentItem = new BehaviorSubject<string>('');
 
@@ -17,27 +21,77 @@ export class EditDragDrop {
         this.currentItem$ = this.currentItem.asObservable();
     }
 
-    addWasDragged(wasDragged: string) {
-        this.wasDragged.next([...this.wasDragged.value, wasDragged]);
-    }
-
-    removeWasDragged(wasDragged: string) {
-        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
-    }
-
-    findWasDragged(wasDragged: string) {
-        const itemName = ITEMS_TYPES.find((type) => type === wasDragged);
-        if (itemName) {
-            return this.wasDragged.value.find((type) => type === itemName);
-        }
-        return undefined;
-    }
-
     setCurrentItem(currentItem: string) {
-        this.currentItem.next(currentItem);
+        if (ITEMS_TYPES.includes(currentItem)) {
+            this.currentItem.next(currentItem);
+            this.isSet = true;
+        } else {
+            this.isSet = false;
+        }
     }
 
     getCurrentItem() {
         return this.currentItem.value;
+    }
+
+    onDrop(board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+        const item = this.getCurrentItem();
+        if (this.isSet) {
+            this.handleItemDrop(item, board, cell, itemMap);
+            this.setCurrentItem('');
+        }
+    }
+
+    private addWasDragged(wasDragged: string) {
+        this.wasDragged.next([...this.wasDragged.value, wasDragged]);
+    }
+
+    private removeWasDragged(wasDragged: string) {
+        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
+    }
+
+    private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+        if (cell.item !== item && cell.item !== ItemType.Default) {
+            this.handleExistingItemRemoval(cell, itemMap);
+        }
+
+        this.updateItemState(item, cell);
+        this.updateItemPositions(item, cell, itemMap, board);
+    }
+
+    private handleExistingItemRemoval(cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+        this.removeWasDragged(cell.item);
+        const itemPositions = itemMap.get(cell.item);
+        if (itemPositions) {
+            itemPositions.push({ x: -1, y: -1 });
+            itemPositions.shift();
+            itemMap.set(cell.item, itemPositions);
+        }
+    }
+
+    private updateItemState(item: string, cell: BoardCell) {
+        this.addWasDragged(item);
+        cell.item = item as ItemType;
+    }
+
+    private updateItemPositions(item: string, cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
+        const itemPositions = itemMap.get(item);
+        if (itemPositions) {
+            itemPositions.push(cell.position);
+            this.clearOldPosition(itemPositions, board);
+            itemPositions.shift();
+            itemMap.set(item, itemPositions);
+        }
+    }
+
+    private clearOldPosition(itemPositions: Vec2[], board: BoardCell[][]) {
+        const pos1 = itemPositions[0];
+        const pos2 = itemPositions[1];
+        if (pos1 === pos2) {
+            return;
+        }
+        if (pos1.x !== -1 && pos1.y !== -1) {
+            board[pos1.x][pos1.y].item = ItemType.Default;
+        }
     }
 }

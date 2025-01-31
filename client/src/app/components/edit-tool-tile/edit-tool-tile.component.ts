@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-    selector: 'app-edit-tool',
-    templateUrl: './edit-tool.component.html',
-    styleUrl: './edit-tool.component.scss',
+    selector: 'app-edit-tool-tile',
+    templateUrl: './edit-tool-tile.component.html',
+    styleUrl: './edit-tool-tile.component.scss',
 })
-export class EditToolComponent {
+export class EditToolTileComponent {
     @Input() type: string;
     @Input() alternate: string;
 

@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
 import { ItemType } from '@common/enums';
 import { BoardCell } from '@common/board';
 import { Vec2 } from '@common/vec2';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
-import { Subject } from 'rxjs';
 import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 
 @Component({
@@ -38,25 +38,7 @@ export class BoardCellComponent implements OnDestroy {
 
     onDrop(event: DragEvent) {
         event.preventDefault();
-        const item = this.editDragDrop.getCurrentItem();
-        if (item) {
-            if (this.cell.item !== item) {
-                this.editDragDrop.removeWasDragged(this.cell.item);
-            }
-            this.editDragDrop.addWasDragged(item);
-            this.cell.item = item as ItemType;
-            const itemPositions = this.itemMap.get(this.cell.item);
-            if (itemPositions) {
-                itemPositions.push(this.cell.position);
-                const pos = itemPositions[0];
-                if (pos.x !== -1 && pos.y !== -1) {
-                    this.board[pos.x][pos.y].item = ItemType.Default;
-                }
-                itemPositions.shift();
-                this.itemMap.set(this.cell.item, itemPositions);
-            }
-        }
-        this.editDragDrop.setCurrentItem('');
+        this.editDragDrop.onDrop(this.board, this.cell, this.itemMap);
     }
 
     onDragStart(event: DragEvent) {
