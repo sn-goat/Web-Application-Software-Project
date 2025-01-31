@@ -5,14 +5,14 @@ class="cell"
     <div class="image-container">
         <img
         class="base-image"
-        [src]="imageUrl"
+        [src]="srcTiles + cell.tile + fileType"
         >
-        @if (itemUrl) {
+        @if (cell.item) {
             <img 
             class="image-stack"
             draggable="true"
-            (dragstart)="onDragStart($event)"
-            [src]="itemUrl"
+            (drag)="onDragStart($event)"
+            [src]="srcItem + cell.item + fileType"
             >
         }
     </div>

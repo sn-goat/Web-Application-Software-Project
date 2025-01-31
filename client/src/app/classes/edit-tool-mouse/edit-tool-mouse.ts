@@ -1,29 +1,23 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { TileType } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
 })
 export class EditToolMouse {
-    isTile$: Observable<boolean>;
-    selectedUrl$: Observable<string>;
-    private isTile = new BehaviorSubject<boolean>(false);
-    private selectedUrl = new BehaviorSubject<string>('');
+    selectedTile$: Observable<TileType | null>;
+    private selectedTile = new BehaviorSubject<TileType | null>(null);
 
     constructor() {
-        this.isTile$ = this.isTile.asObservable();
-        this.selectedUrl$ = this.selectedUrl.asObservable();
+        this.selectedTile$ = this.selectedTile.asObservable();
     }
 
-    updateIsTile(isTile: boolean) {
-        this.isTile.next(isTile);
-    }
-
-    updateSelectedUrl(selectedUrl: string) {
-        if (this.selectedUrl.value === selectedUrl) {
-            this.selectedUrl.next('');
+    updateSelectedTile(selectedTile: TileType) {
+        if (this.selectedTile.value === selectedTile) {
+            this.selectedTile.next(null);
         } else {
-            this.selectedUrl.next(selectedUrl);
+            this.selectedTile.next(selectedTile);
         }
     }
 }

@@ -1,0 +1,26 @@
+<div class="container">   
+    <h1> Vue Édition </h1>
+    <mat-drawer-container>
+        <mat-drawer mode="side" opened>
+            <form>
+                <label for="Nom">Nom: </label>
+                <input id="Nom" type="text" />
+                <br/>
+                <label for="Description">Description: </label>
+                <textarea id="Description" type="text" rows="4"> </textarea>
+            </form>
+        </mat-drawer>
+        <mat-drawer-content >
+            <mat-grid-list cols="10" rowHeight=1:7>
+                <mat-grid-tile class="board-container" colspan="8">
+                    <div>
+                    <app-board-game [importedData]="data"></app-board-game>
+                    </div>
+                </mat-grid-tile>
+                <mat-grid-tile class="tools-container" colspan="2">
+                    <app-edit-item-area></app-edit-item-area>
+                </mat-grid-tile>
+            </mat-grid-list>  
+        </mat-drawer-content>
+    </mat-drawer-container> 
+</div>

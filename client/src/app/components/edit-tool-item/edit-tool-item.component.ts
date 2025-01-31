@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 
 @Component({
@@ -10,26 +9,21 @@ import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 })
 export class EditToolItemComponent {
     @Input() type: string;
-    @Input() url: string;
     @Input() alternate: string;
+
+    src = './assets/items/';
+    fileType = '.png';
 
     isDraggable = true;
 
-    constructor(
-        private editToolMouse: EditToolMouse,
-        private editDragDrop: EditDragDrop,
-    ) {
+    constructor(private editDragDrop: EditDragDrop) {
         this.editDragDrop.wasDragged$.subscribe((wasDragged) => {
-            this.isDraggable = wasDragged.find((type) => type === this.alternate) === undefined;
+            this.isDraggable = wasDragged.find((type) => type === this.type) === undefined;
         });
     }
 
-    onClick() {
-        this.editToolMouse.updateIsTile(false);
-        this.editToolMouse.updateSelectedUrl(this.url);
-    }
-
     onDragStart(event: DragEvent) {
-        event.dataTransfer?.setData('text/plain', this.url);
+        event.preventDefault();
+        this.editDragDrop.setCurrentItem(this.type);
     }
 }

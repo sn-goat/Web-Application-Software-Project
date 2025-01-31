@@ -1,0 +1,11 @@
+mat-drawer-content {
+  height: 100%;
+}
+
+.tools-container {
+  max-height: 100%; 
+  overflow-y: auto; /* Ajoutez cette ligne pour rendre le conteneur défilable */
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}

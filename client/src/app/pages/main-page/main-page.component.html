@@ -1,6 +1,15 @@
 <div class="container justified">
     <h1 class="header-item"> {{ title }}</h1>
-    <img [src]="gameLogoPath"  alt="Logo Jeu" />
+    @if (!gameLogoError) {
+        <img 
+            [src]="gameLogoPath" 
+            (error)="handleGameLogoError()" 
+            alt="Logo Jeu" 
+        />
+    } @else {
+        <p class="error-message">Failed to load game logo.</p>
+    }
+
     <section id="server-message" class="justified">
 
         <div class="button-container ">
@@ -13,8 +22,10 @@
     <footer class="footer-item">
         <h4 class="team-name">Équipe 112</h4>
         <p>
-            <span>Léonard Renoud</span>, <span>Arnaud Grandisson</span>, <span>Sergile Junior Domguia Nyouvop</span>,
-            <span>Shanmukh Iyer</span>, <span>Hossam Moustafa</span>, <span>Hubert Khouzam</span>
+            @for (member of teamMembers; track member) {
+                <span>{{ member }}</span>
+                @if (!$last) {, }
+            }
         </p>
     </footer>
 </div>
