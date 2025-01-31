@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { BoardCell } from '../../../../../common/board';
+import { BoardCell } from '@common/board';
 import { ItemType } from '@common/enums';
 import { Vec2 } from '@common/vec2';
 import { ITEMS_TYPES } from '@app/constants/types';
@@ -74,7 +74,7 @@ export class EditDragDrop {
         cell.item = item as ItemType;
     }
 
-    private updateItemPositions(item: string, cell: BoardCell, itemMap: Map<string, Vec2[]>,  board: BoardCell[][]) {
+    private updateItemPositions(item: string, cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
         const itemPositions = itemMap.get(item);
         if (itemPositions) {
             itemPositions.push(cell.position);

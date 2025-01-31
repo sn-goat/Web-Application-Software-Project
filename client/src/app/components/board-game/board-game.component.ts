@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, EventEmitter, ElementRef} from '@angular/core';
+import { Component, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges, EventEmitter, ElementRef } from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import {ItemType, TileType, BoardStatus, BoardVisibility } from'../../../../../common/enums';
-import { Board, BoardCell } from '../../../../../common/board';
+import { ItemType, TileType, BoardStatus, BoardVisibility } from '@common/enums';
+import { Board, BoardCell } from '@common/board';
 import { Vec2 } from '@common/vec2';
 
 @Component({

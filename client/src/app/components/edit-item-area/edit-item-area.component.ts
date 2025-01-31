@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { EditToolItemComponent } from '@app/components/edit-tool-item/edit-tool-item.component';
 import { EditToolTileComponent } from '@app/components/edit-tool-tile/edit-tool-tile.component';
-import { ItemType, TileType } from '../../../../../common/enums';
+import { ItemType, TileType } from '@common/enums';
 
 @Component({
     selector: 'app-edit-item-area',

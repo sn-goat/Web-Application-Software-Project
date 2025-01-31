@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
-import {ItemType, TileType } from'../../../../../common/enums';
-import { BoardCell } from '../../../../../common/board';
+import { ItemType, TileType } from '@common/enums';
+import { BoardCell } from '@common/board';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
