@@ -85,9 +85,13 @@ export class EditDragDrop {
     }
 
     private clearOldPosition(itemPositions: Vec2[], board: BoardCell[][]) {
-        const pos = itemPositions[0];
-        if (pos.x !== -1 && pos.y !== -1) {
-            board[pos.x][pos.y].item = ItemType.Default;
+        const pos1 = itemPositions[0];
+        const pos2 = itemPositions[1];
+        if (pos1 === pos2) {
+            return;
+        }
+        if (pos1.x !== -1 && pos1.y !== -1) {
+            board[pos1.x][pos1.y].item = ItemType.Default;
         }
     }
 }
