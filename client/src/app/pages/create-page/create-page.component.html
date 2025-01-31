@@ -1,6 +1,7 @@
 <app-map-list class="map-list" [showActions]="false" [onlyVisible]="true" (divClicked)="openPopup()"></app-map-list>
 <!-- Popup -->
-<div class="popup" *ngIf="isPopupVisible">
+@if (isPopupVisible) {
+<div class="popup">
   <div class="popup-content">
     <!-- Portrait Navigation -->
 
@@ -15,39 +16,43 @@
     <!-- Name Input -->
     <div class="name-container">
       <label for="player-name">Who are you ?</label>
-      <input type="text" id="player-name" [(ngModel)]="playerName" placeholder="Enter your name" class="name-input" maxlength="20"/>
+      <input type="text" id="player-name" [(ngModel)]="playerName" placeholder="Enter your name" class="name-input"
+        maxlength="20" />
     </div>
 
-  <!-- Stat Selection -->
-  <div class="stat-container">
-    <div class="tooltip">
-      <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()">
-        Vie: {{ stats.life }}
-      </button>
-      <span class="tooltiptext">Augmente la vie de 2 points</span>
+    <!-- Stat Selection -->
+    <div class="stat-container">
+      <div class="tooltip">
+        <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()">
+          Vie: {{ stats.life }}
+        </button>
+        <span class="tooltiptext">Augmente la vie de 2 points</span>
+      </div>
+      <div class="tooltip">
+        <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()">
+          Rapidité: {{ stats.rapidity }}
+        </button>
+        <span class="tooltiptext">Augmente la rapidité de 2 points</span>
+      </div>
+      <div class="tooltip">
+        <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()">
+          Attaque: {{ stats.attack }}
+        </button>
+        <span class="tooltiptext">Augmente l'attaque à D6</span>
+      </div>
+      <div class="tooltip">
+        <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()">
+          Défense: {{ stats.defense }}
+        </button>
+        <span class="tooltiptext">Augmente la défense à D6</span>
+      </div>
     </div>
-    <div class="tooltip">
-      <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()">
-        Rapidité: {{ stats.rapidity }}
-      </button>
-      <span class="tooltiptext">Augmente la rapidité de 2 points</span>
-    </div>
-    <div class="tooltip">
-      <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()">
-        Attaque: {{ stats.attack }}
-      </button>
-      <span class="tooltiptext">Augmente l'attaque à D6</span>
-    </div>
-    <div class="tooltip">
-      <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()">
-        Défense: {{ stats.defense }}
-      </button>
-      <span class="tooltiptext">Augmente la défense à D6</span>
-    </div>
-  </div>
 
     <!-- Close Popup -->
     <button class="close-popup-button" (click)="closePopup()">Close</button>
-    <button *ngIf="areTwoStatsSelected()" class="join-button" routerLink="/attente">Join</button>
+    @if (areTwoStatsSelected()) {
+    <button class="join-button" routerLink="/attente">Join</button>
+    }
   </div>
 </div>
+}
