@@ -69,29 +69,7 @@ export class BoardCellComponent implements OnInit, OnDestroy {
 
     onDrop(event: DragEvent) {
         event.preventDefault();
-        const item = this.editDragDrop.getCurrentItem();
-        if (item) {
-            if (this.cell.item !== item) {
-                this.editDragDrop.removeWasDragged(this.cell.item);
-            }
-            this.editDragDrop.addWasDragged(item);
-            this.cell.item = item as ItemType;
-            const itemPositions = this.itemMap.get(this.cell.item);
-            if (itemPositions) {
-                itemPositions.push(this.cell.position);
-                const pos = itemPositions[0];
-                if (pos.x !== -1 && pos.y !== -1) {
-                    this.board[pos.x][pos.y].item = ItemType.Default;
-                }
-                itemPositions.shift();
-                this.itemMap.set(this.cell.item, itemPositions);
-
-                itemPositions.forEach((position) => {
-                    console.log(position.x, position.y);
-                });
-            }
-        }
-        this.editDragDrop.setCurrentItem('');
+        this.editDragDrop.onDrop(this.board, this.cell, this.itemMap);
     }
 
     onDragStart(event: DragEvent) {
