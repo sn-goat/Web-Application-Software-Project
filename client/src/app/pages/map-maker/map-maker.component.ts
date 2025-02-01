@@ -14,7 +14,7 @@ import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-
 })
 export class MapMakerComponent implements OnInit {
     data: { name: string; size: number; description: string } = { name: '', size: 10, description: '' };
-    coord = { x: 0, y: 0 };
+
     constructor(private route: ActivatedRoute) {}
     ngOnInit(): void {
         this.route.queryParams.subscribe((params) => {
@@ -24,8 +24,5 @@ export class MapMakerComponent implements OnInit {
                 description: params['description'] || '',
             };
         });
-    }
-    selecteCoord(coord: { x: number; y: number }) {
-        this.coord = coord;
     }
 }

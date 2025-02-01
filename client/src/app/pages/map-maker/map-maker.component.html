@@ -11,16 +11,12 @@
             </form>
         </mat-drawer>
         <mat-drawer-content >
-            <mat-grid-list cols="10" rowHeight=1:7>
-                <mat-grid-tile class="board-container" colspan="8">
-                    <div>
-                    <app-board-game [importedData]="data"></app-board-game>
-                    </div>
-                </mat-grid-tile>
-                <mat-grid-tile class="tools-container" colspan="2">
-                    <app-edit-item-area></app-edit-item-area>
-                </mat-grid-tile>
-            </mat-grid-list>  
+            <div class = "board-container">
+                <app-board-game [importedData]="data"></app-board-game>
+            </div>
+            <div class = "tools-container">
+                <app-edit-item-area></app-edit-item-area>
+            </div>
         </mat-drawer-content>
     </mat-drawer-container> 
 </div>

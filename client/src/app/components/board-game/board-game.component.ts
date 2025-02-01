@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, OnInit, OnDestroy, SimpleChanges, ElementRef } from '@angular/core';
-import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
+import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
-import { ItemType, TileType, BoardStatus, BoardVisibility } from '@common/enums';
-import { Subject, takeUntil } from 'rxjs';
+import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
+import { BoardStatus, BoardVisibility, ItemType, TileType } from '@common/enums';
 import { Vec2 } from '@common/vec2';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-board-game',
@@ -91,7 +91,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     @HostListener('mousemove', ['$event'])
     onMouseMove(event: MouseEvent) {
         this.currentCoord = { x: event.clientX, y: event.clientY };
-        this.applyIntermadiateTiles(this.previousCoord, this.currentCoord);
+        this.applyIntermediateTiles(this.previousCoord, this.currentCoord);
         this.previousCoord = this.currentCoord;
     }
 
@@ -103,8 +103,8 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes['importedData']) {
-            this.updateBoardGame();
+        if (changes.importedData) {
+            // this.updateBoardGame();
         }
     }
 
@@ -114,6 +114,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private generateBoard(size: number) {
+        this.boardGame.board = [];
         for (let i = 0; i < size; i++) {
             const row: BoardCell[] = [];
             for (let j = 0; j < size; j++) {
@@ -129,17 +130,12 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
 
     private updateBoardGame() {
         this.boardGame = {
-            _id: this.boardGame._id,
+            ...this.boardGame,
             name: this.importedData.name,
             description: this.importedData.description,
             size: this.importedData.size,
-            category: this.boardGame.category,
-            isCTF: this.boardGame.isCTF,
-            board: this.boardGame.board,
             status: BoardStatus.Ongoing,
             visibility: BoardVisibility.Public,
-            image: this.boardGame.image,
-            createdAt: this.boardGame.createdAt,
             updatedAt: new Date().getDate().toString(),
         };
 
@@ -159,7 +155,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         return tileCoord;
     }
 
-    private applyIntermadiateTiles(previousCoord: Vec2, currentCoord: Vec2) {
+    private applyIntermediateTiles(previousCoord: Vec2, currentCoord: Vec2) {
         const firstCell = this.screenToBoard(previousCoord.x, previousCoord.y);
         const finalCell = this.screenToBoard(currentCoord.x, currentCoord.y);
 
@@ -170,7 +166,9 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         for (let x = previousCoord.x; x < currentCoord.x; x += step) {
             const y: number = slope * (x - previousCoord.x) + previousCoord.y;
             const tileCoord = this.screenToBoard(x, y);
-            if (!seen.has(tileCoord)) {
+            if (tileCoord.x === finalCell.x && tileCoord.y === finalCell.y) {
+                break;
+            } else if (!seen.has(tileCoord)) {
                 this.updateCell(tileCoord.x, tileCoord.y);
             }
         }
@@ -180,10 +178,46 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
 
     private applyTile(col: number, row: number) {
         if (this.selectedTile !== null) {
-            this.boardGame.board[row][col].tile = this.selectedTile as TileType;
+            switch (this.selectedTile) {
+                case TileType.Closed_Door:
+                    this.applyDoor(col, row);
+                    break;
+
+                case TileType.Wall:
+                    this.applyWall(col, row);
+                    break;
+
+                default:
+                    this.boardGame.board[row][col].tile = this.selectedTile as TileType;
+                    break;
+            }
         }
     }
 
+    private applyDoor(col: number, row: number) {
+        if (this.surroudningTilesAreWall(col, row)) {
+            if (this.boardGame.board[row][col].tile === TileType.Closed_Door) {
+                this.boardGame.board[row][col].tile = TileType.Opened_Door;
+            } else if (this.boardGame.board[row][col].tile === TileType.Opened_Door) {
+                this.boardGame.board[row][col].tile = TileType.Closed_Door;
+            } else {
+                this.boardGame.board[row][col].tile = TileType.Closed_Door;
+            }
+        }
+    }
+
+    private applyWall(col: number, row: number) {
+        if (this.boardGame.board[row][col].item !== ItemType.Default) {
+            this.boardGame.board[row][col].item = ItemType.Default;
+        }
+        this.boardGame.board[row][col].tile = TileType.Wall;
+    }
+
+    private surroudningTilesAreWall(col: number, row: number): boolean {
+        const onXAxis = this.boardGame.board[row][col - 1].tile === TileType.Wall && this.boardGame.board[row][col + 1].tile === TileType.Wall;
+        const onYAxis = this.boardGame.board[row - 1][col].tile === TileType.Wall && this.boardGame.board[row + 1][col].tile === TileType.Wall;
+        return (onXAxis || onYAxis) && !(onXAxis && onYAxis);
+    }
     private revertToDefault(col: number, row: number) {
         this.boardGame.board[row][col].tile = TileType.Default;
     }
