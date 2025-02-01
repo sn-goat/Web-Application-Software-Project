@@ -3,12 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { BoardGameComponent } from '@app/components/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
 
 @Component({
     selector: 'app-map-maker',
-    imports: [MatSidenavModule, MatGridListModule, MatFormFieldModule, BoardGameComponent, EditItemAreaComponent],
+    imports: [MatSidenavModule, MatGridListModule, MatFormFieldModule, MatIconModule, BoardGameComponent, EditItemAreaComponent],
     templateUrl: './map-maker.component.html',
     styleUrl: './map-maker.component.scss',
 })

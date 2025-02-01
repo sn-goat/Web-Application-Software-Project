@@ -11,12 +11,12 @@ describe('MapMakerComponent', () => {
             imports: [MapMakerComponent]
         }).compileComponents();
 
-      fixture = TestBed.createComponent(MapMakerComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
+        fixture = TestBed.createComponent(MapMakerComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     it('should create', () => {
-      expect(component).toBeTruthy();
+        expect(component).toBeTruthy();
     });
 });
