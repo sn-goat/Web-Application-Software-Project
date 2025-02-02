@@ -90,9 +90,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     @HostListener('dragleave', ['$event'])
     onDragLeave(event: DragEvent) {
         event.preventDefault();
-        if (this.currentCoord.x !== -1 && this.currentCoord.y !== -1) {
-            this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
-        }
+        this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
     }
 
     @HostListener('mouseleave')

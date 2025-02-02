@@ -12,19 +12,16 @@ export class EditDragDrop {
     wasDragged$: Observable<string[]>;
     currentItem$: Observable<string>;
     mousePosition$: Observable<Vec2>;
-    itemOutsideBoard$: Observable<string>;
 
     private isSet = false;
     private mousePosition = new BehaviorSubject<Vec2>({ x: -1, y: -1 });
     private wasDragged = new BehaviorSubject<string[]>([]);
     private currentItem = new BehaviorSubject<string>('');
-    private itemOutsideBoard = new BehaviorSubject<string>('');
 
     constructor() {
         this.wasDragged$ = this.wasDragged.asObservable();
         this.currentItem$ = this.currentItem.asObservable();
         this.mousePosition$ = this.mousePosition.asObservable();
-        this.itemOutsideBoard$ = this.itemOutsideBoard.asObservable();
     }
 
     setCurrentItem(currentItem: string) {
@@ -48,16 +45,6 @@ export class EditDragDrop {
         return this.mousePosition.value;
     }
 
-    getItemOutsideBoard() {
-        return this.itemOutsideBoard.value;
-    }
-
-    setItemOutsideBoard(item: string) {
-        if (ITEMS_TYPES.includes(item) && item !== ItemType.Default) {
-            this.itemOutsideBoard.next(item);
-        }
-    }
-
     onDrop(board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
         const item = this.getCurrentItem();
         if (this.isSet) {
@@ -67,36 +54,28 @@ export class EditDragDrop {
     }
 
     onDragLeave(board: BoardCell[][], itemMap: Map<string, Vec2[]>) {
-        const item = this.getItemOutsideBoard();
-        if (item !== ItemType.Default) {
-            this.removeWasDragged(item);
-            const itemPositions = itemMap.get(item as ItemType);
-            let pos;
-            if (itemPositions) {
-                pos = itemPositions[0];
-                if (pos.x !== -1 && pos.y !== -1) {
-                    board[pos.x][pos.y].item = ItemType.Default;
+        if (this.getCurrentPosition().x !== -1 && this.getCurrentPosition().y !== -1) {
+            const item = this.getCurrentItem();
+            if (item !== ItemType.Default) {
+                this.removeWasDragged(item);
+                const itemPositions = itemMap.get(item as ItemType);
+                let pos;
+                if (itemPositions) {
+                    pos = itemPositions[0];
+                    if (pos.x !== -1 && pos.y !== -1) {
+                        board[pos.x][pos.y].item = ItemType.Default;
+                    }
+                    itemPositions.push({ x: -1, y: -1 });
+                    itemPositions.shift();
+                    itemMap.set(item as ItemType, itemPositions);
                 }
-                itemPositions.push({ x: -1, y: -1 });
-                itemPositions.shift();
-                itemMap.set(item as ItemType, itemPositions);
             }
         }
-
-        this.setItemOutsideBoard('');
     }
 
     handleItemOnInvalidTile(cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
         this.handleExistingItemRemoval(cell, itemMap);
         board[cell.position.x][cell.position.y].item = ItemType.Default;
-    }
-
-    onDropOutsideBoard() {
-        if (this.getCurrentPosition().x === -1 || this.getCurrentPosition().y === -1) {
-            this.setItemOutsideBoard(this.currentItem.value);
-        } else {
-            this.setItemOutsideBoard('');
-        }
     }
 
     private handleExistingItemRemoval(cell: BoardCell, itemMap: Map<string, Vec2[]>) {

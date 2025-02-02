@@ -6,7 +6,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { BoardGameComponent } from '@app/components/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
-import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 
 @Component({
     selector: 'app-map-maker',
@@ -17,15 +16,8 @@ import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 export class MapMakerComponent implements OnInit {
     data: { name: string; size: number; description: string } = { name: '', size: 10, description: '' };
 
-    constructor(
-        private route: ActivatedRoute,
-        private editDragDrop: EditDragDrop,
-    ) {}
+    constructor(private route: ActivatedRoute) {}
 
-    onDrop(event: DragEvent) {
-        event.preventDefault();
-        this.editDragDrop.onDropOutsideBoard();
-    }
 
     ngOnInit(): void {
         this.route.queryParams.subscribe((params) => {
