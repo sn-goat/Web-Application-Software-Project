@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
@@ -22,8 +23,6 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     previousCoord: Vec2 = { x: -1, y: -1 };
     currentCoord: Vec2 = { x: -1, y: -1 };
 
-    readonly itemMap: Map<ItemType, Vec2[]> = new Map();
-
     boardGame: Board = {
         _id: '',
         name: '',
@@ -39,12 +38,15 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         updatedAt: '',
     };
 
+    itemMap: Map<ItemType, Vec2[]> = new Map();
+
     private selectedTile: TileType | null = null;
     private destroy$ = new Subject<void>();
 
     constructor(
         private elRef: ElementRef,
         private editToolMouse: EditToolMouse,
+        private editDragDrop: EditDragDrop,
     ) {
         this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
@@ -80,12 +82,20 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         this.currentCoord = { x: -1, y: -1 };
     }
 
+    @HostListener('dragleave', ['$event'])
+    onDragLeave(event: DragEvent) {
+        event.preventDefault();
+        this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
+    }
+
     @HostListener('mouseleave')
     onMouseLeave() {
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
         this.previousCoord = { x: -1, y: -1 };
         this.currentCoord = { x: -1, y: -1 };
+
+        this.editDragDrop.setCurrentPosition({ x: -1, y: -1 });
     }
 
     @HostListener('mousemove', ['$event'])
@@ -93,6 +103,8 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         this.currentCoord = { x: event.clientX, y: event.clientY };
         this.applyIntermediateTiles(this.previousCoord, this.currentCoord);
         this.previousCoord = this.currentCoord;
+
+        this.editDragDrop.setCurrentPosition({ x: event.clientX, y: event.clientY });
     }
 
     ngOnInit() {
@@ -208,6 +220,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
 
     private applyWall(col: number, row: number) {
         if (this.boardGame.board[row][col].item !== ItemType.Default) {
+            this.editDragDrop.removeWasDragged(this.boardGame.board[row][col].item);
             this.boardGame.board[row][col].item = ItemType.Default;
         }
         this.boardGame.board[row][col].tile = TileType.Wall;

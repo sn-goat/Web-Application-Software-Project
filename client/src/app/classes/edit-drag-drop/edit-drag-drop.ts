@@ -11,14 +11,20 @@ import { ITEMS_TYPES } from '@app/constants/types';
 export class EditDragDrop {
     wasDragged$: Observable<string[]>;
     currentItem$: Observable<string>;
+    mousePosition$: Observable<Vec2>;
+    itemOutsideBoard$: Observable<string>;
 
     private isSet = false;
+    private mousePosition = new BehaviorSubject<Vec2>({ x: -1, y: -1 });
     private wasDragged = new BehaviorSubject<string[]>([]);
     private currentItem = new BehaviorSubject<string>('');
+    private itemOutsideBoard = new BehaviorSubject<string>('');
 
     constructor() {
         this.wasDragged$ = this.wasDragged.asObservable();
         this.currentItem$ = this.currentItem.asObservable();
+        this.mousePosition$ = this.mousePosition.asObservable();
+        this.itemOutsideBoard$ = this.itemOutsideBoard.asObservable();
     }
 
     setCurrentItem(currentItem: string) {
@@ -34,6 +40,22 @@ export class EditDragDrop {
         return this.currentItem.value;
     }
 
+    setCurrentPosition(position: Vec2) {
+        this.mousePosition.next(position);
+    }
+
+    getCurrentPosition() {
+        return this.mousePosition.value;
+    }
+
+    getItemOutsideBoard() {
+        return this.itemOutsideBoard.value;
+    }
+
+    setItemOutsideBoard(item: string) {
+        this.itemOutsideBoard.next(item);
+    }
+
     onDrop(board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
         const item = this.getCurrentItem();
         if (this.isSet) {
@@ -42,21 +64,38 @@ export class EditDragDrop {
         }
     }
 
-    private addWasDragged(wasDragged: string) {
+    onDragLeave(board: BoardCell[][], itemMap: Map<string, Vec2[]>) {
+        this.onDropOutsideBoard();
+        const item = this.getItemOutsideBoard();
+        if (item !== ItemType.Default) {
+            this.removeWasDragged(item);
+            const itemPositions = itemMap.get(item as ItemType);
+            let pos;
+            if (itemPositions) {
+                pos = itemPositions[0];
+                if (pos) {
+                    board[pos.x][pos.y].item = ItemType.Default;
+                }
+                itemPositions.push({ x: -1, y: -1 });
+                itemPositions.shift();
+                itemMap.set(item as ItemType, itemPositions);
+            }
+            this.setItemOutsideBoard('');
+        }
+    }
+
+    addWasDragged(wasDragged: string) {
         this.wasDragged.next([...this.wasDragged.value, wasDragged]);
     }
 
-    private removeWasDragged(wasDragged: string) {
+    removeWasDragged(wasDragged: string) {
         this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
     }
 
-    private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
-        if (cell.item !== item && cell.item !== ItemType.Default) {
-            this.handleExistingItemRemoval(cell, itemMap);
+    private onDropOutsideBoard() {
+        if (this.getCurrentPosition().x === -1 || this.getCurrentPosition().y === -1) {
+            this.setItemOutsideBoard(this.currentItem.value);
         }
-
-        this.updateItemState(item, cell);
-        this.updateItemPositions(item, cell, itemMap, board);
     }
 
     private handleExistingItemRemoval(cell: BoardCell, itemMap: Map<string, Vec2[]>) {
@@ -67,6 +106,15 @@ export class EditDragDrop {
             itemPositions.shift();
             itemMap.set(cell.item, itemPositions);
         }
+    }
+
+    private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+        if (cell.item !== item && cell.item !== ItemType.Default) {
+            this.handleExistingItemRemoval(cell, itemMap);
+        }
+
+        this.updateItemState(item, cell);
+        this.updateItemPositions(item, cell, itemMap, board);
     }
 
     private updateItemState(item: string, cell: BoardCell) {
