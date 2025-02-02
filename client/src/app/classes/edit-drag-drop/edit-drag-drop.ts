@@ -42,12 +42,12 @@ export class EditDragDrop {
         }
     }
 
-    private addWasDragged(wasDragged: string) {
-        this.wasDragged.next([...this.wasDragged.value, wasDragged]);
+    removeWasDragged(wasDragged: string) {
+        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
     }
 
-    private removeWasDragged(wasDragged: string) {
-        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
+    private addWasDragged(wasDragged: string) {
+        this.wasDragged.next([...this.wasDragged.value, wasDragged]);
     }
 
     private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {

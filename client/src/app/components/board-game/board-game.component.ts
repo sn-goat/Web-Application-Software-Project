@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
@@ -13,7 +13,7 @@ import { Subject, takeUntil } from 'rxjs';
     styleUrls: ['./board-game.component.scss'],
     imports: [CommonModule, BoardCellComponent],
 })
-export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
+export class BoardGameComponent implements OnInit, OnDestroy {
     @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
 
     isMouseRightDown: boolean = false;
@@ -100,12 +100,6 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
             this.selectedTile = tile;
         });
         this.updateBoardGame();
-    }
-
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes.importedData) {
-            // this.updateBoardGame();
-        }
     }
 
     ngOnDestroy() {
