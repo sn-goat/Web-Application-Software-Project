@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { BoardCell } from '@common/board';
-import { ItemType } from '@common/enums';
+import { ItemType, TileType } from '@common/enums';
 import { Vec2 } from '@common/vec2';
 import { ITEMS_TYPES } from '@app/constants/types';
 
@@ -28,7 +28,7 @@ export class EditDragDrop {
     }
 
     setCurrentItem(currentItem: string) {
-        if (ITEMS_TYPES.includes(currentItem)) {
+        if (ITEMS_TYPES.includes(currentItem) && currentItem !== ItemType.Default) {
             this.currentItem.next(currentItem);
             this.isSet = true;
         } else {
@@ -53,7 +53,9 @@ export class EditDragDrop {
     }
 
     setItemOutsideBoard(item: string) {
-        this.itemOutsideBoard.next(item);
+        if (ITEMS_TYPES.includes(item) && item !== ItemType.Default) {
+            this.itemOutsideBoard.next(item);
+        }
     }
 
     onDrop(board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
@@ -65,7 +67,6 @@ export class EditDragDrop {
     }
 
     onDragLeave(board: BoardCell[][], itemMap: Map<string, Vec2[]>) {
-        this.onDropOutsideBoard();
         const item = this.getItemOutsideBoard();
         if (item !== ItemType.Default) {
             this.removeWasDragged(item);
@@ -73,28 +74,28 @@ export class EditDragDrop {
             let pos;
             if (itemPositions) {
                 pos = itemPositions[0];
-                if (pos) {
+                if (pos.x !== -1 && pos.y !== -1) {
                     board[pos.x][pos.y].item = ItemType.Default;
                 }
                 itemPositions.push({ x: -1, y: -1 });
                 itemPositions.shift();
                 itemMap.set(item as ItemType, itemPositions);
             }
-            this.setItemOutsideBoard('');
         }
+
+        this.setItemOutsideBoard('');
     }
 
-    addWasDragged(wasDragged: string) {
-        this.wasDragged.next([...this.wasDragged.value, wasDragged]);
+    handleItemOnInvalidTile(cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
+        this.handleExistingItemRemoval(cell, itemMap);
+        board[cell.position.x][cell.position.y].item = ItemType.Default;
     }
 
-    removeWasDragged(wasDragged: string) {
-        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
-    }
-
-    private onDropOutsideBoard() {
+    onDropOutsideBoard() {
         if (this.getCurrentPosition().x === -1 || this.getCurrentPosition().y === -1) {
             this.setItemOutsideBoard(this.currentItem.value);
+        } else {
+            this.setItemOutsideBoard('');
         }
     }
 
@@ -108,7 +109,19 @@ export class EditDragDrop {
         }
     }
 
+    private addWasDragged(wasDragged: string) {
+        this.wasDragged.next([...this.wasDragged.value, wasDragged]);
+    }
+
+    private removeWasDragged(wasDragged: string) {
+        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
+    }
+
     private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+        if (cell.tile === TileType.Opened_Door || cell.tile === TileType.Closed_Door || cell.tile === TileType.Wall) {
+            return;
+        }
+
         if (cell.item !== item && cell.item !== ItemType.Default) {
             this.handleExistingItemRemoval(cell, itemMap);
         }

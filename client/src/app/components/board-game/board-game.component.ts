@@ -70,6 +70,11 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         this.updateCell(cellPosition.x, cellPosition.y);
     }
 
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent) {
+        event.preventDefault();
+    }
+
     @HostListener('mouseup', ['$event'])
     onMouseUp(event: MouseEvent) {
         if (event.button === 0) {
@@ -85,7 +90,9 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     @HostListener('dragleave', ['$event'])
     onDragLeave(event: DragEvent) {
         event.preventDefault();
-        this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
+        if (this.currentCoord.x !== -1 && this.currentCoord.y !== -1) {
+            this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
+        }
     }
 
     @HostListener('mouseleave')
@@ -215,13 +222,13 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
             } else {
                 this.boardGame.board[row][col].tile = TileType.Closed_Door;
             }
+            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
         }
     }
 
     private applyWall(col: number, row: number) {
         if (this.boardGame.board[row][col].item !== ItemType.Default) {
-            this.editDragDrop.removeWasDragged(this.boardGame.board[row][col].item);
-            this.boardGame.board[row][col].item = ItemType.Default;
+            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
         }
         this.boardGame.board[row][col].tile = TileType.Wall;
     }
@@ -232,7 +239,11 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         return (onXAxis || onYAxis) && !(onXAxis && onYAxis);
     }
     private revertToDefault(col: number, row: number) {
-        this.boardGame.board[row][col].tile = TileType.Default;
+        if (this.boardGame.board[row][col].item !== ItemType.Default) {
+            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
+        } else if (this.boardGame.board[row][col].tile !== TileType.Default) {
+            this.boardGame.board[row][col].tile = TileType.Default;
+        }
     }
 
     private updateCell(col: number, row: number) {
