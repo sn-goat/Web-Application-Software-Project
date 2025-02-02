@@ -36,13 +36,13 @@
       </div>
       <div class="tooltip">
         <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()">
-          Attaque: {{ stats.attack }}
+          Attaque: <img [src]="stats.attackDice" alt="Attack Dice" class="dice-image" />
         </button>
         <span class="tooltiptext">Augmente l'attaque à D6</span>
       </div>
       <div class="tooltip">
         <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()">
-          Défense: {{ stats.defense }}
+          Défense: <img [src]="stats.defenseDice" alt="Defense Dice" class="dice-image" />
         </button>
         <span class="tooltiptext">Augmente la défense à D6</span>
       </div>

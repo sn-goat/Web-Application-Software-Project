@@ -55,6 +55,13 @@ describe('CreatePageComponent', () => {
         expect(component.stats.life).toBe(BASE_STAT);
     });
 
+    it('should reset rapidity when life is selected', () => {
+        component.rapiditySelected = true;
+        component.selectLife();
+        expect(component.rapiditySelected).toBeFalse();
+        expect(component.stats.rapidity).toBe(BASE_STAT);
+    });
+
     it('should select and deselect rapidity', () => {
         component.lifeSelected = false;
         component.selectRapidity();
@@ -65,30 +72,70 @@ describe('CreatePageComponent', () => {
         expect(component.stats.rapidity).toBe(BASE_STAT);
     });
 
+    it('should reset life when rapidity is selected', () => {
+        component.lifeSelected = true;
+        component.selectRapidity();
+        expect(component.lifeSelected).toBeFalse();
+        expect(component.stats.life).toBe(BASE_STAT);
+    });
+
     it('should select and deselect attack', () => {
         component.defenseSelected = false;
         component.selectAttack();
         expect(component.attackSelected).toBeTrue();
-        expect(component.stats.attack).toBe('D6');
+        expect(component.stats.attackDice).toBe('./assets/dice/d6.png');
         component.selectAttack();
         expect(component.attackSelected).toBeFalse();
-        expect(component.stats.attack).toBe('D4');
+        expect(component.stats.attackDice).toBe('./assets/dice/d4.png');
+    });
+
+    it('should reset defense when attack is selected', () => {
+        component.defenseSelected = true;
+        component.selectAttack();
+        expect(component.defenseSelected).toBeFalse();
+        expect(component.stats.defenseDice).toBe('./assets/dice/d4.png');
     });
 
     it('should select and deselect defense', () => {
         component.attackSelected = false;
         component.selectDefense();
         expect(component.defenseSelected).toBeTrue();
-        expect(component.stats.defense).toBe('D6');
+        expect(component.stats.defenseDice).toBe('./assets/dice/d6.png');
         component.selectDefense();
         expect(component.defenseSelected).toBeFalse();
-        expect(component.stats.defense).toBe('D4');
+        expect(component.stats.defenseDice).toBe('./assets/dice/d4.png');
+    });
+
+    it('should reset attack when defense is selected', () => {
+        component.attackSelected = true;
+        component.selectDefense();
+        expect(component.attackSelected).toBeFalse();
+        expect(component.stats.attackDice).toBe('./assets/dice/d4.png');
     });
 
     it('should return correct portrait image', () => {
         component.currentPortraitIndex = 0;
-        expect(component.getCurrentPortraitImage()).toBe('/assets/portraits/portrait1.png');
+        expect(component.getCurrentPortraitImage()).toBe('./assets/portraits/portrait1.png');
         component.currentPortraitIndex = 5;
-        expect(component.getCurrentPortraitImage()).toBe('/assets/portraits/portrait6.png');
+        expect(component.getCurrentPortraitImage()).toBe('./assets/portraits/portrait6.png');
+    });
+
+    it('should return true if two stats are selected and name is entered', () => {
+        component.playerName = 'Test Player';
+        component.lifeSelected = true;
+        component.rapiditySelected = true;
+        expect(component.canJoin()).toBeTrue();
+    });
+
+    it('should return false if less than two stats are selected or name is not entered', () => {
+        component.playerName = '';
+        component.lifeSelected = true;
+        component.rapiditySelected = true;
+        expect(component.canJoin()).toBeFalse();
+
+        component.playerName = 'Test Player';
+        component.lifeSelected = true;
+        component.rapiditySelected = false;
+        expect(component.canJoin()).toBeFalse();
     });
 });

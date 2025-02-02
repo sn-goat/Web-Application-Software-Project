@@ -9,8 +9,7 @@ describe('AttentePageComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [CommonModule, FormsModule],
-            declarations: [AttentePageComponent],
+            imports: [CommonModule, FormsModule, AttentePageComponent],
         }).compileComponents();
     });
 
@@ -24,12 +23,17 @@ describe('AttentePageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should generate a 4-digit access code', () => {
+    it('should generate a 4-digit access code on initialization', () => {
+        component.ngOnInit();
+        expect(component.accessCode).toMatch(/^\d{4}$/);
+    });
+
+    it('should generate a new 4-digit access code', () => {
         component.generateAccessCode();
         expect(component.accessCode).toMatch(/^\d{4}$/);
     });
 
-    it('should display the access code', () => {
+    it('should display the access code in the template', () => {
         component.generateAccessCode();
         fixture.detectChanges();
         const compiled = fixture.nativeElement as HTMLElement;

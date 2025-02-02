@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
 
 const MAX_PORTRAITS = 12;
+const d4_IMAGE = './assets/dice/d4.png';
+const d6_IMAGE = './assets/dice/d6.png';
 
 @Component({
     selector: 'app-create-page',
@@ -26,8 +28,10 @@ export class CreatePageComponent {
     stats = {
         life: 4,
         rapidity: 4,
-        attack: 'D4',
-        defense: 'D4',
+        attack: 4,
+        defense: 4,
+        attackDice: d4_IMAGE,
+        defenseDice: d4_IMAGE,
     };
 
     getCurrentPortraitImage(): string {
@@ -79,30 +83,30 @@ export class CreatePageComponent {
     selectAttack() {
         if (this.defenseSelected) {
             this.defenseSelected = false;
-            this.stats.defense = 'D4';
+            this.stats.defenseDice = d4_IMAGE;
         }
         this.attackSelected = !this.attackSelected;
         if (this.attackSelected) {
-            this.stats.attack = 'D6';
+            this.stats.attackDice = d6_IMAGE;
         } else {
-            this.stats.attack = 'D4';
+            this.stats.attackDice = d4_IMAGE;
         }
     }
 
     selectDefense() {
         if (this.attackSelected) {
             this.attackSelected = false;
-            this.stats.attack = 'D4';
+            this.stats.attackDice = d4_IMAGE;
         }
         this.defenseSelected = !this.defenseSelected;
         if (this.defenseSelected) {
-            this.stats.defense = 'D6';
+            this.stats.defenseDice = d6_IMAGE;
         } else {
-            this.stats.defense = 'D4';
+            this.stats.defenseDice = d4_IMAGE;
         }
     }
 
-    areTwoStatsSelected(): boolean {
+    canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
         return this.playerName.trim().length > 0 && selectedStats.filter(stat => stat).length === 2;
     }
