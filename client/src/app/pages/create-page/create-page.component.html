@@ -50,7 +50,7 @@
 
     <!-- Close Popup -->
     <button class="close-popup-button" (click)="closePopup()">Close</button>
-    @if (areTwoStatsSelected()) {
+    @if (canJoin()) {
     <button class="join-button" routerLink="/attente">Join</button>
     }
   </div>

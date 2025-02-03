@@ -34,8 +34,19 @@ export class MapListComponent implements OnInit {
         private readonly boardService: BoardService,
     ) {}
 
-    onDivClick() {
-        this.divClicked.emit();
+    onDivClick(map: BoardGame): void {
+        this.mapService.getAllMaps().subscribe((serverMaps) => {
+            const serverMap = serverMaps.find((m) => m._id === map._id);
+            if (!serverMap) {
+                alert('La carte a été supprimée du serveur.');
+                window.location.reload();
+            } else if (!this.areMapsEqual(map, serverMap)) {
+                alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
+                window.location.reload();
+            } else {
+                this.divClicked.emit();
+            }
+        });
     }
 
     ngOnInit(): void {
@@ -58,7 +69,7 @@ export class MapListComponent implements OnInit {
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions || item.status === 'Ongoing';
+            const isPublished = this.showActions || item.status === 'Completed';
 
             return matchesSearch && isPublished;
         });
@@ -81,6 +92,17 @@ export class MapListComponent implements OnInit {
                     return 0;
             }
         });
+    }
+
+    areMapsEqual(localMap: BoardGame, serverMap: BoardGame): boolean {
+        return (
+            localMap.name === serverMap.name &&
+            localMap.description === serverMap.description &&
+            localMap.size === serverMap.size &&
+            localMap.status === serverMap.status &&
+            localMap.visibility === serverMap.visibility &&
+            JSON.stringify(localMap.boardCells) === JSON.stringify(serverMap.boardCells)
+        );
     }
 
     onEdit(map: BoardGame): void {

@@ -15,7 +15,7 @@
     <div class="grid-container">
       <!-- Map Cards -->
       @for (map of getFilteredAndSortedItems(); track map) {
-      <div class="list-item" (click)="onDivClick()">
+      <div class="list-item" (click)="onDivClick(map)">
         <div class="item-image">
           <img src="https://picsum.photos/200/300?random=2" [alt]="map.name" (error)="handleImageError($event)" />
         </div>
