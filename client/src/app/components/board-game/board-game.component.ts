@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
