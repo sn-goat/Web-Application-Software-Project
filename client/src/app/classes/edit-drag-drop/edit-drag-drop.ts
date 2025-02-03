@@ -100,7 +100,7 @@ export class EditDragDrop {
     }
 
     private removeWasDragged(wasDragged: string) {
-        this.wasDragged.next(this.wasDragged.value.filter((url) => url !== wasDragged));
+        this.wasDragged.next(this.wasDragged.value.filter((item) => item !== wasDragged));
     }
 
     private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
