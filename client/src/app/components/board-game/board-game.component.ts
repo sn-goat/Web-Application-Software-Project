@@ -14,7 +14,7 @@ import { Subject, takeUntil } from 'rxjs';
     styleUrls: ['./board-game.component.scss'],
     imports: [CommonModule, BoardCellComponent],
 })
-export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
+export class BoardGameComponent implements OnInit, OnDestroy {
     @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
 
     isMouseRightDown: boolean = false;
@@ -116,12 +116,6 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
             this.selectedTile = tile;
         });
         this.updateBoardGame();
-    }
-
-    ngOnChanges(changes: SimpleChanges) {
-        if (changes.importedData) {
-            // this.updateBoardGame();
-        }
     }
 
     ngOnDestroy() {
