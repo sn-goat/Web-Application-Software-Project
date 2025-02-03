@@ -67,22 +67,17 @@ export class MapListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.mapService.getAllMaps().subscribe(
-            (maps) => {
-                this.items = maps.map((item) => ({
-                    ...item,
-                    status: item.status === 'Draft' ? BoardStatus.Draft : BoardStatus.Published,
-                    visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
-                    createdAt: item.createdAt ? new Date(item.createdAt) : null,
-                    updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
-                }));
-                this.viewportRuler.change(1); // Force recalculation of viewport size
-                this.cdr.detectChanges(); // Manually trigger change detection
-            },
-            (error) => {
-                console.error('Error fetching maps:', error);
-            }
-        );
+        this.mapService.getAllMaps().subscribe((maps) => {
+            this.items = maps.map((item) => ({
+                ...item,
+                status: item.status === 'Draft' ? BoardStatus.Draft : BoardStatus.Published,
+                visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
+                createdAt: item.createdAt ? new Date(item.createdAt) : null,
+                updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
+            }));
+            this.viewportRuler.change(1); // Force recalculation of viewport size
+            this.cdr.detectChanges(); // Manually trigger change detection
+        });
     }
 
     getFilteredAndSortedItems(): GameMap[] {

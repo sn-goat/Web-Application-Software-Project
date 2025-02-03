@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+const minNumber = 1000;
+const maxNumber = 9000;
+
 @Component({
     selector: 'app-attente-page',
     templateUrl: './attente-page.component.html',
@@ -16,6 +19,6 @@ export class AttentePageComponent implements OnInit {
     }
 
     generateAccessCode() {
-        this.accessCode = Math.floor(1000 + Math.random() * 9000).toString();
+        this.accessCode = Math.floor(minNumber + Math.random() * maxNumber).toString();
     }
 }

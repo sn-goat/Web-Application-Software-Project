@@ -5,8 +5,8 @@ import { RouterLink } from '@angular/router';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
 
 const MAX_PORTRAITS = 12;
-const d4_IMAGE = './assets/dice/d4.png';
-const d6_IMAGE = './assets/dice/d6.png';
+const D4 = './assets/dice/d4.png';
+const D6 = './assets/dice/d6.png';
 
 @Component({
     selector: 'app-create-page',
@@ -30,8 +30,8 @@ export class CreatePageComponent {
         rapidity: 4,
         attack: 4,
         defense: 4,
-        attackDice: d4_IMAGE,
-        defenseDice: d4_IMAGE,
+        attackDice: D4,
+        defenseDice: D4,
     };
 
     getCurrentPortraitImage(): string {
@@ -83,31 +83,31 @@ export class CreatePageComponent {
     selectAttack() {
         if (this.defenseSelected) {
             this.defenseSelected = false;
-            this.stats.defenseDice = d4_IMAGE;
+            this.stats.defenseDice = D4;
         }
         this.attackSelected = !this.attackSelected;
         if (this.attackSelected) {
-            this.stats.attackDice = d6_IMAGE;
+            this.stats.attackDice = D6;
         } else {
-            this.stats.attackDice = d4_IMAGE;
+            this.stats.attackDice = D4;
         }
     }
 
     selectDefense() {
         if (this.attackSelected) {
             this.attackSelected = false;
-            this.stats.attackDice = d4_IMAGE;
+            this.stats.attackDice = D4;
         }
         this.defenseSelected = !this.defenseSelected;
         if (this.defenseSelected) {
-            this.stats.defenseDice = d6_IMAGE;
+            this.stats.defenseDice = D6;
         } else {
-            this.stats.defenseDice = d4_IMAGE;
+            this.stats.defenseDice = D4;
         }
     }
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
-        return this.playerName.trim().length > 0 && selectedStats.filter(stat => stat).length === 2;
+        return this.playerName.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
 }
