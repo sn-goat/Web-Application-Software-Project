@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
+// import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
 import { BoardStatus, BoardVisibility, ItemType, TileType } from '@common/enums';
@@ -45,6 +46,7 @@ export class BoardGameComponent implements OnInit, OnDestroy {
 
     constructor(
         private elRef: ElementRef,
+        // private tileApplicator: TileApplicatorService,
         private editToolMouse: EditToolMouse,
         private editDragDrop: EditDragDrop,
     ) {
@@ -172,8 +174,9 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         const seen: Set<Vec2> = new Set([firstCell, finalCell]);
         const slope = (currentCoord.y - previousCoord.y) / (currentCoord.x - previousCoord.x);
         const step = previousCoord.x < currentCoord.x ? 1 : -1;
+        const check = previousCoord.x < currentCoord.x ? previousCoord.x < currentCoord.x : previousCoord.x > currentCoord.x;
 
-        for (let x = previousCoord.x; x < currentCoord.x; x += step) {
+        for (let x = previousCoord.x; check; x += step) {
             const y: number = slope * (x - previousCoord.x) + previousCoord.y;
             const tileCoord = this.screenToBoard(x, y);
             if (tileCoord.x === finalCell.x && tileCoord.y === finalCell.y) {
