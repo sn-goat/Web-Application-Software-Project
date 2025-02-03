@@ -1,7 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { TileType } from '@common/enums';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-tile',
@@ -9,12 +11,31 @@ import { DEFAULT_PATH_TILES } from '@app/constants/path';
     styleUrl: './edit-tool-tile.component.scss',
     imports: [],
 })
-export class EditToolTileComponent {
+export class EditToolTileComponent implements OnInit, OnDestroy {
     @Input() type!: TileType;
     src: string = DEFAULT_PATH_TILES;
-    extenstion: string = '.png';
+    extension: string = '.png';
+    description: string = '';
+    styleClass: string = 'unselected';
+    private destroy$ = new Subject<void>();
 
     constructor(private editToolMouse: EditToolMouse) {}
+
+    ngOnInit() {
+        this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
+            if (tile === this.type) {
+                this.styleClass = 'selected';
+            } else {
+                this.styleClass = 'unselected';
+            }
+        });
+        this.description = ASSETS_DESCRIPTION.get(this.type) || 'Pas de description';
+    }
+
+    ngOnDestroy() {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
 
     onClick() {
         this.editToolMouse.updateSelectedTile(this.type);

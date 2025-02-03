@@ -1,6 +1,9 @@
-<img 
-(click)="onClick()"
-[src]="src + type + extenstion" 
-[alt]="type"
-draggable="false"
->
+<div>
+    <img 
+    (click)="onClick()"
+    [src]="src + type + extension" 
+    [alt]="type"
+    draggable="false"
+    title="{{description}}"
+    class="{{styleClass}}">
+</div>
