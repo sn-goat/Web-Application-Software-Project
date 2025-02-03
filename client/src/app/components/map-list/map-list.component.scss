@@ -113,7 +113,7 @@ body {
 }
 
 .item-image {
-    width: 100%;
+    width: 98%;
     height: 160px;
     margin-bottom: 16px;
     border: 2px solid $glow-teal;
@@ -156,7 +156,6 @@ body {
     font-size: 14px;
 }
 
-
 .item-description {
     font-size: 14px;
     margin: 8px 0;
@@ -185,7 +184,8 @@ body {
     font-size: 14px;
 }
 
-.item-size, .item-ctf {
+.item-size,
+.item-ctf {
     background: $glow-teal;
     padding: 4px 12px;
     border-radius: 16px;
@@ -200,8 +200,8 @@ body {
     flex-wrap: wrap;
 }
 
-
-.item-status, .item-visibility {
+.item-status,
+.item-visibility {
     background: $glow-teal;
     padding: 4px 12px;
     border-radius: 16px;
@@ -209,12 +209,14 @@ body {
     color: $primary-text;
     border: 1px solid $glow-teal;
 
-    &.draft, &.private {
+    &.draft,
+    &.private {
         background: $glow-teal;
         border: 1px solid $glow-teal;
     }
 
-    &.published, &.public {
+    &.published,
+    &.public {
         background: $glow-gold;
         border: 1px solid $glow-teal;
     }
