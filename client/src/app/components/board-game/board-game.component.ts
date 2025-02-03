@@ -121,6 +121,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.importedData) {
             // this.updateBoardGame();
+            // change this
         }
     }
 
