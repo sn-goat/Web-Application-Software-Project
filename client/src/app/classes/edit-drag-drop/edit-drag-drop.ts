@@ -72,7 +72,9 @@ export class EditDragDrop {
             }
         }
     }
-    updateDeletePosition() {}
+    updateDeletePosition() {
+        return;
+    }
     deleteOnClick(cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
         if (cell.item !== ItemType.Default) {
             this.handleItemOnInvalidTile(cell, itemMap, board);
