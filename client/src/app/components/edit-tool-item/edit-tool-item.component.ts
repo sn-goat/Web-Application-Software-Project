@@ -25,5 +25,11 @@ export class EditToolItemComponent {
     onDragStart(event: DragEvent) {
         event.preventDefault();
         this.editDragDrop.setCurrentItem(this.type);
+        this.editDragDrop.setIsOnItemContainer(false);
+    }
+
+    onDragEnter(event: MouseEvent) {
+        event.preventDefault();
+        this.editDragDrop.setIsOnItemContainer(true);
     }
 }

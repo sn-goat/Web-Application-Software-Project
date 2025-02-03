@@ -12,16 +12,23 @@ export class EditDragDrop {
     wasDragged$: Observable<string[]>;
     currentItem$: Observable<string>;
     mousePosition$: Observable<Vec2>;
+    isOnItemContainer$: Observable<boolean>;
 
     private isSet = false;
     private mousePosition = new BehaviorSubject<Vec2>({ x: -1, y: -1 });
     private wasDragged = new BehaviorSubject<string[]>([]);
     private currentItem = new BehaviorSubject<string>('');
+    private isOnItemContainer = new BehaviorSubject<boolean>(false);
 
     constructor() {
         this.wasDragged$ = this.wasDragged.asObservable();
         this.currentItem$ = this.currentItem.asObservable();
         this.mousePosition$ = this.mousePosition.asObservable();
+        this.isOnItemContainer$ = this.isOnItemContainer.asObservable();
+    }
+
+    setIsOnItemContainer(value: boolean) {
+        this.isOnItemContainer.next(value);
     }
 
     setCurrentItem(currentItem: string) {

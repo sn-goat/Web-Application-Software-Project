@@ -56,6 +56,11 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         this.itemMap.set(ItemType.Leather_Boot, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Pearl, [{ x: -1, y: -1 }]);
+        this.editDragDrop.isOnItemContainer$.subscribe((isOnItemContainer) => {
+            if (isOnItemContainer) {
+                this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
+            }
+        });
     }
 
     @HostListener('mousedown', ['$event'])
@@ -85,12 +90,6 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         }
         this.previousCoord = { x: -1, y: -1 };
         this.currentCoord = { x: -1, y: -1 };
-    }
-
-    @HostListener('dragleave', ['$event'])
-    onDragLeave(event: DragEvent) {
-        event.preventDefault();
-        this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
     }
 
     @HostListener('mouseleave')

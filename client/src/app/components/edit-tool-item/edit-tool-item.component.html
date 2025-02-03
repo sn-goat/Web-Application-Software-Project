@@ -6,5 +6,6 @@
     [draggable]="isDraggable"
     [class.item-moved]="!isDraggable"
     (drag)="onDragStart($event)"
+    (dragleave)="onDragEnter($event)"
     >
 </div>
