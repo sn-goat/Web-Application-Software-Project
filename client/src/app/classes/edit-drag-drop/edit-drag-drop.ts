@@ -99,6 +99,10 @@ export class EditDragDrop {
         this.wasDragged.next([...this.wasDragged.value, wasDragged]);
     }
 
+    private removeWasDragged(wasDragged: string) {
+        this.wasDragged.next(this.wasDragged.value.filter((item) => item !== wasDragged));
+    }
+
     private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
         if (cell.tile === TileType.Opened_Door || cell.tile === TileType.Closed_Door || cell.tile === TileType.Wall) {
             return;
