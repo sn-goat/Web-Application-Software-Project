@@ -1,5 +1,5 @@
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
-import { BoardStatus, BoardVisibility } from '@common/enums';
+import { BoardVisibility } from '@common/enums';
 
 export const EMPTY_BOARD: CreateBoardDto = {
     name: 'mock_board1',
@@ -9,7 +9,6 @@ export const EMPTY_BOARD: CreateBoardDto = {
     board: [[]],
     category: 'fun',
     visibility: BoardVisibility.Public,
-    status: BoardStatus.Completed,
     image: 'random/url/',
 };
 
@@ -21,7 +20,6 @@ export const VALID_BOARD: CreateBoardDto = {
     board: [[]],
     category: 'strategy',
     visibility: BoardVisibility.Public,
-    status: BoardStatus.Ongoing,
     image: 'random/url/',
 };
 
@@ -33,7 +31,6 @@ export const INVALID_BOARD1: CreateBoardDto = {
     board: [[]],
     category: 'horror',
     visibility: BoardVisibility.Public,
-    status: BoardStatus.Completed,
     image: 'random/url/',
 };
 
@@ -45,7 +42,6 @@ export const INVALID_BOARD2: CreateBoardDto = {
     board: [[]],
     category: 'fantasy',
     visibility: BoardVisibility.Public,
-    status: BoardStatus.Completed,
     image: 'random/url/',
 };
 

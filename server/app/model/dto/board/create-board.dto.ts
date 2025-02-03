@@ -1,5 +1,5 @@
 import { BoardCell } from '@common/board';
-import { BoardStatus, BoardVisibility } from '@common/enums';
+import { BoardVisibility } from '@common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
@@ -22,9 +22,6 @@ export class CreateBoardDto {
 
     @ApiProperty({ description: 'Board state' })
     board: BoardCell[][];
-
-    @ApiProperty({ description: 'Whether the user deems the board ready for gameplay' })
-    status: BoardStatus;
 
     @ApiProperty({ description: 'Whether the board is available to everyone' })
     visibility: BoardVisibility;
