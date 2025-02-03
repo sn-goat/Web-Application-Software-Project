@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { GameMap } from '@app/components/map-list/map-list.component';
+import { BoardGame } from '@app/interfaces/board/board-game';
 
 @Injectable({
     providedIn: 'root',
@@ -11,7 +11,7 @@ export class MapService {
 
     constructor(private readonly http: HttpClient) {}
 
-    getAllMaps(): Observable<GameMap[]> {
-        return this.http.get<GameMap[]>(`${this.apiUrl}/`);
+    getAllMaps(): Observable<BoardGame[]> {
+        return this.http.get<BoardGame[]>(`${this.apiUrl}/`);
     }
 }

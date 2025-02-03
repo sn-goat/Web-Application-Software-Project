@@ -110,4 +110,10 @@ export class CreatePageComponent {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
         return this.playerName.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
+
+    areTwoStatsSelected(): boolean {
+        const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected].filter((stat) => stat);
+
+        return selectedStats.length >= 2;
+    }
 }

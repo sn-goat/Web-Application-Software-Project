@@ -17,20 +17,20 @@
       @for (map of getFilteredAndSortedItems(); track map) {
       <div class="list-item" (click)="onDivClick()">
         <div class="item-image">
-          <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
+          <img src="https://picsum.photos/200/300?random=2" [alt]="map.name" (error)="handleImageError($event)" />
         </div>
         <div class="item-content">
           <div class="item-header">
             <h3 class="item-title">{{ map.name }}</h3>
-            <span class="item-date">{{ map.createdAt | date: "MMM d, y" }}</span>
+            <span class="item-date">{{ map.updatedAt | date: "MMM d, y" }}</span>
           </div>
           <p class="item-description">{{ map.description }}</p>
           <div class="item-details">
             <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
-            <span class="item-ctf">{{ map.isCTF ? "CTF Enabled" : "CTF Disabled" }}</span>
+            <span class="item-ctf">{{ "CTF Enabled" }}</span>
+            <!-- <span class="item-ctf">{{ map.isCTF ? "CTF Enabled" : "CTF Disabled" }}</span> -->
           </div>
           <div class="item-footer">
-            <span class="item-category">{{ map.category }}</span>
             <span class="item-status" [ngClass]="map.status.toLowerCase()">{{ map.status }}</span>
             <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
           </div>

@@ -6,37 +6,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapService } from '@app/services/map.service';
-
-enum BoardStatus {
-    Draft = 'Draft',
-    Published = 'Published',
-}
-
-enum BoardVisibility {
-    Public = 'Public',
-    Private = 'Private',
-}
-
-interface BoardCell {
-    x: number;
-    y: number;
-    type: string;
-}
-
-export interface GameMap {
-    _id: string;
-    name: string;
-    description: string;
-    size: number;
-    category: string;
-    isCTF: boolean;
-    board: BoardCell[][];
-    status: BoardStatus;
-    visibility: BoardVisibility;
-    image: string | null;
-    createdAt?: Date | null;
-    updatedAt?: Date | null;
-}
+import { BoardService } from '@app/services/board.service';
+import { BoardGame } from '@app/interfaces/board/board-game';
 
 @Component({
     selector: 'app-map-list',
@@ -47,7 +18,7 @@ export interface GameMap {
     imports: [CommonModule, FormsModule, ScrollingModule],
 })
 export class MapListComponent implements OnInit {
-    @Input() items: GameMap[] = [];
+    @Input() items: BoardGame[] = [];
     @Input() showActions: boolean = true;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
@@ -58,8 +29,9 @@ export class MapListComponent implements OnInit {
         private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
         private readonly dialog: MatDialog,
-        private viewportRuler: ViewportRuler,
-        private mapService: MapService,
+        private readonly viewportRuler: ViewportRuler,
+        private readonly mapService: MapService,
+        private readonly boardService: BoardService,
     ) {}
 
     onDivClick() {
@@ -70,23 +42,23 @@ export class MapListComponent implements OnInit {
         this.mapService.getAllMaps().subscribe((maps) => {
             this.items = maps.map((item) => ({
                 ...item,
-                status: item.status === 'Draft' ? BoardStatus.Draft : BoardStatus.Published,
-                visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
-                createdAt: item.createdAt ? new Date(item.createdAt) : null,
-                updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
+                status: item.status === 'Ongoing' ? 'Ongoing' : 'Completed',
+                visibility: item.visibility === 'Public' ? 'Public' : 'Private',
+                createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
+                updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
             }));
             this.viewportRuler.change(1); // Force recalculation of viewport size
             this.cdr.detectChanges(); // Manually trigger change detection
         });
     }
 
-    getFilteredAndSortedItems(): GameMap[] {
+    getFilteredAndSortedItems(): BoardGame[] {
         let filtered = this.items.filter((item) => {
             const matchesSearch =
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions || item.status === BoardStatus.Published;
+            const isPublished = this.showActions || item.status === 'Ongoing';
 
             return matchesSearch && isPublished;
         });
@@ -111,20 +83,24 @@ export class MapListComponent implements OnInit {
         });
     }
 
-    onEdit(map: GameMap): void {
+    onEdit(map: BoardGame): void {
         this.router.navigate(['/edit'], { queryParams: { id: map._id } });
     }
 
-    onDelete(map: GameMap): void {
+    onDelete(map: BoardGame): void {
         if (confirm(`Are you sure you want to delete "${map.name}"?`)) {
-            this.items = this.items.filter((item) => item._id !== map._id);
-            this.cdr.detectChanges();
+            this.boardService.deleteBoardByName(map.name).subscribe(() => {
+                this.items = this.items.filter((item) => item._id !== map._id);
+                this.cdr.detectChanges();
+            });
         }
     }
 
-    toggleVisibility(map: GameMap): void {
-        map.visibility = map.visibility === BoardVisibility.Public ? BoardVisibility.Private : BoardVisibility.Public;
-        this.cdr.detectChanges();
+    toggleVisibility(map: BoardGame): void {
+        this.boardService.toggleVisibility(map.name).subscribe((updatedMap) => {
+            map.visibility = updatedMap.visibility;
+            this.cdr.detectChanges();
+        });
     }
 
     createNewMap(): void {

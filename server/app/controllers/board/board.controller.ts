@@ -55,8 +55,8 @@ export class BoardController {
     @Patch('/visibility/:name')
     async toggleBoardVisibility(@Param('name') name: string, @Res() response: Response) {
         try {
-            await this.boardService.toggleVisibility(name);
-            response.status(HttpStatus.ACCEPTED).send();
+            const updatedBoard = await this.boardService.toggleVisibility(name);
+            response.status(HttpStatus.OK).json(updatedBoard);
         } catch (error) {
             response.status(HttpStatus.NOT_FOUND).send(error.message);
         }
