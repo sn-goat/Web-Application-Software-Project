@@ -1,7 +1,8 @@
 <div 
 class="cell" 
 (dragover)="onDragOver($event)"
-(drop)="onDrop($event)">
+(drop)="onDrop($event)"
+(contextmenu)="onMouseUp($event)">
     <div class="image-container">
         <img
         class="base-image"

@@ -212,7 +212,7 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private applyDoor(col: number, row: number) {
-        if (this.surroudningTilesAreWall(col, row)) {
+        if (this.isSurroundedByWalls(col, row)) {
             if (this.boardGame.board[row][col].tile === TileType.Closed_Door) {
                 this.boardGame.board[row][col].tile = TileType.Opened_Door;
             } else if (this.boardGame.board[row][col].tile === TileType.Opened_Door) {
@@ -231,15 +231,13 @@ export class BoardGameComponent implements OnInit, OnChanges, OnDestroy {
         this.boardGame.board[row][col].tile = TileType.Wall;
     }
 
-    private surroudningTilesAreWall(col: number, row: number): boolean {
+    private isSurroundedByWalls(col: number, row: number): boolean {
         const onXAxis = this.boardGame.board[row][col - 1].tile === TileType.Wall && this.boardGame.board[row][col + 1].tile === TileType.Wall;
         const onYAxis = this.boardGame.board[row - 1][col].tile === TileType.Wall && this.boardGame.board[row + 1][col].tile === TileType.Wall;
         return (onXAxis || onYAxis) && !(onXAxis && onYAxis);
     }
     private revertToDefault(col: number, row: number) {
-        if (this.boardGame.board[row][col].item !== ItemType.Default) {
-            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
-        } else if (this.boardGame.board[row][col].tile !== TileType.Default) {
+        if (this.boardGame.board[row][col].tile !== TileType.Default) {
             this.boardGame.board[row][col].tile = TileType.Default;
         }
     }

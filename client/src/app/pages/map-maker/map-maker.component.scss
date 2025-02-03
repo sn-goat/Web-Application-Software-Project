@@ -2,34 +2,43 @@ mat-drawer-content {
   display: flex;
   flex: 1;
   justify-content: center;
-  height: calc(100vh - 100px);
+  height: auto;
 }
+
 .board-container {
-  flex: 1;
+  flex: 3; /* Occupe plus d'espace */
+  flex-direction: column;
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
   height: fit-content;
 }
 
+.reset-button-container {
+  margin-top: 10px; /* Espace au-dessus du bouton de réinitialisation */
+  display: flex;
+  justify-content: center; /* Centrage du bouton */
+  width: 100%;
+}
+
 .tools-container {
-  flex: 1;
-  max-height: 100%;
+  flex: 1; /* Occupe moins d'espace */
+  max-width: 30%; /* Définir une largeur maximale */
+  height: auto;
   overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 10px;
   box-sizing: border-box;
 }
 
-
 .form-group {
   margin-bottom: 20px;
-  width: calc(100% - 20px);
+  width: auto;
   margin-left: 10px;
   margin-right: 10px;
-  display:flex;
+  display: flex;
   flex-direction: column;
 }
 
@@ -41,7 +50,7 @@ textarea#Description {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
-  width:  calc(100% - 20px);
+  width: calc(100% - 20px);
   margin-left: 10px;
   margin-right: 10px;
 }

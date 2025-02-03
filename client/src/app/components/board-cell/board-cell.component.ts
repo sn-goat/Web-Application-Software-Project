@@ -45,4 +45,18 @@ export class BoardCellComponent implements OnDestroy {
         event.preventDefault();
         this.editDragDrop.setCurrentItem(this.cell.item);
     }
+
+    onMouseDown(event: MouseEvent) {
+        event.preventDefault();
+        if (event.button === 2) {
+            this.editDragDrop.updateDeletePosition();
+        }
+    }
+
+    onMouseUp(event: MouseEvent) {
+        event.preventDefault();
+        if (event.button === 2) {
+            this.editDragDrop.deleteOnClick(this.cell, this.itemMap, this.board);
+        }
+    }
 }
