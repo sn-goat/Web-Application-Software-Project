@@ -1,13 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
-// import { TileApplicatorService } from '@app/services/tile-applicator.service';
+import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
 import { BoardStatus, BoardVisibility, ItemType, TileType } from '@common/enums';
 import { Vec2 } from '@common/vec2';
-import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-board-game',
@@ -15,14 +13,10 @@ import { Subject, takeUntil } from 'rxjs';
     styleUrls: ['./board-game.component.scss'],
     imports: [CommonModule, BoardCellComponent],
 })
-export class BoardGameComponent implements OnInit, OnDestroy {
+export class BoardGameComponent implements OnInit {
     @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
-
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
-
-    previousCoord: Vec2 = { x: -1, y: -1 };
-    currentCoord: Vec2 = { x: -1, y: -1 };
 
     boardGame: Board = {
         _id: '',
@@ -41,13 +35,9 @@ export class BoardGameComponent implements OnInit, OnDestroy {
 
     itemMap: Map<ItemType, Vec2[]> = new Map();
 
-    private selectedTile: TileType | null = null;
-    private destroy$ = new Subject<void>();
-
     constructor(
         private elRef: ElementRef,
-        // private tileApplicator: TileApplicatorService,
-        private editToolMouse: EditToolMouse,
+        private tileApplicator: TileApplicatorService,
         private editDragDrop: EditDragDrop,
     ) {
         this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
@@ -65,64 +55,28 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         });
     }
 
-    @HostListener('mousedown', ['$event'])
-    onMouseDown(event: MouseEvent) {
-        if (event.button === 2) {
-            this.isMouseRightDown = true;
-        } else if (event.button === 0) {
-            this.isMouseLeftDown = true;
-        }
-        this.previousCoord = { x: event.clientX, y: event.clientY };
-        const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y);
-        this.updateCell(cellPosition.x, cellPosition.y);
+    @HostListener('mousedown')
+    onMouseDown() {
+        this.tileApplicator.handleMouseDown(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }
 
-    @HostListener('contextmenu', ['$event'])
-    onRightClick(event: MouseEvent) {
-        event.preventDefault();
-    }
-
-    @HostListener('mouseup', ['$event'])
-    onMouseUp(event: MouseEvent) {
-        if (event.button === 0) {
-            this.isMouseLeftDown = false;
-        }
-        if (event.button === 2) {
-            this.isMouseRightDown = false;
-        }
-        this.previousCoord = { x: -1, y: -1 };
-        this.currentCoord = { x: -1, y: -1 };
+    @HostListener('mouseup')
+    onMouseUp() {
+        this.tileApplicator.handleMouseUp();
     }
 
     @HostListener('mouseleave')
     onMouseLeave() {
-        this.isMouseLeftDown = false;
-        this.isMouseRightDown = false;
-        this.previousCoord = { x: -1, y: -1 };
-        this.currentCoord = { x: -1, y: -1 };
-
-        this.editDragDrop.setCurrentPosition({ x: -1, y: -1 });
+        this.tileApplicator.handleMouseLeave();
     }
 
-    @HostListener('mousemove', ['$event'])
-    onMouseMove(event: MouseEvent) {
-        this.currentCoord = { x: event.clientX, y: event.clientY };
-        this.applyIntermediateTiles(this.previousCoord, this.currentCoord);
-        this.previousCoord = this.currentCoord;
-
-        this.editDragDrop.setCurrentPosition({ x: event.clientX, y: event.clientY });
+    @HostListener('mousemove')
+    onMouseMove() {
+        this.tileApplicator.handleMouseMove(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }
 
     ngOnInit() {
-        this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
-            this.selectedTile = tile;
-        });
         this.updateBoardGame();
-    }
-
-    ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
     }
 
     private generateBoard(size: number) {
@@ -152,99 +106,5 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         };
 
         this.generateBoard(this.boardGame.size);
-    }
-
-    private screenToBoard(x: number, y: number): Vec2 {
-        const rect = this.elRef.nativeElement.getBoundingClientRect();
-        const coordX = Math.floor(x - rect.left);
-        const coordY = Math.floor(y - rect.top);
-        const cellWidth = rect.width / this.boardGame.size;
-        const cellHeight = rect.height / this.boardGame.size;
-
-        const tileX = Math.floor(coordX / cellWidth);
-        const tileY = Math.floor(coordY / cellHeight);
-        const tileCoord: Vec2 = { x: tileX, y: tileY };
-        return tileCoord;
-    }
-
-    private applyIntermediateTiles(previousCoord: Vec2, currentCoord: Vec2) {
-        const firstCell = this.screenToBoard(previousCoord.x, previousCoord.y);
-        const finalCell = this.screenToBoard(currentCoord.x, currentCoord.y);
-
-        const seen: Set<Vec2> = new Set([firstCell, finalCell]);
-        const slope = (currentCoord.y - previousCoord.y) / (currentCoord.x - previousCoord.x);
-        const step = previousCoord.x < currentCoord.x ? 1 : -1;
-        const check = previousCoord.x < currentCoord.x ? previousCoord.x < currentCoord.x : previousCoord.x > currentCoord.x;
-
-        for (let x = previousCoord.x; check; x += step) {
-            const y: number = slope * (x - previousCoord.x) + previousCoord.y;
-            const tileCoord = this.screenToBoard(x, y);
-            if (tileCoord.x === finalCell.x && tileCoord.y === finalCell.y) {
-                break;
-            } else if (!seen.has(tileCoord)) {
-                this.updateCell(tileCoord.x, tileCoord.y);
-            }
-        }
-
-        this.updateCell(finalCell.x, finalCell.y);
-    }
-
-    private applyTile(col: number, row: number) {
-        if (this.selectedTile !== null) {
-            switch (this.selectedTile) {
-                case TileType.Closed_Door:
-                    this.applyDoor(col, row);
-                    break;
-
-                case TileType.Wall:
-                    this.applyWall(col, row);
-                    break;
-
-                default:
-                    this.boardGame.board[row][col].tile = this.selectedTile as TileType;
-                    break;
-            }
-        }
-    }
-
-    private applyDoor(col: number, row: number) {
-        if (this.surroudningTilesAreWall(col, row)) {
-            if (this.boardGame.board[row][col].tile === TileType.Closed_Door) {
-                this.boardGame.board[row][col].tile = TileType.Opened_Door;
-            } else if (this.boardGame.board[row][col].tile === TileType.Opened_Door) {
-                this.boardGame.board[row][col].tile = TileType.Closed_Door;
-            } else {
-                this.boardGame.board[row][col].tile = TileType.Closed_Door;
-            }
-            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
-        }
-    }
-
-    private applyWall(col: number, row: number) {
-        if (this.boardGame.board[row][col].item !== ItemType.Default) {
-            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
-        }
-        this.boardGame.board[row][col].tile = TileType.Wall;
-    }
-
-    private surroudningTilesAreWall(col: number, row: number): boolean {
-        const onXAxis = this.boardGame.board[row][col - 1].tile === TileType.Wall && this.boardGame.board[row][col + 1].tile === TileType.Wall;
-        const onYAxis = this.boardGame.board[row - 1][col].tile === TileType.Wall && this.boardGame.board[row + 1][col].tile === TileType.Wall;
-        return (onXAxis || onYAxis) && !(onXAxis && onYAxis);
-    }
-    private revertToDefault(col: number, row: number) {
-        if (this.boardGame.board[row][col].item !== ItemType.Default) {
-            this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
-        } else if (this.boardGame.board[row][col].tile !== TileType.Default) {
-            this.boardGame.board[row][col].tile = TileType.Default;
-        }
-    }
-
-    private updateCell(col: number, row: number) {
-        if (this.isMouseRightDown) {
-            this.revertToDefault(col, row);
-        } else if (this.isMouseLeftDown) {
-            this.applyTile(col, row);
-        }
     }
 }

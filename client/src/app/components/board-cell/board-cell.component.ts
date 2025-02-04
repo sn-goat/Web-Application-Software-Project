@@ -19,7 +19,6 @@ export class BoardCellComponent implements OnDestroy {
     @Input() cell!: BoardCell;
     @Input() itemMap: Map<ItemType, Vec2[]>;
     @Input() board: BoardCell[][];
-
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';
