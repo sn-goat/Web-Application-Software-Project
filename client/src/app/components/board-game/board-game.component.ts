@@ -56,6 +56,18 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.itemMap.set(ItemType.Leather_Boot, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Pearl, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Chest0, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Spawn0, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Chest1, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Spawn1, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Chest2, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Spawn2, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Chest3, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Spawn3, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Chest4, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Spawn4, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Chest5, [{ x: -1, y: -1 }]);
+        this.itemMap.set(ItemType.Spawn5, [{ x: -1, y: -1 }]);
         this.editDragDrop.isOnItemContainer$.subscribe((isOnItemContainer) => {
             if (isOnItemContainer) {
                 this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);

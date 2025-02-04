@@ -23,6 +23,7 @@ export class BoardCellComponent implements OnDestroy {
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';
+    readonly itemType = ItemType;
     private destroy$ = new Subject<void>();
 
     constructor(private editDragDrop: EditDragDrop) {}
