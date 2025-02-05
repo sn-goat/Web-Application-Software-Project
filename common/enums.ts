@@ -37,7 +37,8 @@ export enum BoardVisibility {
     Private = 'Private',
 }
 
-export enum BoardStatus {
-    Ongoing = 'Ongoing',
-    Completed = 'Completed',
+export enum BoardSize {
+    Small = 10,
+    Medium = 15,
+    Large = 20,
 }

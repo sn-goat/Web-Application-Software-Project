@@ -16,8 +16,11 @@ export class TileApplicatorService implements OnDestroy {
     private previousCoord: Vec2 = { x: -1, y: -1 };
     private oldItemPos: Vec2 = { x: -1, y: -1 };
     private newItemPos: Vec2 = { x: -1, y: -1 };
+    private handleItem: boolean = false;
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
+    private itemsOnBoard: number = 0;
+    private spawnOnBoard: number = 0;
 
     private selectedTile: TileType | null;
     private selectedItem: ItemType | null;
@@ -46,24 +49,30 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     handleMouseDown(event: MouseEvent, boardGame: Board, rect: DOMRect) {
-        if (event.button === 2) {
-            this.isMouseRightDown = true;
-        }
-        if (event.button === 0) {
-            this.isMouseLeftDown = true;
-        }
         this.previousCoord = this.currentCoord;
         const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y, boardGame, rect);
 
-        if (boardGame.board[cellPosition.y][cellPosition.x].item !== ItemType.Default) {
-            this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
-        } else {
-            this.updateCell(cellPosition.x, cellPosition.y, boardGame);
+        if (event.button === 2) {
+            this.isMouseRightDown = true;
+            if (boardGame.board[cellPosition.y][cellPosition.x].item !== ItemType.Default) {
+                this.handleItem = true;
+                this.deleteItem(cellPosition.x, cellPosition.y, boardGame);
+            }
         }
+        if (event.button === 0) {
+            this.isMouseLeftDown = true;
+            if (boardGame.board[cellPosition.y][cellPosition.x].item !== ItemType.Default) {
+                this.handleItem = true;
+                this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
+            }
+        }
+
+        this.updateCell(cellPosition.x, cellPosition.y, boardGame);
     }
 
     handleMouseUp(event: MouseEvent) {
         if (event.button === 2) {
+            this.handleItem = false;
             this.isMouseRightDown = false;
         }
         if (event.button === 0) {
@@ -79,8 +88,10 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     handleMouseMove(boardGame: Board, rect: DOMRect) {
-        this.applyIntermediateTiles(this.previousCoord, boardGame, rect);
-        this.previousCoord = this.currentCoord;
+        if (!this.handleItem) {
+            this.applyIntermediateTiles(this.previousCoord, boardGame, rect);
+            this.previousCoord = this.currentCoord;
+        }
     }
 
     handleDrop(boardGame: Board, rect: DOMRect) {
@@ -90,6 +101,10 @@ export class TileApplicatorService implements OnDestroy {
         }
         this.oldItemPos = { x: -1, y: -1 };
         this.editToolMouse.updateSelectedItem(ItemType.Default);
+        this.isMouseLeftDown = false;
+        this.isMouseRightDown = false;
+        this.handleItem = false;
+        console.log('items : ', this.itemsOnBoard, 'spwan : ', this.spawnOnBoard);
     }
 
     handleDragLeave(){}
@@ -151,35 +166,54 @@ export class TileApplicatorService implements OnDestroy {
 
     private applyWall(col: number, row: number, boardGame: Board) {
         if (boardGame.board[row][col].item !== ItemType.Default) {
-            // this.editDragDrop.handleItemOnInvalidTile(boardGame.board[row][col], this.itemMap, this.boardGame.board);
+            this.deleteItem(col, row, boardGame);
         }
         boardGame.board[row][col].tile = TileType.Wall;
     }
 
     private revertToDefault(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item !== ItemType.Default) {
-            // this.editDragDrop.handleItemOnInvalidTile(boardGame.board[row][col], this.itemMap, this.boardGame.board);
-        } else if (boardGame.board[row][col].tile !== TileType.Default) {
+        if (boardGame.board[row][col].tile !== TileType.Default) {
             boardGame.board[row][col].tile = TileType.Default;
         }
     }
 
     private updateCell(col: number, row: number, boardGame: Board) {
-        if (this.isMouseRightDown) {
-            this.revertToDefault(col, row, boardGame);
-        } else if (this.isMouseLeftDown) {
-            this.applyTile(col, row, boardGame);
+        if (!this.handleItem) {
+            if (this.isMouseRightDown) {
+                this.revertToDefault(col, row, boardGame);
+            } else if (this.isMouseLeftDown) {
+                this.applyTile(col, row, boardGame);
+            }
         }
     }
 
-    private changeItemType(col: number, row: number, boardGame: Board, newType: ItemType) {
-        boardGame.board[row][col].item = newType;
+    private applyItem(col: number, row: number, boardGame: Board) {
+        if (this.selectedItem === ItemType.Spawn) {
+            this.spawnOnBoard++;
+        } else {
+            this.itemsOnBoard++;
+        }
+
+        if (boardGame.board[row][col].item !== ItemType.Default) {
+            this.deleteItem(col, row, boardGame);
+        }
+        boardGame.board[row][col].item = this.selectedItem as ItemType;
+    }
+    private deleteItem(col: number, row: number, boardGame: Board) {
+        if (boardGame.board[row][col].item === ItemType.Spawn) {
+            this.spawnOnBoard--;
+        } else {
+            this.itemsOnBoard--;
+        }
+        boardGame.board[row][col].item = ItemType.Default;
     }
 
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2, boardGame: Board) {
-        if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
-            this.changeItemType(oldItemPos.x, oldItemPos.y, boardGame, ItemType.Default);
+        if (boardGame.board[newItemPos.y][newItemPos.x].tile !== TileType.Wall) {
+            if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
+                this.deleteItem(oldItemPos.x, oldItemPos.y, boardGame);
+            }
+            this.applyItem(newItemPos.x, newItemPos.y, boardGame);
         }
-        this.changeItemType(newItemPos.x, newItemPos.y, boardGame, this.selectedItem as ItemType);
     }
 }

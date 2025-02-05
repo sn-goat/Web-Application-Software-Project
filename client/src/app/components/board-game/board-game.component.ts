@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
-import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
+// import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
-import { BoardStatus, BoardVisibility, ItemType, TileType } from '@common/enums';
+import { BoardVisibility, ItemType, TileType } from '@common/enums';
 import { Vec2 } from '@common/vec2';
 
 @Component({
@@ -26,7 +26,6 @@ export class BoardGameComponent implements OnInit {
         category: '',
         isCTF: false,
         board: [],
-        status: BoardStatus.Ongoing,
         visibility: BoardVisibility.Public,
         image: '',
         createdAt: new Date().getDate().toString(),
@@ -38,7 +37,7 @@ export class BoardGameComponent implements OnInit {
     constructor(
         private elRef: ElementRef,
         private tileApplicator: TileApplicatorService,
-        private editDragDrop: EditDragDrop,
+        // private editDragDrop: EditDragDrop,
     ) {
         this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
@@ -60,11 +59,11 @@ export class BoardGameComponent implements OnInit {
         this.itemMap.set(ItemType.Spawn4, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Chest5, [{ x: -1, y: -1 }]);
         this.itemMap.set(ItemType.Spawn5, [{ x: -1, y: -1 }]);
-        this.editDragDrop.isOnItemContainer$.subscribe((isOnItemContainer) => {
-            if (isOnItemContainer) {
-                this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
-            }
-        });
+        // this.editDragDrop.isOnItemContainer$.subscribe((isOnItemContainer) => {
+        //     if (isOnItemContainer) {
+        //         this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
+        //     }
+        // });
     }
 
     @HostListener('mousedown', ['$event'])
@@ -122,7 +121,6 @@ export class BoardGameComponent implements OnInit {
             name: this.importedData.name,
             description: this.importedData.description,
             size: this.importedData.size,
-            status: BoardStatus.Ongoing,
             visibility: BoardVisibility.Public,
             updatedAt: new Date().getDate().toString(),
         };
