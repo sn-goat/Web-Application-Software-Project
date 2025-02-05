@@ -8,12 +8,28 @@ class="cell"
         [src]="srcTiles + cell.tile + fileType"
         >
         @if (cell.item) {
-            <img 
-            class="image-stack"
-            draggable="true"
-            (drag)="onDragStart($event)"
-            [src]="srcItem + cell.item + fileType"
-            >
+            @if (cell.item.includes(itemType.Chest)){
+                <img 
+                class="image-stack"
+                draggable="true"
+                (drag)="onDragStart($event)"
+                [src]="srcItem + itemType.Chest + fileType"
+                >
+            } @else if (cell.item.includes(itemType.Spawn)) {
+                <img 
+                class="image-stack"
+                draggable="true"
+                (drag)="onDragStart($event)"
+                [src]="srcItem + itemType.Spawn + fileType"
+                >
+            } @else{
+                <img 
+                class="image-stack"
+                draggable="true"
+                (drag)="onDragStart($event)"
+                [src]="srcItem + cell.item + fileType"
+                >
+            }
         }
     </div>
 </div>

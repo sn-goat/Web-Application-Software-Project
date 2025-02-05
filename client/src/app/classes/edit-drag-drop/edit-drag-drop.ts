@@ -13,18 +13,24 @@ export class EditDragDrop {
     currentItem$: Observable<string>;
     mousePosition$: Observable<Vec2>;
     isOnItemContainer$: Observable<boolean>;
+    setChests$: Observable<Set<string>>;
+    setSpawns$: Observable<Set<string>>;
 
     private isSet = false;
     private mousePosition = new BehaviorSubject<Vec2>({ x: -1, y: -1 });
     private wasDragged = new BehaviorSubject<string[]>([]);
     private currentItem = new BehaviorSubject<string>('');
     private isOnItemContainer = new BehaviorSubject<boolean>(false);
+    private setChests = new BehaviorSubject<Set<string>>(new Set());
+    private setSpawns = new BehaviorSubject<Set<string>>(new Set());
 
     constructor() {
         this.wasDragged$ = this.wasDragged.asObservable();
         this.currentItem$ = this.currentItem.asObservable();
         this.mousePosition$ = this.mousePosition.asObservable();
         this.isOnItemContainer$ = this.isOnItemContainer.asObservable();
+        this.setChests$ = this.setChests.asObservable();
+        this.setSpawns$ = this.setSpawns.asObservable();
     }
 
     setIsOnItemContainer(value: boolean) {
@@ -64,7 +70,13 @@ export class EditDragDrop {
         if (this.getCurrentPosition().x !== -1 && this.getCurrentPosition().y !== -1) {
             const item = this.getCurrentItem();
             if (item !== ItemType.Default) {
-                this.removeWasDragged(item);
+                if (item.includes(ItemType.Chest)) {
+                    this.removeSetChests(item);
+                } else if (item.includes(ItemType.Spawn)) {
+                    this.removeSetSpawns(item);
+                } else {
+                    this.removeWasDragged(item);
+                }
                 const itemPositions = itemMap.get(item as ItemType);
                 let pos;
                 if (itemPositions) {
@@ -85,8 +97,34 @@ export class EditDragDrop {
         board[cell.position.x][cell.position.y].item = ItemType.Default;
     }
 
+    private addSetChests(chest: string) {
+        this.setChests.next(new Set(this.setChests.value.add(chest)));
+    }
+
+    private removeSetChests(chest: string) {
+        if (this.setChests.value.delete(chest)) {
+            this.setChests.next(new Set(this.setChests.value));
+        }
+    }
+
+    private addSetSpawns(chest: string) {
+        this.setSpawns.next(new Set(this.setSpawns.value.add(chest)));
+    }
+
+    private removeSetSpawns(chest: string) {
+        if (this.setSpawns.value.delete(chest)) {
+            this.setSpawns.next(new Set(this.setSpawns.value));
+        }
+    }
+
     private handleExistingItemRemoval(cell: BoardCell, itemMap: Map<string, Vec2[]>) {
-        this.removeWasDragged(cell.item);
+        if (cell.item.includes(ItemType.Chest)) {
+            this.removeSetChests(cell.item);
+        } else if (cell.item.includes(ItemType.Spawn)) {
+            this.removeSetSpawns(cell.item);
+        } else {
+            this.removeWasDragged(cell.item);
+        }
         const itemPositions = itemMap.get(cell.item);
         if (itemPositions) {
             itemPositions.push({ x: -1, y: -1 });
@@ -117,7 +155,14 @@ export class EditDragDrop {
     }
 
     private updateItemState(item: string, cell: BoardCell) {
+        if (item.includes(ItemType.Chest)) {
+            this.addSetChests(item);
+        } else if (item.includes(ItemType.Spawn)) {
+            this.addSetSpawns(item);
+        }
+
         this.addWasDragged(item);
+
         cell.item = item as ItemType;
     }
 
