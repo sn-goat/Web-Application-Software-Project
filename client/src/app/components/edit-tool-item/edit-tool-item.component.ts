@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
+import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { ItemType } from '@common/enums';
 
 @Component({
@@ -17,10 +17,10 @@ export class EditToolItemComponent {
 
     isDraggable = true;
 
-    constructor(private editToolMouse: EditToolMouse) {}
+    constructor(private toolSelection: ToolSelectionService) {}
 
     onDragStart() {
-        this.editToolMouse.updateSelectedItem(this.type);
+        this.toolSelection.updateSelectedItem(this.type);
     }
 
     onDragEnter(event: MouseEvent) {

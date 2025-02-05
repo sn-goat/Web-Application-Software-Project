@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
+import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { TileType } from '@common/enums';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
@@ -19,10 +19,10 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     styleClass: string = 'unselected';
     private destroy$ = new Subject<void>();
 
-    constructor(private editToolMouse: EditToolMouse) {}
+    constructor(private toolSelection: ToolSelectionService) {}
 
     ngOnInit() {
-        this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
+        this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             if (tile === this.type) {
                 this.styleClass = 'selected';
             } else {
@@ -38,6 +38,6 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     }
 
     onClick() {
-        this.editToolMouse.updateSelectedTile(this.type);
+        this.toolSelection.updateSelectedTile(this.type);
     }
 }

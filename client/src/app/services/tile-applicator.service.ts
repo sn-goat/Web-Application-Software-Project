@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
-import { MouseEditorService } from '@app/services/mouse-editor.service';
-import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
+import { MouseEditorService } from './mouse-editor.service';
+import { ToolSelectionService } from './tool-selection.service';
 
 import { TileType, ItemType } from '@common/enums';
 import { Vec2 } from '@common/vec2';
@@ -19,8 +19,6 @@ export class TileApplicatorService implements OnDestroy {
     private handleItem: boolean = false;
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
-    private itemsOnBoard: number = 0;
-    private spawnOnBoard: number = 0;
 
     private selectedTile: TileType | null;
     private selectedItem: ItemType | null;
@@ -28,17 +26,17 @@ export class TileApplicatorService implements OnDestroy {
 
     constructor(
         private mouseEditorService: MouseEditorService,
-        private editToolMouse: EditToolMouse,
+        private toolSelection: ToolSelectionService,
     ) {
         this.mouseEditorService.currentCoord$.pipe(takeUntil(this.destroy$)).subscribe((coord) => {
             this.currentCoord = coord;
         });
 
-        this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
+        this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             this.selectedTile = tile;
         });
 
-        this.editToolMouse.selectedItem$.pipe(takeUntil(this.destroy$)).subscribe((item) => {
+        this.toolSelection.selectedItem$.pipe(takeUntil(this.destroy$)).subscribe((item) => {
             this.selectedItem = item;
         });
     }
@@ -101,11 +99,10 @@ export class TileApplicatorService implements OnDestroy {
             this.updatePosition(this.oldItemPos, this.newItemPos, boardGame);
         }
         this.oldItemPos = { x: -1, y: -1 };
-        this.editToolMouse.updateSelectedItem(ItemType.Default);
+        this.toolSelection.updateSelectedItem(ItemType.Default);
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
         this.handleItem = false;
-        console.log('items : ', this.itemsOnBoard, 'spwan : ', this.spawnOnBoard);
     }
 
     private isOnBoard(x: number, y: number, rect: DOMRect): boolean {
@@ -188,9 +185,9 @@ export class TileApplicatorService implements OnDestroy {
 
     private applyItem(col: number, row: number, boardGame: Board) {
         if (this.selectedItem === ItemType.Spawn) {
-            this.spawnOnBoard++;
+            this.toolSelection.incrementSpawn();
         } else {
-            this.itemsOnBoard++;
+            this.toolSelection.incrementItem();
         }
 
         if (boardGame.board[row][col].item !== ItemType.Default) {
@@ -200,9 +197,9 @@ export class TileApplicatorService implements OnDestroy {
     }
     private deleteItem(col: number, row: number, boardGame: Board) {
         if (boardGame.board[row][col].item === ItemType.Spawn) {
-            this.spawnOnBoard--;
+            this.toolSelection.decrementSpawn();
         } else {
-            this.itemsOnBoard--;
+            this.toolSelection.decrementItem();
         }
         boardGame.board[row][col].item = ItemType.Default;
     }
