@@ -6,22 +6,10 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
-
-enum BoardStatus {
-    Draft = 'Draft',
-    Published = 'Published',
-}
-
-enum BoardVisibility {
-    Public = 'Public',
-    Private = 'Private',
-}
-
-interface BoardCell {
-    x: number;
-    y: number;
-    type: string;
-}
+import { MapService } from '@app/services/map.service';
+import { BoardCell } from '@common/board';
+import { BoardStatus, BoardVisibility } from '@common/enums';
+import { environment } from 'src/environments/environment';
 
 export interface GameMap {
     _id: string;
@@ -54,6 +42,10 @@ export class MapListComponent implements OnInit {
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
+    mapService: MapService = new MapService();
+
+    private readonly baseUrl: string = environment.serverUrl;
+
     constructor(
         private readonly http: HttpClient,
         private readonly router: Router,
@@ -70,7 +62,7 @@ export class MapListComponent implements OnInit {
             next: (data) => {
                 this.items = data.map((item) => ({
                     ...item,
-                    status: item.status === 'Draft' ? BoardStatus.Draft : BoardStatus.Published,
+                    status: item.status === BoardStatus.Ongoing ? BoardStatus.Ongoing : BoardStatus.Completed,
                     visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
                     createdAt: item.createdAt ? new Date(item.createdAt) : null,
                     updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
@@ -86,7 +78,7 @@ export class MapListComponent implements OnInit {
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions || item.status === BoardStatus.Published;
+            const isPublished = this.showActions || item.status === BoardStatus.Completed;
 
             return matchesSearch && isPublished;
         });
@@ -112,7 +104,10 @@ export class MapListComponent implements OnInit {
     }
 
     onEdit(map: GameMap): void {
-        this.router.navigate(['/edit'], { queryParams: { id: map._id } });
+        this.http.get<GameMap>(`${this.baseUrl}/board/${map.name}`).subscribe((fullMap) => {
+            this.mapService.setMapData(fullMap);
+            this.router.navigate(['/edit']);
+        });
     }
 
     onDelete(map: GameMap): void {
