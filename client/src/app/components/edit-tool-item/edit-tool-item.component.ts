@@ -25,19 +25,23 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     constructor(private toolSelection: ToolSelectionService) {}
     ngOnInit() {
         const maxObjectByType = BOARD_SIZE_MAPPING.get(this.boardSize);
-        if (this.type !== ItemType.Spawn) {
-            this.toolSelection.nbrItemOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrItems) => {
-                if (maxObjectByType !== undefined) {
-                    this.remainingItem = maxObjectByType - nbrItems;
-                    this.isDraggable = this.remainingItem > 0;
-                }
-            });
-        } else {
+        if (this.type === ItemType.Spawn) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
                 if (maxObjectByType !== undefined) {
                     this.remainingItem = maxObjectByType - nbrSpawns;
                     this.isDraggable = this.remainingItem > 0;
                 }
+            });
+        } else if (this.type === ItemType.Chest) {
+            this.toolSelection.nbrChestOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrChests) => {
+                if (maxObjectByType !== undefined) {
+                    this.remainingItem = maxObjectByType - nbrChests;
+                    this.isDraggable = this.remainingItem > 0;
+                }
+            });
+        } else {
+            this.toolSelection.itemOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((items) => {
+                this.isDraggable = !items.has(this.type);
             });
         }
     }

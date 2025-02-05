@@ -186,8 +186,10 @@ export class TileApplicatorService implements OnDestroy {
     private applyItem(col: number, row: number, boardGame: Board) {
         if (this.selectedItem === ItemType.Spawn) {
             this.toolSelection.incrementSpawn();
+        } else if (this.selectedItem === ItemType.Chest) {
+            this.toolSelection.incrementChest();
         } else {
-            this.toolSelection.incrementItem();
+            this.toolSelection.addItem(this.selectedItem as ItemType);
         }
 
         if (boardGame.board[row][col].item !== ItemType.Default) {
@@ -198,8 +200,10 @@ export class TileApplicatorService implements OnDestroy {
     private deleteItem(col: number, row: number, boardGame: Board) {
         if (boardGame.board[row][col].item === ItemType.Spawn) {
             this.toolSelection.decrementSpawn();
+        } else if (boardGame.board[row][col].item === ItemType.Chest) {
+            this.toolSelection.decrementChest();
         } else {
-            this.toolSelection.decrementItem();
+            this.toolSelection.removeItem(boardGame.board[row][col].item as ItemType);
         }
         boardGame.board[row][col].item = ItemType.Default;
     }

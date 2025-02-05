@@ -8,19 +8,22 @@ import { TileType, ItemType } from '@common/enums';
 export class ToolSelectionService {
     selectedTile$: Observable<TileType | null>;
     selectedItem$: Observable<ItemType | null>;
-    nbrItemOnBoard$: Observable<number>;
+    itemOnBoard$: Observable<Set<ItemType>>;
     nbrSpawnOnBoard$: Observable<number>;
+    nbrChestOnBoard$: Observable<number>;
 
     private selectedTile = new BehaviorSubject<TileType | null>(null);
     private selectedItem = new BehaviorSubject<ItemType | null>(null);
-    private nbrItemOnBoard = new BehaviorSubject<number>(0);
+    private itemOnBoard = new BehaviorSubject<Set<ItemType>>(new Set());
     private nbrSpawnOnBoard = new BehaviorSubject<number>(0);
+    private nbrChestOnBoard = new BehaviorSubject<number>(0);
 
     constructor() {
         this.selectedTile$ = this.selectedTile.asObservable();
         this.selectedItem$ = this.selectedItem.asObservable();
-        this.nbrItemOnBoard$ = this.nbrItemOnBoard.asObservable();
+        this.itemOnBoard$ = this.itemOnBoard.asObservable();
         this.nbrSpawnOnBoard$ = this.nbrSpawnOnBoard.asObservable();
+        this.nbrChestOnBoard$ = this.nbrChestOnBoard.asObservable();
     }
 
     updateSelectedTile(selectedTile: TileType) {
@@ -35,23 +38,36 @@ export class ToolSelectionService {
         this.selectedItem.next(selectedItem);
     }
 
-    incrementItem() {
-        this.nbrItemOnBoard.next(this.nbrItemOnBoard.value + 1);
-        console.log('items :', this.nbrItemOnBoard.value, 'spawn :', this.nbrSpawnOnBoard.value);
+    addItem(item: ItemType) {
+        this.itemOnBoard.next(this.itemOnBoard.value.add(item));
+        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
-    decrementItem() {
-        this.nbrItemOnBoard.next(this.nbrItemOnBoard.value - 1);
-        console.log('items :', this.nbrItemOnBoard.value, 'spawn :', this.nbrSpawnOnBoard.value);
+    removeItem(item: ItemType) {
+        this.itemOnBoard.next(this.itemOnBoard.value.delete(item) ? this.itemOnBoard.value : this.itemOnBoard.value);
+        for (const i of this.itemOnBoard.value) {
+            console.log(i, ' ');
+        }
+        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     incrementSpawn() {
         this.nbrSpawnOnBoard.next(this.nbrSpawnOnBoard.value + 1);
-        console.log('items :', this.nbrItemOnBoard.value, 'spawn :', this.nbrSpawnOnBoard.value);
+        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     decrementSpawn() {
         this.nbrSpawnOnBoard.next(this.nbrSpawnOnBoard.value - 1);
-        console.log('items :', this.nbrItemOnBoard.value, 'spawn :', this.nbrSpawnOnBoard.value);
+        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
+    }
+
+    incrementChest() {
+        this.nbrChestOnBoard.next(this.nbrChestOnBoard.value + 1);
+        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
+    }
+
+    decrementChest() {
+        this.nbrChestOnBoard.next(this.nbrChestOnBoard.value - 1);
+        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 }
