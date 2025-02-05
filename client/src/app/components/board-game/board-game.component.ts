@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
-// import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { Board, BoardCell } from '@common/board';
@@ -37,34 +36,7 @@ export class BoardGameComponent implements OnInit {
     constructor(
         private elRef: ElementRef,
         private tileApplicator: TileApplicatorService,
-        // private editDragDrop: EditDragDrop,
-    ) {
-        this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Shield, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Flag, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Monster_Egg, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Leather_Boot, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Pearl, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Chest0, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Spawn0, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Chest1, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Spawn1, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Chest2, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Spawn2, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Chest3, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Spawn3, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Chest4, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Spawn4, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Chest5, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Spawn5, [{ x: -1, y: -1 }]);
-        // this.editDragDrop.isOnItemContainer$.subscribe((isOnItemContainer) => {
-        //     if (isOnItemContainer) {
-        //         this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
-        //     }
-        // });
-    }
+    ) {}
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent) {
@@ -92,10 +64,6 @@ export class BoardGameComponent implements OnInit {
         this.tileApplicator.handleDrop(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }
 
-    @HostListener('dragleave')
-    onDragLeave() {
-        this.tileApplicator.handleDragLeave();
-    }
     ngOnInit() {
         this.updateBoardGame();
     }

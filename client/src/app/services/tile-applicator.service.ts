@@ -84,6 +84,7 @@ export class TileApplicatorService implements OnDestroy {
     handleMouseLeave() {
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
+        this.handleItem = false;
         this.previousCoord = { x: -1, y: -1 };
     }
 
@@ -106,8 +107,6 @@ export class TileApplicatorService implements OnDestroy {
         this.handleItem = false;
         console.log('items : ', this.itemsOnBoard, 'spwan : ', this.spawnOnBoard);
     }
-
-    handleDragLeave(){}
 
     private isOnBoard(x: number, y: number, rect: DOMRect): boolean {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
