@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component, Input } from '@angular/core';
+// import { Subject } from 'rxjs';
 import { ItemType } from '@common/enums';
 import { BoardCell } from '@common/board';
 import { Vec2 } from '@common/vec2';
-import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
+// import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
+import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 
 @Component({
@@ -13,7 +14,7 @@ import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
     styleUrls: ['./board-cell.component.scss'],
     imports: [CommonModule],
 })
-export class BoardCellComponent implements OnDestroy {
+export class BoardCellComponent {
     @Input() isMouseRightDown!: boolean;
     @Input() isMouseLeftDown!: boolean;
     @Input() cell!: BoardCell;
@@ -23,26 +24,29 @@ export class BoardCellComponent implements OnDestroy {
     readonly srcItem = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';
     readonly itemType = ItemType;
-    private destroy$ = new Subject<void>();
+    // private destroy$ = new Subject<void>();
 
-    constructor(private editDragDrop: EditDragDrop) {}
+    constructor(
+        // private editDragDrop: EditDragDrop,
+        private editToolMouse: EditToolMouse,
+    ) {}
 
-    ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
+    // ngOnDestroy() {
+    //     this.destroy$.next();
+    //     this.destroy$.complete();
+    // }
+
+    // onDragOver(event: DragEvent) {
+    //     event.preventDefault();
+    // }
+    onDrag() {
+        this.editToolMouse.updateSelectedItem(this.cell.item);
+    }
+    onDrop(event: DragEvent) {
+        event.preventDefault();
     }
 
     onDragOver(event: DragEvent) {
         event.preventDefault();
-    }
-
-    onDrop(event: DragEvent) {
-        event.preventDefault();
-        this.editDragDrop.onDrop(this.board, this.cell, this.itemMap);
-    }
-
-    onDragStart(event: DragEvent) {
-        event.preventDefault();
-        this.editDragDrop.setCurrentItem(this.cell.item);
     }
 }

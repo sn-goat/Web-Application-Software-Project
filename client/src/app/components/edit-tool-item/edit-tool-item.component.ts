@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
+import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { ItemType } from '@common/enums';
 
 @Component({
@@ -9,7 +10,7 @@ import { ItemType } from '@common/enums';
     imports: [],
 })
 export class EditToolItemComponent {
-    @Input() type: string;
+    @Input() type: ItemType;
     @Input() alternate: string;
 
     src = './assets/items/';
@@ -25,7 +26,10 @@ export class EditToolItemComponent {
     chestCounter = 0;
     spawnCounter = 0;
 
-    constructor(private editDragDrop: EditDragDrop) {
+    constructor(
+        private editDragDrop: EditDragDrop,
+        private editToolMouse: EditToolMouse,
+    ) {
         this.editDragDrop.wasDragged$.subscribe((wasDragged) => {
             if (this.type !== ItemType.Chest && this.type !== ItemType.Spawn) {
                 this.isDraggable = wasDragged.find((type) => type === this.type) === undefined;
@@ -63,16 +67,8 @@ export class EditToolItemComponent {
         });
     }
 
-    onDragStart(event: DragEvent) {
-        event.preventDefault();
-        if (this.type === ItemType.Chest) {
-            this.editDragDrop.setCurrentItem(this.chestType);
-        } else if (this.type === ItemType.Spawn) {
-            this.editDragDrop.setCurrentItem(this.spawnType);
-        } else {
-            this.editDragDrop.setCurrentItem(this.type);
-        }
-        this.editDragDrop.setIsOnItemContainer(false);
+    onDragStart() {
+        this.editToolMouse.updateSelectedItem(this.type);
     }
 
     onDragEnter(event: MouseEvent) {

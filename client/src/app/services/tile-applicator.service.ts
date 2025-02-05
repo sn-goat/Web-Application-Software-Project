@@ -14,10 +14,13 @@ import { Board } from '@common/board';
 export class TileApplicatorService implements OnDestroy {
     private destroy$ = new Subject<void>();
     private previousCoord: Vec2 = { x: -1, y: -1 };
+    private oldItemPos: Vec2 = { x: -1, y: -1 };
+    private newItemPos: Vec2 = { x: -1, y: -1 };
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
 
     private selectedTile: TileType | null;
+    private selectedItem: ItemType | null;
     private currentCoord: Vec2 = { x: -1, y: -1 };
 
     constructor(
@@ -30,6 +33,10 @@ export class TileApplicatorService implements OnDestroy {
 
         this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             this.selectedTile = tile;
+        });
+
+        this.editToolMouse.selectedItem$.pipe(takeUntil(this.destroy$)).subscribe((item) => {
+            this.selectedItem = item;
         });
     }
 
@@ -47,7 +54,12 @@ export class TileApplicatorService implements OnDestroy {
         }
         this.previousCoord = this.currentCoord;
         const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y, boardGame, rect);
-        this.updateCell(cellPosition.x, cellPosition.y, boardGame);
+
+        if (boardGame.board[cellPosition.y][cellPosition.x].item !== ItemType.Default) {
+            this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
+        } else {
+            this.updateCell(cellPosition.x, cellPosition.y, boardGame);
+        }
     }
 
     handleMouseUp(event: MouseEvent) {
@@ -70,6 +82,18 @@ export class TileApplicatorService implements OnDestroy {
         this.applyIntermediateTiles(this.previousCoord, boardGame, rect);
         this.previousCoord = this.currentCoord;
     }
+
+    handleDrop(boardGame: Board, rect: DOMRect) {
+        if (this.selectedItem !== ItemType.Default) {
+            this.newItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
+            this.updatePosition(this.oldItemPos, this.newItemPos, boardGame);
+        }
+        this.oldItemPos = { x: -1, y: -1 };
+        this.editToolMouse.updateSelectedItem(ItemType.Default);
+    }
+
+    handleDragLeave(){}
+
     private isOnBoard(x: number, y: number, rect: DOMRect): boolean {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
@@ -146,5 +170,16 @@ export class TileApplicatorService implements OnDestroy {
         } else if (this.isMouseLeftDown) {
             this.applyTile(col, row, boardGame);
         }
+    }
+
+    private changeItemType(col: number, row: number, boardGame: Board, newType: ItemType) {
+        boardGame.board[row][col].item = newType;
+    }
+
+    private updatePosition(oldItemPos: Vec2, newItemPos: Vec2, boardGame: Board) {
+        if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
+            this.changeItemType(oldItemPos.x, oldItemPos.y, boardGame, ItemType.Default);
+        }
+        this.changeItemType(newItemPos.x, newItemPos.y, boardGame, this.selectedItem as ItemType);
     }
 }

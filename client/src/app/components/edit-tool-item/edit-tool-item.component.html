@@ -5,7 +5,7 @@
     class="draggable-image"
     [draggable]="isDraggable"
     [class.item-moved]="!isDraggable"
-    (drag)="onDragStart($event)"
+    (drag)="onDragStart()"
     (dragleave)="onDragEnter($event)"
     >
 </div>

@@ -87,6 +87,16 @@ export class BoardGameComponent implements OnInit {
         this.tileApplicator.handleMouseMove(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }
 
+    @HostListener('drop', ['$event'])
+    onDrop(event: DragEvent) {
+        event.preventDefault();
+        this.tileApplicator.handleDrop(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
+    }
+
+    @HostListener('dragleave')
+    onDragLeave() {
+        this.tileApplicator.handleDragLeave();
+    }
     ngOnInit() {
         this.updateBoardGame();
     }
