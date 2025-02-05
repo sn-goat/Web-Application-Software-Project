@@ -55,14 +55,14 @@ export class BoardGameComponent implements OnInit {
         });
     }
 
-    @HostListener('mousedown')
-    onMouseDown() {
-        this.tileApplicator.handleMouseDown(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
+    @HostListener('mousedown', ['$event'])
+    onMouseDown(event: MouseEvent) {
+        this.tileApplicator.handleMouseDown(event, this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }
 
-    @HostListener('mouseup')
-    onMouseUp() {
-        this.tileApplicator.handleMouseUp();
+    @HostListener('mouseup', ['$event'])
+    onMouseUp(event: MouseEvent) {
+        this.tileApplicator.handleMouseUp(event);
     }
 
     @HostListener('mouseleave')

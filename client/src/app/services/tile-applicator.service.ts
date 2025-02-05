@@ -12,13 +12,13 @@ import { Board } from '@common/board';
     providedIn: 'root',
 })
 export class TileApplicatorService implements OnDestroy {
-    private selectedTile: TileType | null;
+    private destroy$ = new Subject<void>();
     private previousCoord: Vec2 = { x: -1, y: -1 };
-    private currentCoord: Vec2 = { x: -1, y: -1 };
-    private applyOnBoard: boolean = false;
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
-    private destroy$ = new Subject<void>();
+
+    private selectedTile: TileType | null;
+    private currentCoord: Vec2 = { x: -1, y: -1 };
 
     constructor(
         private mouseEditorService: MouseEditorService,
@@ -27,12 +27,7 @@ export class TileApplicatorService implements OnDestroy {
         this.mouseEditorService.currentCoord$.pipe(takeUntil(this.destroy$)).subscribe((coord) => {
             this.currentCoord = coord;
         });
-        this.mouseEditorService.isMouseLeftDown$.pipe(takeUntil(this.destroy$)).subscribe((leftButton) => {
-            this.isMouseLeftDown = leftButton;
-        });
-        this.mouseEditorService.isMouseRightDown$.pipe(takeUntil(this.destroy$)).subscribe((rightButton) => {
-            this.isMouseRightDown = rightButton;
-        });
+
         this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             this.selectedTile = tile;
         });
@@ -43,28 +38,37 @@ export class TileApplicatorService implements OnDestroy {
         this.destroy$.complete();
     }
 
-    handleMouseDown(boardGame: Board, rect: DOMRect) {
-        this.applyOnBoard = true;
+    handleMouseDown(event: MouseEvent, boardGame: Board, rect: DOMRect) {
+        if (event.button === 2) {
+            this.isMouseRightDown = true;
+        }
+        if (event.button === 0) {
+            this.isMouseLeftDown = true;
+        }
         this.previousCoord = this.currentCoord;
         const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y, boardGame, rect);
         this.updateCell(cellPosition.x, cellPosition.y, boardGame);
     }
 
-    handleMouseUp() {
+    handleMouseUp(event: MouseEvent) {
+        if (event.button === 2) {
+            this.isMouseRightDown = false;
+        }
+        if (event.button === 0) {
+            this.isMouseLeftDown = false;
+        }
         this.previousCoord = { x: -1, y: -1 };
     }
 
     handleMouseLeave() {
-        this.applyOnBoard = false;
-        this.mouseEditorService.turnButtonsOff();
+        this.isMouseLeftDown = false;
+        this.isMouseRightDown = false;
         this.previousCoord = { x: -1, y: -1 };
     }
 
     handleMouseMove(boardGame: Board, rect: DOMRect) {
-        if (this.applyOnBoard) {
-            this.applyIntermediateTiles(this.previousCoord, boardGame, rect);
-            this.previousCoord = this.currentCoord;
-        }
+        this.applyIntermediateTiles(this.previousCoord, boardGame, rect);
+        this.previousCoord = this.currentCoord;
     }
     private isOnBoard(x: number, y: number, rect: DOMRect): boolean {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
@@ -95,7 +99,7 @@ export class TileApplicatorService implements OnDestroy {
         let x = previousCoord.x;
         let y = previousCoord.y;
 
-        while (distanceMade <= distanceToDo) {
+        while (distanceMade < distanceToDo) {
             if (!this.isOnBoard(x, y, rect)) {
                 break;
             }
@@ -107,7 +111,7 @@ export class TileApplicatorService implements OnDestroy {
             }
             x += step;
             y = slope * (x - previousCoord.x) + previousCoord.y;
-            distanceMade++;
+            distanceMade += 1;
         }
     }
 

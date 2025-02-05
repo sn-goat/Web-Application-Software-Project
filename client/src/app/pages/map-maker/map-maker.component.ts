@@ -27,16 +27,6 @@ export class MapMakerComponent implements OnInit {
         this.mouseEditor.preventRightClick(event);
     }
 
-    @HostListener('mousedown', ['$event'])
-    onMouseDown(event: MouseEvent) {
-        this.mouseEditor.handleMouseDown(event);
-    }
-
-    @HostListener('mouseup', ['$event'])
-    onMouseUp(event: MouseEvent) {
-        this.mouseEditor.handleMouseUp(event);
-    }
-
     @HostListener('mousemove', ['$event'])
     onMouseMove(event: MouseEvent) {
         this.mouseEditor.updateCoordinate(event);
