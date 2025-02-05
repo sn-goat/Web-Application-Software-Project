@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { EditToolTileComponent } from '@app/components/edit-tool-tile/edit-tool-tile.component';
 import { EditToolItemComponent } from '@app/components/edit-tool-item/edit-tool-item.component';
@@ -11,6 +11,7 @@ import { ItemType, TileType } from '@common/enums';
     imports: [EditToolTileComponent, EditToolItemComponent, MatCardModule],
 })
 export class EditItemAreaComponent {
+    @Input() boardSize!: number;
     readonly itemType = ItemType;
     readonly tileType = TileType;
 
