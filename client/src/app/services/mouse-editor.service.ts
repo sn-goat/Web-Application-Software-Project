@@ -14,7 +14,6 @@ export class MouseEditorService {
     }
 
     updateCoordinate(event: MouseEvent | DragEvent) {
-        // console.log(this.currentCoord);
         this.currentCoord.next({ x: event.pageX, y: event.pageY });
     }
 

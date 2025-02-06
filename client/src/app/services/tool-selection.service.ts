@@ -40,34 +40,25 @@ export class ToolSelectionService {
 
     addItem(item: ItemType) {
         this.itemOnBoard.next(this.itemOnBoard.value.add(item));
-        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     removeItem(item: ItemType) {
         this.itemOnBoard.next(this.itemOnBoard.value.delete(item) ? this.itemOnBoard.value : this.itemOnBoard.value);
-        for (const i of this.itemOnBoard.value) {
-            console.log(i, ' ');
-        }
-        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     incrementSpawn() {
         this.nbrSpawnOnBoard.next(this.nbrSpawnOnBoard.value + 1);
-        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     decrementSpawn() {
         this.nbrSpawnOnBoard.next(this.nbrSpawnOnBoard.value - 1);
-        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     incrementChest() {
         this.nbrChestOnBoard.next(this.nbrChestOnBoard.value + 1);
-        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 
     decrementChest() {
         this.nbrChestOnBoard.next(this.nbrChestOnBoard.value - 1);
-        console.log('items :', this.itemOnBoard.value.size, 'spawn :', this.nbrSpawnOnBoard.value, 'chest :', this.nbrChestOnBoard.value);
     }
 }
