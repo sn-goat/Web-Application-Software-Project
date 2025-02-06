@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { GameMap } from '@app/components/map-list/map-list.component';
+import { Board } from '@common/board';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class MapService {
-    private mapData = new BehaviorSubject<GameMap>({} as GameMap);
-    setMapData(data: GameMap): void {
+    private mapData = new BehaviorSubject<Board>({} as Board);
+    setMapData(data: Board): void {
         this.mapData.next(data);
     }
 
-    getMapData(): BehaviorSubject<GameMap> {
+    getMapData(): BehaviorSubject<Board> {
         return this.mapData;
     }
 }

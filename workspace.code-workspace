@@ -4,7 +4,7 @@
             "path": "."
         },
         {
-            "path": "./client/src"
+            "path": "./client/src/app"
         },
         {
             "path": "./common"

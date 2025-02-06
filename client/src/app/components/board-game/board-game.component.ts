@@ -1,42 +1,29 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import { Board, Cell } from '@common/board';
-import { Item, Status, Tile, Visibility } from '@common/enums';
-import { Vec2 } from '@common/vec2';
+import { Board } from '@common/board';
+import { Item, Tile } from '@common/enums';
+import { Vec2 } from '@common/board';
 import { Subject, takeUntil } from 'rxjs';
+import { MapService } from '@app/services/map.service';
 
 @Component({
     selector: 'app-board-game',
     templateUrl: './board-game.component.html',
     styleUrls: ['./board-game.component.scss'],
-    imports: [CommonModule, BoardCellComponent],
+    imports: [CommonModule, BoardCellComponent]
 })
 export class BoardGameComponent implements OnInit, OnDestroy {
-    @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
-
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
-
     previousCoord: Vec2 = { x: -1, y: -1 };
     currentCoord: Vec2 = { x: -1, y: -1 };
 
-    boardGame: Board = {
-        _id: '',
-        name: '',
-        description: '',
-        size: 15,
-        category: '',
-        isCTF: false,
-        board: [],
-        status: Status.Ongoing,
-        visibility: Visibility.Public,
-        image: '',
-        createdAt: new Date().getDate().toString(),
-        updatedAt: '',
-    };
+    boardGame: Board;
+
+    private readonly mapService = inject(MapService);
 
     itemMap: Map<Item, Vec2[]> = new Map();
 
@@ -115,7 +102,9 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             this.selectedTile = tile;
         });
-        this.updateBoardGame();
+        this.boardGame = this.mapService.getMapData().value;
+        this.sanitizeBoard();
+        this.populateBoard();
     }
 
     ngOnDestroy() {
@@ -123,33 +112,30 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    private generateBoard(size: number) {
-        this.boardGame.board = [];
-        for (let i = 0; i < size; i++) {
-            const row: Cell[] = [];
-            for (let j = 0; j < size; j++) {
-                row.push({
-                    position: { x: i, y: j },
-                    tile: Tile.Default,
-                    item: Item.Default,
-                });
-            }
-            this.boardGame.board.push(row);
-        }
+    private sanitizeBoard() {
+        this.boardGame.board.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item === undefined) {
+                    cell.item = Item.Default;
+                }
+                if (cell.tile === undefined) {
+                    cell.tile = Tile.Default;
+                }
+            });
+        });
     }
 
-    private updateBoardGame() {
-        this.boardGame = {
-            ...this.boardGame,
-            name: this.importedData.name,
-            description: this.importedData.description,
-            size: this.importedData.size,
-            status: Status.Ongoing,
-            visibility: Visibility.Public,
-            updatedAt: new Date().getDate().toString(),
-        };
 
-        this.generateBoard(this.boardGame.size);
+    private populateBoard() {
+        if (this.boardGame.board.length === 0) {
+            for (let i = 0; i < this.boardGame.size; i++) {
+                const row = [];
+                for (let j = 0; j < this.boardGame.size; j++) {
+                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                }
+                this.boardGame.board.push(row);
+            }
+        }
     }
 
     private screenToBoard(x: number, y: number): Vec2 {
@@ -205,7 +191,7 @@ export class BoardGameComponent implements OnInit, OnDestroy {
     }
 
     private applyDoor(col: number, row: number) {
-        if (this.surroudningTilesAreWall(col, row)) {
+        if (this.surroundingTilesAreWall(col, row)) {
             if (this.boardGame.board[row][col].tile === Tile.Closed_Door) {
                 this.boardGame.board[row][col].tile = Tile.Opened_Door;
             } else if (this.boardGame.board[row][col].tile === Tile.Opened_Door) {
@@ -224,11 +210,12 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.boardGame.board[row][col].tile = Tile.Wall;
     }
 
-    private surroudningTilesAreWall(col: number, row: number): boolean {
+    private surroundingTilesAreWall(col: number, row: number): boolean {
         const onXAxis = this.boardGame.board[row][col - 1].tile === Tile.Wall && this.boardGame.board[row][col + 1].tile === Tile.Wall;
         const onYAxis = this.boardGame.board[row - 1][col].tile === Tile.Wall && this.boardGame.board[row + 1][col].tile === Tile.Wall;
         return (onXAxis || onYAxis) && !(onXAxis && onYAxis);
     }
+
     private revertToDefault(col: number, row: number) {
         if (this.boardGame.board[row][col].item !== Item.Default) {
             this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);

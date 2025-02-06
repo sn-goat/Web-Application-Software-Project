@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
+import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 
 @Component({
     selector: 'app-edit-tool-item',
@@ -11,7 +12,7 @@ export class EditToolItemComponent {
     @Input() type: string;
     @Input() alternate: string;
 
-    src = './assets/items/';
+    src = DEFAULT_PATH_ITEMS;
     fileType = '.png';
 
     isDraggable = true;

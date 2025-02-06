@@ -1,30 +1,15 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapService } from '@app/services/map.service';
-import { Cell } from '@common/board';
 import { Status, Visibility } from '@common/enums';
 import { environment } from 'src/environments/environment';
-
-export interface GameMap {
-    _id: string;
-    name: string;
-    description: string;
-    size: number;
-    category: string;
-    isCTF: boolean;
-    board: Cell[][];
-    status: Status;
-    visibility: Visibility;
-    image: string | null;
-    createdAt?: Date | null;
-    updatedAt?: Date | null;
-}
+import { Board } from '@common/board';
 
 @Component({
     selector: 'app-map-list',
@@ -35,14 +20,14 @@ export interface GameMap {
     imports: [CommonModule, FormsModule, ScrollingModule],
 })
 export class MapListComponent implements OnInit {
-    @Input() items: GameMap[] = [];
+    @Input() items: Board[] = [];
     @Input() showActions: boolean = true;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
-    mapService: MapService = new MapService();
+    private mapService = inject(MapService);
 
     private readonly baseUrl: string = environment.serverUrl;
 
@@ -58,7 +43,7 @@ export class MapListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.http.get<GameMap[]>('assets/mockMapData.json').subscribe({
+        this.http.get<Board[]>('assets/mockMapData.json').subscribe({
             next: (data) => {
                 this.items = data.map((item) => ({
                     ...item,
@@ -72,7 +57,7 @@ export class MapListComponent implements OnInit {
         });
     }
 
-    getFilteredAndSortedItems(): GameMap[] {
+    getFilteredAndSortedItems(): Board[] {
         let filtered = this.items.filter((item) => {
             const matchesSearch =
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -103,21 +88,21 @@ export class MapListComponent implements OnInit {
         });
     }
 
-    onEdit(map: GameMap): void {
-        this.http.get<GameMap>(`${this.baseUrl}/board/${map.name}`).subscribe((fullMap) => {
+    onEdit(map: Board): void {
+        this.http.get<Board>(`${this.baseUrl}/board/${map.name}`).subscribe((fullMap) => {
             this.mapService.setMapData(fullMap);
             this.router.navigate(['/edit']);
         });
     }
 
-    onDelete(map: GameMap): void {
+    onDelete(map: Board): void {
         if (confirm(`Are you sure you want to delete "${map.name}"?`)) {
             this.items = this.items.filter((item) => item._id !== map._id);
             this.cdr.detectChanges();
         }
     }
 
-    toggleVisibility(map: GameMap): void {
+    toggleVisibility(map: Board): void {
         map.visibility = map.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
         this.cdr.detectChanges();
     }
@@ -130,7 +115,8 @@ export class MapListComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-                this.router.navigate(['/edit'], { queryParams: result });
+                this.mapService.setMapData(result);
+                this.router.navigate(['/edit']);
             }
         });
     }

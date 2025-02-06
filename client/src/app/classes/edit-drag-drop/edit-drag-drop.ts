@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Cell } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Vec2 } from '@common/vec2';
+import { Vec2 } from '@common/board';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({

@@ -2,9 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
-import { Cell } from '@common/board';
+import { Cell, Vec2 } from '@common/board';
 import { Item } from '@common/enums';
-import { Vec2 } from '@common/vec2';
 import { Subject } from 'rxjs';
 
 @Component({

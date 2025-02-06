@@ -12,15 +12,4 @@ import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-
     templateUrl: './map-maker.component.html',
     styleUrl: './map-maker.component.scss',
 })
-export class MapMakerComponent {
-    // data: GameMap;
-    // constructor(private route: ActivatedRoute) {}
-    // ngOnInit(): void {
-    //     this.route.queryParams.subscribe((params) => {
-    //         // eslint-disable-next-line no-console
-    //         console.log(params);
-    //         // eslint-enable-next-line no-console
-    //         this.data = params as GameMap;
-    //     });
-    // }
-}
+export class MapMakerComponent {}
