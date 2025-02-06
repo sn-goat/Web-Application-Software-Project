@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -7,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { BoardGameComponent } from '@app/components/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
+import { MapService } from '@app/services/map.service';
 
 @Component({
     selector: 'app-map-maker',
@@ -19,8 +21,19 @@ import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-
         MatButtonModule,
         BoardGameComponent,
         EditItemAreaComponent,
+        FormsModule,
     ],
     templateUrl: './map-maker.component.html',
     styleUrls: ['./map-maker.component.scss'],
 })
-export class MapMakerComponent {}
+export class MapMakerComponent {
+    private readonly mapService = inject(MapService);
+
+    get name() {
+        return this.mapService.getMapData().value.name;
+    }
+
+    get description() {
+        return this.mapService.getMapData().value.description;
+    }
+}

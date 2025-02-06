@@ -5,7 +5,7 @@ import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { MapService } from '@app/services/map.service';
 import { Board, Vec2 } from '@common/board';
-import { Item, Tile } from '@common/enums';
+import { Item, Status, Tile, Visibility } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -101,6 +101,32 @@ export class BoardGameComponent implements OnInit, OnDestroy {
             this.selectedTile = tile;
         });
         this.boardGame = this.mapService.getMapData().value;
+        if (this.boardGame.board === undefined) {
+            this.boardGame = {
+                _id: '',
+                name: this.boardGame.name,
+                description: this.boardGame.description,
+                size: this.boardGame.size,
+                category: '',
+                isCTF: false,
+                board: [],
+                status: Status.Ongoing,
+                visibility: Visibility.Public,
+                image: '',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+            for (let i = 0; i < this.boardGame.size; i++) {
+                const row = [];
+                for (let j = 0; j < this.boardGame.size; j++) {
+                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                }
+                this.boardGame.board.push(row);
+            }
+        }
+        // eslint-disable-next-line no-console
+        console.log(this.boardGame.board);
+        // eslint-enable-next-line no-console
         this.parseBoard();
         this.populateEmptyCells();
     }
