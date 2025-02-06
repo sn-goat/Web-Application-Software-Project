@@ -8,9 +8,6 @@ import { BehaviorSubject } from 'rxjs';
 export class MapService {
     private mapData = new BehaviorSubject<GameMap>({} as GameMap);
     setMapData(data: GameMap): void {
-        // eslint-disable-next-line no-console
-        console.log(data);
-        // eslint-enable-next-line no-console
         this.mapData.next(data);
     }
 
