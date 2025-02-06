@@ -3,17 +3,16 @@ import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import { Board } from '@common/board';
-import { Item, Tile } from '@common/enums';
-import { Vec2 } from '@common/board';
-import { Subject, takeUntil } from 'rxjs';
 import { MapService } from '@app/services/map.service';
+import { Board, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-board-game',
     templateUrl: './board-game.component.html',
     styleUrls: ['./board-game.component.scss'],
-    imports: [CommonModule, BoardCellComponent]
+    imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent implements OnInit, OnDestroy {
     isMouseRightDown: boolean = false;
@@ -23,9 +22,8 @@ export class BoardGameComponent implements OnInit, OnDestroy {
 
     boardGame: Board;
 
-    private readonly mapService = inject(MapService);
-
     itemMap: Map<Item, Vec2[]> = new Map();
+    private readonly mapService = inject(MapService);
 
     private selectedTile: Tile | null = null;
     private destroy$ = new Subject<void>();
@@ -124,7 +122,6 @@ export class BoardGameComponent implements OnInit, OnDestroy {
             });
         });
     }
-
 
     private populateBoard() {
         if (this.boardGame.board.length === 0) {
