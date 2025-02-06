@@ -26,7 +26,7 @@ describe('MapListComponent', () => {
         mockMapService = jasmine.createSpyObj('MapService', ['getAllMaps']);
         mockBoardService = jasmine.createSpyObj('BoardService', ['deleteBoardByName', 'toggleVisibility']);
         mockViewportRuler = jasmine.createSpyObj('ViewportRuler', ['change']);
-        mockVirtualScroll = jasmine.createSpyObj('CdkVirtualScrollViewport', ['elementScrolled']);;
+        mockVirtualScroll = jasmine.createSpyObj('CdkVirtualScrollViewport', ['elementScrolled']);
         mockCdr = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
 
         await TestBed.configureTestingModule({

@@ -56,8 +56,8 @@ export class CreatePageComponent {
 
     selectStat(stat: 'life' | 'rapidity') {
         const otherStat = stat === 'life' ? 'rapidity' : 'life';
-        const selectedStat = stat + 'Selected' as 'lifeSelected' | 'rapiditySelected';
-        const otherSelectedStat = otherStat + 'Selected' as 'lifeSelected' | 'rapiditySelected';
+        const selectedStat = (stat + 'Selected') as 'lifeSelected' | 'rapiditySelected';
+        const otherSelectedStat = (otherStat + 'Selected') as 'lifeSelected' | 'rapiditySelected';
 
         if (this[otherSelectedStat]) {
             this[otherSelectedStat] = false;
@@ -72,21 +72,21 @@ export class CreatePageComponent {
     }
 
     selectCombatStat(stat: 'attack' | 'defense') {
-    const otherStat = stat === 'attack' ? 'defense' : 'attack';
-    const selectedStat = stat + 'Selected' as 'attackSelected' | 'defenseSelected';
-    const otherSelectedStat = otherStat + 'Selected' as 'attackSelected' | 'defenseSelected';
+        const otherStat = stat === 'attack' ? 'defense' : 'attack';
+        const selectedStat = (stat + 'Selected') as 'attackSelected' | 'defenseSelected';
+        const otherSelectedStat = (otherStat + 'Selected') as 'attackSelected' | 'defenseSelected';
 
-    if (this[otherSelectedStat]) {
-        this[otherSelectedStat] = false;
-        this.stats[`${otherStat}Dice`] = D4;
+        if (this[otherSelectedStat]) {
+            this[otherSelectedStat] = false;
+            this.stats[`${otherStat}Dice`] = D4;
+        }
+        this[selectedStat] = !this[selectedStat];
+        if (this[selectedStat]) {
+            this.stats[`${stat}Dice`] = D6;
+        } else {
+            this.stats[`${stat}Dice`] = D4;
+        }
     }
-    this[selectedStat] = !this[selectedStat];
-    if (this[selectedStat]) {
-        this.stats[`${stat}Dice`] = D6;
-    } else {
-        this.stats[`${stat}Dice`] = D4;
-    }
-}
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
