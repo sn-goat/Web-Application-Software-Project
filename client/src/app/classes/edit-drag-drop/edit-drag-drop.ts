@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
+import { Cell } from '@common/board';
+import { Item, Tile } from '@common/enums';
+import { Vec2 } from '@common/board';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { BoardCell } from '@common/board';
-import { ItemType, TileType } from '@common/enums';
-import { Vec2 } from '@common/vec2';
-import { ITEMS_TYPES } from '@app/constants/types';
 
 @Injectable({
     providedIn: 'root',
@@ -32,7 +31,7 @@ export class EditDragDrop {
     }
 
     setCurrentItem(currentItem: string) {
-        if (ITEMS_TYPES.includes(currentItem) && currentItem !== ItemType.Default) {
+        if ((<any>Object).values(Item).includes(currentItem) && currentItem !== Item.Default) {
             this.currentItem.next(currentItem);
             this.isSet = true;
         } else {
@@ -52,7 +51,7 @@ export class EditDragDrop {
         return this.mousePosition.value;
     }
 
-    onDrop(board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+    onDrop(board: Cell[][], cell: Cell, itemMap: Map<string, Vec2[]>) {
         const item = this.getCurrentItem();
         if (this.isSet) {
             this.handleItemDrop(item, board, cell, itemMap);
@@ -60,32 +59,32 @@ export class EditDragDrop {
         }
     }
 
-    onDragLeave(board: BoardCell[][], itemMap: Map<string, Vec2[]>) {
+    onDragLeave(board: Cell[][], itemMap: Map<string, Vec2[]>) {
         if (this.getCurrentPosition().x !== -1 && this.getCurrentPosition().y !== -1) {
             const item = this.getCurrentItem();
-            if (item !== ItemType.Default) {
+            if (item !== Item.Default) {
                 this.removeWasDragged(item);
-                const itemPositions = itemMap.get(item as ItemType);
+                const itemPositions = itemMap.get(item as Item);
                 let pos;
                 if (itemPositions) {
                     pos = itemPositions[0];
                     if (pos.x !== -1 && pos.y !== -1) {
-                        board[pos.x][pos.y].item = ItemType.Default;
+                        board[pos.x][pos.y].item = Item.Default;
                     }
                     itemPositions.push({ x: -1, y: -1 });
                     itemPositions.shift();
-                    itemMap.set(item as ItemType, itemPositions);
+                    itemMap.set(item as Item, itemPositions);
                 }
             }
         }
     }
 
-    handleItemOnInvalidTile(cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
+    handleItemOnInvalidTile(cell: Cell, itemMap: Map<string, Vec2[]>, board: Cell[][]) {
         this.handleExistingItemRemoval(cell, itemMap);
-        board[cell.position.x][cell.position.y].item = ItemType.Default;
+        board[cell.position.x][cell.position.y].item = Item.Default;
     }
 
-    private handleExistingItemRemoval(cell: BoardCell, itemMap: Map<string, Vec2[]>) {
+    private handleExistingItemRemoval(cell: Cell, itemMap: Map<string, Vec2[]>) {
         this.removeWasDragged(cell.item);
         const itemPositions = itemMap.get(cell.item);
         if (itemPositions) {
@@ -103,12 +102,12 @@ export class EditDragDrop {
         this.wasDragged.next(this.wasDragged.value.filter((item) => item !== wasDragged));
     }
 
-    private handleItemDrop(item: string, board: BoardCell[][], cell: BoardCell, itemMap: Map<string, Vec2[]>) {
-        if (cell.tile === TileType.Opened_Door || cell.tile === TileType.Closed_Door || cell.tile === TileType.Wall) {
+    private handleItemDrop(item: string, board: Cell[][], cell: Cell, itemMap: Map<string, Vec2[]>) {
+        if (cell.tile === Tile.Opened_Door || cell.tile === Tile.Closed_Door || cell.tile === Tile.Wall) {
             return;
         }
 
-        if (cell.item !== item && cell.item !== ItemType.Default) {
+        if (cell.item !== item && cell.item !== Item.Default) {
             this.handleExistingItemRemoval(cell, itemMap);
         }
 
@@ -116,12 +115,12 @@ export class EditDragDrop {
         this.updateItemPositions(item, cell, itemMap, board);
     }
 
-    private updateItemState(item: string, cell: BoardCell) {
+    private updateItemState(item: string, cell: Cell) {
         this.addWasDragged(item);
-        cell.item = item as ItemType;
+        cell.item = item as Item;
     }
 
-    private updateItemPositions(item: string, cell: BoardCell, itemMap: Map<string, Vec2[]>, board: BoardCell[][]) {
+    private updateItemPositions(item: string, cell: Cell, itemMap: Map<string, Vec2[]>, board: Cell[][]) {
         const itemPositions = itemMap.get(item);
         if (itemPositions) {
             itemPositions.push(cell.position);
@@ -131,14 +130,14 @@ export class EditDragDrop {
         }
     }
 
-    private clearOldPosition(itemPositions: Vec2[], board: BoardCell[][]) {
+    private clearOldPosition(itemPositions: Vec2[], board: Cell[][]) {
         const pos1 = itemPositions[0];
         const pos2 = itemPositions[1];
         if (pos1 === pos2) {
             return;
         }
         if (pos1.x !== -1 && pos1.y !== -1) {
-            board[pos1.x][pos1.y].item = ItemType.Default;
+            board[pos1.x][pos1.y].item = Item.Default;
         }
     }
 }

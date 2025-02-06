@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import { Board, BoardCell } from '@common/board';
-import { BoardStatus, BoardVisibility, ItemType, TileType } from '@common/enums';
-import { Vec2 } from '@common/vec2';
+import { MapService } from '@app/services/map.service';
+import { Board, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -15,32 +15,17 @@ import { Subject, takeUntil } from 'rxjs';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent implements OnInit, OnDestroy {
-    @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
-
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
-
     previousCoord: Vec2 = { x: -1, y: -1 };
     currentCoord: Vec2 = { x: -1, y: -1 };
 
-    boardGame: Board = {
-        _id: '',
-        name: '',
-        description: '',
-        size: 15,
-        category: '',
-        isCTF: false,
-        board: [],
-        status: BoardStatus.Ongoing,
-        visibility: BoardVisibility.Public,
-        image: '',
-        createdAt: new Date().getDate().toString(),
-        updatedAt: '',
-    };
+    boardGame: Board;
 
-    itemMap: Map<ItemType, Vec2[]> = new Map();
+    itemMap: Map<Item, Vec2[]> = new Map();
+    private readonly mapService = inject(MapService);
 
-    private selectedTile: TileType | null = null;
+    private selectedTile: Tile | null = null;
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -48,14 +33,14 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         private editToolMouse: EditToolMouse,
         private editDragDrop: EditDragDrop,
     ) {
-        this.itemMap.set(ItemType.Bow, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Shield, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Flag, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Monster_Egg, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Leather_Boot, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Sword, [{ x: -1, y: -1 }]);
-        this.itemMap.set(ItemType.Pearl, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Bow, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Sword, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Shield, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Flag, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Monster_Egg, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Leather_Boot, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Sword, [{ x: -1, y: -1 }]);
+        this.itemMap.set(Item.Pearl, [{ x: -1, y: -1 }]);
         this.editDragDrop.isOnItemContainer$.subscribe((isOnItemContainer) => {
             if (isOnItemContainer) {
                 this.editDragDrop.onDragLeave(this.boardGame.board, this.itemMap);
@@ -115,7 +100,9 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.editToolMouse.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             this.selectedTile = tile;
         });
-        this.updateBoardGame();
+        this.boardGame = this.mapService.getMapData().value;
+        this.parseBoard();
+        this.populateEmptyCells();
     }
 
     ngOnDestroy() {
@@ -123,33 +110,33 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    private generateBoard(size: number) {
-        this.boardGame.board = [];
-        for (let i = 0; i < size; i++) {
-            const row: BoardCell[] = [];
-            for (let j = 0; j < size; j++) {
-                row.push({
-                    position: { x: i, y: j },
-                    tile: TileType.Default,
-                    item: ItemType.Default,
-                });
+    private parseBoard() {
+        for (let i = 0; i < this.boardGame.size; i++) {
+            for (let j = 0; j < this.boardGame.size; j++) {
+                const cell = this.boardGame.board[i][j];
+                if (cell.tile === undefined) {
+                    cell.tile = Tile.Default;
+                }
+                if (cell.item === undefined) {
+                    cell.item = Item.Default;
+                }
+                if (cell.position === undefined) {
+                    cell.position = { x: j, y: i };
+                }
             }
-            this.boardGame.board.push(row);
         }
     }
 
-    private updateBoardGame() {
-        this.boardGame = {
-            ...this.boardGame,
-            name: this.importedData.name,
-            description: this.importedData.description,
-            size: this.importedData.size,
-            status: BoardStatus.Ongoing,
-            visibility: BoardVisibility.Public,
-            updatedAt: new Date().getDate().toString(),
-        };
-
-        this.generateBoard(this.boardGame.size);
+    private populateEmptyCells() {
+        if (this.boardGame.board.length === 0) {
+            for (let i = 0; i < this.boardGame.size; i++) {
+                const row = [];
+                for (let j = 0; j < this.boardGame.size; j++) {
+                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                }
+                this.boardGame.board.push(row);
+            }
+        }
     }
 
     private screenToBoard(x: number, y: number): Vec2 {
@@ -189,51 +176,52 @@ export class BoardGameComponent implements OnInit, OnDestroy {
     private applyTile(col: number, row: number) {
         if (this.selectedTile !== null) {
             switch (this.selectedTile) {
-                case TileType.Closed_Door:
+                case Tile.Closed_Door:
                     this.applyDoor(col, row);
                     break;
 
-                case TileType.Wall:
+                case Tile.Wall:
                     this.applyWall(col, row);
                     break;
 
                 default:
-                    this.boardGame.board[row][col].tile = this.selectedTile as TileType;
+                    this.boardGame.board[row][col].tile = this.selectedTile as Tile;
                     break;
             }
         }
     }
 
     private applyDoor(col: number, row: number) {
-        if (this.surroudningTilesAreWall(col, row)) {
-            if (this.boardGame.board[row][col].tile === TileType.Closed_Door) {
-                this.boardGame.board[row][col].tile = TileType.Opened_Door;
-            } else if (this.boardGame.board[row][col].tile === TileType.Opened_Door) {
-                this.boardGame.board[row][col].tile = TileType.Closed_Door;
+        if (this.surroundingTilesAreWall(col, row)) {
+            if (this.boardGame.board[row][col].tile === Tile.Closed_Door) {
+                this.boardGame.board[row][col].tile = Tile.Opened_Door;
+            } else if (this.boardGame.board[row][col].tile === Tile.Opened_Door) {
+                this.boardGame.board[row][col].tile = Tile.Closed_Door;
             } else {
-                this.boardGame.board[row][col].tile = TileType.Closed_Door;
+                this.boardGame.board[row][col].tile = Tile.Closed_Door;
             }
             this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
         }
     }
 
     private applyWall(col: number, row: number) {
-        if (this.boardGame.board[row][col].item !== ItemType.Default) {
+        if (this.boardGame.board[row][col].item !== Item.Default) {
             this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
         }
-        this.boardGame.board[row][col].tile = TileType.Wall;
+        this.boardGame.board[row][col].tile = Tile.Wall;
     }
 
-    private surroudningTilesAreWall(col: number, row: number): boolean {
-        const onXAxis = this.boardGame.board[row][col - 1].tile === TileType.Wall && this.boardGame.board[row][col + 1].tile === TileType.Wall;
-        const onYAxis = this.boardGame.board[row - 1][col].tile === TileType.Wall && this.boardGame.board[row + 1][col].tile === TileType.Wall;
+    private surroundingTilesAreWall(col: number, row: number): boolean {
+        const onXAxis = this.boardGame.board[row][col - 1].tile === Tile.Wall && this.boardGame.board[row][col + 1].tile === Tile.Wall;
+        const onYAxis = this.boardGame.board[row - 1][col].tile === Tile.Wall && this.boardGame.board[row + 1][col].tile === Tile.Wall;
         return (onXAxis || onYAxis) && !(onXAxis && onYAxis);
     }
+
     private revertToDefault(col: number, row: number) {
-        if (this.boardGame.board[row][col].item !== ItemType.Default) {
+        if (this.boardGame.board[row][col].item !== Item.Default) {
             this.editDragDrop.handleItemOnInvalidTile(this.boardGame.board[row][col], this.itemMap, this.boardGame.board);
-        } else if (this.boardGame.board[row][col].tile !== TileType.Default) {
-            this.boardGame.board[row][col].tile = TileType.Default;
+        } else if (this.boardGame.board[row][col].tile !== Tile.Default) {
+            this.boardGame.board[row][col].tile = Tile.Default;
         }
     }
 

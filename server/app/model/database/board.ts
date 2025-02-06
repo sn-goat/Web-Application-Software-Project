@@ -1,5 +1,5 @@
-import { BoardCell } from '@common/board';
-import { BoardStatus, BoardVisibility } from '@common/enums';
+import { Cell } from '@common/board';
+import { Status, Visibility } from '@common/enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
@@ -30,15 +30,15 @@ export class Board {
 
     @ApiProperty({ description: 'Board state' })
     @Prop({ type: [[Object]], required: true })
-    board: BoardCell[][];
+    board: Cell[][];
 
     @ApiProperty({ description: 'Whether the user deems the board ready for gameplay' })
     @Prop({ required: true, enum: ['Ongoing', 'Completed'] })
-    status: BoardStatus;
+    status: Status;
 
     @ApiProperty({ description: 'Whether the board is available to everyone' })
     @Prop({ required: true, enum: ['Public', 'Private'] })
-    visibility: BoardVisibility;
+    visibility: Visibility;
 
     @ApiProperty({ description: 'Link or name for board miniature' })
     @Prop({})

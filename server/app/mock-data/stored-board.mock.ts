@@ -1,5 +1,5 @@
 import { Board } from '@app/model/database/board';
-import { BoardStatus, BoardVisibility } from '@common/enums';
+import { Status, Visibility } from '@common/enums';
 
 export const EMPTY_BOARD: Board = {
     name: 'mock_board1',
@@ -8,8 +8,8 @@ export const EMPTY_BOARD: Board = {
     isCTF: false,
     board: [[]],
     category: 'fun',
-    visibility: BoardVisibility.Public,
-    status: BoardStatus.Completed,
+    visibility: Visibility.Public,
+    status: Status.Completed,
     image: 'random/url/',
     updatedAt: new Date(),
     createdAt: new Date('2024,01,01'),
@@ -22,8 +22,8 @@ export const VALID_BOARD: Board = {
     isCTF: false,
     board: [[]],
     category: 'strategy',
-    visibility: BoardVisibility.Public,
-    status: BoardStatus.Ongoing,
+    visibility: Visibility.Public,
+    status: Status.Ongoing,
     image: 'another/random/url',
     updatedAt: new Date('2025,01,15'),
     createdAt: new Date('2025,01,02'),
@@ -36,8 +36,8 @@ export const INVALID_BOARD1: Board = {
     isCTF: true,
     board: [[]],
     category: 'horror',
-    visibility: BoardVisibility.Public,
-    status: BoardStatus.Completed,
+    visibility: Visibility.Public,
+    status: Status.Completed,
     image: 'random/url/',
     updatedAt: new Date(),
     createdAt: new Date('2025,01,02'),
@@ -50,8 +50,8 @@ export const INVALID_BOARD2: Board = {
     isCTF: true,
     board: [[]],
     category: 'fantasy',
-    visibility: BoardVisibility.Public,
-    status: BoardStatus.Completed,
+    visibility: Visibility.Public,
+    status: Status.Completed,
     image: 'url',
     updatedAt: new Date(),
     createdAt: new Date(),

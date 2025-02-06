@@ -4,13 +4,13 @@
             "path": "."
         },
         {
-            "path": "./client"
-        },
-        {
-            "path": "./server"
+            "path": "./client/src/app"
         },
         {
             "path": "./common"
+        },
+        {
+            "path": "./server"
         }
     ]
 }

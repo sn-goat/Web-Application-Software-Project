@@ -1,8 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { EditToolMouse } from '@app/classes/edit-tool-mouse/edit-tool-mouse';
-import { TileType } from '@common/enums';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
+import { Tile } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -12,7 +12,7 @@ import { Subject, takeUntil } from 'rxjs';
     imports: [],
 })
 export class EditToolTileComponent implements OnInit, OnDestroy {
-    @Input() type!: TileType;
+    @Input() type!: Tile;
     src: string = DEFAULT_PATH_TILES;
     extension: string = '.png';
     description: string = '';

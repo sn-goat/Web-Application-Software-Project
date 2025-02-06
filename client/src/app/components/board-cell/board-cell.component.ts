@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
-import { ItemType } from '@common/enums';
-import { BoardCell } from '@common/board';
-import { Vec2 } from '@common/vec2';
 import { EditDragDrop } from '@app/classes/edit-drag-drop/edit-drag-drop';
-import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
+import { Cell, Vec2 } from '@common/board';
+import { Item } from '@common/enums';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-board-cell',
@@ -16,9 +15,9 @@ import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 export class BoardCellComponent implements OnDestroy {
     @Input() isMouseRightDown!: boolean;
     @Input() isMouseLeftDown!: boolean;
-    @Input() cell!: BoardCell;
-    @Input() itemMap: Map<ItemType, Vec2[]>;
-    @Input() board: BoardCell[][];
+    @Input() cell!: Cell;
+    @Input() itemMap: Map<Item, Vec2[]>;
+    @Input() board: Cell[][];
 
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;

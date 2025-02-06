@@ -1,7 +1,7 @@
 [
     {
         "_id": "1",
-        "name": "Grandpa's Last Stand",
+        "name": "TestBoard",
         "description": "Defend Grandpa's farm from zombie chickens armed with pitchforks. It's his final wish.",
         "size": 16,
         "category": "rpg",
