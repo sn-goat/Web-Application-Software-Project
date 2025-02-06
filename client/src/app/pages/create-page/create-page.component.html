@@ -23,26 +23,26 @@
     <!-- Stat Selection -->
     <div class="stat-container">
       <div class="tooltip">
-        <button class="stat-button" [class.selected]="lifeSelected" (click)="selectLife()">
+        <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">
           Vie: {{ stats.life }}
         </button>
         <span class="tooltiptext">le nombre de points de vie</span>
       </div>
       <div class="tooltip">
-        <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectRapidity()">
+        <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectStat('rapidity')">
           Rapidité: {{ stats.rapidity }}
         </button>
         <span class="tooltiptext">déterminer l’ordre des tours et points de mouvement par tour</span>
       </div>
       <div class="tooltip">
-        <button class="stat-button" [class.selected]="attackSelected" (click)="selectAttack()">
-          Attaque: <img [src]="stats.attackDice" alt="Attack Dice" class="dice-image" />
+        <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
+          Attaque: {{ stats.attack }} + <img [src]="stats.attackDice" alt="Attack Dice" class="dice-image" />
         </button>
         <span class="tooltiptext">dégats d'une attaque</span>
       </div>
       <div class="tooltip">
-        <button class="stat-button" [class.selected]="defenseSelected" (click)="selectDefense()">
-          Défense: <img [src]="stats.defenseDice" alt="Defense Dice" class="dice-image" />
+        <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
+          Défense: {{ stats.defense }} + <img [src]="stats.defenseDice" alt="Defense Dice" class="dice-image" />
         </button>
         <span class="tooltiptext">capacité à bloquer une attaque </span>
       </div>

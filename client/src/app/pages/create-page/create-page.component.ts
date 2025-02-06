@@ -54,57 +54,39 @@ export class CreatePageComponent {
         }
     }
 
-    selectLife() {
-        if (this.rapiditySelected) {
-            this.rapiditySelected = false;
-            this.stats.rapidity = 4;
+    selectStat(stat: 'life' | 'rapidity') {
+        const otherStat = stat === 'life' ? 'rapidity' : 'life';
+        const selectedStat = stat + 'Selected' as 'lifeSelected' | 'rapiditySelected';
+        const otherSelectedStat = otherStat + 'Selected' as 'lifeSelected' | 'rapiditySelected';
+
+        if (this[otherSelectedStat]) {
+            this[otherSelectedStat] = false;
+            this.stats[otherStat] = 4;
         }
-        this.lifeSelected = !this.lifeSelected;
-        if (this.lifeSelected) {
-            this.stats.life += 2;
+        this[selectedStat] = !this[selectedStat];
+        if (this[selectedStat]) {
+            this.stats[stat] += 2;
         } else {
-            this.stats.life -= 2;
+            this.stats[stat] -= 2;
         }
     }
 
-    selectRapidity() {
-        if (this.lifeSelected) {
-            this.lifeSelected = false;
-            this.stats.life = 4;
-        }
-        this.rapiditySelected = !this.rapiditySelected;
-        if (this.rapiditySelected) {
-            this.stats.rapidity += 2;
-        } else {
-            this.stats.rapidity -= 2;
-        }
-    }
+    selectCombatStat(stat: 'attack' | 'defense') {
+    const otherStat = stat === 'attack' ? 'defense' : 'attack';
+    const selectedStat = stat + 'Selected' as 'attackSelected' | 'defenseSelected';
+    const otherSelectedStat = otherStat + 'Selected' as 'attackSelected' | 'defenseSelected';
 
-    selectAttack() {
-        if (this.defenseSelected) {
-            this.defenseSelected = false;
-            this.stats.defenseDice = D4;
-        }
-        this.attackSelected = !this.attackSelected;
-        if (this.attackSelected) {
-            this.stats.attackDice = D6;
-        } else {
-            this.stats.attackDice = D4;
-        }
+    if (this[otherSelectedStat]) {
+        this[otherSelectedStat] = false;
+        this.stats[`${otherStat}Dice`] = D4;
     }
-
-    selectDefense() {
-        if (this.attackSelected) {
-            this.attackSelected = false;
-            this.stats.attackDice = D4;
-        }
-        this.defenseSelected = !this.defenseSelected;
-        if (this.defenseSelected) {
-            this.stats.defenseDice = D6;
-        } else {
-            this.stats.defenseDice = D4;
-        }
+    this[selectedStat] = !this[selectedStat];
+    if (this[selectedStat]) {
+        this.stats[`${stat}Dice`] = D6;
+    } else {
+        this.stats[`${stat}Dice`] = D4;
     }
+}
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
