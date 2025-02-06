@@ -101,8 +101,8 @@ export class BoardGameComponent implements OnInit, OnDestroy {
             this.selectedTile = tile;
         });
         this.boardGame = this.mapService.getMapData().value;
-        this.sanitizeBoard();
-        this.populateBoard();
+        this.parseBoard();
+        this.populateEmptyCells();
     }
 
     ngOnDestroy() {
@@ -110,20 +110,24 @@ export class BoardGameComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
-    private sanitizeBoard() {
-        this.boardGame.board.forEach((row) => {
-            row.forEach((cell) => {
-                if (cell.item === undefined) {
-                    cell.item = Item.Default;
-                }
+    private parseBoard() {
+        for (let i = 0; i < this.boardGame.size; i++) {
+            for (let j = 0; j < this.boardGame.size; j++) {
+                const cell = this.boardGame.board[i][j];
                 if (cell.tile === undefined) {
                     cell.tile = Tile.Default;
                 }
-            });
-        });
+                if (cell.item === undefined) {
+                    cell.item = Item.Default;
+                }
+                if (cell.position === undefined) {
+                    cell.position = { x: j, y: i };
+                }
+            }
+        }
     }
 
-    private populateBoard() {
+    private populateEmptyCells() {
         if (this.boardGame.board.length === 0) {
             for (let i = 0; i < this.boardGame.size; i++) {
                 const row = [];
