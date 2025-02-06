@@ -1,10 +1,10 @@
-import { BoardStatus, BoardVisibility, ItemType, TileType } from './enums';
+import { Item, Status, Tile, Visibility } from './enums';
 import { Vec2 } from './vec2';
 
-export interface BoardCell {
+export interface Cell {
     position: Vec2;
-    tile: TileType;
-    item: ItemType;
+    tile: Tile;
+    item: Item;
 }
 
 export interface Board {
@@ -14,9 +14,9 @@ export interface Board {
     size: number;
     category: string | null;
     isCTF: boolean;
-    board: BoardCell[][];
-    status: BoardStatus;
-    visibility: BoardVisibility;
+    board: Cell[][];
+    status: Status;
+    visibility: Visibility;
     image: string;
     createdAt: string | null;
     updatedAt: string | null;

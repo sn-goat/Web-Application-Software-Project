@@ -7,8 +7,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapService } from '@app/services/map.service';
-import { BoardCell } from '@common/board';
-import { BoardStatus, BoardVisibility } from '@common/enums';
+import { Cell } from '@common/board';
+import { Status, Visibility } from '@common/enums';
 import { environment } from 'src/environments/environment';
 
 export interface GameMap {
@@ -18,9 +18,9 @@ export interface GameMap {
     size: number;
     category: string;
     isCTF: boolean;
-    board: BoardCell[][];
-    status: BoardStatus;
-    visibility: BoardVisibility;
+    board: Cell[][];
+    status: Status;
+    visibility: Visibility;
     image: string | null;
     createdAt?: Date | null;
     updatedAt?: Date | null;
@@ -62,8 +62,8 @@ export class MapListComponent implements OnInit {
             next: (data) => {
                 this.items = data.map((item) => ({
                     ...item,
-                    status: item.status === BoardStatus.Ongoing ? BoardStatus.Ongoing : BoardStatus.Completed,
-                    visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
+                    status: item.status === Status.Ongoing ? Status.Ongoing : Status.Completed,
+                    visibility: item.visibility === 'Public' ? Visibility.Public : Visibility.Private,
                     createdAt: item.createdAt ? new Date(item.createdAt) : null,
                     updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
                 }));
@@ -78,7 +78,7 @@ export class MapListComponent implements OnInit {
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions || item.status === BoardStatus.Completed;
+            const isPublished = this.showActions || item.status === Status.Completed;
 
             return matchesSearch && isPublished;
         });
@@ -118,7 +118,7 @@ export class MapListComponent implements OnInit {
     }
 
     toggleVisibility(map: GameMap): void {
-        map.visibility = map.visibility === BoardVisibility.Public ? BoardVisibility.Private : BoardVisibility.Public;
+        map.visibility = map.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
         this.cdr.detectChanges();
     }
 
