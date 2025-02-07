@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Vec2 } from '@common/vec2';
+import { Vec2 } from '@common/board';
 
 @Injectable({
     providedIn: 'root',

@@ -3,9 +3,11 @@
         <mat-card-title>Tuiles</mat-card-title>
     </mat-card-header>
     <mat-card-content class="content">
-        <ng-container *ngFor="let tile of tiles">
-            <app-edit-tool-tile [type]="tile"></app-edit-tool-tile>
-        </ng-container>
+        @for(tile of tiles; track tile){
+            @if(tile !== tileType.Default && tile !== tileType.Opened_Door ){
+                <app-edit-tool-tile [type]="tile"></app-edit-tool-tile>
+            }
+        }
     </mat-card-content>
 </mat-card>
 <mat-card appearance="outlined">
@@ -13,10 +15,10 @@
         <mat-card-title>Objets</mat-card-title>
     </mat-card-header>
     <mat-card-content class="content">
-        <ng-container *ngFor="let item of items">
+        @for(item of items; track item){
             @if (item !== '') {
                 <app-edit-tool-item [type]="item"></app-edit-tool-item>
             }
-        </ng-container>
+        }
     </mat-card-content>
 </mat-card>

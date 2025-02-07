@@ -7,7 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapService } from '@app/services/map.service';
-import { Status, Visibility } from '@common/enums';
+import { Visibility } from '@common/enums';
 import { environment } from 'src/environments/environment';
 import { Board } from '@common/board';
 
@@ -47,7 +47,6 @@ export class MapListComponent implements OnInit {
             next: (data) => {
                 this.items = data.map((item) => ({
                     ...item,
-                    status: item.status === Status.Ongoing ? Status.Ongoing : Status.Completed,
                     visibility: item.visibility === 'Public' ? Visibility.Public : Visibility.Private,
                     createdAt: item.createdAt ? new Date(item.createdAt) : null,
                     updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
@@ -63,7 +62,7 @@ export class MapListComponent implements OnInit {
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions || item.status === Status.Completed;
+            const isPublished = this.showActions;
 
             return matchesSearch && isPublished;
         });
@@ -78,8 +77,6 @@ export class MapListComponent implements OnInit {
                     return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0);
                 case 'name':
                     return a.name.localeCompare(b.name);
-                case 'status':
-                    return a.status.localeCompare(b.status);
                 case 'size':
                     return b.size - a.size;
                 default:
@@ -110,7 +107,7 @@ export class MapListComponent implements OnInit {
     createNewMap(): void {
         const dialogRef = this.dialog.open(FormDialogComponent, {
             width: '280px',
-            data: { name: '', description: '', size: 10, category: '', isCTF: false },
+            data: { name: '', description: '', size: 10, isCTF: false },
         });
 
         dialogRef.afterClosed().subscribe((result) => {

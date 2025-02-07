@@ -1,20 +1,20 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { TileType, ItemType } from '@common/enums';
+import { Tile, Item } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ToolSelectionService {
-    selectedTile$: Observable<TileType | null>;
-    selectedItem$: Observable<ItemType | null>;
-    itemOnBoard$: Observable<Set<ItemType>>;
+    selectedTile$: Observable<Tile | null>;
+    selectedItem$: Observable<Item | null>;
+    itemOnBoard$: Observable<Set<Item>>;
     nbrSpawnOnBoard$: Observable<number>;
     nbrChestOnBoard$: Observable<number>;
 
-    private selectedTile = new BehaviorSubject<TileType | null>(null);
-    private selectedItem = new BehaviorSubject<ItemType | null>(null);
-    private itemOnBoard = new BehaviorSubject<Set<ItemType>>(new Set());
+    private selectedTile = new BehaviorSubject<Tile | null>(null);
+    private selectedItem = new BehaviorSubject<Item | null>(null);
+    private itemOnBoard = new BehaviorSubject<Set<Item>>(new Set());
     private nbrSpawnOnBoard = new BehaviorSubject<number>(0);
     private nbrChestOnBoard = new BehaviorSubject<number>(0);
 
@@ -26,7 +26,7 @@ export class ToolSelectionService {
         this.nbrChestOnBoard$ = this.nbrChestOnBoard.asObservable();
     }
 
-    updateSelectedTile(selectedTile: TileType) {
+    updateSelectedTile(selectedTile: Tile) {
         if (this.selectedTile.value === selectedTile) {
             this.selectedTile.next(null);
         } else {
@@ -34,15 +34,15 @@ export class ToolSelectionService {
         }
     }
 
-    updateSelectedItem(selectedItem: ItemType) {
+    updateSelectedItem(selectedItem: Item) {
         this.selectedItem.next(selectedItem);
     }
 
-    addItem(item: ItemType) {
+    addItem(item: Item) {
         this.itemOnBoard.next(this.itemOnBoard.value.add(item));
     }
 
-    removeItem(item: ItemType) {
+    removeItem(item: Item) {
         this.itemOnBoard.next(this.itemOnBoard.value.delete(item) ? this.itemOnBoard.value : this.itemOnBoard.value);
     }
 

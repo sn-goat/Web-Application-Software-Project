@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
-import { Item } from '@common/enums';
+import { BoardSize, Item } from '@common/enums';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { MapService } from '@app/services/map.service';
@@ -25,7 +25,8 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
 
     constructor(private toolSelection: ToolSelectionService) {}
     ngOnInit() {
-        const maxObjectByType = BOARD_SIZE_MAPPING.get(this.mapService.getMapData().value.size);
+        const boardSize = this.mapService.getMapData().value.size as BoardSize;
+        const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
         if (this.type === Item.Spawn) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
                 if (maxObjectByType !== undefined) {

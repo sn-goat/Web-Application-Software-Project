@@ -4,9 +4,8 @@ import { Subject, takeUntil } from 'rxjs';
 import { MouseEditorService } from './mouse-editor.service';
 import { ToolSelectionService } from './tool-selection.service';
 
-import { TileType, ItemType } from '@common/enums';
-import { Vec2 } from '@common/vec2';
-import { Board } from '@common/board';
+import { Tile, Item } from '@common/enums';
+import { Board, Vec2 } from '@common/board';
 
 @Injectable({
     providedIn: 'root',
@@ -20,8 +19,8 @@ export class TileApplicatorService implements OnDestroy {
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
 
-    private selectedTile: TileType | null;
-    private selectedItem: ItemType | null;
+    private selectedTile: Tile | null;
+    private selectedItem: Item | null;
     private currentCoord: Vec2 = { x: -1, y: -1 };
 
     constructor(
@@ -52,14 +51,14 @@ export class TileApplicatorService implements OnDestroy {
 
         if (event.button === 2) {
             this.isMouseRightDown = true;
-            if (boardGame.board[cellPosition.y][cellPosition.x].item !== ItemType.Default) {
+            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.Default) {
                 this.handleItem = true;
                 this.deleteItem(cellPosition.x, cellPosition.y, boardGame);
             }
         }
         if (event.button === 0) {
             this.isMouseLeftDown = true;
-            if (boardGame.board[cellPosition.y][cellPosition.x].item !== ItemType.Default) {
+            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.Default) {
                 this.handleItem = true;
                 this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
             }
@@ -94,12 +93,12 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     handleDrop(boardGame: Board, rect: DOMRect) {
-        if (this.selectedItem !== ItemType.Default) {
+        if (this.selectedItem !== Item.Default) {
             this.newItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
             this.updatePosition(this.oldItemPos, this.newItemPos, boardGame);
         }
         this.oldItemPos = { x: -1, y: -1 };
-        this.toolSelection.updateSelectedItem(ItemType.Default);
+        this.toolSelection.updateSelectedItem(Item.Default);
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
         this.handleItem = false;
@@ -122,54 +121,70 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     private applyIntermediateTiles(previousCoord: Vec2, boardGame: Board, rect: DOMRect) {
-        const dx = this.currentCoord.x - previousCoord.x;
-        const dy = this.currentCoord.y - previousCoord.y;
-        const distanceToDo = Math.sqrt(dx * dx + dy * dy);
-        let distanceMade = 0;
+        const startX = previousCoord.x;
+        const startY = previousCoord.y;
+        const endX = this.currentCoord.x;
+        const endY = this.currentCoord.y;
 
-        const seen: Set<Vec2> = new Set([this.screenToBoard(previousCoord.x, previousCoord.y, boardGame, rect)]);
-        const slope = (this.currentCoord.y - previousCoord.y) / (this.currentCoord.x - previousCoord.x);
-        const step = previousCoord.x < this.currentCoord.x ? 1 : -1;
+        const dx = Math.abs(endX - startX);
+        const dy = Math.abs(endY - startY);
+        const sx = startX < endX ? 1 : -1;
+        const sy = startY < endY ? 1 : -1;
+        let err = dx - dy;
 
-        let x = previousCoord.x;
-        let y = previousCoord.y;
+        const seen: Set<string> = new Set([JSON.stringify(this.screenToBoard(startX, startY, boardGame, rect))]);
 
-        while (distanceMade < distanceToDo) {
+        let x = startX;
+        let y = startY;
+
+        while (true) {
             if (!this.isOnBoard(x, y, rect)) {
                 break;
             }
 
             const tileCoord = this.screenToBoard(x, y, boardGame, rect);
-            if (!seen.has(tileCoord)) {
+            const tileCoordKey = JSON.stringify(tileCoord);
+            if (!seen.has(tileCoordKey)) {
                 this.updateCell(tileCoord.x, tileCoord.y, boardGame);
-                seen.add(tileCoord);
+                seen.add(tileCoordKey);
             }
-            x += step;
-            y = slope * (x - previousCoord.x) + previousCoord.y;
-            distanceMade += 1;
+
+            if (x === endX && y === endY) {
+                break;
+            }
+
+            const e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                x += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                y += sy;
+            }
         }
     }
 
     private applyTile(col: number, row: number, boardGame: Board) {
         if (this.selectedTile !== null) {
-            if (this.selectedTile === TileType.Wall) {
+            if (this.selectedTile === Tile.Wall) {
                 this.applyWall(col, row, boardGame);
             } else {
-                boardGame.board[row][col].tile = this.selectedTile as TileType;
+                boardGame.board[row][col].tile = this.selectedTile as Tile;
             }
         }
     }
 
     private applyWall(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item !== ItemType.Default) {
+        if (boardGame.board[row][col].item !== Item.Default) {
             this.deleteItem(col, row, boardGame);
         }
-        boardGame.board[row][col].tile = TileType.Wall;
+        boardGame.board[row][col].tile = Tile.Wall;
     }
 
     private revertToDefault(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].tile !== TileType.Default) {
-            boardGame.board[row][col].tile = TileType.Default;
+        if (boardGame.board[row][col].tile !== Tile.Default) {
+            boardGame.board[row][col].tile = Tile.Default;
         }
     }
 
@@ -184,32 +199,32 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     private applyItem(col: number, row: number, boardGame: Board) {
-        if (this.selectedItem === ItemType.Spawn) {
+        if (this.selectedItem === Item.Spawn) {
             this.toolSelection.incrementSpawn();
-        } else if (this.selectedItem === ItemType.Chest) {
+        } else if (this.selectedItem === Item.Chest) {
             this.toolSelection.incrementChest();
         } else {
-            this.toolSelection.addItem(this.selectedItem as ItemType);
+            this.toolSelection.addItem(this.selectedItem as Item);
         }
 
-        if (boardGame.board[row][col].item !== ItemType.Default) {
+        if (boardGame.board[row][col].item !== Item.Default) {
             this.deleteItem(col, row, boardGame);
         }
-        boardGame.board[row][col].item = this.selectedItem as ItemType;
+        boardGame.board[row][col].item = this.selectedItem as Item;
     }
     private deleteItem(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item === ItemType.Spawn) {
+        if (boardGame.board[row][col].item === Item.Spawn) {
             this.toolSelection.decrementSpawn();
-        } else if (boardGame.board[row][col].item === ItemType.Chest) {
+        } else if (boardGame.board[row][col].item === Item.Chest) {
             this.toolSelection.decrementChest();
         } else {
-            this.toolSelection.removeItem(boardGame.board[row][col].item as ItemType);
+            this.toolSelection.removeItem(boardGame.board[row][col].item as Item);
         }
-        boardGame.board[row][col].item = ItemType.Default;
+        boardGame.board[row][col].item = Item.Default;
     }
 
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2, boardGame: Board) {
-        if (boardGame.board[newItemPos.y][newItemPos.x].tile !== TileType.Wall) {
+        if (boardGame.board[newItemPos.y][newItemPos.x].tile !== Tile.Wall) {
             if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
                 this.deleteItem(oldItemPos.x, oldItemPos.y, boardGame);
             }

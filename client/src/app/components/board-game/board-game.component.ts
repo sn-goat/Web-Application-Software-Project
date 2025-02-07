@@ -3,7 +3,7 @@ import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { MapService } from '@app/services/map.service';
-import { Board, Vec2 } from '@common/board';
+import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 
 @Component({
@@ -13,11 +13,6 @@ import { Item, Tile, Visibility } from '@common/enums';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent implements OnInit {
-    isMouseRightDown: boolean = false;
-    isMouseLeftDown: boolean = false;
-    previousCoord: Vec2 = { x: -1, y: -1 };
-    currentCoord: Vec2 = { x: -1, y: -1 };
-
     boardGame: Board;
 
     private readonly mapService = inject(MapService);
@@ -54,6 +49,10 @@ export class BoardGameComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.initializeBoard();
+    }
+
+    private initializeBoard() {
         this.boardGame = this.mapService.getMapData().value;
         if (this.boardGame.board === undefined) {
             this.boardGame = {
@@ -78,6 +77,7 @@ export class BoardGameComponent implements OnInit {
         }
         this.parseBoard();
         this.populateEmptyCells();
+        this.mapService.setMapData(this.boardGame);
     }
 
     private parseBoard() {
