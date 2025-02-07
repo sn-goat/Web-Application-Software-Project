@@ -82,7 +82,6 @@ export class TileApplicatorService implements OnDestroy {
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
         this.handleItem = false;
-        this.previousCoord = { x: -1, y: -1 };
     }
 
     handleMouseMove(boardGame: Board, rect: DOMRect) {
@@ -137,7 +136,7 @@ export class TileApplicatorService implements OnDestroy {
         let x = startX;
         let y = startY;
 
-        while (true) {
+        while (x !== endX || y !== endY) {
             if (!this.isOnBoard(x, y, rect)) {
                 break;
             }
@@ -147,10 +146,6 @@ export class TileApplicatorService implements OnDestroy {
             if (!seen.has(tileCoordKey)) {
                 this.updateCell(tileCoord.x, tileCoord.y, boardGame);
                 seen.add(tileCoordKey);
-            }
-
-            if (x === endX && y === endY) {
-                break;
             }
 
             const e2 = 2 * err;
@@ -163,15 +158,35 @@ export class TileApplicatorService implements OnDestroy {
                 y += sy;
             }
         }
+
+        // Ensure the end point is also updated
+        if (this.isOnBoard(endX, endY, rect)) {
+            const tileCoord = this.screenToBoard(endX, endY, boardGame, rect);
+            const tileCoordKey = JSON.stringify(tileCoord);
+            if (!seen.has(tileCoordKey)) {
+                this.updateCell(tileCoord.x, tileCoord.y, boardGame);
+                seen.add(tileCoordKey);
+            }
+        }
     }
 
     private applyTile(col: number, row: number, boardGame: Board) {
         if (this.selectedTile !== null) {
             if (this.selectedTile === Tile.Wall) {
                 this.applyWall(col, row, boardGame);
+            } else if (this.selectedTile === Tile.Closed_Door) {
+                this.applyDoor(col, row, boardGame);
             } else {
                 boardGame.board[row][col].tile = this.selectedTile as Tile;
             }
+        }
+    }
+
+    private applyDoor(col: number, row: number, boardGame: Board) {
+        if (boardGame.board[row][col].tile === Tile.Closed_Door) {
+            boardGame.board[row][col].tile = Tile.Opened_Door;
+        } else {
+            boardGame.board[row][col].tile = Tile.Closed_Door;
         }
     }
 
