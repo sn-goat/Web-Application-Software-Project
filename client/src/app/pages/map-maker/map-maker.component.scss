@@ -1,60 +1,138 @@
-mat-drawer-content {
-  display: flex;
-  flex: 1;
-  justify-content: center;
-  height: auto;
+$primary-bg: #ffffff;
+$border-color: #000;
+$text-color: #000;
+
+.editor-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    width: 98%;
+    height: 97%;
+    padding: 20px;
+    background: $primary-bg;
 }
 
-.board-container {
-  flex: 3; /* Occupe plus d'espace */
-  flex-direction: column;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: fit-content;
+.editor-panel, .tiles-panel {
+    width: 20%;
+    border: 2px solid $border-color;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.reset-button-container {
-  margin-top: 10px; /* Espace au-dessus du bouton de réinitialisation */
-  display: flex;
-  justify-content: center; /* Centrage du bouton */
+.map-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+}
+
+h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-container {
   width: 100%;
+  padding: 10px;  // Ajoute un padding interne pour éviter que les champs touchent les bords
 }
 
-.tools-container {
-  flex: 1; /* Occupe moins d'espace */
-  max-width: 30%; /* Définir une largeur maximale */
-  height: auto;
-  overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  box-sizing: border-box;
-}
-
-.form-group {
-  margin-bottom: 20px;
-  width: auto;
-  margin-left: 10px;
-  margin-right: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-textarea#Description {
-  resize: none; /* Empêche le redimensionnement */
-}
-
-.button-group {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  width: calc(100% - 20px);
-  margin-left: 10px;
-  margin-right: 10px;
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 button {
-  padding: 10px 10px;
+  background: #007BFF;
+  color: white;
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
 }
+
+button:hover {
+  background: #0056b3;
+}
+
+.reset-button {
+  background: #888;
+  color: white;
+}
+
+.reset-button:hover {
+  background: #555;
+}
+
+.editor-panel {
+  width: 30%;  // Augmente la largeur de la boîte
+  max-width: 400px;  // Fixe une largeur maximale
+  border: 2px solid #000;
+  border-radius: 10px;
+  padding: 30px;  // Ajoute du padding pour espacer les éléments
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.title {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.button-group {
+    margin-bottom: 20px;
+}
+
+.content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.board-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.reset-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.tools-container {
+    margin-left: 20px;
+}
+
+
+
+

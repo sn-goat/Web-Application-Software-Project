@@ -1,34 +1,22 @@
-<div class="container">   
-    <h1>Vue Edition</h1>
-    <mat-drawer-container>
-        <mat-drawer #drawer mode="push" closed>
-            <form>
-                <div class="form-group">
-                    <label for="Nom">Nom de la carte:</label>
-                    <input id="Nom" type="text" maxlength="15" placeholder="15 caractères maximum"/>
-                </div>
-                <div class="form-group">
-                    <label for="Description">Description de la carte:</label>
-                    <textarea id="Description" type="text" rows="4" maxlength="100" placeholder="100 caractères maximum"></textarea>
-                </div>
-                <div class="button-group">
-                    <button type="button" id="saveButton">Enregistrer la carte</button>
-                </div>
-            </form>
-        </mat-drawer>
-        <mat-drawer-content >
-            <button mat-icon-button (click)="drawer.toggle()">
-                <mat-icon>more_vert</mat-icon>
-            </button>
-            <div class = "board-container">
-                <app-board-game [importedData]="data"></app-board-game>
-                <div class="reset-button-container">
-                    <button type="button" id="resetButton">Réinitialiser les changements</button>
-                </div>
-            </div>
-            <div class = "tools-container">
-                <app-edit-item-area [boardSize]="data.size"></app-edit-item-area>
-            </div>
-        </mat-drawer-content>
-    </mat-drawer-container> 
+<div class="editor-container">
+    <div class="editor-panel">
+        <h2>Vue d’édition</h2>
+        <div class="form-container">
+            <label for="Nom">Nom de la carte:</label>
+            <input id="Nom" type="text" maxlength="15" placeholder="15 caractères maximum" matInput [(ngModel)]="name" />
+
+            <label for="Description">Description de la carte:</label>
+            <textarea id="Description" rows="4" maxlength="100" placeholder="100 caractères maximum" matInput [(ngModel)]="description"></textarea>
+
+            <button type="button" id="saveButton">Enregistrer</button>
+            <button type="button" class="reset-button">Réinitialiser</button>
+        </div>
+    </div>
+    <div class="map-container">
+        <app-board-game></app-board-game>
+    </div>
+
+    <div class="tiles-panel">
+        <app-edit-item-area></app-edit-item-area>
+    </div>
 </div>

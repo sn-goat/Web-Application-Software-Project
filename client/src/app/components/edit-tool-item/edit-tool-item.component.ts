@@ -1,9 +1,10 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
-import { ItemType } from '@common/enums';
+import { Item } from '@common/enums';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
+import { MapService } from '@app/services/map.service';
 
 @Component({
     selector: 'app-edit-tool-item',
@@ -12,27 +13,27 @@ import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
     imports: [],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
-    @Input() type!: ItemType;
-    @Input() boardSize!: number;
+    @Input() type: Item;
 
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';
     isDraggable = true;
     remainingItem: number = 0;
 
+    private readonly mapService = inject(MapService);
     private destroy$ = new Subject<void>();
 
     constructor(private toolSelection: ToolSelectionService) {}
     ngOnInit() {
-        const maxObjectByType = BOARD_SIZE_MAPPING.get(this.boardSize);
-        if (this.type === ItemType.Spawn) {
+        const maxObjectByType = BOARD_SIZE_MAPPING.get(this.mapService.getMapData().value.size);
+        if (this.type === Item.Spawn) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
                 if (maxObjectByType !== undefined) {
                     this.remainingItem = maxObjectByType - nbrSpawns;
                     this.isDraggable = this.remainingItem > 0;
                 }
             });
-        } else if (this.type === ItemType.Chest) {
+        } else if (this.type === Item.Chest) {
             this.toolSelection.nbrChestOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrChests) => {
                 if (maxObjectByType !== undefined) {
                     this.remainingItem = maxObjectByType - nbrChests;

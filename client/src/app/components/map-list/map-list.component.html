@@ -3,10 +3,10 @@
     <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
     <div class="filter-sort">
       <select [(ngModel)]="sortBy" class="sort-select">
-        <option value="createdAt">Created Date</option>
-        <option value="name">Name</option>
-        <option value="status">Status</option>
-        <option value="size">Size</option>
+        <option value="createdAt">Date de création</option>
+        <option value="name">Nom</option>
+        <option value="status">Statut</option>
+        <option value="size">Taille</option>
       </select>
     </div>
   </div>
@@ -59,7 +59,7 @@
       <!-- Add Map Card -->
       <div *ngIf="showActions" class="list-item new-map-card" (click)="createNewMap()">
         <div class="add-icon">+</div>
-        <p class="add-text">Create New Map</p>
+        <p class="add-text">Créer un nouveau terrain</p>
       </div>
     </div>
   </cdk-virtual-scroll-viewport>
@@ -67,7 +67,7 @@
   <!-- Empty State -->
   @if (getFilteredAndSortedItems().length === 0) {
     <div class="empty-state">
-      <p>No items found</p>
+      <p>Aucun item trouvé</p>
     </div>
   }
 </div>

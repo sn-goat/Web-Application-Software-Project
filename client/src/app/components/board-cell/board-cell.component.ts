@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { BoardCell } from '@common/board';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
-import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
+import { Cell } from '@common/board';
 
 @Component({
     selector: 'app-board-cell',
@@ -11,7 +11,7 @@ import { DEFAULT_PATH_TILES, DEFAULT_PATH_ITEMS } from '@app/constants/path';
     imports: [CommonModule],
 })
 export class BoardCellComponent {
-    @Input() cell!: BoardCell;
+    @Input() cell!: Cell;
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';

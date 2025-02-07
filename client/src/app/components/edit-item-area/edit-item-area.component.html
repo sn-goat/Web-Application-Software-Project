@@ -2,11 +2,10 @@
     <mat-card-header>
         <mat-card-title>Tuiles</mat-card-title>
     </mat-card-header>
-    <mat-card-content class= "content">
-        <app-edit-tool-tile [type]="tileType.Water"></app-edit-tool-tile>
-        <app-edit-tool-tile [type]="tileType.Wall"></app-edit-tool-tile>
-        <app-edit-tool-tile [type]="tileType.Ice"></app-edit-tool-tile>
-        <app-edit-tool-tile [type]="tileType.Closed_Door"></app-edit-tool-tile>
+    <mat-card-content class="content">
+        <ng-container *ngFor="let tile of tiles">
+            <app-edit-tool-tile [type]="tile"></app-edit-tool-tile>
+        </ng-container>
     </mat-card-content>
 </mat-card>
 <mat-card appearance="outlined">
@@ -14,14 +13,10 @@
         <mat-card-title>Objets</mat-card-title>
     </mat-card-header>
     <mat-card-content class="content">
-        <app-edit-tool-item [type]="itemType.Bow" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Flag" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Leather_Boot" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Monster_Egg" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Pearl" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Shield" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Sword" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Chest" [boardSize]="boardSize"></app-edit-tool-item>
-        <app-edit-tool-item [type]="itemType.Spawn" [boardSize]="boardSize"></app-edit-tool-item>
+        <ng-container *ngFor="let item of items">
+            @if (item !== '') {
+                <app-edit-tool-item [type]="item"></app-edit-tool-item>
+            }
+        </ng-container>
     </mat-card-content>
 </mat-card>

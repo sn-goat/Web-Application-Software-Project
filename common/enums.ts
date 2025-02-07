@@ -1,4 +1,4 @@
-export enum TileType {
+export enum Tile {
     Ice = 'Ice',
     Water = 'Water',
     Wall = 'Wall',
@@ -7,7 +7,7 @@ export enum TileType {
     Default = 'Base',
 }
 
-export enum ItemType {
+export enum Item {
     Bow = 'Bow',
     Flag = 'Flag',
     Leather_Boot = 'Leather Boot',
@@ -20,7 +20,7 @@ export enum ItemType {
     Default = '',
 }
 
-export enum BoardVisibility {
+export enum Visibility {
     Public = 'Public',
     Private = 'Private',
 }

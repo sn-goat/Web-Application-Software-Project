@@ -1,7 +1,7 @@
 import { MOCK_STORED_BOARD_ARRAY } from '@app/mock-data/stored-board.mock';
 import { Board, BoardDocument } from '@app/model/database/board';
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
-import { BoardVisibility, TileType } from '@common/enums';
+import { Tile, Visibility } from '@common/enums';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -65,7 +65,7 @@ export class BoardService {
             throw new NotFoundException(`Board with name "${name}" not found.`);
         }
 
-        const newVisibility = board.visibility === BoardVisibility.Public ? BoardVisibility.Private : BoardVisibility.Public;
+        const newVisibility = board.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
         board.visibility = newVisibility;
         return await board.save();
     }
@@ -96,7 +96,7 @@ export class BoardService {
 
         for (const row of boardGame.board) {
             for (const cell of row) {
-                if (cell.tile === TileType.Wall) {
+                if (cell.tile === Tile.Wall) {
                     tilecount++;
                 }
             }

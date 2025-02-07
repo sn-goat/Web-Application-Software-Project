@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, Input, OnInit } from '@angular/core';
 import { TileApplicatorService } from '@app/services/tile-applicator.service';
+import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
-import { Board, BoardCell } from '@common/board';
-import { BoardVisibility, ItemType, TileType } from '@common/enums';
-import { Vec2 } from '@common/vec2';
+import { MapService } from '@app/services/map.service';
+import { Board, Vec2 } from '@common/board';
+import { Item, Tile, Visibility } from '@common/enums';
 
 @Component({
     selector: 'app-board-game',
@@ -13,25 +13,14 @@ import { Vec2 } from '@common/vec2';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent implements OnInit {
-    @Input() importedData: { name: string; size: number; description: string } = { name: '', size: 0, description: '' };
     isMouseRightDown: boolean = false;
     isMouseLeftDown: boolean = false;
+    previousCoord: Vec2 = { x: -1, y: -1 };
+    currentCoord: Vec2 = { x: -1, y: -1 };
 
-    boardGame: Board = {
-        _id: '',
-        name: '',
-        description: '',
-        size: 15,
-        category: '',
-        isCTF: false,
-        board: [],
-        visibility: BoardVisibility.Public,
-        image: '',
-        createdAt: new Date().getDate().toString(),
-        updatedAt: '',
-    };
+    boardGame: Board;
 
-    itemMap: Map<ItemType, Vec2[]> = new Map();
+    private readonly mapService = inject(MapService);
 
     constructor(
         private elRef: ElementRef,
@@ -65,34 +54,58 @@ export class BoardGameComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.updateBoardGame();
+        this.boardGame = this.mapService.getMapData().value;
+        if (this.boardGame.board === undefined) {
+            this.boardGame = {
+                _id: '',
+                name: this.boardGame.name,
+                description: this.boardGame.description,
+                size: this.boardGame.size,
+                isCTF: false,
+                board: [],
+                visibility: Visibility.Public,
+                image: '',
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+            for (let i = 0; i < this.boardGame.size; i++) {
+                const row = [];
+                for (let j = 0; j < this.boardGame.size; j++) {
+                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                }
+                this.boardGame.board.push(row);
+            }
+        }
+        this.parseBoard();
+        this.populateEmptyCells();
     }
 
-    private generateBoard(size: number) {
-        this.boardGame.board = [];
-        for (let i = 0; i < size; i++) {
-            const row: BoardCell[] = [];
-            for (let j = 0; j < size; j++) {
-                row.push({
-                    position: { x: i, y: j },
-                    tile: TileType.Default,
-                    item: ItemType.Default,
-                });
+    private parseBoard() {
+        for (let i = 0; i < this.boardGame.size; i++) {
+            for (let j = 0; j < this.boardGame.size; j++) {
+                const cell = this.boardGame.board[i][j];
+                if (cell.tile === undefined) {
+                    cell.tile = Tile.Default;
+                }
+                if (cell.item === undefined) {
+                    cell.item = Item.Default;
+                }
+                if (cell.position === undefined) {
+                    cell.position = { x: j, y: i };
+                }
             }
-            this.boardGame.board.push(row);
         }
     }
 
-    private updateBoardGame() {
-        this.boardGame = {
-            ...this.boardGame,
-            name: this.importedData.name,
-            description: this.importedData.description,
-            size: this.importedData.size,
-            visibility: BoardVisibility.Public,
-            updatedAt: new Date().getDate().toString(),
-        };
-
-        this.generateBoard(this.boardGame.size);
+    private populateEmptyCells() {
+        if (this.boardGame.board.length === 0) {
+            for (let i = 0; i < this.boardGame.size; i++) {
+                const row = [];
+                for (let j = 0; j < this.boardGame.size; j++) {
+                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                }
+                this.boardGame.board.push(row);
+            }
+        }
     }
 }
