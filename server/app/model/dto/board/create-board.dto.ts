@@ -11,9 +11,6 @@ export class CreateBoardDto {
     @ApiProperty({ description: 'Board description' })
     description: string;
 
-    @ApiProperty({ description: 'Tag associated with the board' })
-    category: string;
-
     @ApiProperty({ description: 'Number representing the size of a single board column', examples: ['10', '16', '20'] })
     size: number;
 

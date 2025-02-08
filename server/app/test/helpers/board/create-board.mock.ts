@@ -6,31 +6,28 @@ export const EMPTY_BOARD: CreateBoardDto = {
     description: 'test board #1',
     size: 16,
     isCTF: false,
-    board: [[]],
-    category: 'fun',
-    visibility: BoardVisibility.Public,
+    board: [],
+    visibility: BoardVisibility.PUBLIC,
     image: 'random/url/',
 };
 
 export const VALID_BOARD: CreateBoardDto = {
     name: 'mock_board2',
     description: 'test board #2',
-    size: 20,
+    size: 10,
     isCTF: false,
     board: [[]],
-    category: 'strategy',
-    visibility: BoardVisibility.Public,
+    visibility: BoardVisibility.PUBLIC,
     image: 'random/url/',
 };
 
-export const INVALID_BOARD1: CreateBoardDto = {
+export const PRIVATE_BOARD: CreateBoardDto = {
     name: 'mock_board3',
     description: 'test board #3',
     size: 18,
     isCTF: true,
-    board: [[]],
-    category: 'horror',
-    visibility: BoardVisibility.Public,
+    board: [],
+    visibility: BoardVisibility.PRIVATE,
     image: 'random/url/',
 };
 
@@ -40,9 +37,8 @@ export const INVALID_BOARD2: CreateBoardDto = {
     size: 16,
     isCTF: true,
     board: [[]],
-    category: 'fantasy',
-    visibility: BoardVisibility.Public,
+    visibility: BoardVisibility.PUBLIC,
     image: 'random/url/',
 };
 
-export const MOCK_BOARD_ARRAY: CreateBoardDto[] = [EMPTY_BOARD, VALID_BOARD, INVALID_BOARD1, INVALID_BOARD2];
+export const MOCK_BOARD_ARRAY: CreateBoardDto[] = [EMPTY_BOARD, VALID_BOARD, PRIVATE_BOARD, INVALID_BOARD2];

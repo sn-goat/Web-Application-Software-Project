@@ -3,7 +3,7 @@ import { Vec2 } from './vec2';
 
 export interface BoardCell {
     position: Vec2;
-    tile: TileType | null;
+    tile: TileType;
     item: string | null;
 }
 

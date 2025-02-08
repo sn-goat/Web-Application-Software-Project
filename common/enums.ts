@@ -1,12 +1,13 @@
 export enum TileType {
-    Ice = 'Ice',
-    Water = 'Water',
-    Wall = 'Wall',
-    Closed_Door = 'Closed_Door',
-    Opened_Door = 'Opened_Door',
+    ICE = 'Ice',
+    WATER = 'Water',
+    WALL = 'Wall',
+    FLOOR = 'Floor',
+    CLOSED_DOOR = 'Closed_Door',
+    OPENED_DOOR = 'Opened_Door',
 }
 
 export enum BoardVisibility {
-    Public = 'Public',
-    Private = 'Private',
+    PUBLIC = 'Public',
+    PRIVATE = 'Private',
 }
