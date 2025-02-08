@@ -43,9 +43,9 @@ export class BoardController {
     }
 
     @Patch('/:name')
-    async patchBoard(@Param('name') name: string, @Body() updates: Record<string, unknown>, @Res() response: Response) {
+    async patchBoard(@Param('board') board: CreateBoardDto, @Res() response: Response) {
         try {
-            const updatedBoard = await this.boardService.updateBoard(name, updates);
+            const updatedBoard = await this.boardService.updateBoard(board);
             response.status(HttpStatus.OK).json(updatedBoard);
         } catch (error) {
             response.status(HttpStatus.NOT_FOUND).send(error.message);
@@ -58,7 +58,7 @@ export class BoardController {
             const updatedBoard = await this.boardService.toggleVisibility(name);
             response.status(HttpStatus.OK).json(updatedBoard);
         } catch (error) {
-            response.status(HttpStatus.NOT_FOUND).send(error.message);
+            response.status(HttpStatus.UNAUTHORIZED).send(error.message);
         }
     }
 
