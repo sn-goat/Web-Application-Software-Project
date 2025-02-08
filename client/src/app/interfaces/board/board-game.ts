@@ -1,7 +1,7 @@
 import { BoardCell } from '@app/interfaces/board/board-cell';
 
-type BoardStatus = 'Ongoing' | 'Completed';
-type BoardVisibility = 'Public' | 'Private';
+export type BoardStatus = 'Ongoing' | 'Completed';
+export type BoardVisibility = 'Public' | 'Private';
 
 export interface BoardGame {
     _id: string;

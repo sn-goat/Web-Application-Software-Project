@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
 
 const MAX_PORTRAITS = 12;
+const D4 = './assets/dice/d4.png';
+const D6 = './assets/dice/d6.png';
 
 @Component({
     selector: 'app-create-page',
@@ -26,12 +28,14 @@ export class CreatePageComponent {
     stats = {
         life: 4,
         rapidity: 4,
-        attack: 'D4',
-        defense: 'D4',
+        attack: 4,
+        defense: 4,
+        attackDice: D4,
+        defenseDice: D4,
     };
 
     getCurrentPortraitImage(): string {
-        return `/assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
+        return `./assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
     }
 
     openPopup() {
@@ -50,45 +54,42 @@ export class CreatePageComponent {
         }
     }
 
-    selectLife() {
-        if (!this.rapiditySelected) {
-            this.lifeSelected = !this.lifeSelected;
-            if (this.lifeSelected) {
-                this.stats.life += 2;
-            } else {
-                this.stats.life -= 2;
-            }
+    selectStat(stat: 'life' | 'rapidity') {
+        const otherStat = stat === 'life' ? 'rapidity' : 'life';
+        const selectedStat = (stat + 'Selected') as 'lifeSelected' | 'rapiditySelected';
+        const otherSelectedStat = (otherStat + 'Selected') as 'lifeSelected' | 'rapiditySelected';
+
+        if (this[otherSelectedStat]) {
+            this[otherSelectedStat] = false;
+            this.stats[otherStat] = 4;
         }
-    }
-    selectRapidity() {
-        if (!this.lifeSelected) {
-            this.rapiditySelected = !this.rapiditySelected;
-            if (this.rapiditySelected) {
-                this.stats.rapidity += 2;
-            } else {
-                this.stats.rapidity -= 2;
-            }
+        this[selectedStat] = !this[selectedStat];
+        if (this[selectedStat]) {
+            this.stats[stat] += 2;
+        } else {
+            this.stats[stat] -= 2;
         }
     }
 
-    selectAttack() {
-        if (!this.defenseSelected) {
-            this.attackSelected = !this.attackSelected;
-            if (this.attackSelected) {
-                this.stats.attack = 'D6';
-            } else {
-                this.stats.attack = 'D4';
-            }
+    selectCombatStat(stat: 'attack' | 'defense') {
+        const otherStat = stat === 'attack' ? 'defense' : 'attack';
+        const selectedStat = (stat + 'Selected') as 'attackSelected' | 'defenseSelected';
+        const otherSelectedStat = (otherStat + 'Selected') as 'attackSelected' | 'defenseSelected';
+
+        if (this[otherSelectedStat]) {
+            this[otherSelectedStat] = false;
+            this.stats[`${otherStat}Dice`] = D4;
+        }
+        this[selectedStat] = !this[selectedStat];
+        if (this[selectedStat]) {
+            this.stats[`${stat}Dice`] = D6;
+        } else {
+            this.stats[`${stat}Dice`] = D4;
         }
     }
-    selectDefense() {
-        if (!this.attackSelected) {
-            this.defenseSelected = !this.defenseSelected;
-            if (this.defenseSelected) {
-                this.stats.defense = 'D6';
-            } else {
-                this.stats.defense = 'D4';
-            }
-        }
+
+    canJoin(): boolean {
+        const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
+        return this.playerName.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
 }

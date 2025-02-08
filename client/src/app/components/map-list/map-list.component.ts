@@ -1,42 +1,12 @@
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
-
-enum BoardStatus {
-    Draft = 'Draft',
-    Published = 'Published',
-}
-
-enum BoardVisibility {
-    Public = 'Public',
-    Private = 'Private',
-}
-
-interface BoardCell {
-    x: number;
-    y: number;
-    type: string;
-}
-
-export interface GameMap {
-    _id: string;
-    name: string;
-    description: string;
-    size: number;
-    category: string;
-    isCTF: boolean;
-    board: BoardCell[][];
-    status: BoardStatus;
-    visibility: BoardVisibility;
-    image: string | null;
-    createdAt?: Date | null;
-    updatedAt?: Date | null;
-}
+import { BoardGame } from '@app/interfaces/board/board-game';
+import { BoardService } from '@app/services/board.service';
+import { BoardVisibility } from '@common/enums';
 
 @Component({
     selector: 'app-map-list',
@@ -44,10 +14,10 @@ export interface GameMap {
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule, ScrollingModule],
+    imports: [CommonModule, FormsModule],
 })
 export class MapListComponent implements OnInit {
-    @Input() items: GameMap[] = [];
+    @Input() items: BoardGame[] = [];
     @Input() showActions: boolean = true;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
@@ -55,38 +25,47 @@ export class MapListComponent implements OnInit {
     sortBy: string = 'createdAt';
 
     constructor(
-        private readonly http: HttpClient,
         private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
         private readonly dialog: MatDialog,
+        private readonly boardService: BoardService,
     ) {}
 
-    onDivClick() {
-        this.divClicked.emit();
-    }
-
-    ngOnInit(): void {
-        this.http.get<GameMap[]>('assets/mockMapData.json').subscribe({
-            next: (data) => {
-                this.items = data.map((item) => ({
-                    ...item,
-                    status: item.status === 'Draft' ? BoardStatus.Draft : BoardStatus.Published,
-                    visibility: item.visibility === 'Public' ? BoardVisibility.Public : BoardVisibility.Private,
-                    createdAt: item.createdAt ? new Date(item.createdAt) : null,
-                    updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
-                }));
-                this.cdr.detectChanges(); // Manually trigger change detection
-            },
+    onDivClick(map: BoardGame): void {
+        this.boardService.getAllBoards().subscribe((serverMaps) => {
+            const serverMap = serverMaps.find((m) => m._id === map._id);
+            if (!serverMap) {
+                alert('La carte a été supprimée du serveur.');
+                window.location.reload();
+            } else if (!this.areMapsEqual(map, serverMap)) {
+                alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
+                window.location.reload();
+            } else {
+                this.divClicked.emit();
+            }
         });
     }
 
-    getFilteredAndSortedItems(): GameMap[] {
+    ngOnInit(): void {
+        this.boardService.getAllBoards().subscribe((boards) => {
+            this.items = boards.map((item) => ({
+                ...item,
+                status: item.status === 'Ongoing' ? 'Ongoing' : 'Completed',
+                visibility: item.visibility === 'Public' ? 'Public' : 'Private',
+                createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
+                updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+            }));
+            this.cdr.detectChanges(); // Manually trigger change detection
+        });
+    }
+
+    getFilteredAndSortedItems(): BoardGame[] {
         let filtered = this.items.filter((item) => {
             const matchesSearch =
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions || item.status === BoardStatus.Published;
+            const isPublished = this.showActions || item.status === 'Completed';
 
             return matchesSearch && isPublished;
         });
@@ -98,7 +77,7 @@ export class MapListComponent implements OnInit {
         return filtered.sort((a, b) => {
             switch (this.sortBy) {
                 case 'createdAt':
-                    return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0);
+                    return (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0);
                 case 'name':
                     return a.name.localeCompare(b.name);
                 case 'status':
@@ -111,20 +90,34 @@ export class MapListComponent implements OnInit {
         });
     }
 
-    onEdit(map: GameMap): void {
+    areMapsEqual(localMap: BoardGame, serverMap: BoardGame): boolean {
+        return (
+            localMap.name === serverMap.name &&
+            localMap.description === serverMap.description &&
+            localMap.size === serverMap.size &&
+            localMap.visibility === serverMap.visibility &&
+            JSON.stringify(localMap.boardCells) === JSON.stringify(serverMap.boardCells)
+        );
+    }
+
+    onEdit(map: BoardGame): void {
         this.router.navigate(['/edit'], { queryParams: { id: map._id } });
     }
 
-    onDelete(map: GameMap): void {
+    onDelete(map: BoardGame): void {
         if (confirm(`Are you sure you want to delete "${map.name}"?`)) {
-            this.items = this.items.filter((item) => item._id !== map._id);
-            this.cdr.detectChanges();
+            this.boardService.deleteBoardByName(map.name).subscribe(() => {
+                this.items = this.items.filter((item) => item._id !== map._id);
+                this.cdr.detectChanges();
+            });
         }
     }
 
-    toggleVisibility(map: GameMap): void {
-        map.visibility = map.visibility === BoardVisibility.Public ? BoardVisibility.Private : BoardVisibility.Public;
-        this.cdr.detectChanges();
+    toggleVisibility(map: BoardGame): void {
+        this.boardService.toggleVisibility(map.name).subscribe(() => {
+            map.visibility = map.visibility === BoardVisibility.PUBLIC ? BoardVisibility.PRIVATE : BoardVisibility.PUBLIC;
+            this.cdr.detectChanges();
+        });
     }
 
     createNewMap(): void {
