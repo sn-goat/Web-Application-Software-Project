@@ -1,13 +1,12 @@
 import { ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { BoardGame } from '@app/interfaces/board/board-game';
 import { BoardService } from '@app/services/board.service';
-import { MapService } from '@app/services/map.service';
 
 @Component({
     selector: 'app-map-list',
@@ -22,7 +21,6 @@ export class MapListComponent implements OnInit {
     @Input() showActions: boolean = true;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
-    @Inject(MapService) private readonly mapService: MapService;
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
@@ -35,12 +33,12 @@ export class MapListComponent implements OnInit {
     ) {}
 
     onDivClick(map: BoardGame): void {
-        this.mapService.getAllMaps().subscribe((serverMaps) => {
-            const serverMap = serverMaps.find((m) => m._id === map._id);
-            if (!serverMap) {
+        this.boardService.getAllBoards().subscribe((boardService) => {
+            const serverBoard = boardService.find((m) => m._id === map._id);
+            if (!serverBoard) {
                 alert('La carte a été supprimée du serveur.');
                 window.location.reload();
-            } else if (!this.areMapsEqual(map, serverMap)) {
+            } else if (!this.areMapsEqual(map, serverBoard)) {
                 alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
                 window.location.reload();
             } else {
@@ -50,8 +48,8 @@ export class MapListComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.mapService.getAllMaps().subscribe((maps) => {
-            this.items = maps.map((item) => ({
+        this.boardService.getAllBoards().subscribe((boards) => {
+            this.items = boards.map((item) => ({
                 ...item,
                 status: item.status === 'Ongoing' ? 'Ongoing' : 'Completed',
                 visibility: item.visibility === 'Public' ? 'Public' : 'Private',

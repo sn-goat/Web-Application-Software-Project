@@ -1,23 +1,21 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MapListComponent } from './map-list.component';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { BoardService } from '@app/services/board.service';
-import { MapService } from '@app/services/map.service';
-import { ViewportRuler, ScrollingModule, CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
 import { ChangeDetectorRef } from '@angular/core';
-import { BoardGame, BoardStatus, BoardVisibility } from '@app/interfaces/board/board-game';
-import { BoardCell } from '@app/interfaces/board/board-cell';
-import { Tiles, Items } from '@app/enum/tile';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
+import { Router } from '@angular/router';
+import { Items, Tiles } from '@app/enum/tile';
+import { BoardCell } from '@app/interfaces/board/board-cell';
+import { BoardGame, BoardStatus, BoardVisibility } from '@app/interfaces/board/board-game';
+import { BoardService } from '@app/services/board.service';
+import { Observable, of } from 'rxjs';
+import { MapListComponent } from './map-list.component';
 
 describe('MapListComponent', () => {
     let component: MapListComponent;
     let fixture: ComponentFixture<MapListComponent>;
     let mockRouter: jasmine.SpyObj<Router>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
-    let mockMapService: jasmine.SpyObj<MapService>;
     let mockBoardService: jasmine.SpyObj<BoardService>;
     let mockViewportRuler: jasmine.SpyObj<ViewportRuler>;
     let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
@@ -36,7 +34,7 @@ describe('MapListComponent', () => {
     class MockMatDialogRef<T = any> {
         close = jasmine.createSpy('close');
         afterClosed(): Observable<boolean> {
-            return of(true); // Simulate dialog closing with a response
+            return of(true);
         }
     }
 
@@ -45,8 +43,7 @@ describe('MapListComponent', () => {
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-        mockMapService = jasmine.createSpyObj('MapService', ['getAllMaps']);
-        mockBoardService = jasmine.createSpyObj('BoardService', ['deleteBoardByName', 'toggleVisibility']);
+        mockBoardService = jasmine.createSpyObj('BoardService', ['deleteBoardByName', 'toggleVisibility', 'getAllBoards']);
         mockViewportRuler = jasmine.createSpyObj('ViewportRuler', ['change']);
         mockViewportRuler.change.and.returnValue(of(new Event('change')));
         mockCdr = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
@@ -64,7 +61,6 @@ describe('MapListComponent', () => {
             providers: [
                 { provide: Router, useValue: mockRouter },
                 { provide: MatDialog, useValue: mockDialog },
-                { provide: MapService, useValue: mockMapService },
                 { provide: BoardService, useValue: mockBoardService },
                 { provide: ViewportRuler, useValue: mockViewportRuler },
                 { provide: ChangeDetectorRef, useValue: mockCdr },
@@ -73,106 +69,105 @@ describe('MapListComponent', () => {
         }).compileComponents();
 
         fixture = TestBed.createComponent(MapListComponent);
-        component = fixture.componentInstance; // ✅ Initialize component
+        component = fixture.componentInstance; 
 
-        mockMapService.getAllMaps.and.returnValue(of([])); // Ensure getAllMaps returns a valid observable
+        mockBoardService.getAllBoards.and.returnValue(of([])); // Ensure getAllBoards returns a valid observable
         fixture.detectChanges();
     });
 
     afterEach(() => {});
 
-    // ✅ Test: Should display all available games in a list
-    it('devrait afficher la liste des jeux disponibles', () => {
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
+
+    it('should display the list of available games', () => {
         const mockMaps: BoardGame[] = [
-            { _id: '1', name: 'Jeu A', size: 10, description: 'Desc A', boardCells: [], status: 'Ongoing', visibility: 'Public' },
-            { _id: '2', name: 'Jeu B', size: 12, description: 'Desc B', boardCells: [], status: 'Ongoing', visibility: 'Private' },
+            { _id: '1', name: 'Game A', size: 10, description: 'Desc A', boardCells: [], status: 'Ongoing', visibility: 'Public' },
+            { _id: '2', name: 'Game B', size: 12, description: 'Desc B', boardCells: [], status: 'Ongoing', visibility: 'Private' },
         ];
 
-        mockMapService.getAllMaps.and.returnValue(of(mockMaps)); // ✅ Set up mock data
+        mockBoardService.getAllBoards.and.returnValue(of(mockMaps)); 
 
         fixture = TestBed.createComponent(MapListComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges(); // ✅ Now run change detection
+        fixture.detectChanges(); 
 
         const items = fixture.debugElement.queryAll(By.css('.list-item:not(.new-map-card)'));
-        expect(items.length).toBe(mockMaps.length); // ✅ Check if both items are rendered
+        expect(items.length).toBe(mockMaps.length);
     });
 
-    // ✅ Test: Each game should display required details (name, size, mode, last modified date)
-    it('devrait afficher les détails de chaque jeu', () => {
+    it('should display the details of each game', () => {
         const mockMap: BoardGame = {
             _id: '1',
-            name: 'Jeu A',
+            name: 'Game A',
             size: 10,
             boardCells: mockBoardCells,
             status: 'Ongoing' as BoardStatus,
             visibility: 'Public' as BoardVisibility,
-            description: 'Une description de test',
+            description: 'A test description',
             createdAt: new Date(),
             updatedAt: new Date(),
         };
 
-        mockMapService.getAllMaps.and.returnValue(of([mockMap]));
+        mockBoardService.getAllBoards.and.returnValue(of([mockMap]));
         fixture.detectChanges();
 
-        // ✅ Select only game items, excluding the "Create New Map" card
         const item = fixture.debugElement.query(By.css('.list-item:not(.new-map-card)'));
         expect(item.nativeElement.textContent).toContain(mockMap.name);
         expect(item.nativeElement.textContent).toContain(mockMap.size.toString());
         expect(item.nativeElement.textContent).toContain(mockMap.status);
     });
 
-    // ✅ Test: Each game should have a modifiable visibility setting
-    it('devrait permettre de modifier la visibilité du jeu', () => {
-        component.showActions = true; // ✅ Ensure actions are visible
+    it('should allow toggling the visibility of the game', () => {
+        component.showActions = true;
         fixture.detectChanges();
 
         const visibilityButton = fixture.debugElement.query(By.css('.visibility-btn'));
-        expect(visibilityButton).toBeTruthy(); // ✅ Ensure button exists
+        expect(visibilityButton).toBeTruthy(); 
 
         visibilityButton.triggerEventHandler('click', null);
         expect(mockBoardService.toggleVisibility).toHaveBeenCalledWith(component.items[0].name);
     });
 
-    // ✅ Test: Each game should have a preview image
-    it('devrait afficher une image de prévisualisation du jeu', () => {
+    it('should display a preview image of the game', () => {
         const mockMap: BoardGame = {
             _id: '1',
-            name: 'Jeu A',
+            name: 'Game A',
             size: 10,
             boardCells: mockBoardCells,
             status: 'Ongoing' as BoardStatus,
             visibility: 'Public' as BoardVisibility,
-            description: 'Une description de test',
+            description: 'A test description',
             createdAt: new Date(),
             updatedAt: new Date(),
         };
 
-        mockMapService.getAllMaps.and.returnValue(of([mockMap])); // ✅ Provide mock data
-        fixture.detectChanges(); // ✅ Trigger rendering
+        mockBoardService.getAllBoards.and.returnValue(of([mockMap]));
+        fixture.detectChanges();
 
         const previewImage = fixture.debugElement.query(By.css('.item-image img'));
-        expect(previewImage).not.toBeNull(); // ✅ Check if image exists
+        expect(previewImage).not.toBeNull();
     });
 
-    it("devrait afficher la description du jeu lors du survol de l'image", () => {
+    it('should display the game description on image hover', () => {
         const mockMap: BoardGame = {
             _id: '1',
-            name: 'Jeu A',
+            name: 'Game A',
             size: 10,
             boardCells: mockBoardCells,
             status: 'Ongoing' as BoardStatus,
             visibility: 'Public' as BoardVisibility,
-            description: 'Une description de test',
+            description: 'A test description',
             createdAt: new Date(),
             updatedAt: new Date(),
         };
 
-        mockMapService.getAllMaps.and.returnValue(of([mockMap]));
+        mockBoardService.getAllBoards.and.returnValue(of([mockMap]));
         fixture.detectChanges();
 
         const previewContainer = fixture.debugElement.query(By.css('.item-image'));
-        expect(previewContainer).toBeTruthy(); // ✅ Ensure the element exists
+        expect(previewContainer).toBeTruthy();
 
         previewContainer.triggerEventHandler('mouseover', null);
         fixture.detectChanges();
@@ -181,30 +176,30 @@ describe('MapListComponent', () => {
         expect(description.nativeElement.textContent).toContain(mockMap.description);
     });
 
-    it("devrait permettre la modification d'un jeu", () => {
-        component.showActions = true; // ✅ Ensure buttons are visible
+    it('should allow editing a game', () => {
+        component.showActions = true; 
         fixture.detectChanges();
 
         const editButton = fixture.debugElement.query(By.css('.edit-btn'));
-        expect(editButton).not.toBeNull(); // ✅ Ensure button exists before triggering event
+        expect(editButton).not.toBeNull();
 
         editButton.triggerEventHandler('click', null);
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit', '1']);
     });
 
-    it("devrait permettre la suppression d'un jeu", () => {
-        component.showActions = true; // ✅ Ensure delete button is visible
+    it('should allow deleting a game', () => {
+        component.showActions = true;
         fixture.detectChanges();
 
         const deleteButton = fixture.debugElement.query(By.css('.delete-btn'));
-        expect(deleteButton).not.toBeNull(); // ✅ Ensure button exists
+        expect(deleteButton).not.toBeNull();
 
         deleteButton.triggerEventHandler('click', null);
         expect(mockBoardService.deleteBoardByName).toHaveBeenCalledWith(component.items[0].name);
     });
 
-    it("devrait permettre la création d'un nouveau jeu", () => {
-        component.showActions = true; // ✅ Ensure button is visible
+    it('should allow creating a new game', () => {
+        component.showActions = true;
         fixture.detectChanges();
 
         const createButton = fixture.debugElement.query(By.css('.new-map-card'));
@@ -215,5 +210,4 @@ describe('MapListComponent', () => {
 
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit'], jasmine.any(Object));
     });
-
 });
