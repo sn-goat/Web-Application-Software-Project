@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { BoardGame } from '@app/interfaces/board/board-game';
 import { BoardService } from '@app/services/board.service';
+import { BoardVisibility } from '@common/enums';
 
 @Component({
     selector: 'app-map-list',
@@ -44,7 +45,6 @@ export class MapListComponent implements OnInit {
             }
         });
     }
-
 
     ngOnInit(): void {
         this.boardService.getAllBoards().subscribe((boards) => {
@@ -114,8 +114,8 @@ export class MapListComponent implements OnInit {
     }
 
     toggleVisibility(map: BoardGame): void {
-        this.boardService.toggleVisibility(map.name).subscribe((updatedMap) => {
-            map.visibility = updatedMap.visibility;
+        this.boardService.toggleVisibility(map.name).subscribe(() => {
+            map.visibility = map.visibility === BoardVisibility.PUBLIC ? BoardVisibility.PRIVATE : BoardVisibility.PUBLIC;
             this.cdr.detectChanges();
         });
     }
