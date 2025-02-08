@@ -37,7 +37,7 @@ export class BoardGameComponent implements OnInit {
         this.tileApplicator.handleMouseLeave();
     }
 
-    @HostListener('mousemove')
+    @HostListener('window:mousemove')
     onMouseMove() {
         this.tileApplicator.handleMouseMove(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }

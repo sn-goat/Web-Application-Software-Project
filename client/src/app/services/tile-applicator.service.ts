@@ -79,8 +79,6 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     handleMouseLeave() {
-        this.isMouseLeftDown = false;
-        this.isMouseRightDown = false;
         this.handleItem = false;
     }
 
@@ -138,6 +136,8 @@ export class TileApplicatorService implements OnDestroy {
 
         while (x !== endX || y !== endY) {
             if (!this.isOnBoard(x, y, rect)) {
+                this.isMouseLeftDown = false;
+                this.isMouseRightDown = false;
                 break;
             }
 
