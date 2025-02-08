@@ -43,6 +43,6 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
         this.toolSelection.updateSelectedTile(this.type);
     }
     getDescription(type: Tile): string {
-       return ASSETS_DESCRIPTION.get(type) ?? '';
+        return ASSETS_DESCRIPTION.get(type) ?? '';
     }
 }

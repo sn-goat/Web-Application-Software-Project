@@ -33,7 +33,7 @@ export class MapMakerComponent {
 
     constructor(
         private mouseEditor: MouseEditorService,
-        private readonly router: Router
+        private readonly router: Router,
     ) {}
 
     get name() {
@@ -63,7 +63,7 @@ export class MapMakerComponent {
     }
 
     confirmReturn() {
-        if(confirm('Are you sure you want to leave this page?')) {
+        if (confirm('Are you sure you want to leave this page?')) {
             this.router.navigate(['/admin']);
         }
     }
