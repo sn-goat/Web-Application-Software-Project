@@ -1,4 +1,4 @@
-<div class="object">
+<div class="object" (mouseenter)="showTooltip = true" (mouseleave)="showTooltip = false">
     <img 
     [src]="src + type + fileType" 
     [alt]="type"
@@ -9,3 +9,6 @@
     (dragleave)="onDragEnter($event)"
     >
 </div>
+@if(showTooltip) {
+    <app-tooltip [text]="getDescription(type)"></app-tooltip>
+}

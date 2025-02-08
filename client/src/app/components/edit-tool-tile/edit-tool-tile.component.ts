@@ -1,7 +1,8 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { TooltipComponent } from '@app/components/tooltip/tooltip.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
+import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { Tile } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -9,13 +10,14 @@ import { Subject, takeUntil } from 'rxjs';
     selector: 'app-edit-tool-tile',
     templateUrl: './edit-tool-tile.component.html',
     styleUrl: './edit-tool-tile.component.scss',
-    imports: [],
+    imports: [TooltipComponent],
 })
 export class EditToolTileComponent implements OnInit, OnDestroy {
     @Input() type!: Tile;
     src: string = DEFAULT_PATH_TILES;
     extension: string = '.png';
     description: string = '';
+    showTooltip = false;
     styleClass: string = 'unselected';
     private destroy$ = new Subject<void>();
 
@@ -39,5 +41,8 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
 
     onClick() {
         this.toolSelection.updateSelectedTile(this.type);
+    }
+    getDescription(type: Tile): string {
+        return ASSETS_DESCRIPTION.get(type) ?? '';
     }
 }

@@ -1,6 +1,6 @@
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 
-export const ASSETS_DESCRIPTION: Map<Tile, string> = new Map([
+export const ASSETS_DESCRIPTION = new Map<Tile | Item, string>([
     [
         Tile.Ice,
         `Glace:
@@ -26,4 +26,16 @@ Le coût pour la traverser s'élève à 2 pts`,
     ],
     [Tile.Opened_Door, ''],
     [Tile.Default, ''],
+
+    // Descriptions for items
+    [Item.Bow, 'Arc : Une arme à distance utilisée pour attaquer les ennemis de loin.'],
+    [Item.Flag, 'Drapeau : Un symbole de victoire ou de capture dans le jeu.'],
+    [Item.Leather_Boot, 'Bottes en cuir : Augmente la vitesse de déplacement du joueur.'],
+    [Item.Monster_Egg, 'Œuf de monstre : Peut éclore en un monstre allié ou ennemi.'],
+    [Item.Pearl, 'Perle : Un objet précieux pouvant être échangé contre des ressources.'],
+    [Item.Shield, 'Bouclier : Utilisé pour se protéger contre les attaques ennemies.'],
+    [Item.Sword, 'Épée : Une arme de mêlée utilisée pour attaquer les ennemis de près.'],
+    [Item.Spawn, 'Point de spawn : Lieu où les joueurs apparaissent au début du jeu.'],
+    [Item.Chest, 'Coffre : Contient des objets et des ressources pour le joueur.'],
+    [Item.Default, ''],
 ]);
