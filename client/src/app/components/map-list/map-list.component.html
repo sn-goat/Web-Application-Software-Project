@@ -11,59 +11,57 @@
     </div>
   </div>
 
-  <cdk-virtual-scroll-viewport itemSize="120" class="virtual-scroll-viewport">
-    <div class="grid-container">
-      <!-- Map Cards -->
-      @for (map of getFilteredAndSortedItems(); track map) {
-      <div class="list-item" (click)="onDivClick(map)">
-        <div class="item-image">
-          <img src="https://picsum.photos/200/300?random=2" [alt]="map.name" (error)="handleImageError($event)" />
-        </div>
-        <div class="item-content">
-          <div class="item-header">
-            <h3 class="item-title">{{ map.name }}</h3>
-            <span class="item-date">{{ map.updatedAt | date: "MMM d, y" }}</span>
-          </div>
-          <p class="item-description">{{ map.description }}</p>
-          <div class="item-details">
-            <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
-            <span class="item-ctf">{{ "CTF Enabled" }}</span>
-            <!-- <span class="item-ctf">{{ map.isCTF ? "CTF Enabled" : "CTF Disabled" }}</span> -->
-          </div>
-          <div class="item-footer">
-            <span class="item-status" [ngClass]="map.status.toLowerCase()">{{ map.status }}</span>
-            <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
-          </div>
-        </div>
-        @if (showActions) {
-        <div class="item-actions">
-          <!-- Visibility Button -->
-          <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
-            <img [src]="map.visibility === 'Public'
-                        ? 'https://www.shareicon.net/data/512x512/2015/09/12/100039_visibility_512x512.png'
-                        : 'https://www.svgrepo.com/show/453442/visibility-off.svg'" [alt]="map.visibility"
-              class="button-icon" />
-          </button>
-          <button class="edit-btn" (click)="onEdit(map)" title="Edit">
-            <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
-          </button>
-          <button class="delete-btn" (click)="onDelete(map)" title="Delete">
-            <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
-          </button>
-        </div>
-        }
+  <div class="grid-container">
+    <!-- Map Cards -->
+    @for (map of getFilteredAndSortedItems(); track map) {
+    <div class="list-item" (click)="onDivClick(map)">
+      <div class="item-image">
+        <img src="https://picsum.photos/200/300?random=2" [alt]="map.name" (error)="handleImageError($event)" />
       </div>
-      }
-
-      <!-- Add Map Card -->
-      @if(showActions) {
-      <div class="list-item new-map-card" (click)="createNewMap()">
-        <div class="add-icon">+</div>
-        <p class="add-text">Create New Map</p>
+      <div class="item-content">
+        <div class="item-header">
+          <h3 class="item-title">{{ map.name }}</h3>
+          <span class="item-date">{{ map.updatedAt | date: "MMM d, y" }}</span>
+        </div>
+        <p class="item-description">{{ map.description }}</p>
+        <div class="item-details">
+          <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
+          <span class="item-ctf">{{ "CTF Enabled" }}</span>
+          <!-- <span class="item-ctf">{{ map.isCTF ? "CTF Enabled" : "CTF Disabled" }}</span> -->
+        </div>
+        <div class="item-footer">
+          <span class="item-status" [ngClass]="map.status.toLowerCase()">{{ map.status }}</span>
+          <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
+        </div>
+      </div>
+      @if (showActions) {
+      <div class="item-actions">
+        <!-- Visibility Button -->
+        <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
+         <img [src]="map.visibility === 'Public'
+                      ? 'https://www.shareicon.net/data/512x512/2015/09/12/100039_visibility_512x512.png'
+                      : 'https://www.svgrepo.com/show/453442/visibility-off.svg'" [alt]="map.visibility"
+            class="button-icon" />
+        </button>
+        <button class="edit-btn" (click)="onEdit(map)" title="Edit">
+          <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
+        </button>
+        <button class="delete-btn" (click)="onDelete(map)" title="Delete">
+          <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
+        </button>
       </div>
       }
     </div>
-  </cdk-virtual-scroll-viewport>
+    }
+
+    <!-- Add Map Card -->
+    @if(showActions) {
+    <div class="list-item new-map-card" (click)="createNewMap()">
+      <div class="add-icon">+</div>
+      <p class="add-text">Create New Map</p>
+    </div>
+    }
+  </div>
 
   <!-- Empty State -->
   @if (getFilteredAndSortedItems().length === 0) {

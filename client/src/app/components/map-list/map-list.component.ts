@@ -1,4 +1,3 @@
-import { ScrollingModule, ViewportRuler } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +13,7 @@ import { BoardService } from '@app/services/board.service';
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule, ScrollingModule],
+    imports: [CommonModule, FormsModule],
 })
 export class MapListComponent implements OnInit {
     @Input() items: BoardGame[] = [];
@@ -28,7 +27,6 @@ export class MapListComponent implements OnInit {
         private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
         private readonly dialog: MatDialog,
-        private readonly viewportRuler: ViewportRuler,
         private readonly boardService: BoardService,
     ) {}
 
@@ -56,7 +54,6 @@ export class MapListComponent implements OnInit {
                 createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
                 updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
             }));
-            this.viewportRuler.change(1); // Force recalculation of viewport size
             this.cdr.detectChanges(); // Manually trigger change detection
         });
     }
