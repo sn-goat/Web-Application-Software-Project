@@ -91,11 +91,8 @@ button:hover {
     padding: 20px;
 }
 
-.header {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 20px;
+textarea {
+  resize: none;
 }
 
 .title {
