@@ -17,8 +17,28 @@ describe('MapListComponent', () => {
     let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
     const mockBoardGames: BoardGame[] = [
-        { _id: '1', name: 'Game A', size: 10, description: 'Desc A', boardCells: [], status: 'Ongoing', visibility: 'Public', createdAt: new Date(), updatedAt: new Date() },
-        { _id: '2', name: 'Game B', size: 12, description: 'Desc B', boardCells: [], status: 'Completed', visibility: 'Private', createdAt: new Date(), updatedAt: new Date() },
+        {
+            _id: '1',
+            name: 'Game A',
+            size: 10,
+            description: 'Desc A',
+            boardCells: [],
+            status: 'Ongoing',
+            visibility: 'Public',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
+        {
+            _id: '2',
+            name: 'Game B',
+            size: 12,
+            description: 'Desc B',
+            boardCells: [],
+            status: 'Completed',
+            visibility: 'Private',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        },
     ];
 
     beforeEach(async () => {

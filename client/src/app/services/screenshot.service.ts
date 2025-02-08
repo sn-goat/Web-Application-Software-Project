@@ -5,8 +5,9 @@ import html2canvas from 'html2canvas';
     providedIn: 'root',
 })
 export class ScreenshotService {
+    private readonly defaultQuality = 0.9;
 
-    async captureElementAsFile(elementId: string, quality: number = 0.9, fileName: string = 'screenshot.jpg'): Promise<File | null> {
+    async captureElementAsFile(elementId: string, quality: number = this.defaultQuality, fileName: string = 'screenshot.jpg'): Promise<File | null> {
         const element = document.getElementById(elementId);
         if (!element) {
             return null;
