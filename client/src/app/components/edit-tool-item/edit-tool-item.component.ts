@@ -1,10 +1,11 @@
-import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
+import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
+import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { MapService } from '@app/services/map.service';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { BoardSize, Item } from '@common/enums';
-import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
-import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { MapService } from '@app/services/map.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-item',
@@ -19,11 +20,13 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     readonly fileType = '.png';
     isDraggable = true;
     remainingItem: number = 0;
+    showTooltip = false;
 
     private readonly mapService = inject(MapService);
     private destroy$ = new Subject<void>();
 
     constructor(private toolSelection: ToolSelectionService) {}
+
     ngOnInit() {
         const boardSize = this.mapService.getMapData().value.size as BoardSize;
         const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
@@ -59,5 +62,9 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
 
     onDragEnter(event: MouseEvent) {
         event.preventDefault();
+    }
+
+    getDescription(type: Item): string {
+        return ASSETS_DESCRIPTION.get(type) ?? '';
     }
 }
