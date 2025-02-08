@@ -31,12 +31,12 @@ export class MapListComponent implements OnInit {
     ) {}
 
     onDivClick(map: BoardGame): void {
-        this.boardService.getAllBoards().subscribe((boardService) => {
-            const serverBoard = boardService.find((m) => m._id === map._id);
-            if (!serverBoard) {
+        this.boardService.getAllBoards().subscribe((serverMaps) => {
+            const serverMap = serverMaps.find((m) => m._id === map._id);
+            if (!serverMap) {
                 alert('La carte a été supprimée du serveur.');
                 window.location.reload();
-            } else if (!this.areMapsEqual(map, serverBoard)) {
+            } else if (!this.areMapsEqual(map, serverMap)) {
                 alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
                 window.location.reload();
             } else {
@@ -44,6 +44,7 @@ export class MapListComponent implements OnInit {
             }
         });
     }
+
 
     ngOnInit(): void {
         this.boardService.getAllBoards().subscribe((boards) => {
@@ -94,7 +95,6 @@ export class MapListComponent implements OnInit {
             localMap.name === serverMap.name &&
             localMap.description === serverMap.description &&
             localMap.size === serverMap.size &&
-            localMap.status === serverMap.status &&
             localMap.visibility === serverMap.visibility &&
             JSON.stringify(localMap.boardCells) === JSON.stringify(serverMap.boardCells)
         );
