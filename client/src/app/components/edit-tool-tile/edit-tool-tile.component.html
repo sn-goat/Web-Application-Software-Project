@@ -1,4 +1,4 @@
-<div>
+<div (mouseenter)="showTooltip = true" (mouseleave)="showTooltip = false">
     <img 
     (click)="onClick()"
     [src]="src + type + extension" 
@@ -7,3 +7,6 @@
     title="{{description}}"
     class="{{styleClass}}">
 </div>
+@if(showTooltip) {
+    <app-tooltip [text]="getDescription(type)"></app-tooltip>
+}

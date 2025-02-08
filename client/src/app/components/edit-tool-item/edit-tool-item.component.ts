@@ -67,6 +67,6 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     }
 
     getDescription(type: Item): string {
-        return ASSETS_DESCRIPTION.get(type) || '';
+        return ASSETS_DESCRIPTION.get(type) ?? '';
     }
 }
