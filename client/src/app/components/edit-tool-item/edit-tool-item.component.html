@@ -10,7 +10,5 @@
     >
 </div>
 @if(showTooltip) {
-    <div class="tooltip">
-        {{ getDescription(type) }}
-    </div>
+    <app-tooltip [text]="getDescription(type)"></app-tooltip>
 }

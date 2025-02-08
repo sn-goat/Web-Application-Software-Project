@@ -1,4 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { TooltipComponent } from '@app/components/tooltip/tooltip.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
@@ -10,8 +11,9 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
     selector: 'app-edit-tool-item',
     templateUrl: './edit-tool-item.component.html',
-    styleUrl: './edit-tool-item.component.scss',
-    imports: [],
+    styleUrls: ['./edit-tool-item.component.scss'],
+    standalone: true,
+    imports: [TooltipComponent],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
     @Input() type: Item;
@@ -65,6 +67,6 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     }
 
     getDescription(type: Item): string {
-        return ASSETS_DESCRIPTION.get(type) ?? '';
+        return ASSETS_DESCRIPTION.get(type) || '';
     }
 }
