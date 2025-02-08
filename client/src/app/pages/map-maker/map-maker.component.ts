@@ -6,10 +6,11 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { Router } from '@angular/router';
 import { BoardGameComponent } from '@app/components/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
-import { MouseEditorService } from '@app/services/mouse-editor.service';
 import { MapService } from '@app/services/map.service';
+import { MouseEditorService } from '@app/services/mouse-editor.service';
 
 @Component({
     selector: 'app-map-maker',
@@ -30,7 +31,10 @@ import { MapService } from '@app/services/map.service';
 export class MapMakerComponent {
     private readonly mapService = inject(MapService);
 
-    constructor(private mouseEditor: MouseEditorService) {}
+    constructor(
+        private mouseEditor: MouseEditorService,
+        private readonly router: Router
+    ) {}
 
     get name() {
         return this.mapService.getMapData().value.name;
@@ -53,5 +57,14 @@ export class MapMakerComponent {
     @HostListener('drag', ['$event'])
     onMouseDrag(event: MouseEvent) {
         this.mouseEditor.updateCoordinate(event);
+    }
+    reset() {
+        window.location.reload();
+    }
+
+    confirmReturn() {
+        if(confirm('Are you sure you want to leave this page?')) {
+            this.router.navigate(['/admin']);
+        }
     }
 }
