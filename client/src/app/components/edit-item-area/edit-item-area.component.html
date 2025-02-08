@@ -4,7 +4,7 @@
     </mat-card-header>
     <mat-card-content class="content">
         @for(tile of tiles; track tile){
-            @if(tile !== tileType.Default && tile !== tileType.Opened_Door ){
+            @if(tile !== tileType.FLOOR && tile !== tileType.OPENED_DOOR ){
                 <app-edit-tool-tile [type]="tile"></app-edit-tool-tile>
             }
         }

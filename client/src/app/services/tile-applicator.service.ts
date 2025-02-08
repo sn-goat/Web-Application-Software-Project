@@ -51,14 +51,14 @@ export class TileApplicatorService implements OnDestroy {
 
         if (event.button === 2) {
             this.isMouseRightDown = true;
-            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.Default) {
+            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.DEFAULT) {
                 this.handleItem = true;
                 this.deleteItem(cellPosition.x, cellPosition.y, boardGame);
             }
         }
         if (event.button === 0) {
             this.isMouseLeftDown = true;
-            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.Default) {
+            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.DEFAULT) {
                 this.handleItem = true;
                 this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
             }
@@ -90,12 +90,12 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     handleDrop(boardGame: Board, rect: DOMRect) {
-        if (this.selectedItem !== Item.Default) {
+        if (this.selectedItem !== Item.DEFAULT) {
             this.newItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
             this.updatePosition(this.oldItemPos, this.newItemPos, boardGame);
         }
         this.oldItemPos = { x: -1, y: -1 };
-        this.toolSelection.updateSelectedItem(Item.Default);
+        this.toolSelection.updateSelectedItem(Item.DEFAULT);
         this.isMouseLeftDown = false;
         this.isMouseRightDown = false;
         this.handleItem = false;
@@ -172,9 +172,9 @@ export class TileApplicatorService implements OnDestroy {
 
     private applyTile(col: number, row: number, boardGame: Board) {
         if (this.selectedTile !== null) {
-            if (this.selectedTile === Tile.Wall) {
+            if (this.selectedTile === Tile.WALL) {
                 this.applyWall(col, row, boardGame);
-            } else if (this.selectedTile === Tile.Closed_Door) {
+            } else if (this.selectedTile === Tile.CLOSED_DOOR) {
                 this.applyDoor(col, row, boardGame);
             } else {
                 boardGame.board[row][col].tile = this.selectedTile as Tile;
@@ -183,30 +183,30 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     private applyDoor(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].tile === Tile.Closed_Door) {
-            boardGame.board[row][col].tile = Tile.Opened_Door;
+        if (boardGame.board[row][col].tile === Tile.CLOSED_DOOR) {
+            boardGame.board[row][col].tile = Tile.OPENED_DOOR;
         } else {
-            boardGame.board[row][col].tile = Tile.Closed_Door;
+            boardGame.board[row][col].tile = Tile.CLOSED_DOOR;
         }
     }
 
     private applyWall(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item !== Item.Default) {
+        if (boardGame.board[row][col].item !== Item.DEFAULT) {
             this.deleteItem(col, row, boardGame);
         }
-        boardGame.board[row][col].tile = Tile.Wall;
+        boardGame.board[row][col].tile = Tile.WALL;
     }
 
-    private revertToDefault(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].tile !== Tile.Default) {
-            boardGame.board[row][col].tile = Tile.Default;
+    private revertToFLOOR(col: number, row: number, boardGame: Board) {
+        if (boardGame.board[row][col].tile !== Tile.FLOOR) {
+            boardGame.board[row][col].tile = Tile.FLOOR;
         }
     }
 
     private updateCell(col: number, row: number, boardGame: Board) {
         if (!this.handleItem) {
             if (this.isMouseRightDown) {
-                this.revertToDefault(col, row, boardGame);
+                this.revertToFLOOR(col, row, boardGame);
             } else if (this.isMouseLeftDown) {
                 this.applyTile(col, row, boardGame);
             }
@@ -214,32 +214,32 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     private applyItem(col: number, row: number, boardGame: Board) {
-        if (this.selectedItem === Item.Spawn) {
+        if (this.selectedItem === Item.SPAWN) {
             this.toolSelection.incrementSpawn();
-        } else if (this.selectedItem === Item.Chest) {
+        } else if (this.selectedItem === Item.CHEST) {
             this.toolSelection.incrementChest();
         } else {
             this.toolSelection.addItem(this.selectedItem as Item);
         }
 
-        if (boardGame.board[row][col].item !== Item.Default) {
+        if (boardGame.board[row][col].item !== Item.DEFAULT) {
             this.deleteItem(col, row, boardGame);
         }
         boardGame.board[row][col].item = this.selectedItem as Item;
     }
     private deleteItem(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item === Item.Spawn) {
+        if (boardGame.board[row][col].item === Item.SPAWN) {
             this.toolSelection.decrementSpawn();
-        } else if (boardGame.board[row][col].item === Item.Chest) {
+        } else if (boardGame.board[row][col].item === Item.CHEST) {
             this.toolSelection.decrementChest();
         } else {
             this.toolSelection.removeItem(boardGame.board[row][col].item as Item);
         }
-        boardGame.board[row][col].item = Item.Default;
+        boardGame.board[row][col].item = Item.DEFAULT;
     }
 
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2, boardGame: Board) {
-        if (boardGame.board[newItemPos.y][newItemPos.x].tile !== Tile.Wall) {
+        if (boardGame.board[newItemPos.y][newItemPos.x].tile !== Tile.WALL) {
             if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
                 this.deleteItem(oldItemPos.x, oldItemPos.y, boardGame);
             }

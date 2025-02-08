@@ -5,7 +5,7 @@ import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { MapService } from '@app/services/map.service';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
-import { BoardSize, Item } from '@common/enums';
+import { Size, Item } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -30,16 +30,16 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     constructor(private toolSelection: ToolSelectionService) {}
 
     ngOnInit() {
-        const boardSize = this.mapService.getMapData().value.size as BoardSize;
+        const boardSize = this.mapService.getMapData().value.size as Size;
         const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
-        if (this.type === Item.Spawn) {
+        if (this.type === Item.SPAWN) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
                 if (maxObjectByType !== undefined) {
                     this.remainingItem = maxObjectByType - nbrSpawns;
                     this.isDraggable = this.remainingItem > 0;
                 }
             });
-        } else if (this.type === Item.Chest) {
+        } else if (this.type === Item.CHEST) {
             this.toolSelection.nbrChestOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrChests) => {
                 if (maxObjectByType !== undefined) {
                     this.remainingItem = maxObjectByType - nbrChests;

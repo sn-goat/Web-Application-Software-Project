@@ -62,7 +62,7 @@ export class BoardGameComponent implements OnInit {
                 size: this.boardGame.size,
                 isCTF: false,
                 board: [],
-                visibility: Visibility.Public,
+                visibility: Visibility.PUBLIC,
                 image: '',
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -70,7 +70,7 @@ export class BoardGameComponent implements OnInit {
             for (let i = 0; i < this.boardGame.size; i++) {
                 const row = [];
                 for (let j = 0; j < this.boardGame.size; j++) {
-                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                    row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
                 }
                 this.boardGame.board.push(row);
             }
@@ -85,10 +85,10 @@ export class BoardGameComponent implements OnInit {
             for (let j = 0; j < this.boardGame.size; j++) {
                 const cell = this.boardGame.board[i][j];
                 if (cell.tile === undefined) {
-                    cell.tile = Tile.Default;
+                    cell.tile = Tile.FLOOR;
                 }
                 if (cell.item === undefined) {
-                    cell.item = Item.Default;
+                    cell.item = Item.DEFAULT;
                 }
                 if (cell.position === undefined) {
                     cell.position = { x: j, y: i };
@@ -102,7 +102,7 @@ export class BoardGameComponent implements OnInit {
             for (let i = 0; i < this.boardGame.size; i++) {
                 const row = [];
                 for (let j = 0; j < this.boardGame.size; j++) {
-                    row.push({ tile: Tile.Default, item: Item.Default, position: { x: j, y: i } });
+                    row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
                 }
                 this.boardGame.board.push(row);
             }

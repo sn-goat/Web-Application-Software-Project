@@ -47,7 +47,7 @@ export class MapListComponent implements OnInit {
             next: (data) => {
                 this.items = data.map((item) => ({
                     ...item,
-                    visibility: item.visibility === 'Public' ? Visibility.Public : Visibility.Private,
+                    visibility: item.visibility === 'Public' ? Visibility.PUBLIC : Visibility.PRIVATE,
                     createdAt: item.createdAt ? new Date(item.createdAt) : null,
                     updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
                 }));
@@ -100,7 +100,7 @@ export class MapListComponent implements OnInit {
     }
 
     toggleVisibility(map: Board): void {
-        map.visibility = map.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
+        map.visibility = map.visibility === Visibility.PUBLIC ? Visibility.PRIVATE : Visibility.PUBLIC;
         this.cdr.detectChanges();
     }
 

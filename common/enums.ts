@@ -1,32 +1,33 @@
 export enum Tile {
-    Ice = 'Ice',
-    Water = 'Water',
-    Wall = 'Wall',
-    Closed_Door = 'ClosedDoor',
-    Opened_Door = 'OpenedDoor',
-    Default = 'Base',
+    ICE = 'Ice',
+    WATER = 'Water',
+    WALL = 'Wall',
+    FLOOR = 'Floor',
+    CLOSED_DOOR = 'ClosedDoor',
+    OPENED_DOOR = 'OpenedDoor',
 }
 
 export enum Item {
-    Bow = 'Bow',
-    Flag = 'Flag',
-    Leather_Boot = 'Leather Boot',
-    Monster_Egg = 'Monster Egg',
-    Pearl = 'Pearl',
-    Shield = 'Shield',
-    Sword = 'Sword',
-    Spawn = 'Spawn',
-    Chest = 'Chest',
-    Default = '',
+    BOW = 'Bow',
+    FLAG = 'Flag',
+    LEATHER_BOOT = 'Leather Boot',
+    MONSTER_EGG = 'Monster Egg',
+    PEARL = 'Pearl',
+    SHIELD = 'Shield',
+    SWORD = 'Sword',
+    SPAWN = 'Spawn',
+    CHEST = 'Chest',
+    DEFAULT = '',
 }
+
 
 export enum Visibility {
-    Public = 'Public',
-    Private = 'Private',
+    PUBLIC = 'Public',
+    PRIVATE = 'Private',
 }
 
-export enum BoardSize {
-    Small = 10,
-    Medium = 15,
-    Large = 20,
+export enum Size {
+    SMALL = 10,
+    MEDIUM = 15,
+    LARGE = 20,
 }

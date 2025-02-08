@@ -1,5 +1,5 @@
 import { Cell } from '@common/board';
-import { Status, Visibility } from '@common/enums';
+import { Visibility } from '@common/enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
@@ -20,10 +20,6 @@ export class Board {
     @Prop({ required: true })
     size: number;
 
-    @ApiProperty({ description: 'Tag associated with the board' })
-    @Prop({})
-    category: string;
-
     @ApiProperty({ description: 'Is the board made for the CTF game mode' })
     @Prop({ required: true, default: false })
     isCTF: boolean;
@@ -31,10 +27,6 @@ export class Board {
     @ApiProperty({ description: 'Board state' })
     @Prop({ type: [[Object]], required: true })
     board: Cell[][];
-
-    @ApiProperty({ description: 'Whether the user deems the board ready for gameplay' })
-    @Prop({ required: true, enum: ['Ongoing', 'Completed'] })
-    status: Status;
 
     @ApiProperty({ description: 'Whether the board is available to everyone' })
     @Prop({ required: true, enum: ['Public', 'Private'] })
@@ -44,13 +36,9 @@ export class Board {
     @Prop({})
     image: string;
 
-    @ApiProperty({ description: 'Date when the board was created' })
-    @Prop({ type: Date, required: true })
-    createdAt: Date;
-
     @ApiProperty({ description: 'Date when the board was last modified' })
     @Prop({ required: true })
-    updatedAt: Date;
+    lastUpdatedAt: Date;
 }
 
 export const boardSchema = SchemaFactory.createForClass(Board);
