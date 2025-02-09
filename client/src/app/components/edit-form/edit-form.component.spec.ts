@@ -19,4 +19,9 @@ describe('FormComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should set isMapSaved to true on submit', () => {
+        component.onSubmit();
+        expect(component.isMapSaved).toBeTrue();
+    });
 });

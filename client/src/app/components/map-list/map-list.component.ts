@@ -34,15 +34,19 @@ export class MapListComponent implements OnInit {
         private readonly boardService: BoardService,
     ) {}
 
+    reloadPage(): void {
+        window.location.reload();
+    }
+
     onDivClick(map: Board): void {
         this.boardService.getAllBoards().subscribe((serverMaps) => {
             const serverMap = serverMaps.find((m) => m._id === map._id);
             if (!serverMap) {
                 alert('La carte a été supprimée du serveur.');
-                window.location.reload();
+                this.reloadPage();
             } else if (!this.areMapsEqual(map, serverMap)) {
                 alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
-                window.location.reload();
+                this.reloadPage();
             } else {
                 this.divClicked.emit();
             }

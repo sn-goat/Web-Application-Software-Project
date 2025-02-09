@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { Cell } from '@common/board';
-import { Item, Tile } from '@common/enums';
 import { BoardCellComponent } from './board-cell.component';
 
 describe('BoardCellComponent', () => {
@@ -30,7 +29,7 @@ describe('BoardCellComponent', () => {
 
     it('should call updateSelectedItem on drag', () => {
         component.onDrag();
-        expect(toolSelectionService.updateSelectedItem).toHaveBeenCalledWith(jasmine.objectContaining({ item: 'Bow' }));
+        expect(toolSelectionService.updateSelectedItem).toHaveBeenCalledWith(component.cell.item);
     });
 
     it('should prevent default on drop', () => {
@@ -48,11 +47,11 @@ describe('BoardCellComponent', () => {
     });
 
     it('should have correct srcTiles', () => {
-        expect(component.srcTiles).toBe(Tile.FLOOR);
+        expect(component.srcTiles).toBe('./assets/tiles/');
     });
 
     it('should have correct srcItem', () => {
-        expect(component.srcItem).toBe(Item.DEFAULT);
+        expect(component.srcItem).toBe('./assets/items/');
     });
 
     it('should have correct fileType', () => {

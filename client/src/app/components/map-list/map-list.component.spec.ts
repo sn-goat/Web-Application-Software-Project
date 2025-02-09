@@ -24,10 +24,10 @@ describe('MapListComponent', () => {
             size: 10,
             description: 'Desc A',
             board: [],
-            visibility: Visibility.PUBLIC,
-            lastUpdatedAt: new Date(),
             isCTF: false,
+            visibility: Visibility.PUBLIC,
             image: '',
+            lastUpdatedAt: new Date(),
         },
         {
             _id: '2',
@@ -35,10 +35,10 @@ describe('MapListComponent', () => {
             size: 12,
             description: 'Desc B',
             board: [],
+            isCTF: false,
             visibility: Visibility.PRIVATE,
-            lastUpdatedAt: new Date(),
-            isCTF: true,
             image: '',
+            lastUpdatedAt: new Date(),
         },
     ];
 
@@ -78,6 +78,52 @@ describe('MapListComponent', () => {
         expect(item).not.toBeNull();
         expect(item.nativeElement.textContent).toContain(mockBoardGames[0].name);
         expect(item.nativeElement.textContent).toContain(mockBoardGames[0].size.toString());
+        expect(item.nativeElement.textContent).toContain(mockBoardGames[0].visibility);
+    });
+
+    it('should sort items by name', () => {
+        component.items = [
+            { ...mockBoardGames[1], name: 'Game B' },
+            { ...mockBoardGames[0], name: 'Game A' },
+        ];
+        component.sortBy = 'name';
+        const sortedItems = component.getFilteredAndSortedItems();
+        expect(sortedItems[0].name).toBe('Game A');
+        expect(sortedItems[1].name).toBe('Game B');
+    });
+    
+    it('should sort items by size', () => {
+        component.items = [
+            { ...mockBoardGames[0], size: 10 },
+            { ...mockBoardGames[1], size: 12 },
+        ];
+        component.sortBy = 'size';
+        const sortedItems = component.getFilteredAndSortedItems();
+        expect(sortedItems[0].size).toBe(12);
+        expect(sortedItems[1].size).toBe(10);
+    });
+
+    it('should return items unsorted for default case', () => {
+        component.items = [
+            { ...mockBoardGames[0], name: 'Game A' },
+            { ...mockBoardGames[1], name: 'Game B' },
+        ];
+        component.sortBy = 'unknown';
+        const sortedItems = component.getFilteredAndSortedItems();
+        expect(sortedItems[0].name).toBe('Game A');
+        expect(sortedItems[1].name).toBe('Game B');
+    });
+    
+    it('should alert and reload page if map is not found on server', () => {
+        const mockMap = mockBoardGames[0];
+        spyOn(window, 'alert');
+        const reloadSpy = spyOn(component, 'reloadPage').and.callFake(() => {});
+        mockBoardService.getAllBoards.and.returnValue(of([]));
+    
+        component.onDivClick(mockMap);
+    
+        expect(window.alert).toHaveBeenCalledWith('La carte a été supprimée du serveur.');
+        expect(reloadSpy).toHaveBeenCalled();
     });
 
     it('should allow toggling the visibility of the game', () => {
@@ -134,5 +180,59 @@ describe('MapListComponent', () => {
         dialogRefSpyObj.afterClosed().subscribe(() => {
             expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
         });
+    });
+
+    it('should compare maps correctly', () => {
+        const localMap: Board = {
+            _id: '1',
+            name: 'Board 1',
+            description: 'Desc 1',
+            size: 10,
+            visibility: Visibility.PUBLIC,
+            board: [],
+            lastUpdatedAt: new Date(),
+            isCTF: false,
+            image: ''
+        };
+        const serverMap: Board = {
+            _id: '1',
+            name: 'Board 1',
+            description: 'Desc 1',
+            size: 10,
+            visibility: Visibility.PUBLIC,
+            board: [],
+            lastUpdatedAt: new Date(),
+            isCTF: false,
+            image: ''
+        };
+
+        expect(component.areMapsEqual(localMap, serverMap)).toBeTrue();
+
+        serverMap.name = 'Board 2';
+        expect(component.areMapsEqual(localMap, serverMap)).toBeFalse();
+    });
+
+    it('should alert and reload page if maps are not equal', () => {
+        const mockMap = mockBoardGames[0];
+        const serverMap = { ...mockMap, name: 'Different Name' };
+        spyOn(window, 'alert');
+        const reloadSpy = spyOn(component, 'reloadPage').and.callFake(() => {});
+        mockBoardService.getAllBoards.and.returnValue(of([serverMap]));
+    
+        component.onDivClick(mockMap);
+    
+        expect(window.alert).toHaveBeenCalledWith('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
+        expect(reloadSpy).toHaveBeenCalled();
+    });
+    
+    it('should emit divClicked if maps are equal', () => {
+        const mockMap = mockBoardGames[0];
+        const serverMap = { ...mockMap };
+        spyOn(component.divClicked, 'emit');
+        mockBoardService.getAllBoards.and.returnValue(of([serverMap]));
+    
+        component.onDivClick(mockMap);
+    
+        expect(component.divClicked.emit).toHaveBeenCalled();
     });
 });
