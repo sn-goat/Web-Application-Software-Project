@@ -11,6 +11,7 @@ import { BoardGameComponent } from '@app/components/board-game/board-game.compon
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
 import { MapService } from '@app/services/map.service';
 import { MouseEditorService } from '@app/services/mouse-editor.service';
+import { ToolSelectionService } from '@app/services/tool-selection.service';
 
 @Component({
     selector: 'app-map-maker',
@@ -33,6 +34,7 @@ export class MapMakerComponent {
 
     constructor(
         private mouseEditor: MouseEditorService,
+        private toolSelection: ToolSelectionService,
         private readonly router: Router,
     ) {}
 
@@ -58,13 +60,26 @@ export class MapMakerComponent {
     onMouseDrag(event: MouseEvent) {
         this.mouseEditor.updateCoordinate(event);
     }
-    reset() {
-        window.location.reload();
+
+    checkIfReadyToSave() {
+        if (this.toolSelection.getIsReadyToSave()) {
+            if (confirm('Are you sure you want to save the map?')) {
+                alert('Map saved successfully!');
+            }
+        } else {
+            alert('You need to place all the spawns points on the board before saving the map.');
+        }
     }
 
     confirmReturn() {
         if (confirm('Are you sure you want to leave this page?')) {
-            this.router.navigate(['/admin']);
+            this.router.navigate(['/admin']).then(() => {
+                this.reset();
+            });
         }
+    }
+
+    reset() {
+        window.location.reload();
     }
 }

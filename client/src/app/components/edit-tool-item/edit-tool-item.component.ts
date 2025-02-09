@@ -1,5 +1,4 @@
 import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { TooltipComponent } from '@app/components/tooltip/tooltip.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
@@ -15,7 +14,7 @@ import { MatBadgeModule } from '@angular/material/badge';
     templateUrl: './edit-tool-item.component.html',
     styleUrls: ['./edit-tool-item.component.scss'],
     standalone: true,
-    imports: [TooltipComponent, MatBadgeModule],
+    imports: [MatBadgeModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
     @Input() type: Item;
@@ -26,6 +25,8 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     remainingItem: number = 1;
     showTooltip = false;
 
+    private maxObjectByType: number;
+    private boardSize: Size;
     private readonly mapService = inject(MapService);
     private destroy$ = new Subject<void>();
 
@@ -35,19 +36,20 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        const boardSize = this.mapService.getMapData().value.size as Size;
-        const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
+        this.boardSize = this.mapService.getMapData().value.size as Size;
+        this.maxObjectByType = BOARD_SIZE_MAPPING[this.boardSize];
         if (this.type === Item.SPAWN) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
-                if (maxObjectByType !== undefined) {
-                    this.remainingItem = maxObjectByType - nbrSpawns;
+                if (this.maxObjectByType !== undefined) {
+                    this.remainingItem = this.maxObjectByType - nbrSpawns;
                     this.isDraggable = this.remainingItem > 0;
+                    this.toolSelection.setIsReadyToSave(this.remainingItem === 0);
                 }
             });
         } else if (this.type === Item.CHEST) {
             this.toolSelection.nbrChestOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrChests) => {
-                if (maxObjectByType !== undefined) {
-                    this.remainingItem = maxObjectByType - nbrChests;
+                if (this.maxObjectByType !== undefined) {
+                    this.remainingItem = this.maxObjectByType - nbrChests;
                     this.isDraggable = this.remainingItem > 0;
                 }
             });
@@ -62,10 +64,16 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+        if (this.type === Item.SPAWN || this.type === Item.CHEST) {
+            this.remainingItem = BOARD_SIZE_MAPPING[this.boardSize];
+        } else {
+            this.remainingItem = 1;
+        }
     }
 
     onDragStart() {
         this.toolSelection.updateSelectedItem(this.type);
+        this.tileApplicator.setDropOnItem(Item.DEFAULT);
     }
 
     onDragEnter(event: MouseEvent) {

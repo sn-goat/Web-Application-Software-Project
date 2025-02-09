@@ -17,6 +17,7 @@ export class ToolSelectionService {
     private itemOnBoard = new BehaviorSubject<Set<Item>>(new Set());
     private nbrSpawnOnBoard = new BehaviorSubject<number>(0);
     private nbrChestOnBoard = new BehaviorSubject<number>(0);
+    private isReadyToSave = false;
 
     constructor() {
         this.selectedTile$ = this.selectedTile.asObservable();
@@ -32,6 +33,14 @@ export class ToolSelectionService {
         } else {
             this.selectedTile.next(selectedTile);
         }
+    }
+
+    getIsReadyToSave() {
+        return this.isReadyToSave;
+    }
+
+    setIsReadyToSave(isReady: boolean) {
+        this.isReadyToSave = isReady;
     }
 
     updateSelectedItem(selectedItem: Item) {
