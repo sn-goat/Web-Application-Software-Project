@@ -134,8 +134,8 @@ export class BoardService {
                         return { isValid: false, error: 'Des portes sont placées sur les rebords du jeu' };
                     }
 
-                    const horizontalFloors = board.board[i][j - 1].tile === Tile.FLOOR && board.board[i][j + 1].tile === Tile.FLOOR;
-                    const verticalFloors = board.board[i - 1][j].tile === Tile.FLOOR && board.board[i + 1][j].tile === Tile.FLOOR;
+                    const horizontalFloors = board.board[i][j - 1].tile !== Tile.WALL && board.board[i][j + 1].tile !== Tile.WALL;
+                    const verticalFloors = board.board[i - 1][j].tile !== Tile.WALL && board.board[i + 1][j].tile !== Tile.WALL;
                     const horizontalWalls = board.board[i - 1][j].tile === Tile.WALL && board.board[i + 1][j].tile === Tile.WALL;
                     const verticalWalls = board.board[i][j - 1].tile === Tile.WALL && board.board[i][j + 1].tile === Tile.WALL;
 
