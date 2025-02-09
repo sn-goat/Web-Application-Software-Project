@@ -4,8 +4,6 @@
     [src]="src + type + extension" 
     [alt]="type"
     draggable="false"
-    class="{{styleClass}}">
+    class="{{styleClass}}"
+    [title] = "getDescription(type)">
 </div>
-@if(showTooltip) {
-    <app-tooltip [text]="getDescription(type)"></app-tooltip>
-}
