@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Board } from '@common/board';
-import { Tile, Item } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class MapService {
-    private readonly storageKey = 'firstBoardValue';
+    private storageKey = 'firstBoardValue';
     private firstBoardValue: BehaviorSubject<Board>;
     private boardToSave: BehaviorSubject<Board>;
 
