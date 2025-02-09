@@ -1,15 +1,5 @@
-img {
-    width: 100%;
-    height: auto;
-    border: 4px solid #000;
-    border-radius: 4px;
-}
-
-img.selected {
-    border: 4px solid #e30909;
-}
-
-div {
+.tile-container {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,15 +7,52 @@ div {
     height: 100%;
     margin: 3px;
     cursor: pointer;
-    
 }
 
-.tooltip {
-    background-color: #cebf82;
-    color: #ffffff00;
+img {
+    width: 100%;
+    height: auto;
+    border: 4px solid #000;
+    border-radius: 4px;
+    transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+
+img.selected {
+    border: 4px solid #e30909;
 }
 
 img:hover {
     opacity: 0.25;
-    filter: grayscale(50%); 
+    filter: grayscale(50%);
+}
+
+/* Tooltip: Now always in the DOM, just hidden */
+.tooltip {
+    position: absolute;
+    bottom: 100%; /* Places tooltip above the image */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #cebf82;
+    color: white; /* Fix: Previously transparent */
+    padding: 6px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 1000; /* Ensures it's above mat-card */
+}
+
+/* Show tooltip on hover */
+.tile-container:hover .tooltip,
+.tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
+}
+
+/* Ensure tooltip is not clipped by mat-card-content */
+mat-card-content {
+    overflow: visible !important;
 }
