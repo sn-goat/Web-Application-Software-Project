@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
 import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
 import { MapService } from '@app/services/map.service';
+import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 
@@ -64,8 +64,7 @@ export class BoardGameComponent implements OnInit {
                 board: [],
                 visibility: Visibility.PUBLIC,
                 image: '',
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                lastUpdatedAt: new Date(),
             };
             for (let i = 0; i < this.boardGame.size; i++) {
                 const row = [];

@@ -1,71 +1,74 @@
 <div class="map-list-container">
-  <div class="search-bar">
-    <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
-    <div class="filter-sort">
-      <select [(ngModel)]="sortBy" class="sort-select">
-        <option value="createdAt">Date de création</option>
-        <option value="name">Nom</option>
-        <option value="status">Statut</option>
-        <option value="size">Taille</option>
-      </select>
-    </div>
-  </div>
-
-  <cdk-virtual-scroll-viewport itemSize="120" class="virtual-scroll-viewport">
-    <div class="grid-container">
-      <!-- Map Cards -->
-      @for (map of getFilteredAndSortedItems(); track map) {
-        <div class="list-item" (click)="onDivClick()">
-          <div class="item-image">
-            <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
-          </div>
-          <div class="item-content">
-            <div class="item-header">
-              <h3 class="item-title">{{ map.name }}</h3>
-              <span class="item-date">{{ map.createdAt | date: "MMM d, y" }}</span>
-            </div>
-            <p class="item-description">{{ map.description }}</p>
-            <div class="item-details">
-              <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
-              <span class="item-ctf">{{ map.isCTF ? "CTF Enabled" : "CTF Disabled" }}</span>
-            </div>
-            <div class="item-footer">
-              <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
-            </div>
-          </div>
-          <div class="item-actions" *ngIf="showActions">
-            <!-- Visibility Button -->
-            <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
-              <img
-                [src]="map.visibility === 'Public'
-                        ? 'https://www.shareicon.net/data/512x512/2015/09/12/100039_visibility_512x512.png'
-                        : 'https://www.svgrepo.com/show/453442/visibility-off.svg'"
-                [alt]="map.visibility"
-                class="button-icon"
-              />
-            </button>
-            <button class="edit-btn" (click)="onEdit(map)" title="Edit">
-              <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
-            </button>
-            <button class="delete-btn" (click)="onDelete(map)" title="Delete">
-              <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
-            </button>
-          </div>
+    <div class="search-bar">
+        <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
+        <div class="filter-sort">
+            <select [(ngModel)]="sortBy" class="sort-select">
+                <option value="lastUpdatedAt">Date de dernière mise à jour</option>
+                <option value="name">Nom</option>
+                <option value="size">Taille</option>
+            </select>
         </div>
-      }
-
-      <!-- Add Map Card -->
-      <div *ngIf="showActions" class="list-item new-map-card" (click)="createNewMap()">
-        <div class="add-icon">+</div>
-        <p class="add-text">Créer un nouveau terrain</p>
-      </div>
     </div>
-  </cdk-virtual-scroll-viewport>
 
-  <!-- Empty State -->
-  @if (getFilteredAndSortedItems().length === 0) {
+    <div class="grid-container">
+        <!-- Map Cards -->
+        @for (map of getFilteredAndSortedItems(); track map) {
+        <div class="list-item" (click)="onDivClick(map)">
+            <div class="item-image">
+                <img src="https://picsum.photos/200/300?random=2" [alt]="map.name" (error)="handleImageError($event)" />
+            </div>
+            <div class="item-content">
+                <div class="item-header">
+                    <h3 class="item-title">{{ map.name }}</h3>
+                    <span class="item-date">{{ map.lastUpdatedAt | date: 'MMM d, y' }}</span>
+                </div>
+                <p class="item-description">{{ map.description }}</p>
+                <div class="item-details">
+                    <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
+                    <span class="item-ctf">{{ 'CTF Enabled' }}</span>
+                </div>
+                <div class="item-footer">
+                    <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
+                </div>
+            </div>
+            @if (showActions) {
+            <div class="item-actions">
+                <!-- Visibility Button -->
+                <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
+                    <img
+                        [src]="
+                            map.visibility === 'Public'
+                                ? 'https://www.shareicon.net/data/512x512/2015/09/12/100039_visibility_512x512.png'
+                                : 'https://www.svgrepo.com/show/453442/visibility-off.svg'
+                        "
+                        [alt]="map.visibility"
+                        class="button-icon"
+                    />
+                </button>
+                <button class="edit-btn" (click)="onEdit(map)" title="Edit">
+                    <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
+                </button>
+                <button class="delete-btn" (click)="onDelete(map)" title="Delete">
+                    <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
+                </button>
+            </div>
+            }
+        </div>
+        }
+
+        <!-- Add Map Card -->
+        @if(showActions) {
+        <div class="list-item new-map-card" (click)="createNewMap()">
+            <div class="add-icon">+</div>
+            <p class="add-text">Create New Map</p>
+        </div>
+        }
+    </div>
+
+    <!-- Empty State -->
+    @if (getFilteredAndSortedItems().length === 0) {
     <div class="empty-state">
-      <p>Aucun item trouvé</p>
+        <p>Aucunes parties trouvées</p>
     </div>
-  }
+    }
 </div>

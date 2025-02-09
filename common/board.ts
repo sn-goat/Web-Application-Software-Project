@@ -13,8 +13,7 @@ export interface Board {
     board: Cell[][];
     visibility: Visibility;
     image: string;
-    createdAt: Date | null;
-    updatedAt: Date | null;
+    lastUpdatedAt: Date | null;
 }
 
 export interface Vec2 {

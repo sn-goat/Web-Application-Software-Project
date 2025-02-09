@@ -15,7 +15,7 @@ body {
 }
 
 .map-list-container {
-    width: 100%;
+    width: 98%;
     margin: 0 auto;
     padding: 20px;
     background: $primary-bg;
@@ -83,13 +83,6 @@ body {
     color: $primary-text;
 }
 
-.virtual-scroll-viewport {
-    height: auto;
-    min-height: calc(100vh - 140px);
-    width: 100%;
-    background: $primary-bg;
-}
-
 .list-item {
     display: flex;
     flex-direction: column;
@@ -99,15 +92,21 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     height: 450px;
+    position: relative;
 }
 
 .list-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.list-item:hover .item-description {
+    opacity: 5;
+    visibility: visible;
+    transform: translateY(20%);
 }
 
 .item-image {
-    width: 100%;
+    width: 98%;
     height: 160px;
     margin-bottom: 16px;
     border: 2px solid $glow-teal;
@@ -151,13 +150,24 @@ body {
 }
 
 .item-description {
-    color: $primary-text;
     font-size: 14px;
     margin: 8px 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    background: $primary-bg;
+    color: $primary-text;
+    padding: 8px;
+    border-radius: 4px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -5%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    max-width: 175px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+    z-index: 100;
 }
 
 .item-details {
@@ -167,7 +177,8 @@ body {
     font-size: 14px;
 }
 
-.item-size, .item-ctf {
+.item-size,
+.item-ctf {
     background: $glow-teal;
     padding: 4px 12px;
     border-radius: 16px;
@@ -182,16 +193,7 @@ body {
     flex-wrap: wrap;
 }
 
-.item-category{
-    background: $glow-teal;
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    color: $primary-text;
-    border: 1px solid $glow-teal;
-}
-
-.item-status, .item-visibility {
+.item-visibility {
     background: $glow-teal;
     padding: 4px 12px;
     border-radius: 16px;
@@ -199,12 +201,14 @@ body {
     color: $primary-text;
     border: 1px solid $glow-teal;
 
-    &.draft, &.private {
+    &.draft,
+    &.private {
         background: $glow-teal;
         border: 1px solid $glow-teal;
     }
 
-    &.published, &.public {
+    &.published,
+    &.public {
         background: $glow-gold;
         border: 1px solid $glow-teal;
     }
@@ -228,37 +232,6 @@ body {
     transition: all 0.3s ease;
     padding: 0;
     overflow: hidden;
-}
-
-.edit-btn {
-    background: $glow-teal;
-
-    &:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 8px $glow-teal;
-    }
-
-    &:active {
-        transform: scale(1);
-        box-shadow: none;
-    }
-}
-
-.delete-btn {
-    background: $glow-gold;
-
-    &:hover {
-        transform: scale(1.1);
-        box-shadow: 0 4px 8px $glow-gold;
-    }
-
-    &:active {
-        transform: scale(1);
-        box-shadow: none;
-    }
-}
-
-.visibility-btn {
     background: $glow-teal;
 
     &:hover {

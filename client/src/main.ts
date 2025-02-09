@@ -11,6 +11,9 @@ import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MapMakerComponent } from '@app/pages/map-maker/map-maker.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
+import { AttentePageComponent } from '@app/pages/attente-page/attente-page.component';
+
+
 
 Component({
     template: `
@@ -26,6 +29,8 @@ const routes: Routes = [
     { path: 'material', component: MaterialPageComponent },
     { path: 'edit', component: MapMakerComponent },
     { path: 'creation', component: CreatePageComponent },
+    { path: 'creation', component: CreatePageComponent  },
+    { path: 'attente', component: AttentePageComponent  },
     { path: 'admin', component: AdminPageComponent },
     { path: '**', redirectTo: '/home' },
 ];

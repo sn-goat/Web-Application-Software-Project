@@ -1,15 +1,13 @@
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
+import { BoardService } from '@app/services/board.service';
 import { MapService } from '@app/services/map.service';
-import { Visibility } from '@common/enums';
-import { environment } from 'src/environments/environment';
 import { Board } from '@common/board';
+import { Visibility } from '@common/enums';
 
 @Component({
     selector: 'app-map-list',
@@ -17,7 +15,7 @@ import { Board } from '@common/board';
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule, ScrollingModule],
+    imports: [CommonModule, FormsModule],
 })
 export class MapListComponent implements OnInit {
     @Input() items: Board[] = [];
@@ -29,30 +27,36 @@ export class MapListComponent implements OnInit {
 
     private mapService = inject(MapService);
 
-    private readonly baseUrl: string = environment.serverUrl;
-
     constructor(
-        private readonly http: HttpClient,
         private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
         private readonly dialog: MatDialog,
+        private readonly boardService: BoardService,
     ) {}
 
-    onDivClick() {
-        this.divClicked.emit();
+    onDivClick(map: Board): void {
+        this.boardService.getAllBoards().subscribe((serverMaps) => {
+            const serverMap = serverMaps.find((m) => m._id === map._id);
+            if (!serverMap) {
+                alert('La carte a été supprimée du serveur.');
+                window.location.reload();
+            } else if (!this.areMapsEqual(map, serverMap)) {
+                alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
+                window.location.reload();
+            } else {
+                this.divClicked.emit();
+            }
+        });
     }
 
     ngOnInit(): void {
-        this.http.get<Board[]>('assets/mockMapData.json').subscribe({
-            next: (data) => {
-                this.items = data.map((item) => ({
-                    ...item,
-                    visibility: item.visibility === 'Public' ? Visibility.PUBLIC : Visibility.PRIVATE,
-                    createdAt: item.createdAt ? new Date(item.createdAt) : null,
-                    updatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
-                }));
-                this.cdr.detectChanges(); // Manually trigger change detection
-            },
+        this.boardService.getAllBoards().subscribe((boards) => {
+            this.items = boards.map((item) => ({
+                ...item,
+                visibility: item.visibility === Visibility.PUBLIC ? Visibility.PUBLIC : Visibility.PRIVATE,
+                lastUpdatedAt: item.lastUpdatedAt ? new Date(item.lastUpdatedAt) : null,
+            }));
+            this.cdr.detectChanges(); // Manually trigger change detection
         });
     }
 
@@ -62,9 +66,7 @@ export class MapListComponent implements OnInit {
                 item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
                 item.description.toLowerCase().includes(this.searchQuery.toLowerCase());
 
-            const isPublished = this.showActions;
-
-            return matchesSearch && isPublished;
+            return matchesSearch;
         });
 
         if (this.onlyVisible) {
@@ -74,7 +76,7 @@ export class MapListComponent implements OnInit {
         return filtered.sort((a, b) => {
             switch (this.sortBy) {
                 case 'createdAt':
-                    return (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0);
+                    return (b.lastUpdatedAt?.getTime() ?? 0) - (a.lastUpdatedAt?.getTime() ?? 0);
                 case 'name':
                     return a.name.localeCompare(b.name);
                 case 'size':
@@ -85,23 +87,34 @@ export class MapListComponent implements OnInit {
         });
     }
 
+    areMapsEqual(localMap: Board, serverMap: Board): boolean {
+        return (
+            localMap.name === serverMap.name &&
+            localMap.description === serverMap.description &&
+            localMap.size === serverMap.size &&
+            localMap.visibility === serverMap.visibility &&
+            JSON.stringify(localMap.board) === JSON.stringify(serverMap.board)
+        );
+    }
+
     onEdit(map: Board): void {
-        this.http.get<Board>(`${this.baseUrl}/board/${map.name}`).subscribe((fullMap) => {
-            this.mapService.setMapData(fullMap);
-            this.router.navigate(['/edit']);
-        });
+        this.router.navigate(['/edit'], { queryParams: { id: map._id } });
     }
 
     onDelete(map: Board): void {
         if (confirm(`Are you sure you want to delete "${map.name}"?`)) {
-            this.items = this.items.filter((item) => item._id !== map._id);
-            this.cdr.detectChanges();
+            this.boardService.deleteBoardByName(map.name).subscribe(() => {
+                this.items = this.items.filter((item) => item._id !== map._id);
+                this.cdr.detectChanges();
+            });
         }
     }
 
     toggleVisibility(map: Board): void {
-        map.visibility = map.visibility === Visibility.PUBLIC ? Visibility.PRIVATE : Visibility.PUBLIC;
-        this.cdr.detectChanges();
+        this.boardService.toggleVisibility(map.name).subscribe(() => {
+            map.visibility = map.visibility === Visibility.PUBLIC ? Visibility.PRIVATE : Visibility.PUBLIC;
+            this.cdr.detectChanges();
+        });
     }
 
     createNewMap(): void {
