@@ -102,7 +102,10 @@ export class MapListComponent implements OnInit {
     }
 
     onEdit(map: Board): void {
-        this.router.navigate(['/edit'], { queryParams: { id: map._id } });
+        this.boardService.getBoard(map.name).subscribe((fullMap) => {
+            this.mapService.setMapData(fullMap);
+            this.router.navigate(['/edit']);
+        });
     }
 
     onDelete(map: Board): void {
