@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
+import { RouterLink } from '@angular/router';
 
 const MAX_PORTRAITS = 12;
 const D4 = './assets/dice/d4.png';
@@ -11,7 +12,7 @@ const D6 = './assets/dice/d6.png';
     selector: 'app-create-page',
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
-    imports: [CommonModule, FormsModule, MapListComponent],
+    imports: [CommonModule, FormsModule, RouterLink, MapListComponent],
 })
 export class CreatePageComponent {
     playerName: string = '';
