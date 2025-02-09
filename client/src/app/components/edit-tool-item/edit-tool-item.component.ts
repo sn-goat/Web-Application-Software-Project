@@ -55,8 +55,14 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
             });
         } else {
             this.toolSelection.itemOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((items) => {
-                this.remainingItem = !items.has(this.type) ? 1 : 0;
-                this.isDraggable = !items.has(this.type);
+                if (!this.mapService.getMode() && this.type === Item.FLAG) {
+                    this.isDraggable = false;
+                    this.remainingItem = 0;
+                } else {
+                    this.isDraggable = false;
+                    this.remainingItem = !items.has(this.type) ? 1 : 0;
+                    this.isDraggable = !items.has(this.type);
+                }
             });
         }
     }

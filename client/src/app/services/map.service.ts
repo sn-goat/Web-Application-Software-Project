@@ -20,6 +20,8 @@ export class MapService {
 
     setMapData(data: Board): void {
         this.firstBoardValue.next(data);
+        // eslint-disable-next-line no-console
+        console.log(data);
         localStorage.setItem(this.storageKey, JSON.stringify(data));
     }
 
@@ -59,6 +61,11 @@ export class MapService {
     getCellItem(col: number, row: number): Item {
         const currentBoard = this.boardToSave.value;
         return currentBoard.board[row][col].item;
+    }
+
+    getMode(): boolean {
+        const currentBoard = this.boardToSave.value;
+        return currentBoard.isCTF;
     }
 
     setCellTile(col: number, row: number, newTile: Tile) {
