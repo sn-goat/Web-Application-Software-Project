@@ -48,6 +48,12 @@ export class BoardGameComponent implements OnInit {
         this.tileApplicator.handleDrop(this.boardGame, this.elRef.nativeElement.getBoundingClientRect());
     }
 
+    @HostListener('dragend', ['$event'])
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        this.tileApplicator.setItemOutsideBoard(this.boardGame, event.pageX, event.pageY, this.elRef.nativeElement.getBoundingClientRect());
+    }
+
     ngOnInit() {
         this.initializeBoard();
     }

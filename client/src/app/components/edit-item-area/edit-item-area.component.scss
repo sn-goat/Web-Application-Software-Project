@@ -5,10 +5,15 @@
 }
 
 .content > * {
-    width: 50px; /* Largeur fixe pour chaque élément */
-    height: 50px; /* Hauteur fixe pour chaque élément */
+    width: 75px; /* Largeur fixe pour chaque élément */
+    height: 75px; /* Hauteur fixe pour chaque élément */
     box-sizing: border-box; /* Inclure les bordures et les padding dans les dimensions */
     display: flex; 
     justify-content: center; 
     align-items: center; 
 }
+
+mat-card-title {
+    color: #1a1625;
+}
+

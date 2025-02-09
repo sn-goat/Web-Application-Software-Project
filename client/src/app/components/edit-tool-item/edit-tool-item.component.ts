@@ -7,13 +7,15 @@ import { MapService } from '@app/services/map.service';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { Size, Item } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
+import { TileApplicatorService } from '@app/services/tile-applicator.service';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @Component({
     selector: 'app-edit-tool-item',
     templateUrl: './edit-tool-item.component.html',
     styleUrls: ['./edit-tool-item.component.scss'],
     standalone: true,
-    imports: [TooltipComponent],
+    imports: [TooltipComponent, MatBadgeModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
     @Input() type: Item;
@@ -21,13 +23,16 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';
     isDraggable = true;
-    remainingItem: number = 0;
+    remainingItem: number = 1;
     showTooltip = false;
 
     private readonly mapService = inject(MapService);
     private destroy$ = new Subject<void>();
 
-    constructor(private toolSelection: ToolSelectionService) {}
+    constructor(
+        private toolSelection: ToolSelectionService,
+        private tileApplicator: TileApplicatorService,
+    ) {}
 
     ngOnInit() {
         const boardSize = this.mapService.getMapData().value.size as Size;
@@ -48,6 +53,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
             });
         } else {
             this.toolSelection.itemOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((items) => {
+                this.remainingItem = !items.has(this.type) ? 1 : 0;
                 this.isDraggable = !items.has(this.type);
             });
         }
@@ -64,6 +70,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
 
     onDragEnter(event: MouseEvent) {
         event.preventDefault();
+        this.tileApplicator.setDropOnItem(this.type);
     }
 
     getDescription(type: Item): string {

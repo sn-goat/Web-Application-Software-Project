@@ -18,6 +18,7 @@ export class TileApplicatorService implements OnDestroy {
     private handleItem: boolean = false;
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
+    private isOnItem: Item = Item.Default;
 
     private selectedTile: Tile | null;
     private selectedItem: Item | null;
@@ -89,11 +90,31 @@ export class TileApplicatorService implements OnDestroy {
         }
     }
 
+    setItemOutsideBoard(boardGame: Board, x: number, y: number, rect: DOMRect) {
+        if (!this.isOnBoard(x, y, rect)) {
+            if (this.isOnItem) {
+                if (this.oldItemPos.x !== -1 && this.oldItemPos.y !== -1) {
+                    if (this.isOnItem === boardGame.board[this.oldItemPos.y][this.oldItemPos.x].item) {
+                        this.setDropOnItem(Item.Default);
+                        this.deleteItem(this.oldItemPos.x, this.oldItemPos.y, boardGame);
+                    }
+                }
+            } else {
+                this.oldItemPos = { x: -1, y: -1 };
+            }
+        }
+    }
+
+    setDropOnItem(item: Item) {
+        this.isOnItem = item;
+    }
+
     handleDrop(boardGame: Board, rect: DOMRect) {
         if (this.selectedItem !== Item.DEFAULT) {
             this.newItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
             this.updatePosition(this.oldItemPos, this.newItemPos, boardGame);
         }
+
         this.oldItemPos = { x: -1, y: -1 };
         this.toolSelection.updateSelectedItem(Item.DEFAULT);
         this.isMouseLeftDown = false;

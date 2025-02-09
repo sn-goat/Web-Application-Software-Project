@@ -28,4 +28,10 @@ img.item-moved {
 .object {
     position: relative;
     display: inline-block;
+    margin: 10px;
+}
+
+.mat-badge-content {
+    background: #1a1625;
+    color: white;
 }

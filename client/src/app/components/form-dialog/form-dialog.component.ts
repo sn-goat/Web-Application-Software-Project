@@ -15,6 +15,7 @@ export class FormDialogComponent {
         name: '',
         description: '',
         size: '10',
+        ctf: false,
     };
     constructor(public dialogReg: MatDialogRef<FormDialogComponent>) {}
 }
