@@ -37,11 +37,11 @@ export class MapMakerComponent {
     ) {}
 
     get name() {
-        return this.mapService.getMapData().value.name;
+        return this.mapService.getBoardToSave().value.name;
     }
 
     get description() {
-        return this.mapService.getMapData().value.description;
+        return this.mapService.getBoardToSave().value.description;
     }
 
     @HostListener('contextmenu', ['$event'])

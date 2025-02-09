@@ -4,7 +4,6 @@ import { BoardCellComponent } from '@app/components/board-cell/board-cell.compon
 import { MapService } from '@app/services/map.service';
 import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { Board } from '@common/board';
-import { Item, Tile, Visibility } from '@common/enums';
 
 @Component({
     selector: 'app-board-game',
@@ -18,7 +17,7 @@ export class BoardGameComponent implements OnInit {
     private readonly mapService = inject(MapService);
 
     constructor(
-        private elRef: ElementRef,
+        public elRef: ElementRef,
         private tileApplicator: TileApplicatorService,
     ) {}
 
