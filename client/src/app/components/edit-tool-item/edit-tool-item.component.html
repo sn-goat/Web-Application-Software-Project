@@ -12,8 +12,6 @@
     [class.item-moved]="!isDraggable"
     (drag)="onDragStart()"
     (dragleave)="onDragEnter($event)"
+    [title] = "getDescription(type)"
     >
 </div>
-@if(showTooltip) {
-    <app-tooltip [text]="getDescription(type)"></app-tooltip>
-}
