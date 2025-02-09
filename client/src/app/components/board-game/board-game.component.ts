@@ -55,62 +55,9 @@ export class BoardGameComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.initializeBoard();
-    }
-
-    private initializeBoard() {
-        this.boardGame = this.mapService.getMapData().value;
-        if (this.boardGame.board === undefined) {
-            this.boardGame = {
-                _id: '',
-                name: this.boardGame.name,
-                description: this.boardGame.description,
-                size: this.boardGame.size,
-                isCTF: false,
-                board: [],
-                visibility: Visibility.PUBLIC,
-                image: '',
-                lastUpdatedAt: new Date(),
-            };
-            for (let i = 0; i < this.boardGame.size; i++) {
-                const row = [];
-                for (let j = 0; j < this.boardGame.size; j++) {
-                    row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
-                }
-                this.boardGame.board.push(row);
-            }
-        }
-        this.parseBoard();
-        this.populateEmptyCells();
-        this.mapService.setMapData(this.boardGame);
-    }
-
-    private parseBoard() {
-        for (let i = 0; i < this.boardGame.size; i++) {
-            for (let j = 0; j < this.boardGame.size; j++) {
-                const cell = this.boardGame.board[i][j];
-                if (cell.tile === undefined) {
-                    cell.tile = Tile.FLOOR;
-                }
-                if (cell.item === undefined) {
-                    cell.item = Item.DEFAULT;
-                }
-                if (cell.position === undefined) {
-                    cell.position = { x: j, y: i };
-                }
-            }
-        }
-    }
-
-    private populateEmptyCells() {
-        if (this.boardGame.board.length === 0) {
-            for (let i = 0; i < this.boardGame.size; i++) {
-                const row = [];
-                for (let j = 0; j < this.boardGame.size; j++) {
-                    row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
-                }
-                this.boardGame.board.push(row);
-            }
-        }
+        this.mapService.initializeBoard();
+        this.mapService.getBoardToSave().subscribe((board: Board) => {
+            this.boardGame = board;
+        });
     }
 }
