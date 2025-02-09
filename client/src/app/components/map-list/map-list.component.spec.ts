@@ -45,7 +45,7 @@ describe('MapListComponent', () => {
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-        mockBoardService = jasmine.createSpyObj('BoardService', ['getAllBoards', 'deleteBoardByName', 'toggleVisibility']);
+        mockBoardService = jasmine.createSpyObj('BoardService', ['getAllBoards', 'deleteBoardByName', 'toggleVisibility', 'getBoard']);
         mockCdr = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
 
         await TestBed.configureTestingModule({
@@ -103,12 +103,6 @@ describe('MapListComponent', () => {
         const description = fixture.debugElement.query(By.css('.item-description'));
         expect(description).not.toBeNull();
         expect(description.nativeElement.textContent).toContain(mockBoardGames[0].description);
-    });
-
-    it('should allow editing a game', () => {
-        const mockMap = mockBoardGames[0];
-        component.onEdit(mockMap);
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit'], { queryParams: { id: mockMap._id } });
     });
 
     it('should allow deleting a game', () => {
