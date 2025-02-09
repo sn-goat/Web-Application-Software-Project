@@ -18,7 +18,7 @@ export class TileApplicatorService implements OnDestroy {
     private handleItem: boolean = false;
     private isMouseLeftDown: boolean = false;
     private isMouseRightDown: boolean = false;
-    private isOnItem: Item = Item.Default;
+    private isOnItem: Item = Item.DEFAULT;
 
     private selectedTile: Tile | null;
     private selectedItem: Item | null;
@@ -95,7 +95,7 @@ export class TileApplicatorService implements OnDestroy {
             if (this.isOnItem) {
                 if (this.oldItemPos.x !== -1 && this.oldItemPos.y !== -1) {
                     if (this.isOnItem === boardGame.board[this.oldItemPos.y][this.oldItemPos.x].item) {
-                        this.setDropOnItem(Item.Default);
+                        this.setDropOnItem(Item.DEFAULT);
                         this.deleteItem(this.oldItemPos.x, this.oldItemPos.y, boardGame);
                     }
                 }
