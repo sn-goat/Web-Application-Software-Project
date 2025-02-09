@@ -1,9 +1,9 @@
-.cell { 
+.cell {
     aspect-ratio: 1/1;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #000; 
+    border: 1px solid #000;
     position: relative;
 }
 
@@ -19,11 +19,11 @@
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensure images cover the cell without distorting */
+    object-fit: cover;
 }
 
 .image-stack {
-    z-index: 1; /* Ensure the stacked image appears on top */
+    z-index: 1;
 }
 
 .base-image {
@@ -33,4 +33,32 @@
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+}
+
+.tooltip-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1a1625;
+    color: #7ee0d0;
+    padding: 6px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+
+.image-container:hover .tooltip,
+.tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
 }
