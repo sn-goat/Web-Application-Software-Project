@@ -3,7 +3,7 @@ import { BoardService } from '@app/services/board/board.service';
 import { EMPTY_BOARD, PRIVATE_BOARD } from '@app/test/helpers/board/create-board.mock';
 import { MOCK_STORED_BOARD_ARRAY, VALID_BOARD } from '@app/test/helpers/board/stored-board.mock';
 import { createBoard, placeTile, placeUnreachableTile } from '@app/test/helpers/board/tests-utils';
-import { BoardVisibility, TileType } from '@common/enums';
+import { Visibility, Tile } from '@common/enums';
 import { Logger } from '@nestjs/common';
 import { MongooseModule, getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -146,7 +146,7 @@ describe('BoardService', () => {
         const board = createBoard(SIZE_10);
         for (let i = 0; i < MOREHALFSIZE; i++) {
             for (let j = 0; j < MOREHALFSIZE; j++) {
-                placeTile(board, TileType.WALL, { x: i, y: j });
+                placeTile(board, Tile.WALL, { x: i, y: j });
             }
         }
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Invalid board: More than half the surface is covered');
@@ -164,14 +164,14 @@ describe('BoardService', () => {
 
     it('updateBoard() should correcty update a valid board', async () => {
         const storedBoard = createBoard(SIZE_10);
-        placeTile(storedBoard, TileType.WALL, { x: 3, y: 3 });
+        placeTile(storedBoard, Tile.WALL, { x: 3, y: 3 });
         await service.addBoard({ ...VALID_BOARD, board: storedBoard });
         const updatedBoard = createBoard(SIZE_10);
-        placeTile(updatedBoard, TileType.ICE, { x: 3, y: 3 });
-        await service.updateBoard({ ...VALID_BOARD, board: updatedBoard, visibility: BoardVisibility.PRIVATE });
+        placeTile(updatedBoard, Tile.ICE, { x: 3, y: 3 });
+        await service.updateBoard({ ...VALID_BOARD, board: updatedBoard, visibility: Visibility.PRIVATE });
         const board = await service.getBoard(VALID_BOARD.name);
-        expect(board.board[3][3].tile).toEqual(TileType.ICE);
-        expect(board.visibility).toEqual(BoardVisibility.PRIVATE);
+        expect(board.board[3][3].tile).toEqual(Tile.ICE);
+        expect(board.visibility).toEqual(Visibility.PRIVATE);
     });
 
     it('updateBoard() should reject an invalid board', async () => {
@@ -181,7 +181,7 @@ describe('BoardService', () => {
         const updatedBoard = createBoard(SIZE_10);
         for (let i = 0; i < MOREHALFSIZE; i++) {
             for (let j = 0; j < MOREHALFSIZE; j++) {
-                placeTile(updatedBoard, TileType.WALL, { x: i, y: j });
+                placeTile(updatedBoard, Tile.WALL, { x: i, y: j });
             }
         }
 
