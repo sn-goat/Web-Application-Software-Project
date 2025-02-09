@@ -17,7 +17,7 @@ describe('EditToolItemComponent', () => {
     let mockTileApplicatorService: jasmine.SpyObj<TileApplicatorService>;
 
     beforeEach(async () => {
-        mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave']);
+        mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave', 'getBoardSize']);
         mockTileApplicatorService = jasmine.createSpyObj<TileApplicatorService>('TileApplicatorService', ['setDropOnItem']);
 
         mockToolSelectionService = jasmine.createSpyObj<ToolSelectionService>('ToolSelectionService', ['updateSelectedItem'], {

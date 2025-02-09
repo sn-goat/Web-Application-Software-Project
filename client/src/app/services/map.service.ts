@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
     providedIn: 'root',
 })
 export class MapService {
-    private readonly storageKey = 'firstBoardValue';
+    private storageKey = 'firstBoardValue';
     private firstBoardValue: BehaviorSubject<Board>;
     private boardToSave: BehaviorSubject<Board>;
 

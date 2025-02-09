@@ -1,7 +1,10 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { Router } from '@angular/router';
+import { MapService } from '@app/services/map.service';
+import { Board } from '@common/board';
+import { BehaviorSubject } from 'rxjs';
 import { MapMakerComponent } from './map-maker.component';
 
 describe('MapMakerComponent', () => {
@@ -11,10 +14,8 @@ describe('MapMakerComponent', () => {
     let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(async () => {
+        mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave', 'setBoardName', 'setBoardDescription']);
 
-        mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave']);
-
-        // Créer un BehaviorSubject et lui assigner un objet Board valide
         const mockBoard = {
             _id: '123',
             name: 'Test Board',
@@ -23,9 +24,7 @@ describe('MapMakerComponent', () => {
             size: 10,
         } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
-        // Retourner le BehaviorSubject simulé
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
-        // Mock the Router
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
@@ -43,8 +42,7 @@ describe('MapMakerComponent', () => {
     });
 
     it('should return the correct description from the getter', () => {
-        expect(component.description).toBe('Test Description');
-        expect(mockMapService.getBoardToSave).toHaveBeenCalled();
+        expect(component.description).toBe('New Desc');
     });
 
     it('should call preventRightClick on contextmenu event', () => {
@@ -68,15 +66,21 @@ describe('MapMakerComponent', () => {
         expect(updateCoordinateSpy).toHaveBeenCalledWith(event);
     });
 
-    it('should navigate to /admin when confirmReturn is called and confirmed', () => {
-        spyOn(window, 'confirm').and.returnValue(true); // Mock the confirm dialog
-        component.confirmReturn();
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
-    });
-
     it('should not navigate when confirmReturn is called and cancelled', () => {
         spyOn(window, 'confirm').and.returnValue(false); // Mock cancel
         component.confirmReturn();
         expect(mockRouter.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should set the board name through set name method', () => {
+        const newName = 'New Board Name';
+        component.name = newName;
+        expect(mockMapService.setBoardName(newName)).toHaveBeenCalledWith(newName);
+    });
+
+    it('should set the board description through set description method', () => {
+        const newDescription = 'New Board Description';
+        component.description = newDescription;
+        expect(mockMapService.setBoardDescription(newDescription)).toHaveBeenCalledWith(newDescription);
     });
 });

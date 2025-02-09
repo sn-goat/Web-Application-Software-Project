@@ -15,24 +15,11 @@ describe('MapService', () => {
         service = TestBed.inject(MapService);
 
         // Mock BehaviorSubject and its initial value
-        const boardSubject = new BehaviorSubject<Board>({
-            _id: '123',
-            name: 'Test Board',
-            size: 5,
-            isCTF: true,
-            description: 'Test Description',
-            visibility: Visibility.PUBLIC,
-            image: 'image.jpg',
-            lastUpdatedAt: new Date(),
-            board: []
-        });
-
-        service['boardToSave'] = boardSubject;
         
         service['firstBoardValue'] = new BehaviorSubject<Board>({
             _id: '123',
             name: 'Mock Board',
-            size: 5,
+            size: 10,
             isCTF: true,
             description: 'Mock Description',
             visibility: Visibility.PUBLIC,
@@ -41,6 +28,8 @@ describe('MapService', () => {
             board: []
         });
 
+        service.initializeBoard();
+        
         service['storageKey'] = 'mockStorageKey';
     });
 
@@ -90,19 +79,22 @@ describe('MapService', () => {
     });
 
     it('should change tile of the cell', () => {
-        const newTile = Tile.WALL; // Example tile from the Tile enum
+        const newTile = Tile.WALL;
         const col = 2;
         const row = 3;
-        
-        // Set up a mock board with an initial tile value
         const mockBoard = service['boardToSave'].value;
-        mockBoard.board[row] = [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: col, y: row } }];
+    
+        // Initialize the mock board with the appropriate dimensions
+        mockBoard.board = Array(mockBoard.size).fill(null).map((_, rowIndex) => 
+            Array(mockBoard.size).fill(null).map((_, colIndex) => ({
+                tile: Tile.FLOOR,
+                item: Item.DEFAULT,
+                position: { x: colIndex, y: rowIndex }
+            }))
+        );
+    
         service['boardToSave'].next(mockBoard);
-
-        // Call the changeCellTile method
         service.setCellTile(col, row, newTile);
-
-        // Expect the tile to be updated
         expect(service['boardToSave'].value.board[row][col].tile).toBe(newTile);
     });
 
