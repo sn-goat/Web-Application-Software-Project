@@ -1,4 +1,4 @@
-import { Component, HostListener, inject } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +9,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 import { BoardGameComponent } from '@app/components/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
+import { BoardService } from '@app/services/board.service';
 import { MapService } from '@app/services/map.service';
 import { MouseEditorService } from '@app/services/mouse-editor.service';
 
@@ -28,20 +29,21 @@ import { MouseEditorService } from '@app/services/mouse-editor.service';
     templateUrl: './map-maker.component.html',
     styleUrls: ['./map-maker.component.scss'],
 })
-export class MapMakerComponent {
+export class MapMakerComponent implements OnInit {
     private readonly mapService = inject(MapService);
 
     constructor(
         private mouseEditor: MouseEditorService,
+        private boardService: BoardService,
         private readonly router: Router,
     ) {}
 
     get name() {
-        return this.mapService.getMapData().value.name;
+        return this.mapService.getBoardToSave().value.name;
     }
 
     get description() {
-        return this.mapService.getMapData().value.description;
+        return this.mapService.getBoardToSave().value.description;
     }
 
     @HostListener('contextmenu', ['$event'])
@@ -66,5 +68,14 @@ export class MapMakerComponent {
         if (confirm('Are you sure you want to leave this page?')) {
             this.router.navigate(['/admin']);
         }
+    }
+
+    ngOnInit() {
+        this.mapService.initializeBoard();
+    }
+
+    saveBoard() {
+        const res = this.boardService.addBoard(this.mapService.getBoardToSave().value);
+        console.log(res);
     }
 }

@@ -35,7 +35,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        const boardSize = this.mapService.getMapData().value.size as Size;
+        const boardSize = this.mapService.getBoardSize() as Size;
         const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
         if (this.type === Item.SPAWN) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {

@@ -8,7 +8,7 @@
             <label for="Description">Description de la carte:</label>
             <textarea id="Description" rows="4" maxlength="100" placeholder="100 caractères maximum" matInput [(ngModel)]="description"></textarea>
 
-            <button type="button" id="saveButton">Enregistrer</button>
+            <button type="button" id="saveButton" (click)="saveBoard()" >Enregistrer</button>
             <button type="reset" class="reset-button" (click)="reset()">  Réinitialiser </button>
             <button type="button" class="return-button" (click)="confirmReturn()"> Retour </button>
         </div>

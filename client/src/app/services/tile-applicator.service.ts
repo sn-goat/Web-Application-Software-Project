@@ -3,9 +3,10 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { MouseEditorService } from './mouse-editor.service';
 import { ToolSelectionService } from './tool-selection.service';
+import { MapService } from './map.service';
 
 import { Tile, Item } from '@common/enums';
-import { Board, Vec2 } from '@common/board';
+import { Vec2 } from '@common/board';
 
 @Injectable({
     providedIn: 'root',
@@ -27,6 +28,7 @@ export class TileApplicatorService implements OnDestroy {
     constructor(
         private mouseEditorService: MouseEditorService,
         private toolSelection: ToolSelectionService,
+        private mapService: MapService,
     ) {
         this.mouseEditorService.currentCoord$.pipe(takeUntil(this.destroy$)).subscribe((coord) => {
             this.currentCoord = coord;
@@ -46,26 +48,26 @@ export class TileApplicatorService implements OnDestroy {
         this.destroy$.complete();
     }
 
-    handleMouseDown(event: MouseEvent, boardGame: Board, rect: DOMRect) {
+    handleMouseDown(event: MouseEvent, rect: DOMRect) {
         this.previousCoord = this.currentCoord;
-        const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y, boardGame, rect);
+        const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y, rect);
 
         if (event.button === 2) {
             this.isMouseRightDown = true;
-            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.DEFAULT) {
+            if (this.mapService.getCellItem(cellPosition.x, cellPosition.y) !== Item.DEFAULT) {
                 this.handleItem = true;
-                this.deleteItem(cellPosition.x, cellPosition.y, boardGame);
+                this.deleteItem(cellPosition.x, cellPosition.y);
             }
         }
         if (event.button === 0) {
             this.isMouseLeftDown = true;
-            if (boardGame.board[cellPosition.y][cellPosition.x].item !== Item.DEFAULT) {
+            if (this.mapService.getCellItem(cellPosition.y, cellPosition.x) !== Item.DEFAULT) {
                 this.handleItem = true;
-                this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
+                this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, rect);
             }
         }
 
-        this.updateCell(cellPosition.x, cellPosition.y, boardGame);
+        this.updateCell(cellPosition.x, cellPosition.y);
     }
 
     handleMouseUp(event: MouseEvent) {
@@ -83,20 +85,20 @@ export class TileApplicatorService implements OnDestroy {
         this.handleItem = false;
     }
 
-    handleMouseMove(boardGame: Board, rect: DOMRect) {
+    handleMouseMove(rect: DOMRect) {
         if (!this.handleItem) {
-            this.applyIntermediateTiles(this.previousCoord, boardGame, rect);
+            this.applyIntermediateTiles(this.previousCoord, rect);
             this.previousCoord = this.currentCoord;
         }
     }
 
-    setItemOutsideBoard(boardGame: Board, x: number, y: number, rect: DOMRect) {
+    setItemOutsideBoard(x: number, y: number, rect: DOMRect) {
         if (!this.isOnBoard(x, y, rect)) {
             if (this.isOnItem) {
                 if (this.oldItemPos.x !== -1 && this.oldItemPos.y !== -1) {
-                    if (this.isOnItem === boardGame.board[this.oldItemPos.y][this.oldItemPos.x].item) {
+                    if (this.isOnItem === this.mapService.getCellItem(this.oldItemPos.x, this.oldItemPos.y)) {
                         this.setDropOnItem(Item.DEFAULT);
-                        this.deleteItem(this.oldItemPos.x, this.oldItemPos.y, boardGame);
+                        this.deleteItem(this.oldItemPos.x, this.oldItemPos.y);
                     }
                 }
             } else {
@@ -109,10 +111,10 @@ export class TileApplicatorService implements OnDestroy {
         this.isOnItem = item;
     }
 
-    handleDrop(boardGame: Board, rect: DOMRect) {
+    handleDrop(rect: DOMRect) {
         if (this.selectedItem !== Item.DEFAULT) {
-            this.newItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, boardGame, rect);
-            this.updatePosition(this.oldItemPos, this.newItemPos, boardGame);
+            this.newItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, rect);
+            this.updatePosition(this.oldItemPos, this.newItemPos);
         }
 
         this.oldItemPos = { x: -1, y: -1 };
@@ -126,11 +128,11 @@ export class TileApplicatorService implements OnDestroy {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
-    private screenToBoard(x: number, y: number, boardGame: Board, rect: DOMRect): Vec2 {
+    private screenToBoard(x: number, y: number, rect: DOMRect): Vec2 {
         const coordX = Math.floor(x - rect.left);
         const coordY = Math.floor(y - rect.top);
-        const cellWidth = rect.width / boardGame.size;
-        const cellHeight = rect.height / boardGame.size;
+        const cellWidth = rect.width / this.mapService.getBoardSize();
+        const cellHeight = rect.height / this.mapService.getBoardSize();
 
         const tileX = Math.floor(coordX / cellWidth);
         const tileY = Math.floor(coordY / cellHeight);
@@ -138,7 +140,7 @@ export class TileApplicatorService implements OnDestroy {
         return tileCoord;
     }
 
-    private applyIntermediateTiles(previousCoord: Vec2, boardGame: Board, rect: DOMRect) {
+    private applyIntermediateTiles(previousCoord: Vec2, rect: DOMRect) {
         const startX = previousCoord.x;
         const startY = previousCoord.y;
         const endX = this.currentCoord.x;
@@ -150,7 +152,7 @@ export class TileApplicatorService implements OnDestroy {
         const sy = startY < endY ? 1 : -1;
         let err = dx - dy;
 
-        const seen: Set<string> = new Set([JSON.stringify(this.screenToBoard(startX, startY, boardGame, rect))]);
+        const seen: Set<string> = new Set([JSON.stringify(this.screenToBoard(startX, startY, rect))]);
 
         let x = startX;
         let y = startY;
@@ -162,10 +164,10 @@ export class TileApplicatorService implements OnDestroy {
                 break;
             }
 
-            const tileCoord = this.screenToBoard(x, y, boardGame, rect);
+            const tileCoord = this.screenToBoard(x, y, rect);
             const tileCoordKey = JSON.stringify(tileCoord);
             if (!seen.has(tileCoordKey)) {
-                this.updateCell(tileCoord.x, tileCoord.y, boardGame);
+                this.updateCell(tileCoord.x, tileCoord.y);
                 seen.add(tileCoordKey);
             }
 
@@ -182,59 +184,59 @@ export class TileApplicatorService implements OnDestroy {
 
         // Ensure the end point is also updated
         if (this.isOnBoard(endX, endY, rect)) {
-            const tileCoord = this.screenToBoard(endX, endY, boardGame, rect);
+            const tileCoord = this.screenToBoard(endX, endY, rect);
             const tileCoordKey = JSON.stringify(tileCoord);
             if (!seen.has(tileCoordKey)) {
-                this.updateCell(tileCoord.x, tileCoord.y, boardGame);
+                this.updateCell(tileCoord.x, tileCoord.y);
                 seen.add(tileCoordKey);
             }
         }
     }
 
-    private applyTile(col: number, row: number, boardGame: Board) {
+    private applyTile(col: number, row: number) {
         if (this.selectedTile !== null) {
             if (this.selectedTile === Tile.WALL) {
-                this.applyWall(col, row, boardGame);
+                this.applyWall(col, row);
             } else if (this.selectedTile === Tile.CLOSED_DOOR) {
-                this.applyDoor(col, row, boardGame);
+                this.applyDoor(col, row);
             } else {
-                boardGame.board[row][col].tile = this.selectedTile as Tile;
+                this.mapService.setCellTile(col, row, this.selectedTile as Tile);
             }
         }
     }
 
-    private applyDoor(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].tile === Tile.CLOSED_DOOR) {
-            boardGame.board[row][col].tile = Tile.OPENED_DOOR;
+    private applyDoor(col: number, row: number) {
+        if (this.mapService.getCellTile(col, row) === Tile.CLOSED_DOOR) {
+            this.mapService.setCellTile(col, row, Tile.OPENED_DOOR);
         } else {
-            boardGame.board[row][col].tile = Tile.CLOSED_DOOR;
+            this.mapService.setCellTile(col, row, Tile.CLOSED_DOOR);
         }
     }
 
-    private applyWall(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item !== Item.DEFAULT) {
-            this.deleteItem(col, row, boardGame);
+    private applyWall(col: number, row: number) {
+        if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
+            this.deleteItem(col, row);
         }
-        boardGame.board[row][col].tile = Tile.WALL;
+        this.mapService.setCellTile(col, row, Tile.WALL);
     }
 
-    private revertToFLOOR(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].tile !== Tile.FLOOR) {
-            boardGame.board[row][col].tile = Tile.FLOOR;
+    private revertToFLOOR(col: number, row: number) {
+        if (this.mapService.getCellTile(col, row) !== Tile.FLOOR) {
+            this.mapService.setCellTile(col, row, Tile.FLOOR);
         }
     }
 
-    private updateCell(col: number, row: number, boardGame: Board) {
+    private updateCell(col: number, row: number) {
         if (!this.handleItem) {
             if (this.isMouseRightDown) {
-                this.revertToFLOOR(col, row, boardGame);
+                this.revertToFLOOR(col, row);
             } else if (this.isMouseLeftDown) {
-                this.applyTile(col, row, boardGame);
+                this.applyTile(col, row);
             }
         }
     }
 
-    private applyItem(col: number, row: number, boardGame: Board) {
+    private applyItem(col: number, row: number) {
         if (this.selectedItem === Item.SPAWN) {
             this.toolSelection.incrementSpawn();
         } else if (this.selectedItem === Item.CHEST) {
@@ -243,28 +245,28 @@ export class TileApplicatorService implements OnDestroy {
             this.toolSelection.addItem(this.selectedItem as Item);
         }
 
-        if (boardGame.board[row][col].item !== Item.DEFAULT) {
-            this.deleteItem(col, row, boardGame);
+        if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
+            this.deleteItem(col, row);
         }
-        boardGame.board[row][col].item = this.selectedItem as Item;
+        this.mapService.setCellItem(col, row, this.selectedItem as Item);
     }
-    private deleteItem(col: number, row: number, boardGame: Board) {
-        if (boardGame.board[row][col].item === Item.SPAWN) {
+    private deleteItem(col: number, row: number) {
+        if (this.mapService.getCellItem(col, row) === Item.SPAWN) {
             this.toolSelection.decrementSpawn();
-        } else if (boardGame.board[row][col].item === Item.CHEST) {
+        } else if (this.mapService.getCellItem(col, row) === Item.CHEST) {
             this.toolSelection.decrementChest();
         } else {
-            this.toolSelection.removeItem(boardGame.board[row][col].item as Item);
+            this.toolSelection.removeItem(this.mapService.getCellItem(col, row));
         }
-        boardGame.board[row][col].item = Item.DEFAULT;
+        this.mapService.setCellItem(col, row, Item.DEFAULT);
     }
 
-    private updatePosition(oldItemPos: Vec2, newItemPos: Vec2, boardGame: Board) {
-        if (boardGame.board[newItemPos.y][newItemPos.x].tile !== Tile.WALL) {
+    private updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
+        if (this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.WALL) {
             if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
-                this.deleteItem(oldItemPos.x, oldItemPos.y, boardGame);
+                this.deleteItem(oldItemPos.x, oldItemPos.y);
             }
-            this.applyItem(newItemPos.x, newItemPos.y, boardGame);
+            this.applyItem(newItemPos.x, newItemPos.y);
         }
     }
 }
