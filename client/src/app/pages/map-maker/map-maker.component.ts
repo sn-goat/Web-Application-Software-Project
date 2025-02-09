@@ -99,10 +99,10 @@ export class MapMakerComponent implements OnInit {
     saveBoard() {
         this.boardService.addBoard(this.mapService.getBoardToSave().value).subscribe(
             (response) => {
-                console.log('Success:', response);
+                return response;
             },
             (error) => {
-                console.error('Error:', error);
+                return error;
             },
         );
     }

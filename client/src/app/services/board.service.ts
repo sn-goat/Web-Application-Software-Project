@@ -19,8 +19,8 @@ export class BoardService {
         return this.http.get<Board>(`${this.apiUrl}/${name}`);
     }
 
-    addBoard(board: Partial<Board>): Observable<HttpResponse<any>> {
-        return this.http.post<HttpResponse<any>>(`${this.apiUrl}/board`, board, { observe: "response" });
+    addBoard(board: Partial<Board>): Observable<HttpResponse<unknown>> {
+        return this.http.post<HttpResponse<unknown>>(`${this.apiUrl}/board`, board, { observe: 'response' });
     }
 
     updateBoard(name: string, updates: Partial<Board>): Observable<Board> {

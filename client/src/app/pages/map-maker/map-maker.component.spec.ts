@@ -1,10 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
-import { MapService } from '@app/services/map.service';
-import { Board } from '@common/board';
-import { BehaviorSubject } from 'rxjs';
+
 import { MapMakerComponent } from './map-maker.component';
 
 describe('MapMakerComponent', () => {
@@ -33,11 +30,7 @@ describe('MapMakerComponent', () => {
 
         await TestBed.configureTestingModule({
             imports: [MapMakerComponent],
-            providers: [
-                { provide: 'MapService', useValue: mockMapService },
-                { provide: Router, useValue: mockRouter },
-                provideHttpClient(), provideHttpClientTesting()
-            ]
+            providers: [provideHttpClient(), provideHttpClientTesting],
         }).compileComponents();
 
         fixture = TestBed.createComponent(MapMakerComponent);
