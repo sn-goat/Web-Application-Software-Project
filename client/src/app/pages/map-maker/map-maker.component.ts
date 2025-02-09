@@ -43,9 +43,15 @@ export class MapMakerComponent implements OnInit {
     get name() {
         return this.mapService.getBoardToSave().value.name;
     }
-
     get description() {
         return this.mapService.getBoardToSave().value.description;
+    }
+
+    set name(value: string) {
+        this.mapService.setBoardName(value);
+    }
+    set description(value: string) {
+        this.mapService.setBoardDescription(value);
     }
 
     @HostListener('contextmenu', ['$event'])
