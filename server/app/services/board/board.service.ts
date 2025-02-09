@@ -2,7 +2,7 @@ import { Board, BoardDocument } from '@app/model/database/board';
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
 import { MOCK_STORED_BOARD_ARRAY } from '@app/test/helpers/board/stored-board.mock';
 import { Cell, Vec2 } from '@common/board';
-import { Visibility, Tile } from '@common/enums';
+import { Tile, Visibility } from '@common/enums';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -40,10 +40,10 @@ export class BoardService {
     async addBoard(board: CreateBoardDto): Promise<void> {
         const validation = await this.validateBoard(board, true);
         if (!validation.isValid) {
-            return Promise.reject(`Invalid board: ${validation.error}`);
+            return Promise.reject(`Jeu invalide: ${validation.error}`);
         }
         try {
-            await this.boardModel.create({ ...board, lastUpdatedAt: new Date() });
+            await this.boardModel.create({ ...board, lastUpdatedAt: new Date(), visibility: Visibility.PRIVATE });
         } catch (error) {
             return Promise.reject(`Failed to insert board: ${error}`);
         }
@@ -52,13 +52,19 @@ export class BoardService {
     async updateBoard(board: CreateBoardDto): Promise<Board> {
         const validation = await this.validateBoard(board, false);
         if (!validation.isValid) {
-            return Promise.reject(`Invalid board: ${validation.error}`);
+            return Promise.reject(`Jeu invalide: ${validation.error}`);
         }
 
         const updatedBoard = await this.boardModel.findOneAndUpdate({ name: board.name }, board, { new: true }).exec();
 
         if (!updatedBoard) {
-            throw new NotFoundException(`Board with name "${name}" not found.`);
+            const newBoard = { ...board, lastUpdatedAt: new Date(), visibility: Visibility.PRIVATE };
+            try {
+                await this.boardModel.create({ ...board, lastUpdatedAt: new Date(), visibility: Visibility.PRIVATE });
+            } catch (error) {
+                return Promise.reject(`Failed to insert board: ${error}`);
+            }
+            return newBoard;
         }
 
         return updatedBoard;
@@ -93,17 +99,51 @@ export class BoardService {
 
     private async validateBoard(board: CreateBoardDto, newBoard: boolean): Promise<Validation> {
         if (board.board.length === 0) {
-            return { isValid: false, error: 'Empty board' };
+            return { isValid: false, error: 'Jeu vide' };
         }
 
         if (newBoard && !(await this.isBoardNameUnique(board.name))) {
-            return { isValid: false, error: 'Board name has to be unique' };
+            return { isValid: false, error: 'Nom du jeu doit être unique' };
         }
         if (this.isHalfSurfaceCovered(board)) {
-            return { isValid: false, error: 'More than half the surface is covered' };
+            return { isValid: false, error: 'Plus de la moitié de la surface du jeu est couverte' };
         }
         if (this.inacessibleTiles(board)) {
-            return { isValid: false, error: 'There are inacessible tiles' };
+            return { isValid: false, error: 'Il y a des tuiles inacessibles' };
+        }
+        const doorsValidation = this.areDoorsValid(board);
+        if (!doorsValidation.isValid) {
+            return { isValid: false, error: doorsValidation.error };
+        }
+        return { isValid: true };
+    }
+
+    private doorOnEdge(row: number, col: number, max: number): boolean {
+        if (row === 0 || col === 0 || row === max - 1 || col === max - 1) {
+            return true;
+        }
+    }
+
+    private areDoorsValid(board: CreateBoardDto): Validation {
+        const rows = board.board.length;
+        const cols = board.board[0].length;
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                if (board.board[i][j].tile === Tile.CLOSED_DOOR || board.board[i][j].tile === Tile.OPENED_DOOR) {
+                    if (this.doorOnEdge(i, j, rows)) {
+                        return { isValid: false, error: 'Des portes sont placées sur les rebords du jeu' };
+                    }
+
+                    const horizontalFloors = board.board[i][j - 1].tile === Tile.FLOOR && board.board[i][j + 1].tile === Tile.FLOOR;
+                    const verticalFloors = board.board[i - 1][j].tile === Tile.FLOOR && board.board[i + 1][j].tile === Tile.FLOOR;
+                    const horizontalWalls = board.board[i - 1][j].tile === Tile.WALL && board.board[i + 1][j].tile === Tile.WALL;
+                    const verticalWalls = board.board[i][j - 1].tile === Tile.WALL && board.board[i][j + 1].tile === Tile.WALL;
+
+                    if (!(horizontalFloors && verticalWalls) && !(verticalFloors && horizontalWalls)) {
+                        return { isValid: false, error: "Des portes n'ont pas de structure valide" };
+                    }
+                }
+            }
         }
         return { isValid: true };
     }
