@@ -1,4 +1,9 @@
-<div class="object" (mouseenter)="showTooltip = true" (mouseleave)="showTooltip = false">
+<div class="object" 
+    (mouseenter)="showTooltip = true" 
+    (mouseleave)="showTooltip = false"
+
+    matBadge= "{{remainingItem}}"  matBadgeOverlap="false" matBadgeHidden="{{!remainingItem}}"
+    >
     <img 
     [src]="src + type + fileType" 
     [alt]="type"
