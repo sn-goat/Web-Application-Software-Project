@@ -1,13 +1,13 @@
 import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { MapService } from '@app/services/map.service';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
-import { Size, Item } from '@common/enums';
-import { Subject, takeUntil } from 'rxjs';
 import { TileApplicatorService } from '@app/services/tile-applicator.service';
-import { MatBadgeModule } from '@angular/material/badge';
+import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { Item, Size } from '@common/enums';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-item',
@@ -36,7 +36,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.boardSize = this.mapService.getMapData().value.size as Size;
+        this.boardSize = this.mapService.getBoardSize() as Size;
         this.maxObjectByType = BOARD_SIZE_MAPPING[this.boardSize];
         if (this.type === Item.SPAWN) {
             this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
