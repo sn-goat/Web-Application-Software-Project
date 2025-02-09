@@ -26,14 +26,13 @@ img:hover {
     filter: grayscale(50%);
 }
 
-/* Tooltip: Now always in the DOM, just hidden */
 .tooltip {
     position: absolute;
-    bottom: 100%; /* Places tooltip above the image */
+    bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
     background-color: #cebf82;
-    color: white; /* Fix: Previously transparent */
+    color: white;
     padding: 6px 10px;
     border-radius: 4px;
     white-space: nowrap;
@@ -41,10 +40,9 @@ img:hover {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-    z-index: 1000; /* Ensures it's above mat-card */
+    z-index: 1000;
 }
 
-/* Show tooltip on hover */
 .tile-container:hover .tooltip,
 .tooltip.visible {
     opacity: 1;
@@ -52,7 +50,6 @@ img:hover {
     transform: translateX(-50%) translateY(-5px);
 }
 
-/* Ensure tooltip is not clipped by mat-card-content */
 mat-card-content {
     overflow: visible !important;
 }

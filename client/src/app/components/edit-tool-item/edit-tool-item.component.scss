@@ -17,12 +17,12 @@ div {
 
 img:hover {
     opacity: 0.25;
-    filter: grayscale(50%); 
+    filter: grayscale(50%);
 }
 
 img.item-moved {
     opacity: 0.25;
-    filter: grayscale(50%); 
+    filter: grayscale(50%);
 }
 
 .object {
@@ -34,4 +34,28 @@ img.item-moved {
 .mat-badge-content {
     background: #1a1625;
     color: white;
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #cebf82;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.object:hover .tooltip,
+.tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-5px);
 }
