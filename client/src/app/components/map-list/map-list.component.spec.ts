@@ -131,8 +131,8 @@ describe('MapListComponent', () => {
         mockDialog.open.and.returnValue(dialogRefSpyObj);
         component.createNewMap();
         expect(mockDialog.open).toHaveBeenCalled();
-        dialogRefSpyObj.afterClosed().subscribe((result: { name: string; description: string; size: number }) => {
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit'], { queryParams: result });
+        dialogRefSpyObj.afterClosed().subscribe(() => {
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
         });
     });
 });
