@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Board } from '@common/board';
 import { Observable } from 'rxjs';
@@ -19,8 +19,8 @@ export class BoardService {
         return this.http.get<Board>(`${this.apiUrl}/${name}`);
     }
 
-    addBoard(board: Partial<Board>): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/board`, board);
+    addBoard(board: Partial<Board>): Observable<HttpResponse<any>> {
+        return this.http.post<HttpResponse<any>>(`${this.apiUrl}/board`, board, { observe: "response" });
     }
 
     updateBoard(name: string, updates: Partial<Board>): Observable<Board> {

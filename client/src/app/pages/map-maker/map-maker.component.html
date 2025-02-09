@@ -1,5 +1,5 @@
 <div class="editor-container">
-    <div class="editor-panel">   
+    <div class="editor-panel">
         <h1>Informations</h1>
         <div class="form-container">
             <label for="Nom">Nom de la carte:</label>
@@ -8,9 +8,9 @@
             <label for="Description">Description de la carte:</label>
             <textarea id="Description" rows="4" maxlength="100" placeholder="100 caractères maximum" matInput [(ngModel)]="description"></textarea>
 
-            <button type="button" id="saveButton">Enregistrer</button>
-            <button type="reset" class="reset-button" (click)="reset()">  Réinitialiser </button>
-            <button type="button" class="return-button" (click)="confirmReturn()"> Retour </button>
+            <button type="button" id="saveButton" (click)="checkIfReadyToSave()">Enregistrer</button>
+            <button type="reset" class="reset-button" (click)="reset()">Réinitialiser</button>
+            <button type="button" class="return-button" (click)="confirmReturn()">Retour</button>
         </div>
     </div>
     <div class="map-container">

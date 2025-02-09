@@ -3,7 +3,7 @@ import { BoardService } from '@app/services/board/board.service';
 import { EMPTY_BOARD, PRIVATE_BOARD } from '@app/test/helpers/board/create-board.mock';
 import { MOCK_STORED_BOARD_ARRAY, VALID_BOARD } from '@app/test/helpers/board/stored-board.mock';
 import { createBoard, placeTile, placeUnreachableTile } from '@app/test/helpers/board/tests-utils';
-import { Visibility, Tile } from '@common/enums';
+import { Tile, Visibility } from '@common/enums';
 import { Logger } from '@nestjs/common';
 import { MongooseModule, getConnectionToken, getModelToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -128,16 +128,17 @@ describe('BoardService', () => {
         const boards = await boardModel.find({});
         expect(boards.length).toBe(1);
         expect(boards[0].name).toBe(VALID_BOARD.name);
+        expect(boards[0].visibility).toBe(Visibility.PRIVATE);
     });
 
     it('addBoard() should reject an empty board', async () => {
-        await expect(service.addBoard(EMPTY_BOARD)).rejects.toEqual('Invalid board: Empty board');
+        await expect(service.addBoard(EMPTY_BOARD)).rejects.toEqual('Jeu invalide: Jeu vide');
     });
 
     it('addBoard() should reject a board with a non-unique name', async () => {
         const board = createBoard(SIZE_10);
         await service.addBoard({ ...VALID_BOARD, board });
-        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Invalid board: Board name has to be unique');
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Jeu invalide: Nom du jeu doit être unique');
         const boards = await boardModel.find({});
         expect(boards.length).toBe(1);
     });
@@ -149,7 +150,9 @@ describe('BoardService', () => {
                 placeTile(board, Tile.WALL, { x: i, y: j });
             }
         }
-        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Invalid board: More than half the surface is covered');
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual(
+            'Jeu invalide: Plus de la moitié de la surface du jeu est couverte',
+        );
         const boards = await boardModel.find({});
         expect(boards.length).toBe(0);
     });
@@ -157,9 +160,30 @@ describe('BoardService', () => {
     it('addBoard() should reject a board with unreachable floor tiles', async () => {
         const board = createBoard(SIZE_10);
         placeUnreachableTile(board, { x: 5, y: 5 });
-        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Invalid board: There are inacessible tiles');
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Jeu invalide: Il y a des tuiles inacessibles');
         const boards = await boardModel.find({});
         expect(boards.length).toBe(0);
+    });
+
+    it('addBoard() should reject a board with doors placed on the edge', async () => {
+        const board = createBoard(SIZE_10);
+        placeTile(board, Tile.CLOSED_DOOR, { x: 9, y: 3 });
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Jeu invalide: Des portes sont placées sur les rebords du jeu');
+    });
+
+    it('addBoard() should reject a board with an incorrect door structure', async () => {
+        const board = createBoard(SIZE_10);
+        placeTile(board, Tile.OPENED_DOOR, { x: 5, y: 5 });
+        placeTile(board, Tile.WALL, { x: 6, y: 5 });
+        placeTile(board, Tile.WALL, { x: 5, y: 6 });
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual("Jeu invalide: Des portes n'ont pas de structure valide");
+
+        placeTile(board, Tile.WALL, { x: 5, y: 4 });
+        placeTile(board, Tile.ICE, { x: 4, y: 5 });
+        placeTile(board, Tile.FLOOR, { x: 6, y: 5 });
+        await service.addBoard({ ...VALID_BOARD, board });
+        const validBoard = await service.getBoard(VALID_BOARD.name);
+        expect(validBoard.board).toEqual(board);
     });
 
     it('updateBoard() should correcty update a valid board', async () => {
@@ -186,11 +210,18 @@ describe('BoardService', () => {
         }
 
         await expect(service.updateBoard({ ...VALID_BOARD, board: updatedBoard })).rejects.toEqual(
-            'Invalid board: More than half the surface is covered',
+            'Jeu invalide: Plus de la moitié de la surface du jeu est couverte',
         );
 
         const board = await service.getBoard(VALID_BOARD.name);
         expect(board.board).toEqual(storedBoard);
+    });
+
+    it('updateBoard() should create a new board if it does not find one', async () => {
+        const boardNotFound = createBoard(SIZE_10);
+        await service.addBoard({ ...VALID_BOARD, board: boardNotFound });
+        const board = await service.getBoard(VALID_BOARD.name);
+        expect(board.board).toMatchObject(boardNotFound);
     });
 
     it('deleteBoardByName() should delete a specific board', async () => {

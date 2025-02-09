@@ -20,7 +20,7 @@ export class CreateBoardDto {
     @ApiProperty({ description: 'Board state' })
     board: Cell[][];
 
-    @ApiProperty({ description: 'Whether the board is available to everyone' })
+    @ApiProperty({ description: 'Whether the board is available to everyone', required: false })
     visibility: Visibility;
 
     @ApiProperty({ description: 'Miniature image of the board' })

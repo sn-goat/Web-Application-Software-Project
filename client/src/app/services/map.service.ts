@@ -28,7 +28,7 @@ export class MapService {
 
     initializeBoard() {
         this.initializeBoardData();
-        if (this.boardToSave.value.board === undefined) {
+        if (this.boardToSave.value.board.length === 0) {
             this.generateBoard();
         }
     }
@@ -45,13 +45,28 @@ export class MapService {
         this.boardToSave.next(currentBoard);
     }
 
-    changeCellTile(col: number, row: number, newTile: Tile) {
+    getBoardSize(): number {
+        const currentBoard = this.boardToSave.value;
+        return currentBoard.size;
+    }
+
+    getCellTile(col: number, row: number): Tile {
+        const currentBoard = this.boardToSave.value;
+        return currentBoard.board[row][col].tile;
+    }
+
+    getCellItem(col: number, row: number): Item {
+        const currentBoard = this.boardToSave.value;
+        return currentBoard.board[row][col].item;
+    }
+
+    setCellTile(col: number, row: number, newTile: Tile) {
         const currentBoard = this.boardToSave.value;
         currentBoard.board[row][col].tile = newTile;
         this.boardToSave.next(currentBoard);
     }
 
-    changeCellItem(col: number, row: number, newItem: Item) {
+    setCellItem(col: number, row: number, newItem: Item) {
         const currentBoard = this.boardToSave.value;
         currentBoard.board[row][col].item = newItem;
         this.boardToSave.next(currentBoard);
@@ -59,7 +74,10 @@ export class MapService {
 
     private initializeBoardData() {
         const data = this.firstBoardValue.value;
-        this.boardToSave = new BehaviorSubject<Board>(data);
+        this.boardToSave = new BehaviorSubject<Board>({
+            ...data,
+            board: [],
+        });
     }
 
     private generateBoard() {
