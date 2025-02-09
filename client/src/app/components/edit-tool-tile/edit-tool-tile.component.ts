@@ -1,5 +1,4 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { TooltipComponent } from '@app/components/tooltip/tooltip.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
@@ -10,7 +9,7 @@ import { Subject, takeUntil } from 'rxjs';
     selector: 'app-edit-tool-tile',
     templateUrl: './edit-tool-tile.component.html',
     styleUrl: './edit-tool-tile.component.scss',
-    imports: [TooltipComponent],
+    imports: [],
 })
 export class EditToolTileComponent implements OnInit, OnDestroy {
     @Input() type!: Tile;

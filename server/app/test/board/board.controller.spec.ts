@@ -104,12 +104,12 @@ describe('BoardController', () => {
         await controller.addBoard({ name: 'New Board' } as CreateBoardDto, res);
     });
 
-    it('addBoard() should return NOT_FOUND when service fails', async () => {
+    it('addBoard() should return INTERNAL_SERVER_ERROR when service fails', async () => {
         boardService.addBoard.rejects();
 
         const res = {} as unknown as Response;
         res.status = (code) => {
-            expect(code).toEqual(HttpStatus.NOT_FOUND);
+            expect(code).toEqual(HttpStatus.INTERNAL_SERVER_ERROR);
             return res;
         };
         res.send = () => res;
