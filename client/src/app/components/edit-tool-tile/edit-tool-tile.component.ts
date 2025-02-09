@@ -30,7 +30,7 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
                 this.styleClass = 'unselected';
             }
         });
-        this.description = ASSETS_DESCRIPTION.get(this.type) || 'Pas de description';
+        this.description = ASSETS_DESCRIPTION.get(this.type) ?? 'Pas de description';
     }
 
     ngOnDestroy() {

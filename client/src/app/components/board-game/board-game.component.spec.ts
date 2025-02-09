@@ -44,7 +44,7 @@ describe('BoardGameComponent', () => {
         const event = new MouseEvent('mousedown');
         spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
         component.onMouseDown(event);
-        expect(tileApplicatorService.handleMouseDown).toHaveBeenCalledWith(event, component.boardGame, jasmine.any(Object));
+        expect(tileApplicatorService.handleMouseDown).toHaveBeenCalledWith(event, jasmine.any(Object));
     });
 
     it('should handle mouseup event', () => {
@@ -61,7 +61,7 @@ describe('BoardGameComponent', () => {
     it('should handle mousemove event', () => {
         spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
         component.onMouseMove();
-        expect(tileApplicatorService.handleMouseMove).toHaveBeenCalledWith(component.boardGame, jasmine.any(Object));
+        expect(tileApplicatorService.handleMouseMove).toHaveBeenCalledWith(jasmine.any(Object));
     });
 
     it('should handle drop event', () => {
@@ -70,7 +70,7 @@ describe('BoardGameComponent', () => {
         spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
         component.onDrop(event);
         expect(event.preventDefault).toHaveBeenCalled();
-        expect(tileApplicatorService.handleDrop).toHaveBeenCalledWith(component.boardGame, jasmine.any(Object));
+        expect(tileApplicatorService.handleDrop).toHaveBeenCalledWith(jasmine.any(Object));
     });
 
     it('should handle dragend event', () => {
@@ -79,6 +79,6 @@ describe('BoardGameComponent', () => {
         spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
         component.onDragOver(event);
         expect(event.preventDefault).toHaveBeenCalled();
-        expect(tileApplicatorService.setItemOutsideBoard).toHaveBeenCalledWith(component.boardGame, 100, 100, jasmine.any(Object));
+        expect(tileApplicatorService.setItemOutsideBoard).toHaveBeenCalledWith(100, 100, jasmine.any(Object));
     });
 });

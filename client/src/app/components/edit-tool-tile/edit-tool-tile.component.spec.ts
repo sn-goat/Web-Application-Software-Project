@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { EditToolTileComponent } from './edit-tool-tile.component';
 
 describe('EditToolComponent', () => {

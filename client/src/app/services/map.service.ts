@@ -15,6 +15,7 @@ export class MapService {
         const savedData = localStorage.getItem(this.storageKey);
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
         this.firstBoardValue = new BehaviorSubject<Board>(initialData);
+        this.initializeBoard();
     }
 
     setMapData(data: Board): void {

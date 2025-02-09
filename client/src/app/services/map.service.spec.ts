@@ -100,7 +100,7 @@ describe('MapService', () => {
         service['boardToSave'].next(mockBoard);
 
         // Call the changeCellTile method
-        service.changeCellTile(col, row, newTile);
+        service.setCellTile(col, row, newTile);
 
         // Expect the tile to be updated
         expect(service['boardToSave'].value.board[row][col].tile).toBe(newTile);
@@ -117,7 +117,7 @@ describe('MapService', () => {
 
         mockBoard.board[row][col] = { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: col, y: row } };
         service['boardToSave'].next(mockBoard);
-        service.changeCellTile(col, row, newTile);
+        service.setCellTile(col, row, newTile);
         expect(service['boardToSave'].value.board[row][col].tile).toBe(newTile);
     });
     
