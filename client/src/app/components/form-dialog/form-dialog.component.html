@@ -5,14 +5,14 @@
         <!-- Name Field -->
         <mat-form-field class="full-width" appearance="fill">
             <mat-label>Nom du jeu:</mat-label>
-            <input matInput placeholder="Entrez le nom ici..." [(ngModel)]="data.name" name="name" required />
+            <input maxlength="15" matInput placeholder="Entrez le nom ici..." [(ngModel)]="data.name" name="name" required />
             <mat-error *ngIf="gameForm.submitted && !data.name"> Le nom est requis </mat-error>
         </mat-form-field>
 
         <!-- Description Field -->
         <mat-form-field class="full-width" appearance="fill">
             <mat-label>Description:</mat-label>
-            <input matInput placeholder="Entrez une description ici..." [(ngModel)]="data.description" name="description" required />
+            <input matInput maxlength="100" placeholder="Entrez une description ici..." [(ngModel)]="data.description" name="description" required />
             <mat-error *ngIf="gameForm.submitted && !data.description"> La description est requise </mat-error>
         </mat-form-field>
 

@@ -74,6 +74,9 @@ export class MapMakerComponent implements OnInit {
             if (confirm('Are you sure you want to save the map?')) {
                 this.saveBoard();
                 alert('Map saved successfully!');
+                this.router.navigate(['/admin']).then(() => {
+                    this.reset();
+                });
             }
         } else {
             alert('You need to place all the spawns points on the board before saving the map.');

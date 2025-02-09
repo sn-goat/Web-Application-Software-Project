@@ -61,7 +61,7 @@ export class TileApplicatorService implements OnDestroy {
         }
         if (event.button === 0) {
             this.isMouseLeftDown = true;
-            if (this.mapService.getCellItem(cellPosition.y, cellPosition.x) !== Item.DEFAULT) {
+            if (this.mapService.getCellItem(cellPosition.x, cellPosition.y) !== Item.DEFAULT) {
                 this.handleItem = true;
                 this.oldItemPos = this.screenToBoard(this.currentCoord.x, this.currentCoord.y, rect);
             }
@@ -206,6 +206,9 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     private applyDoor(col: number, row: number) {
+        if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
+            this.deleteItem(col, row);
+        }
         if (this.mapService.getCellTile(col, row) === Tile.CLOSED_DOOR) {
             this.mapService.setCellTile(col, row, Tile.OPENED_DOOR);
         } else {
@@ -262,7 +265,11 @@ export class TileApplicatorService implements OnDestroy {
     }
 
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
-        if (this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.WALL) {
+        if (
+            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.WALL &&
+            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.OPENED_DOOR &&
+            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.CLOSED_DOOR
+        ) {
             if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
                 this.deleteItem(oldItemPos.x, oldItemPos.y);
             }
