@@ -38,7 +38,7 @@ export class BoardController {
             await this.boardService.addBoard(board);
             response.status(HttpStatus.CREATED).send();
         } catch (error) {
-            response.status(HttpStatus.NOT_FOUND).send(error.message);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
         }
     }
 

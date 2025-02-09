@@ -75,7 +75,13 @@ export class MapMakerComponent implements OnInit {
     }
 
     saveBoard() {
-        const res = this.boardService.addBoard(this.mapService.getBoardToSave().value);
-        console.log(res);
+        this.boardService.addBoard(this.mapService.getBoardToSave().value).subscribe(
+            (response) => {
+                console.log('Success:', response);
+            },
+            (error) => {
+                console.error('Error:', error);
+            },
+        );
     }
 }
