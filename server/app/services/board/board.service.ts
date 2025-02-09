@@ -136,10 +136,10 @@ export class BoardService {
 
                     const horizontalFloors = board.board[i][j - 1].tile !== Tile.WALL && board.board[i][j + 1].tile !== Tile.WALL;
                     const verticalFloors = board.board[i - 1][j].tile !== Tile.WALL && board.board[i + 1][j].tile !== Tile.WALL;
-                    const horizontalWalls = board.board[i - 1][j].tile === Tile.WALL && board.board[i + 1][j].tile === Tile.WALL;
-                    const verticalWalls = board.board[i][j - 1].tile === Tile.WALL && board.board[i][j + 1].tile === Tile.WALL;
+                    const horizontalWalls = board.board[i][j - 1].tile === Tile.WALL && board.board[i][j + 1].tile === Tile.WALL;
+                    const verticalWalls = board.board[i - 1][j].tile === Tile.WALL && board.board[i + 1][j].tile === Tile.WALL;
 
-                    if (!(horizontalFloors && verticalWalls) && !(verticalFloors && horizontalWalls)) {
+                    if (!((horizontalFloors && verticalWalls) || (verticalFloors && horizontalWalls))) {
                         return { isValid: false, error: "Des portes n'ont pas de structure valide" };
                     }
                 }

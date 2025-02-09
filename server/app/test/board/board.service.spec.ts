@@ -177,6 +177,13 @@ describe('BoardService', () => {
         placeTile(board, Tile.WALL, { x: 6, y: 5 });
         placeTile(board, Tile.WALL, { x: 5, y: 6 });
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual("Jeu invalide: Des portes n'ont pas de structure valide");
+
+        placeTile(board, Tile.WALL, { x: 5, y: 4 });
+        placeTile(board, Tile.ICE, { x: 4, y: 5 });
+        placeTile(board, Tile.FLOOR, { x: 6, y: 5 });
+        await service.addBoard({ ...VALID_BOARD, board });
+        const validBoard = await service.getBoard(VALID_BOARD.name);
+        expect(validBoard.board).toEqual(board);
     });
 
     it('updateBoard() should correcty update a valid board', async () => {
