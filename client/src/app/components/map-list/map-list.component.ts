@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,7 +8,6 @@ import { BoardService } from '@app/services/board.service';
 import { MapService } from '@app/services/map.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
-import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-map-list',
@@ -28,14 +26,12 @@ export class MapListComponent implements OnInit {
     sortBy: string = 'createdAt';
 
     private mapService = inject(MapService);
-    private readonly baseUrl: string = environment.serverUrl;
 
     constructor(
         private readonly router: Router,
         private readonly cdr: ChangeDetectorRef,
         private readonly dialog: MatDialog,
         private readonly boardService: BoardService,
-        private readonly http: HttpClient,
     ) {}
 
     onDivClick(map: Board): void {
@@ -102,7 +98,7 @@ export class MapListComponent implements OnInit {
     }
 
     onEdit(map: Board): void {
-        this.http.get<Board>(`${this.baseUrl}/board/${map.name}`).subscribe((fullMap) => {
+        this.boardService.getBoard(map.name).subscribe((fullMap) => {
             this.mapService.setMapData(fullMap);
             this.router.navigate(['/edit']);
         });
