@@ -64,11 +64,6 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
-        if (this.type === Item.SPAWN || this.type === Item.CHEST) {
-            this.remainingItem = BOARD_SIZE_MAPPING[this.boardSize];
-        } else {
-            this.remainingItem = 1;
-        }
     }
 
     onDragStart() {
