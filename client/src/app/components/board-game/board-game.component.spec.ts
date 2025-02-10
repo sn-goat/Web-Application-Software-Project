@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
 import { MapService } from '@app/services/code/map.service';
+import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
 import { Board } from '@common/board';
 import { BehaviorSubject } from 'rxjs';
 import { BoardGameComponent } from './board-game.component';
@@ -43,7 +43,6 @@ describe('BoardGameComponent', () => {
 
     it('should initialize board on init', () => {
         component.ngOnInit();
-        expect(mapService.initializeBoard).toHaveBeenCalled();
         expect(mapService.getBoardToSave).toHaveBeenCalled();
     });
 

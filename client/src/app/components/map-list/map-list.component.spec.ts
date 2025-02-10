@@ -4,6 +4,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { BoardService } from '@app/services/code/board.service';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { of } from 'rxjs';
@@ -15,6 +16,7 @@ describe('MapListComponent', () => {
     let mockRouter: jasmine.SpyObj<Router>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
     let mockBoardService: jasmine.SpyObj<BoardService>;
+    let mockMapService: jasmine.SpyObj<MapService>;
     let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
     const mockBoardGames: Board[] = [
@@ -46,6 +48,7 @@ describe('MapListComponent', () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
         mockBoardService = jasmine.createSpyObj('BoardService', ['getAllBoards', 'deleteBoardByName', 'toggleVisibility', 'getBoard']);
+        mockMapService = jasmine.createSpyObj('MapService', ['setMapData']);
         mockCdr = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
 
         await TestBed.configureTestingModule({
@@ -54,6 +57,7 @@ describe('MapListComponent', () => {
                 { provide: Router, useValue: mockRouter },
                 { provide: MatDialog, useValue: mockDialog },
                 { provide: BoardService, useValue: mockBoardService },
+                { provide: MapService, useValue: mockMapService },
                 { provide: ChangeDetectorRef, useValue: mockCdr },
             ],
         }).compileComponents();
@@ -67,6 +71,34 @@ describe('MapListComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
+
+    it('should fetch board and navigate to edit page', () => {
+        const mockBoard: Board = {
+            _id: '1',
+            name: 'Game A',
+            size: 10,
+            description: 'Description A',
+            board: [],
+            isCTF: false,
+            visibility: Visibility.PUBLIC,
+            image: '',
+            lastUpdatedAt: new Date(),
+        };
+    
+        const fullMap: Board = {
+            ...mockBoard,
+            board: [[]], // Supposons que le plateau ait des données minimales
+        };
+    
+        mockBoardService.getBoard.and.returnValue(of(fullMap));
+    
+        component.onEdit(mockBoard);
+    
+        expect(mockBoardService.getBoard).toHaveBeenCalledWith('Game A');
+        expect(mockMapService.setMapData).toHaveBeenCalledWith(fullMap);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
+    });
+    
 
     it('should display the list of available games', () => {
         const items = fixture.debugElement.queryAll(By.css('.list-item:not(.new-map-card)'));

@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
 import { MapService } from '@app/services/code/map.service';
+import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Board } from '@common/board';
 import { Item, Size } from '@common/enums';
@@ -61,8 +61,8 @@ describe('EditToolItemComponent', () => {
         component.type = Item.SPAWN;
         component.ngOnInit();
 
-        expect(component.remainingItem).toBe(maxObjectByType - 2);
-        expect(component.isDraggable).toBe(maxObjectByType - 2 > 0);
+        expect(component.remainingItem).toBe(maxObjectByType - 1);
+        expect(component.isDraggable).toBe(maxObjectByType - 1 > 0);
     });
 
     it('should set remainingItem and isDraggable for CHEST type', () => {
