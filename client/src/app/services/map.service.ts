@@ -3,6 +3,8 @@ import { Board } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
 
+const MIN_RANGE = 10;
+
 @Injectable({
     providedIn: 'root',
 })
@@ -80,12 +82,14 @@ export class MapService {
 
     private initializeBoardData() {
         const data = this.firstBoardValue.value;
-        if (data.board.length <= 0) {
+        if (data.board.length < MIN_RANGE) {
             this.boardToSave = new BehaviorSubject<Board>({
                 ...data,
                 board: [],
             });
         } else {
+            // eslint-disable-next-line no-console
+            console.log(data);
             this.boardToSave = new BehaviorSubject<Board>(data);
         }
     }
