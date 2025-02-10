@@ -8,7 +8,7 @@ describe('EditItemAreaComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [EditItemAreaComponent, MatCardModule], // Keep material module in imports
+            imports: [EditItemAreaComponent, MatCardModule],
         }).compileComponents();
 
         fixture = TestBed.createComponent(EditItemAreaComponent);

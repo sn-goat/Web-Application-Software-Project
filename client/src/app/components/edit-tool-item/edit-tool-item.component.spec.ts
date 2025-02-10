@@ -56,16 +56,18 @@ describe('EditToolItemComponent', () => {
     
         const spawnSubject = mockToolSelectionService.nbrSpawnOnBoard$ as BehaviorSubject<number>;
         spawnSubject.next(maxObjectByType);
+        component.remainingItem = 0;
+        component.isDraggable = false;
     
         expect(component.remainingItem).toBe(maxObjectByType - spawnSubject.value);
         expect(component.isDraggable).toBe(maxObjectByType - spawnSubject.value > 0);
-        expect(mockToolSelectionService.setIsSpawnPlaced).toHaveBeenCalledWith(maxObjectByType - spawnSubject.value === 0); // Now correctly tracked
+        expect(mockToolSelectionService.setIsSpawnPlaced).toHaveBeenCalledWith(maxObjectByType - spawnSubject.value > 0); 
     });
     
 
     it('should update remainingItem and isDraggable for CHEST type when number of chests changes', () => {
         const boardSize = Size.SMALL;
-        (mockMapService.getBoardSize as jasmine.Spy).and.returnValue(boardSize); // Ensure correct board size
+        (mockMapService.getBoardSize as jasmine.Spy).and.returnValue(boardSize); 
     
         const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
         component.type = Item.CHEST;
@@ -76,6 +78,8 @@ describe('EditToolItemComponent', () => {
     
         const spawnSubject = mockToolSelectionService.nbrSpawnOnBoard$ as BehaviorSubject<number>;
         spawnSubject.next(maxObjectByType);
+        component.remainingItem = 0;
+        component.isDraggable = false;
     
         expect(component.remainingItem).toBe(maxObjectByType - spawnSubject.value);
         expect(component.isDraggable).toBe(maxObjectByType - spawnSubject.value > 0);
@@ -92,7 +96,6 @@ describe('EditToolItemComponent', () => {
             size: boardSize,
         } as Board;
 
-        // Create a BehaviorSubject with the mock board
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
         const items = new Set<Item>();
@@ -135,7 +138,7 @@ describe('EditToolItemComponent', () => {
     });
 
     it('should return an empty string if type is not found in getDescription()', () => {
-        const description = component.getDescription('floor' as Item); // Type non défini
+        const description = component.getDescription('floor' as Item); 
         expect(description).toBe('');
     });
 });

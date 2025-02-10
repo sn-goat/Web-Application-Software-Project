@@ -1,20 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
-import { MapService } from '@app/services/code/map.service';
 
 describe('MapService', () => {
     let service: MapService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [MapService], // Corrected to use MapService
+            providers: [MapService],
         });
 
         service = TestBed.inject(MapService);
-
-        // Mock BehaviorSubject and its initial value
 
         service['firstBoardValue'] = new BehaviorSubject<Board>({
             _id: '123',
@@ -34,7 +32,6 @@ describe('MapService', () => {
     });
 
     it('should initialize board with data', () => {
-        // Mock data for firstBoardValue
         const mockFirstBoardValue = {
             _id: '123',
             name: 'Test Board',
@@ -46,13 +43,10 @@ describe('MapService', () => {
             lastUpdatedAt: new Date(),
         } as Board;
 
-        // Initialize the BehaviorSubject for boardToSave
         service['firstBoardValue'].next(mockFirstBoardValue);
 
-        // Call initializeBoard method
         service.initializeBoard();
 
-        // Verify board is properly initialized with rows
         expect(service['boardToSave'].value.board).toBeDefined();
         expect(service['boardToSave'].value.board.length).toBe(mockFirstBoardValue.size);
     });
@@ -60,20 +54,16 @@ describe('MapService', () => {
     it('should set board name', () => {
         const newName = 'Updated Board';
 
-        // Call the setBoardName method
         service.setBoardName(newName);
 
-        // Expect the name of the current board to be updated
         expect(service['boardToSave'].value.name).toBe(newName);
     });
 
     it('should set board description', () => {
         const newDescription = 'Updated Description';
 
-        // Call the setBoardDescription method
         service.setBoardDescription(newDescription);
 
-        // Expect the description of the current board to be updated
         expect(service['boardToSave'].value.description).toBe(newDescription);
     });
 
@@ -83,7 +73,6 @@ describe('MapService', () => {
         const row = 3;
         const mockBoard = service['boardToSave'].value;
 
-        // Initialize the mock board with the appropriate dimensions
         mockBoard.board = Array(mockBoard.size)
             .fill(null)
             .map((_, rowIndex) =>
