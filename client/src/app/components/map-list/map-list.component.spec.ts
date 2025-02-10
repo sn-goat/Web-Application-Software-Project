@@ -84,21 +84,20 @@ describe('MapListComponent', () => {
             image: '',
             lastUpdatedAt: new Date(),
         };
-    
+
         const fullMap: Board = {
             ...mockBoard,
             board: [[]],
         };
-    
+
         mockBoardService.getBoard.and.returnValue(of(fullMap));
-    
+
         component.onEdit(mockBoard);
-    
+
         expect(mockBoardService.getBoard).toHaveBeenCalledWith('Game A');
         expect(mockMapService.setMapData).toHaveBeenCalledWith(fullMap);
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
     });
-    
 
     it('should display the list of available games', () => {
         const items = fixture.debugElement.queryAll(By.css('.list-item:not(.new-map-card)'));
