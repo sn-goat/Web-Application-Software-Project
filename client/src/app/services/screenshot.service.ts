@@ -7,29 +7,16 @@ import html2canvas from 'html2canvas';
 export class ScreenshotService {
     private readonly defaultQuality = 0.9;
 
-    async captureElementAsFile(elementId: string, quality: number = this.defaultQuality, fileName: string = 'screenshot.jpg'): Promise<File | null> {
+    async captureElementAsString(elementId: string, quality: number = this.defaultQuality): Promise<string> {
         const element = document.getElementById(elementId);
         if (!element) {
-            return null;
+            return Promise.reject('Element not found');
         }
-
         try {
             const canvas = await html2canvas(element);
-            const blob = await this.convertCanvasToBlob(canvas, 'image/jpeg', quality);
-
-            if (blob) {
-                return new File([blob], fileName, { type: 'image/jpeg' });
-            }
-
-            return null;
+            return canvas.toDataURL('image/jpeg', quality);
         } catch (error) {
-            return null;
+            return Promise.reject(`Element conversion to string failed: ${error}`);
         }
-    }
-
-    private async convertCanvasToBlob(canvas: HTMLCanvasElement, format: string, quality: number): Promise<Blob | null> {
-        return new Promise((resolve) => {
-            canvas.toBlob((blob) => resolve(blob), format, quality);
-        });
     }
 }

@@ -2,12 +2,15 @@ import { AppModule } from '@app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as bodyParser from 'body-parser';
 
 const bootstrap = async () => {
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe());
     app.enableCors();
+    app.use(bodyParser.json({ limit: '10mb' }));
+    app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
     const config = new DocumentBuilder()
         .setTitle('Cadriciel Serveur')

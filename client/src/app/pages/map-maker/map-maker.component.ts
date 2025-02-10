@@ -12,9 +12,9 @@ import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-
 import { BoardService } from '@app/services/board.service';
 import { MapService } from '@app/services/map.service';
 import { MouseEditorService } from '@app/services/mouse-editor.service';
+import { ScreenshotService } from '@app/services/screenshot.service';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
-import { ScreenshotService } from '@app/services/screenshot.service';
 
 @Component({
     selector: 'app-map-maker',
@@ -115,14 +115,15 @@ export class MapMakerComponent implements OnInit {
 
     async saveBoard(): Promise<string> {
         const mapData = this.mapService.getBoardToSave().value;
+        const thumbnail = await this.screenshot();
         let response;
         try {
             if (mapData._id) {
-                response = await firstValueFrom(this.boardService.updateBoard(mapData));
+                response = await firstValueFrom(this.boardService.updateBoard({ ...mapData, image: thumbnail }));
             } else {
                 const mapDataCreation = Object.assign({}, mapData);
                 delete mapDataCreation._id;
-                response = await firstValueFrom(this.boardService.addBoard(mapDataCreation));
+                response = await firstValueFrom(this.boardService.addBoard({ ...mapDataCreation, image: thumbnail }));
             }
             return response.body as string;
         } catch (error) {
@@ -130,15 +131,11 @@ export class MapMakerComponent implements OnInit {
         }
     }
 
-    async screenshot() {
-        const file = await this.screenshotService.captureElementAsFile('map-screenshot');
-        if (file) {
-            const url = URL.createObjectURL(file);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = file.name; // Use the provided filename
-            document.body.appendChild(link);
-            link.click();
+    async screenshot(): Promise<string> {
+        try {
+            return await this.screenshotService.captureElementAsString('map-screenshot');
+        } catch (error) {
+            return Promise.reject(`Error while screenshot: ${error}`);
         }
     }
 }
