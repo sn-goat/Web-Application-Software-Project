@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { MapService } from '@app/services/code/map.service';
@@ -36,7 +37,6 @@ describe('MapService', () => {
     });
 
     it('should initialize board with data', () => {
-        // Mock data for firstBoardValue
         const mockFirstBoardValue = {
             _id: '123',
             name: 'Test Board',

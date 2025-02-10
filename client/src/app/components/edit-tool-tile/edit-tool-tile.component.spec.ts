@@ -13,8 +13,8 @@ describe('EditToolTileComponent', () => {
     let destroy$: Subject<void>;
 
     beforeEach(async () => {
-        selectedTile$ = new BehaviorSubject<string>('someType'); // Mock BehaviorSubject
-        destroy$ = new Subject<void>(); // Mock destroy$ subject
+        selectedTile$ = new BehaviorSubject<string>('someType');
+        destroy$ = new Subject<void>();
         mockToolSelection = jasmine.createSpyObj('ToolSelectionService', ['updateSelectedTile'], { selectedTile$: selectedTile$ });
 
         await TestBed.configureTestingModule({
@@ -25,7 +25,7 @@ describe('EditToolTileComponent', () => {
         fixture = TestBed.createComponent(EditToolTileComponent);
         component = fixture.componentInstance;
         component.type = Tile.WALL;
-        component.destroy$ = destroy$; // Set the destroy$ subject
+        component.destroy$ = destroy$;
         fixture.detectChanges();
     });
 

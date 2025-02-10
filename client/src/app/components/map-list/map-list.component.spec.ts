@@ -87,7 +87,7 @@ describe('MapListComponent', () => {
     
         const fullMap: Board = {
             ...mockBoard,
-            board: [[]], // Supposons que le plateau ait des données minimales
+            board: [[]],
         };
     
         mockBoardService.getBoard.and.returnValue(of(fullMap));

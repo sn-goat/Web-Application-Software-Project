@@ -1,9 +1,9 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Board } from '@common/board'; // Remplacez par votre modèle
-import { Visibility } from '@common/enums'; // Remplacez par votre modèle d'énumération
 import { BoardService } from '@app/services/code/board.service';
+import { Board } from '@common/board';
+import { Visibility } from '@common/enums';
 
 describe('BoardService', () => {
     let service: BoardService;
@@ -20,7 +20,7 @@ describe('BoardService', () => {
     });
 
     afterEach(() => {
-        httpMock.verify(); // Assurez-vous de vérifier après chaque test
+        httpMock.verify();
     });
 
     it('should fetch board by name', () => {
@@ -41,7 +41,7 @@ describe('BoardService', () => {
 
         const req = httpMock.expectOne(`${apiUrl}/Test Board`);
         expect(req.request.method).toBe('GET');
-        req.flush(mockBoard); // Simule la réponse du serveur
+        req.flush(mockBoard);
     });
 
     it('should add a new board', () => {
@@ -57,7 +57,7 @@ describe('BoardService', () => {
         const req = httpMock.expectOne(`${apiUrl}/board`);
         expect(req.request.method).toBe('POST');
         expect(req.request.body).toEqual(mockBoard);
-        req.flush({}); // Simule la réponse du serveur
+        req.flush({}); 
     });
 
     it('should update a board', () => {
@@ -83,7 +83,7 @@ describe('BoardService', () => {
         };
 
         service.toggleVisibility('Test Board').subscribe((board) => {
-            expect(board.visibility).toBe(Visibility.PUBLIC); // Assuming visibility is toggled to public
+            expect(board.visibility).toBe(Visibility.PUBLIC);
         });
 
         const req = httpMock.expectOne(`${apiUrl}/visibility/Test Board`);
@@ -96,7 +96,7 @@ describe('BoardService', () => {
 
         const req = httpMock.expectOne(`${apiUrl}/Test Board`);
         expect(req.request.method).toBe('DELETE');
-        req.flush({}); // Simule la réponse du serveur
+        req.flush({}); 
     });
 
     it('should delete all boards', () => {
@@ -104,6 +104,6 @@ describe('BoardService', () => {
 
         const req = httpMock.expectOne(`${apiUrl}/`);
         expect(req.request.method).toBe('DELETE');
-        req.flush({}); // Simule la réponse du serveur
+        req.flush({});
     });
 });

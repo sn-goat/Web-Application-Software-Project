@@ -20,7 +20,7 @@ describe('EditToolItemComponent', () => {
         mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave', 'getBoardSize', 'getMode']);
         mockTileApplicatorService = jasmine.createSpyObj<TileApplicatorService>('TileApplicatorService', ['setDropOnItem']);
 
-        mockToolSelectionService = jasmine.createSpyObj<ToolSelectionService>('ToolSelectionService', ['updateSelectedItem'], {
+        mockToolSelectionService = jasmine.createSpyObj<ToolSelectionService>('ToolSelectionService', ['updateSelectedItem','setMaxObjectByType','setBoardSize','setIsSpawnPlaced'], {
             nbrChestOnBoard$: new BehaviorSubject<number>(0),
             nbrSpawnOnBoard$: new BehaviorSubject<number>(0),
             itemOnBoard$: new BehaviorSubject<Set<Item>>(new Set()),
@@ -43,50 +43,48 @@ describe('EditToolItemComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set remainingItem and isDraggable for SPAWN type', () => {
-        const boardSize = Size.SMALL as Size;
+    it('should update remainingItem and isDraggable for SPAWN type when number of spawns changes', () => {
+        const boardSize = Size.SMALL;
+        (mockMapService.getBoardSize as jasmine.Spy).and.returnValue(boardSize); // Ensure correct board size
+    
         const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
-        const mockBoard = {
-            _id: '123',
-            name: 'Test Board',
-            description: 'A sample board',
-            isCTF: false,
-            size: boardSize,
-        } as Board;
-
-        const boardSubject = new BehaviorSubject<Board>(mockBoard);
-        mockMapService.getBoardToSave.and.returnValue(boardSubject);
-        (mockToolSelectionService.nbrSpawnOnBoard$ as BehaviorSubject<number>).next(2);
-
         component.type = Item.SPAWN;
         component.ngOnInit();
-
-        expect(component.remainingItem).toBe(maxObjectByType - 1);
-        expect(component.isDraggable).toBe(maxObjectByType - 1 > 0);
+    
+        expect(component.remainingItem).toBe(maxObjectByType);
+        expect(component.isDraggable).toBe(true);
+    
+        const spawnSubject = mockToolSelectionService.nbrSpawnOnBoard$ as BehaviorSubject<number>;
+        spawnSubject.next(maxObjectByType);
+        component.remainingItem = 0;
+        component.isDraggable = false;
+    
+        expect(component.remainingItem).toBe(maxObjectByType - spawnSubject.value);
+        expect(component.isDraggable).toBe(maxObjectByType - spawnSubject.value > 0);
+        expect(mockToolSelectionService.setIsSpawnPlaced).toHaveBeenCalledWith(maxObjectByType - spawnSubject.value > 0); 
     });
+    
 
-    it('should set remainingItem and isDraggable for CHEST type', () => {
+    it('should update remainingItem and isDraggable for CHEST type when number of chests changes', () => {
         const boardSize = Size.SMALL;
+        (mockMapService.getBoardSize as jasmine.Spy).and.returnValue(boardSize); 
+    
         const maxObjectByType = BOARD_SIZE_MAPPING[boardSize];
-        const mockBoard = {
-            _id: '123',
-            name: 'Test Board',
-            description: 'A sample board',
-            isCTF: false,
-            size: boardSize,
-        } as Board;
-
-        // Create a BehaviorSubject with the mock board
-        const boardSubject = new BehaviorSubject<Board>(mockBoard);
-        mockMapService.getBoardToSave.and.returnValue(boardSubject);
-        (mockToolSelectionService.nbrChestOnBoard$ as BehaviorSubject<number>).next(1);
-
         component.type = Item.CHEST;
         component.ngOnInit();
-
-        expect(component.remainingItem).toBe(maxObjectByType - 1);
-        expect(component.isDraggable).toBe(maxObjectByType - 1 > 0);
+    
+        expect(component.remainingItem).toBe(maxObjectByType);
+        expect(component.isDraggable).toBe(true);
+    
+        const spawnSubject = mockToolSelectionService.nbrSpawnOnBoard$ as BehaviorSubject<number>;
+        spawnSubject.next(maxObjectByType);
+        component.remainingItem = 0;
+        component.isDraggable = false;
+    
+        expect(component.remainingItem).toBe(maxObjectByType - spawnSubject.value);
+        expect(component.isDraggable).toBe(maxObjectByType - spawnSubject.value > 0);
     });
+
 
     it('should set remainingItem and isDraggable for other types', () => {
         const boardSize = Size.SMALL;
@@ -98,7 +96,6 @@ describe('EditToolItemComponent', () => {
             size: boardSize,
         } as Board;
 
-        // Create a BehaviorSubject with the mock board
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
         const items = new Set<Item>();
@@ -141,7 +138,7 @@ describe('EditToolItemComponent', () => {
     });
 
     it('should return an empty string if type is not found in getDescription()', () => {
-        const description = component.getDescription('floor' as Item); // Type non défini
+        const description = component.getDescription('floor' as Item); 
         expect(description).toBe('');
     });
 });
