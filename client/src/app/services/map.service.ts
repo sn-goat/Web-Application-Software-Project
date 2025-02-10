@@ -92,7 +92,6 @@ export class MapService {
 
     private initializeBoardData() {
         this.boardToSave = new BehaviorSubject<Board>({
-            _id: '',
             name: '',
             description: '',
             size: 0,
@@ -101,7 +100,7 @@ export class MapService {
             board: [],
             lastUpdatedAt: new Date(),
             image: '',
-        });
+        } as Partial<Board> as Board);
     }
 
     private generateBoard() {
