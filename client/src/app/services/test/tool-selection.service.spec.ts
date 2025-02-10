@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { ToolSelectionService } from './tool-selection.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 
 describe('ToolSelectionService', () => {
     let service: ToolSelectionService;

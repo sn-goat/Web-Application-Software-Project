@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TileApplicatorService } from './tile-applicator.service';
+import { MouseEditorService } from '@app/services/code/mouse-editor.service';
 
-describe('TileApplicatorService', () => {
-    let service: TileApplicatorService;
+describe('MouseEditorService', () => {
+    let service: MouseEditorService;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(TileApplicatorService);
+        service = TestBed.inject(MouseEditorService);
     });
 
     it('should be created', () => {
