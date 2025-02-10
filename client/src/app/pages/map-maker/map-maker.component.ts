@@ -90,7 +90,7 @@ export class MapMakerComponent implements OnInit {
                 return;
             }
         } else {
-            alert('You need to place all the spawn points on the map.');
+            alert('You need to place all the spawns points on the board before saving the map.');
             return;
         }
     }

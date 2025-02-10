@@ -40,6 +40,10 @@ export class ToolSelectionService {
         }
     }
 
+    getSelectedTile() {
+        return this.selectedTile.value;
+    }
+
     setMaxObjectByType(maxObjectByType: number) {
         this.maxObjectByType = maxObjectByType;
     }
@@ -52,8 +56,12 @@ export class ToolSelectionService {
         this.boardSize = boardSize;
     }
 
+    getBoardSize() {
+        return this.boardSize;
+    }
+
     isMinimumObjectPlaced() {
-        return this.itemCounter >= BOARD_SIZE_MAPPING[this.boardSize];
+        return this.getItemCounter() >= BOARD_SIZE_MAPPING[this.boardSize];
     }
 
     getIsSpawnPlaced() {
@@ -72,14 +80,22 @@ export class ToolSelectionService {
         this.selectedItem.next(selectedItem);
     }
 
+    getSelectedItem() {
+        return this.selectedItem.value;
+    }
+
     addItem(item: Item) {
-        this.itemOnBoard.next(this.itemOnBoard.value.add(item));
-        this.itemCounter++;
+        if (!this.itemOnBoard.value.has(item)) {
+            this.itemOnBoard.next(this.itemOnBoard.value.add(item));
+            this.itemCounter++;
+        }
     }
 
     removeItem(item: Item) {
-        this.itemOnBoard.next(this.itemOnBoard.value.delete(item) ? this.itemOnBoard.value : this.itemOnBoard.value);
-        this.itemCounter--;
+        if (this.itemOnBoard.value.delete(item)) {
+            this.itemOnBoard.next(this.itemOnBoard.value);
+            this.itemCounter--;
+        }
     }
 
     incrementSpawn() {

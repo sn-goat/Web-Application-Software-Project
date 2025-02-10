@@ -18,7 +18,7 @@ export class BoardGameComponent implements OnInit, OnDestroy {
     private mapService = inject(MapService);
 
     constructor(
-        private elRef: ElementRef,
+        public elRef: ElementRef,
         private tileApplicator: TileApplicatorService,
     ) {}
 

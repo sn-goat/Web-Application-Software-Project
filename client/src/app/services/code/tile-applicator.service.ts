@@ -1,29 +1,29 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
+import { MapService } from './map.service';
 import { MouseEditorService } from './mouse-editor.service';
 import { ToolSelectionService } from './tool-selection.service';
-import { MapService } from './map.service';
 
-import { Tile, Item } from '@common/enums';
 import { Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
 })
 export class TileApplicatorService implements OnDestroy {
-    private destroy$ = new Subject<void>();
-    private previousCoord: Vec2 = { x: -1, y: -1 };
-    private oldItemPos: Vec2 = { x: -1, y: -1 };
-    private newItemPos: Vec2 = { x: -1, y: -1 };
-    private handleItem: boolean = false;
-    private isMouseLeftDown: boolean = false;
-    private isMouseRightDown: boolean = false;
-    private isOnItem: Item = Item.DEFAULT;
+    isMouseLeftDown: boolean = false;
+    isMouseRightDown: boolean = false;
+    currentCoord: Vec2 = { x: -1, y: -1 };
+    destroy$ = new Subject<void>();
+    previousCoord: Vec2 = { x: -1, y: -1 };
+    oldItemPos: Vec2 = { x: -1, y: -1 };
+    newItemPos: Vec2 = { x: -1, y: -1 };
+    handleItem: boolean = false;
+    isOnItem: Item = Item.DEFAULT;
 
-    private selectedTile: Tile | null;
-    private selectedItem: Item | null;
-    private currentCoord: Vec2 = { x: -1, y: -1 };
+    selectedTile: Tile | null;
+    selectedItem: Item | null;
 
     constructor(
         private mouseEditorService: MouseEditorService,
@@ -124,11 +124,11 @@ export class TileApplicatorService implements OnDestroy {
         this.handleItem = false;
     }
 
-    private isOnBoard(x: number, y: number, rect: DOMRect): boolean {
+    isOnBoard(x: number, y: number, rect: DOMRect): boolean {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
 
-    private screenToBoard(x: number, y: number, rect: DOMRect): Vec2 {
+    screenToBoard(x: number, y: number, rect: DOMRect): Vec2 {
         const coordX = Math.floor(x - rect.left);
         const coordY = Math.floor(y - rect.top);
         const cellWidth = rect.width / this.mapService.getBoardSize();
@@ -140,7 +140,7 @@ export class TileApplicatorService implements OnDestroy {
         return tileCoord;
     }
 
-    private applyIntermediateTiles(previousCoord: Vec2, rect: DOMRect) {
+    applyIntermediateTiles(previousCoord: Vec2, rect: DOMRect) {
         const startX = previousCoord.x;
         const startY = previousCoord.y;
         const endX = this.currentCoord.x;
@@ -193,7 +193,7 @@ export class TileApplicatorService implements OnDestroy {
         }
     }
 
-    private applyTile(col: number, row: number) {
+    applyTile(col: number, row: number) {
         if (this.selectedTile !== null) {
             if (this.selectedTile === Tile.WALL) {
                 this.applyWall(col, row);
@@ -205,7 +205,7 @@ export class TileApplicatorService implements OnDestroy {
         }
     }
 
-    private applyDoor(col: number, row: number) {
+    applyDoor(col: number, row: number) {
         if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
             this.deleteItem(col, row);
         }
@@ -216,20 +216,20 @@ export class TileApplicatorService implements OnDestroy {
         }
     }
 
-    private applyWall(col: number, row: number) {
+    applyWall(col: number, row: number) {
         if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
             this.deleteItem(col, row);
         }
         this.mapService.setCellTile(col, row, Tile.WALL);
     }
 
-    private revertToFLOOR(col: number, row: number) {
+    revertToFLOOR(col: number, row: number) {
         if (this.mapService.getCellTile(col, row) !== Tile.FLOOR) {
             this.mapService.setCellTile(col, row, Tile.FLOOR);
         }
     }
 
-    private updateCell(col: number, row: number) {
+    updateCell(col: number, row: number) {
         if (!this.handleItem) {
             if (this.isMouseRightDown) {
                 this.revertToFLOOR(col, row);
@@ -239,7 +239,7 @@ export class TileApplicatorService implements OnDestroy {
         }
     }
 
-    private applyItem(col: number, row: number) {
+    applyItem(col: number, row: number) {
         if (this.selectedItem === Item.SPAWN) {
             this.toolSelection.incrementSpawn();
         } else if (this.selectedItem === Item.CHEST) {
@@ -253,7 +253,7 @@ export class TileApplicatorService implements OnDestroy {
         }
         this.mapService.setCellItem(col, row, this.selectedItem as Item);
     }
-    private deleteItem(col: number, row: number) {
+    deleteItem(col: number, row: number) {
         if (this.mapService.getCellItem(col, row) === Item.SPAWN) {
             this.toolSelection.decrementSpawn();
         } else if (this.mapService.getCellItem(col, row) === Item.CHEST) {
@@ -264,7 +264,7 @@ export class TileApplicatorService implements OnDestroy {
         this.mapService.setCellItem(col, row, Item.DEFAULT);
     }
 
-    private updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
+    updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
         if (
             this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.WALL &&
             this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.OPENED_DOOR &&

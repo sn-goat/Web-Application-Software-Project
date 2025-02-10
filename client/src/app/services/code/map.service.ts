@@ -29,6 +29,10 @@ export class MapService {
         return this.boardToSave;
     }
 
+    getFirstBoardValue(): Board {
+        return this.firstBoardValue.value;
+    }
+
     initializeBoard() {
         this.initializeBoardData();
         if (this.boardToSave.value.board.length === 0) {
