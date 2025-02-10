@@ -1,36 +1,38 @@
 import { TestBed } from '@angular/core/testing';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
-import { BehaviorSubject } from 'rxjs';
 import { MapService } from '@app/services/code/map.service';
 
 describe('MapService', () => {
     let service: MapService;
+    const dummyBoard: Board = {
+        _id: 'dummyId',
+        name: 'Dummy Board',
+        description: 'Dummy description',
+        size: 10,
+        board: [],
+        isCTF: false,
+        visibility: Visibility.PUBLIC,
+        image: 'dummyImage',
+        lastUpdatedAt: new Date(),
+    };
 
     beforeEach(() => {
+        spyOn(localStorage, 'getItem').and.callFake((key: string) => {
+            if (key === 'firstBoardValue') {
+                return JSON.stringify(dummyBoard);
+            }
+            return null;
+        });
+        spyOn(localStorage, 'setItem');
         TestBed.configureTestingModule({
-            providers: [MapService], // Corrected to use MapService
+            providers: [MapService],
         });
-
         service = TestBed.inject(MapService);
+    });
 
-        // Mock BehaviorSubject and its initial value
-
-        service['firstBoardValue'] = new BehaviorSubject<Board>({
-            _id: '123',
-            name: 'Mock Board',
-            size: 10,
-            isCTF: true,
-            description: 'Mock Description',
-            visibility: Visibility.PUBLIC,
-            image: 'mock.jpg',
-            lastUpdatedAt: new Date(),
-            board: [],
-        });
-
-        service.initializeBoard();
-
-        service['storageKey'] = 'mockStorageKey';
+    it('should be created', () => {
+        expect(service).toBeTruthy();
     });
 
     it('should initialize board with data', () => {
@@ -38,7 +40,7 @@ describe('MapService', () => {
         const mockFirstBoardValue = {
             _id: '123',
             name: 'Test Board',
-            size: 10,
+            size: 15,
             isCTF: true,
             description: 'Test Description',
             visibility: Visibility.PUBLIC,
@@ -46,35 +48,80 @@ describe('MapService', () => {
             lastUpdatedAt: new Date(),
         } as Board;
 
-        // Initialize the BehaviorSubject for boardToSave
         service['firstBoardValue'].next(mockFirstBoardValue);
 
-        // Call initializeBoard method
         service.initializeBoard();
 
-        // Verify board is properly initialized with rows
         expect(service['boardToSave'].value.board).toBeDefined();
         expect(service['boardToSave'].value.board.length).toBe(mockFirstBoardValue.size);
     });
 
-    it('should set board name', () => {
-        const newName = 'Updated Board';
+    it('should generate board if board is undefined', () => {
+        const mockBoard = service['boardToSave'].value;
+        mockBoard.board = [];
+        service['boardToSave'].next(mockBoard);
 
-        // Call the setBoardName method
-        service.setBoardName(newName);
+        service.initializeBoard();
 
-        // Expect the name of the current board to be updated
-        expect(service['boardToSave'].value.name).toBe(newName);
+        const boardToSave = service.getBoardToSave().value;
+        expect(boardToSave.board.length).toEqual(dummyBoard.size);
+        boardToSave.board.forEach((row) => {
+            expect(row.length).toEqual(dummyBoard.size);
+            row.forEach((cell, colIndex) => {
+                expect(cell.tile).toEqual(Tile.FLOOR);
+                expect(cell.item).toEqual(Item.DEFAULT);
+                expect(cell.position).toEqual({ x: colIndex, y: row[0].position.y });
+            });
+        });
+
+        expect(service['boardToSave'].value.board.length).toBeGreaterThan(0);
     });
 
-    it('should set board description', () => {
-        const newDescription = 'Updated Description';
+    it('setMapData should update firstBoardValue and localStorage', () => {
+        const newBoard: Board = {
+            _id: 'dummyId',
+            name: 'Updated Board',
+            description: 'Updated description',
+            size: 3,
+            board: [],
+            isCTF: true,
+            visibility: Visibility.PUBLIC,
+            image: 'dummyImage',
+            lastUpdatedAt: new Date(),
+        };
+        service.setMapData(newBoard);
+        expect(localStorage.setItem).toHaveBeenCalledWith('firstBoardValue', JSON.stringify(newBoard));
+        expect(service.getFirstBoardValue()).toEqual(newBoard);
+    });
 
-        // Call the setBoardDescription method
-        service.setBoardDescription(newDescription);
+    it('getBoardSize should return board size', () => {
+        expect(service.getBoardSize()).toEqual(dummyBoard.size);
+    });
 
-        // Expect the description of the current board to be updated
-        expect(service['boardToSave'].value.description).toBe(newDescription);
+    it('getCellTile should return the tile at specified cell', () => {
+        const tile = service.getCellTile(0, 0);
+        expect(tile).toEqual(Tile.FLOOR);
+    });
+
+    it('getCellItem should return the item at specified cell', () => {
+        const item = service.getCellItem(0, 0);
+        expect(item).toEqual(Item.DEFAULT);
+    });
+
+    it('getMode should return isCTF flag', () => {
+        expect(service.getMode()).toEqual(dummyBoard.isCTF);
+    });
+
+    it('setBoardName should update the board name', () => {
+        const newName = 'New Board Name';
+        service.setBoardName(newName);
+        expect(service.getBoardToSave().value.name).toEqual(newName);
+    });
+
+    it('setBoardDescription should update the board description', () => {
+        const newDesc = 'New Description';
+        service.setBoardDescription(newDesc);
+        expect(service.getBoardToSave().value.description).toEqual(newDesc);
     });
 
     it('should change tile of the cell', () => {
@@ -83,13 +130,12 @@ describe('MapService', () => {
         const row = 3;
         const mockBoard = service['boardToSave'].value;
 
-        // Initialize the mock board with the appropriate dimensions
         mockBoard.board = Array(mockBoard.size)
             .fill(null)
             .map((_, rowIndex) =>
                 Array(mockBoard.size)
                     .fill(null)
-                    .map((_, colIndex) => ({
+                    .map((__, colIndex) => ({
                         tile: Tile.FLOOR,
                         item: Item.DEFAULT,
                         position: { x: colIndex, y: rowIndex },
@@ -101,28 +147,26 @@ describe('MapService', () => {
         expect(service['boardToSave'].value.board[row][col].tile).toBe(newTile);
     });
 
-    it('should change tile of the cell', () => {
-        const newTile = Tile.WALL;
-        const col = 2;
-        const row = 3;
+    it('should change item of the cell', () => {
+        const newItem = Item.FLAG;
+        const col = 1;
+        const row = 1;
         const mockBoard = service['boardToSave'].value;
+
         mockBoard.board = Array(mockBoard.size)
             .fill(null)
-            .map(() => Array(mockBoard.size).fill({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 } }));
+            .map((_, rowIndex) =>
+                Array(mockBoard.size)
+                    .fill(null)
+                    .map((__, colIndex) => ({
+                        tile: Tile.FLOOR,
+                        item: Item.DEFAULT,
+                        position: { x: colIndex, y: rowIndex },
+                    })),
+            );
 
-        mockBoard.board[row][col] = { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: col, y: row } };
         service['boardToSave'].next(mockBoard);
-        service.setCellTile(col, row, newTile);
-        expect(service['boardToSave'].value.board[row][col].tile).toBe(newTile);
-    });
-
-    it('should generate board if board is undefined', () => {
-        const mockBoard = service['boardToSave'].value;
-        mockBoard.board = [];
-        service['boardToSave'].next(mockBoard);
-
-        service.initializeBoard();
-
-        expect(service['boardToSave'].value.board.length).toBeGreaterThan(0);
+        service.setCellItem(col, row, newItem);
+        expect(service['boardToSave'].value.board[row][col].item).toBe(newItem);
     });
 });
