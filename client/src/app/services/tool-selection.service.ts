@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import { Board } from '@common/board';
+import { Item, Tile } from '@common/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Tile, Item } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -69,5 +70,21 @@ export class ToolSelectionService {
 
     decrementChest() {
         this.nbrChestOnBoard.next(this.nbrChestOnBoard.value - 1);
+    }
+
+    parseBoard(board: Board) {
+        board.board.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item !== Item.DEFAULT) {
+                    if (cell.item === Item.CHEST) {
+                        this.decrementChest();
+                    } else if (cell.item === Item.SPAWN) {
+                        this.decrementSpawn();
+                    } else {
+                        this.addItem(cell.item);
+                    }
+                }
+            });
+        });
     }
 }

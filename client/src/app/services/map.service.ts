@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Board } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
+import { ToolSelectionService } from './tool-selection.service';
 
 const MIN_RANGE = 10;
 
@@ -12,6 +13,7 @@ export class MapService {
     private readonly storageKey = 'firstBoardValue';
     private firstBoardValue: BehaviorSubject<Board>;
     private boardToSave: BehaviorSubject<Board>;
+    private readonly toolSelectionService = inject(ToolSelectionService);
 
     constructor() {
         const savedData = localStorage.getItem(this.storageKey);
@@ -88,9 +90,8 @@ export class MapService {
                 board: [],
             });
         } else {
-            // eslint-disable-next-line no-console
-            console.log(data);
             this.boardToSave = new BehaviorSubject<Board>(data);
+            this.toolSelectionService.parseBoard(this.boardToSave.value);
         }
     }
 
