@@ -81,8 +81,8 @@ export class MapService {
     }
 
     setBoardToFirstValue() {
-        const data = this.firstBoardValue.value;
-        if (data.board.length === 0) {
+        const data: Board = this.firstBoardValue.value;
+        if (!Array.isArray(data.board) || data.board.length === 0) {
             this.generateBoard();
         } else {
             this.boardToSave = new BehaviorSubject<Board>(data);
