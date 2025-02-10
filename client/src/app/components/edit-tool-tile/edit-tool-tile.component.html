@@ -1,11 +1,15 @@
-<div class="item-container" (mouseenter)="showTooltip = true" (mouseleave)="showTooltip = false">
+<div class="item-container"
+(mouseenter)="showTooltip = true"
+(mouseleave)="showTooltip = false">
+
     <img
         (click)="onClick()"
         [src]="src + type + extension"
         [alt]="type"
         draggable="false"
         class="{{styleClass}}"
-        [title]="getDescription(type)">
+        [title]="''"
+    >
 
     <div class="tooltip" *ngIf="showTooltip">
         {{ getDescription(type) }}

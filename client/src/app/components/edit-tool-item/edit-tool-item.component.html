@@ -15,7 +15,7 @@
         [class.item-moved]="!isDraggable"
         (drag)="onDragStart()"
         (dragleave)="onDragEnter($event)"
-        [title]="getDescription(type)"
+        [title]="''"
     >
 
     <div class="tooltip" *ngIf="showTooltip">
