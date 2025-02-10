@@ -16,10 +16,12 @@ export class MapService {
     private readonly toolSelectionService = inject(ToolSelectionService);
 
     constructor() {
+        // eslint-disable-next-line no-console
+        console.log('constructorreached');
         const savedData = localStorage.getItem(this.storageKey);
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
         this.firstBoardValue = new BehaviorSubject<Board>(initialData);
-        this.initializeBoard();
+        // this.initializeBoard();
     }
 
     setMapData(data: Board): void {
@@ -83,6 +85,8 @@ export class MapService {
     }
 
     private initializeBoardData() {
+        // eslint-disable-next-line no-console
+        console.log('init board reached');
         const data = this.firstBoardValue.value;
         if (data.board.length < MIN_RANGE) {
             this.boardToSave = new BehaviorSubject<Board>({

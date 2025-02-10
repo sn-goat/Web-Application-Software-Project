@@ -79,7 +79,7 @@ export class ToolSelectionService {
                     if (cell.item === Item.CHEST) {
                         this.decrementChest();
                     } else if (cell.item === Item.SPAWN) {
-                        this.decrementSpawn();
+                        this.incrementSpawn();
                     } else {
                         this.addItem(cell.item);
                     }
