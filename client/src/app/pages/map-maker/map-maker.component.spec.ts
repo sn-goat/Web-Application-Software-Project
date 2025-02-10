@@ -1,11 +1,12 @@
 import { HttpResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { MapService } from '@app/services/code/map.service';
-import { Board } from '@common/board';
 import { BehaviorSubject, of, throwError } from 'rxjs';
+import { Board } from '@common/board';
 import { MapMakerComponent } from './map-maker.component';
+import { MapService } from '@app/services/code/map.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 
 describe('MapMakerComponent', () => {
     let component: MapMakerComponent;
@@ -98,49 +99,83 @@ describe('MapMakerComponent', () => {
         expect(mockMapService.setBoardDescription).toHaveBeenCalledWith(newDescription);
     });
 
-    it('should show alert when checkIfReadyToSave is called and not ready to save', () => {
-        spyOn(window, 'confirm');
+    it('should alert when spawn points are not placed', () => {
+        const maxObject = 3;
+        component['toolSelection'] = {
+            getIsSpawnPlaced: () => false,
+            isMinimumObjectPlaced: () => true,
+            getMaxObjectByType: () => maxObject,
+        } as ToolSelectionService;
         const alertSpy = spyOn(window, 'alert');
         component.checkIfReadyToSave();
-
         expect(alertSpy).toHaveBeenCalledWith('You need to place all the spawns points on the board before saving the map.');
     });
 
-    it('should not save the board when checkIfReadyToSave is called and canceled', () => {
+    it('should alert when minimum objects are not placed', () => {
+        const maxObject = 5;
+        component['toolSelection'] = {
+            getIsSpawnPlaced: () => true,
+            isMinimumObjectPlaced: () => false,
+            getMaxObjectByType: () => maxObject,
+        } as ToolSelectionService;
+        const alertSpy = spyOn(window, 'alert');
+        component.checkIfReadyToSave();
+        expect(alertSpy).toHaveBeenCalledWith('You need to place at least 5 item on the map.');
+    });
+
+    it('should not save board when save confirmation is cancelled', () => {
+        const maxObject = 3;
+        component['toolSelection'] = {
+            getIsSpawnPlaced: () => true,
+            isMinimumObjectPlaced: () => true,
+            getMaxObjectByType: () => maxObject,
+        } as ToolSelectionService;
         spyOn(window, 'confirm').and.returnValue(false);
         const saveBoardSpy = spyOn(component, 'saveBoard');
-        const alertSpy = spyOn(window, 'alert');
-        spyOn(component, 'reset');
         component.checkIfReadyToSave();
-
         expect(saveBoardSpy).not.toHaveBeenCalled();
-        expect(alertSpy).not.toHaveBeenCalledWith('Map saved successfully!');
-        expect(mockRouter.navigate).not.toHaveBeenCalledWith(['/admin']);
-        expect(component.reset).not.toHaveBeenCalled();
     });
-    it('should navigate and reset when confirmReturn is called and confirmed', (done) => {
+
+    it('should save board, alert success, navigate and reset when confirmed and save is successful', fakeAsync(() => {
+        const maxObject = 3;
+        component['toolSelection'] = {
+            getIsSpawnPlaced: () => true,
+            isMinimumObjectPlaced: () => true,
+            getMaxObjectByType: () => maxObject,
+        } as ToolSelectionService;
         spyOn(window, 'confirm').and.returnValue(true);
+        const alertSpy = spyOn(window, 'alert');
         const resetSpy = spyOn(component, 'reset');
+        spyOn(component, 'saveBoard').and.returnValue(Promise.resolve('BoardSaved'));
 
-        component.confirmReturn();
+        component.checkIfReadyToSave();
+        flush();
 
+        expect(component.saveBoard).toHaveBeenCalled();
+        expect(alertSpy).toHaveBeenCalledWith('Map saved successfully!\nBoardSaved');
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
+        expect(resetSpy).toHaveBeenCalled();
+    }));
 
-        mockRouter.navigate(['/admin']).then(() => {
-            expect(resetSpy).toHaveBeenCalled();
-            done();
-        });
-    });
+    it('should alert error when saveBoard fails', fakeAsync(() => {
+        const maxObject = 3;
+        component['toolSelection'] = {
+            getIsSpawnPlaced: () => true,
+            isMinimumObjectPlaced: () => true,
+            getMaxObjectByType: () => maxObject,
+        } as ToolSelectionService;
+        spyOn(window, 'confirm').and.returnValue(true);
+        const alertSpy = spyOn(window, 'alert');
+        const errorObj = { message: 'Save failed' };
+        spyOn(component, 'saveBoard').and.returnValue(Promise.reject(errorObj));
 
-    it('should not navigate and reset when confirmReturn is called and cancelled', () => {
-        spyOn(window, 'confirm').and.returnValue(false);
-        const resetSpy = spyOn(component, 'reset');
+        component.checkIfReadyToSave();
+        flush();
 
-        component.confirmReturn();
+        expect(component.saveBoard).toHaveBeenCalled();
+        expect(alertSpy).toHaveBeenCalledWith('An error occurred while saving the map.\n' + errorObj.message);
+    }));
 
-        expect(mockRouter.navigate).not.toHaveBeenCalled();
-        expect(resetSpy).not.toHaveBeenCalled();
-    });
     it('should handle response and error correctly in saveBoard', () => {
         const mockBoard = { _id: '123', name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
@@ -169,5 +204,29 @@ describe('MapMakerComponent', () => {
         fixture.detectChanges();
 
         expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
+    });
+
+    it('should navigate and reset when confirmReturn is called and confirmed', (done) => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        const resetSpy = spyOn(component, 'reset');
+
+        component.confirmReturn();
+
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
+
+        mockRouter.navigate(['/admin']).then(() => {
+            expect(resetSpy).toHaveBeenCalled();
+            done();
+        });
+    });
+
+    it('should not navigate and reset when confirmReturn is called and cancelled', () => {
+        spyOn(window, 'confirm').and.returnValue(false);
+        const resetSpy = spyOn(component, 'reset');
+
+        component.confirmReturn();
+
+        expect(mockRouter.navigate).not.toHaveBeenCalled();
+        expect(resetSpy).not.toHaveBeenCalled();
     });
 });
