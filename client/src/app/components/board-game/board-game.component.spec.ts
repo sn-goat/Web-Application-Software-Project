@@ -13,7 +13,14 @@ describe('BoardGameComponent', () => {
 
     beforeEach(async () => {
         const mapServiceSpy = jasmine.createSpyObj('MapService', ['initializeBoard', 'getBoardToSave']);
-        const tileApplicatorServiceSpy = jasmine.createSpyObj('TileApplicatorService', ['handleMouseDown', 'handleMouseUp', 'handleMouseLeave', 'handleMouseMove', 'handleDrop', 'setItemOutsideBoard']);
+        const tileApplicatorServiceSpy = jasmine.createSpyObj('TileApplicatorService', [
+            'handleMouseDown',
+            'handleMouseUp',
+            'handleMouseLeave',
+            'handleMouseMove',
+            'handleDrop',
+            'setItemOutsideBoard',
+        ]);
 
         await TestBed.configureTestingModule({
             imports: [BoardGameComponent],

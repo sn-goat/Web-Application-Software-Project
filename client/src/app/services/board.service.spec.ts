@@ -12,7 +12,7 @@ describe('BoardService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [BoardService, provideHttpClient(), provideHttpClientTesting() ],
+            providers: [BoardService, provideHttpClient(), provideHttpClientTesting()],
         });
 
         service = TestBed.inject(BoardService);
@@ -32,10 +32,10 @@ describe('BoardService', () => {
             description: 'Test Description',
             visibility: Visibility.PUBLIC,
             image: 'image.jpg',
-            lastUpdatedAt: new Date()
+            lastUpdatedAt: new Date(),
         } as Board;
 
-        service.getBoard('Test Board').subscribe(board => {
+        service.getBoard('Test Board').subscribe((board) => {
             expect(board).toEqual(mockBoard);
         });
 
@@ -49,7 +49,7 @@ describe('BoardService', () => {
             name: 'New Board',
             size: 12,
             isCTF: false,
-            description: 'New Board Description'
+            description: 'New Board Description',
         };
 
         service.addBoard(mockBoard).subscribe();
@@ -63,7 +63,7 @@ describe('BoardService', () => {
     it('should update a board', () => {
         const updates: Partial<Board> = { description: 'Updated Description' };
 
-        service.updateBoard('Test Board', updates).subscribe(board => {
+        service.updateBoard('Test Board', updates).subscribe((board) => {
             expect(board.name).toBe('Test Board');
             expect(board.description).toBe('Updated Description');
         });
@@ -79,10 +79,10 @@ describe('BoardService', () => {
             name: 'New Board',
             size: 12,
             isCTF: false,
-            description: 'New Board Description'
+            description: 'New Board Description',
         };
 
-        service.toggleVisibility('Test Board').subscribe(board => {
+        service.toggleVisibility('Test Board').subscribe((board) => {
             expect(board.visibility).toBe(Visibility.PUBLIC); // Assuming visibility is toggled to public
         });
 

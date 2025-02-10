@@ -17,7 +17,7 @@ describe('EditToolItemComponent', () => {
     let mockTileApplicatorService: jasmine.SpyObj<TileApplicatorService>;
 
     beforeEach(async () => {
-        mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave', 'getBoardSize']);
+        mockMapService = jasmine.createSpyObj('MapService', ['getBoardToSave', 'getBoardSize', 'getMode']);
         mockTileApplicatorService = jasmine.createSpyObj<TileApplicatorService>('TileApplicatorService', ['setDropOnItem']);
 
         mockToolSelectionService = jasmine.createSpyObj<ToolSelectionService>('ToolSelectionService', ['updateSelectedItem'], {
@@ -51,9 +51,9 @@ describe('EditToolItemComponent', () => {
             name: 'Test Board',
             description: 'A sample board',
             isCTF: false,
-            size: boardSize
+            size: boardSize,
         } as Board;
-        
+
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
         (mockToolSelectionService.nbrSpawnOnBoard$ as BehaviorSubject<number>).next(2);
@@ -73,9 +73,9 @@ describe('EditToolItemComponent', () => {
             name: 'Test Board',
             description: 'A sample board',
             isCTF: false,
-            size: boardSize
+            size: boardSize,
         } as Board;
-        
+
         // Create a BehaviorSubject with the mock board
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
@@ -95,9 +95,9 @@ describe('EditToolItemComponent', () => {
             name: 'Test Board',
             description: 'A sample board',
             isCTF: false,
-            size: boardSize
+            size: boardSize,
         } as Board;
-        
+
         // Create a BehaviorSubject with the mock board
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
@@ -145,4 +145,3 @@ describe('EditToolItemComponent', () => {
         expect(description).toBe('');
     });
 });
-
