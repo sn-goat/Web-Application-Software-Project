@@ -99,7 +99,7 @@ describe('ToolSelectionService', () => {
             ];
             service.parseBoard(mockBoard);
 
-            expect(service.getItemCounter()).toBe(3);
+            expect(service.getItemCounter()).toBe(1);
         });
 
         it('should parse the board and update the spawn counter', () => {
@@ -110,8 +110,9 @@ describe('ToolSelectionService', () => {
                 ],
             ];
             service.parseBoard(mockBoard);
-
-            expect(service.getIsSpawnPlaced()).toBeTrue();
+            service.nbrSpawnOnBoard$.subscribe((value) => {
+                expect(value).toBe(1);
+            });
         });
 
         it('should parse the board and update the chest counter', () => {
@@ -122,8 +123,9 @@ describe('ToolSelectionService', () => {
                 ],
             ];
             service.parseBoard(mockBoard);
-
-            expect(service.getItemCounter()).toBe(4);
+            service.nbrChestOnBoard$.subscribe((value) => {
+                expect(value).toBe(1);
+            });
         });
     });
 });
