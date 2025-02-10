@@ -38,19 +38,32 @@ img.item-moved {
 
 .tooltip {
     position: absolute;
-    bottom: 100%;
+    bottom: calc(100% + 5px); /* Keeps a small gap above the tile */
     left: 50%;
     transform: translateX(-50%);
-    background-color: #cebf82;
-    color: white;
-    padding: 6px 10px;
-    border-radius: 4px;
-    white-space: nowrap;
+    background-color: #1a1625;
+    color: #7ee0d0;
+    padding: 10px 15px;
+    border-radius: 6px;
     font-size: 14px;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     z-index: 1000;
+
+    height: max-content;
+    width: max-content;
+    min-width: 180px;
+    max-width: 350px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    text-align: center;
+
 }
 
 .object:hover .tooltip,
