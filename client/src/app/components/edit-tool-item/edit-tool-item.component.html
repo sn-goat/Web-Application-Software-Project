@@ -1,17 +1,24 @@
-<div class="object" 
-    (mouseenter)="showTooltip = true" 
+<div class="object"
+    (mouseenter)="showTooltip = true"
     (mouseleave)="showTooltip = false"
+    matBadge="{{remainingItem}}"
+    matBadgePosition="below"
+    matBadgeSize="medium"
+    matBadgeOverlap="false"
+    matBadgeHidden="{{!remainingItem}}"
+>
+    <img
+        [src]="src + type + fileType"
+        [alt]="type"
+        class="draggable-image"
+        [draggable]="isDraggable"
+        [class.item-moved]="!isDraggable"
+        (drag)="onDragStart()"
+        (dragleave)="onDragEnter($event)"
+        [title]="getDescription(type)"
+    >
 
-    matBadge= "{{remainingItem}}" matBadgePosition="below" matBadgeSize="medium" matBadgeOverlap="false" matBadgeHidden="{{!remainingItem}}"
-    >
-    <img 
-    [src]="src + type + fileType" 
-    [alt]="type"
-    class="draggable-image"
-    [draggable]="isDraggable"
-    [class.item-moved]="!isDraggable"
-    (drag)="onDragStart()"
-    (dragleave)="onDragEnter($event)"
-    [title] = "getDescription(type)"
-    >
+    <div class="tooltip" *ngIf="showTooltip">
+        {{ getDescription(type) }}
+    </div>
 </div>

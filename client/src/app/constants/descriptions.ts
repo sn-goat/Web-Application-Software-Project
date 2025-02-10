@@ -36,6 +36,6 @@ Le coût pour la traverser s'élève à 2 pts`,
     [Item.SHIELD, 'Bouclier : Utilisé pour se protéger contre les attaques ennemies.'],
     [Item.SWORD, 'Épée : Une arme de mêlée utilisée pour attaquer les ennemis de près.'],
     [Item.SPAWN, 'Point de spawn : Lieu où les joueurs apparaissent au début du jeu.'],
-    [Item.CHEST, 'Coffre : Contient des objets et des ressources pour le joueur.'],
+    [Item.CHEST, 'Coffre : Contient des objets et des ressources pour le joueur. (Aléatoire)'],
     [Item.DEFAULT, ''],
 ]);
