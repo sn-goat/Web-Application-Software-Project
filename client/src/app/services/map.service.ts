@@ -20,8 +20,6 @@ export class MapService {
 
     setMapData(data: Board): void {
         this.firstBoardValue.next(data);
-        // eslint-disable-next-line no-console
-        console.log(data);
         localStorage.setItem(this.storageKey, JSON.stringify(data));
     }
 
@@ -82,10 +80,14 @@ export class MapService {
 
     private initializeBoardData() {
         const data = this.firstBoardValue.value;
-        this.boardToSave = new BehaviorSubject<Board>({
-            ...data,
-            board: [],
-        });
+        if (data.board.length <= 0) {
+            this.boardToSave = new BehaviorSubject<Board>({
+                ...data,
+                board: [],
+            });
+        } else {
+            this.boardToSave = new BehaviorSubject<Board>(data);
+        }
     }
 
     private generateBoard() {
