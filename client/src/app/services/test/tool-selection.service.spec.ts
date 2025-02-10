@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
-import { Item, Size, Tile } from '@common/enums';
+import { Board } from '@common/board';
+import { Item, Size, Tile, Visibility } from '@common/enums';
 
 describe('ToolSelectionService', () => {
     let service: ToolSelectionService;
@@ -75,5 +77,53 @@ describe('ToolSelectionService', () => {
     it('should set the spawn placement', () => {
         service.setIsSpawnPlaced(true);
         expect(service.getIsSpawnPlaced()).toBeTrue();
+    });
+
+    describe('parseBoard', () => {
+        const mockBoard = {
+            _id: '123',
+            name: 'Test Board',
+            size: 10,
+            isCTF: true,
+            description: 'Test Description',
+            visibility: Visibility.PUBLIC,
+            image: 'image.jpg',
+            lastUpdatedAt: new Date(),
+        } as Board;
+        it('should parse the board and update the item counter', () => {
+            mockBoard.board = [
+                [
+                    { tile: Tile.FLOOR, item: Item.PEARL, position: { x: 0, y: 0 } },
+                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 } },
+                ],
+            ];
+            service.parseBoard(mockBoard);
+
+            expect(service.getItemCounter()).toBe(3);
+        });
+
+        it('should parse the board and update the spawn counter', () => {
+            mockBoard.board = [
+                [
+                    { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 } },
+                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 } },
+                ],
+            ];
+            service.parseBoard(mockBoard);
+
+            expect(service.getIsSpawnPlaced()).toBeTrue();
+        });
+
+        it('should parse the board and update the chest counter', () => {
+            mockBoard.board = [
+                [
+                    { tile: Tile.FLOOR, item: Item.CHEST, position: { x: 0, y: 0 } },
+                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 } },
+                ],
+            ];
+            service.parseBoard(mockBoard);
+
+            expect(service.getItemCounter()).toBe(4);
+        });
     });
 });

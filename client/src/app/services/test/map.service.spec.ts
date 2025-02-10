@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
-import { MapService } from '@app/services/code/map.service';
 
 describe('MapService', () => {
     let service: MapService;
@@ -167,5 +167,57 @@ describe('MapService', () => {
         service['boardToSave'].next(mockBoard);
         service.setCellItem(col, row, newItem);
         expect(service['boardToSave'].value.board[row][col].item).toBe(newItem);
+    });
+    describe('setBoardToFirstValue', () => {
+        it('should generate a board if firstBoardValue.board is empty', () => {
+            // Arrange: Create a board with an empty "board" array (simulate no board created yet).
+            const emptyBoard: Board = {
+                _id: 'empty',
+                name: 'Empty Board',
+                description: '',
+                size: 5, // set size to 5 so we expect a 5x5 board after generation.
+                board: [],
+                isCTF: false,
+                visibility: Visibility.PRIVATE,
+                image: '',
+                lastUpdatedAt: new Date(),
+            };
+            service['firstBoardValue'].next(emptyBoard);
+
+            // Act: Call setBoardToFirstValue which should check the empty board and generate one.
+            service.setBoardToFirstValue();
+
+            // Assert: The generated board should be 5x5 and parseBoard should not be called.
+            const boardToSave = service.getBoardToSave().value;
+            expect(boardToSave.board).toBeDefined();
+            expect(Array.isArray(boardToSave.board)).toBeTrue();
+            expect(boardToSave.board.length).toEqual(emptyBoard.size);
+            boardToSave.board.forEach((row) => {
+                expect(row.length).toEqual(emptyBoard.size);
+            });
+        });
+
+        it('should set boardToSave to firstBoardValue and call parseBoard when board is not empty', () => {
+            // Arrange: Create a board that already has a populated board.
+            const nonEmptyBoard: Board = {
+                _id: 'nonEmpty',
+                name: 'Non Empty Board',
+                description: 'Board is already generated',
+                size: 1,
+                board: [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 } }]],
+                isCTF: true,
+                visibility: Visibility.PUBLIC,
+                image: 'img',
+                lastUpdatedAt: new Date(),
+            };
+            service['firstBoardValue'].next(nonEmptyBoard);
+
+            // Act: Call setBoardToFirstValue which should now simply set boardToSave and call parseBoard.
+            service.setBoardToFirstValue();
+
+            // Assert: boardToSave should be equal to nonEmptyBoard and parseBoard should have been called with it.
+            const boardToSave = service.getBoardToSave().value;
+            expect(boardToSave).toEqual(nonEmptyBoard);
+        });
     });
 });

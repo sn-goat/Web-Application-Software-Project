@@ -20,7 +20,7 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     styleClass: string = 'unselected';
     destroy$ = new Subject<void>();
 
-    constructor( public toolSelection: ToolSelectionService) {}
+    constructor(public toolSelection: ToolSelectionService) {}
 
     ngOnInit() {
         this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {

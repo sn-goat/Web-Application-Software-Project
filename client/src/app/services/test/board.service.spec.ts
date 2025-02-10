@@ -57,7 +57,7 @@ describe('BoardService', () => {
         const req = httpMock.expectOne(`${apiUrl}/board`);
         expect(req.request.method).toBe('POST');
         expect(req.request.body).toEqual(mockBoard);
-        req.flush({}); 
+        req.flush({});
     });
 
     it('should update a board', () => {
@@ -96,7 +96,7 @@ describe('BoardService', () => {
 
         const req = httpMock.expectOne(`${apiUrl}/Test Board`);
         expect(req.request.method).toBe('DELETE');
-        req.flush({}); 
+        req.flush({});
     });
 
     it('should delete all boards', () => {

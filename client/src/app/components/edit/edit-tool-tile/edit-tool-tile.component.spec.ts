@@ -15,7 +15,7 @@ describe('EditToolTileComponent', () => {
     beforeEach(async () => {
         selectedTile$ = new BehaviorSubject<string>('someType');
         destroy$ = new Subject<void>();
-        mockToolSelection = jasmine.createSpyObj('ToolSelectionService', ['updateSelectedTile'], { selectedTile$: selectedTile$ });
+        mockToolSelection = jasmine.createSpyObj('ToolSelectionService', ['updateSelectedTile'], { selectedTile$ });
 
         await TestBed.configureTestingModule({
             imports: [EditToolTileComponent],
@@ -58,7 +58,7 @@ describe('EditToolTileComponent', () => {
         component.description = '';
         component.ngOnInit();
         expect(component.description).toBe(ASSETS_DESCRIPTION.get(Tile.FLOOR) ?? 'Pas de description');
-        
+
         component.type = 'invalid' as Tile;
         component.description = 'Pas de description';
         component.ngOnInit();

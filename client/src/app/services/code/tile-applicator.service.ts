@@ -12,18 +12,18 @@ import { Item, Tile } from '@common/enums';
     providedIn: 'root',
 })
 export class TileApplicatorService implements OnDestroy {
-    isMouseLeftDown: boolean = false;
-    isMouseRightDown: boolean = false;
-    currentCoord: Vec2 = { x: -1, y: -1 };
     destroy$ = new Subject<void>();
     previousCoord: Vec2 = { x: -1, y: -1 };
     oldItemPos: Vec2 = { x: -1, y: -1 };
     newItemPos: Vec2 = { x: -1, y: -1 };
     handleItem: boolean = false;
+    isMouseLeftDown: boolean = false;
+    isMouseRightDown: boolean = false;
     isOnItem: Item = Item.DEFAULT;
 
     selectedTile: Tile | null;
     selectedItem: Item | null;
+    currentCoord: Vec2 = { x: -1, y: -1 };
 
     constructor(
         private mouseEditorService: MouseEditorService,
