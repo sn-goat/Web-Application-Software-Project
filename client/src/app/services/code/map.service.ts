@@ -80,6 +80,10 @@ export class MapService {
         this.boardToSave.next(currentBoard);
     }
 
+    getFirstBoardValue(): Board {
+        return this.firstBoardValue.value;
+    }
+
     private initializeBoardData() {
         const data = this.firstBoardValue.value;
         this.boardToSave = new BehaviorSubject<Board>({

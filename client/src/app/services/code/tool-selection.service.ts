@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Tile, Item } from '@common/enums';
+import { Tile, Item, Size } from '@common/enums';
+import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 
 @Injectable({
     providedIn: 'root',
@@ -17,7 +18,10 @@ export class ToolSelectionService {
     private itemOnBoard = new BehaviorSubject<Set<Item>>(new Set());
     private nbrSpawnOnBoard = new BehaviorSubject<number>(0);
     private nbrChestOnBoard = new BehaviorSubject<number>(0);
-    private isReadyToSave = false;
+    private isSpawnPlaced = false;
+    private itemCounter = 0;
+    private maxObjectByType: number;
+    private boardSize: Size;
 
     constructor() {
         this.selectedTile$ = this.selectedTile.asObservable();
@@ -35,12 +39,32 @@ export class ToolSelectionService {
         }
     }
 
-    getIsReadyToSave() {
-        return this.isReadyToSave;
+    setMaxObjectByType(maxObjectByType: number) {
+        this.maxObjectByType = maxObjectByType;
     }
 
-    setIsReadyToSave(isReady: boolean) {
-        this.isReadyToSave = isReady;
+    getMaxObjectByType() {
+        return this.maxObjectByType;
+    }
+
+    setBoardSize(boardSize: Size) {
+        this.boardSize = boardSize;
+    }
+
+    isMinimumObjectPlaced() {
+        return this.itemCounter >= BOARD_SIZE_MAPPING[this.boardSize];
+    }
+
+    getIsSpawnPlaced() {
+        return this.isSpawnPlaced;
+    }
+
+    getItemCounter() {
+        return this.itemCounter;
+    }
+
+    setIsSpawnPlaced(isPlaced: boolean) {
+        this.isSpawnPlaced = isPlaced;
     }
 
     updateSelectedItem(selectedItem: Item) {
@@ -49,10 +73,12 @@ export class ToolSelectionService {
 
     addItem(item: Item) {
         this.itemOnBoard.next(this.itemOnBoard.value.add(item));
+        this.itemCounter++;
     }
 
     removeItem(item: Item) {
         this.itemOnBoard.next(this.itemOnBoard.value.delete(item) ? this.itemOnBoard.value : this.itemOnBoard.value);
+        this.itemCounter--;
     }
 
     incrementSpawn() {
@@ -65,9 +91,11 @@ export class ToolSelectionService {
 
     incrementChest() {
         this.nbrChestOnBoard.next(this.nbrChestOnBoard.value + 1);
+        this.itemCounter++;
     }
 
     decrementChest() {
         this.nbrChestOnBoard.next(this.nbrChestOnBoard.value - 1);
+        this.itemCounter--;
     }
 }

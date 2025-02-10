@@ -9,10 +9,11 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 import { BoardGameComponent } from '@app/components/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
-import { BoardService } from '@app/services/code/board.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
-import { MapService } from '@app/services/code/map.service';
-import { MouseEditorService } from '@app/services/code/mouse-editor.service';
+import { BoardService } from '@app/services/board.service';
+import { MapService } from '@app/services/map.service';
+import { MouseEditorService } from '@app/services/mouse-editor.service';
+import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-map-maker',
@@ -70,16 +71,27 @@ export class MapMakerComponent implements OnInit {
     }
 
     checkIfReadyToSave() {
-        if (this.toolSelection.getIsReadyToSave()) {
-            if (confirm('Are you sure you want to save the map?')) {
-                this.saveBoard();
-                alert('Map saved successfully!');
-                this.router.navigate(['/admin']).then(() => {
-                    this.reset();
-                });
+        if (this.toolSelection.getIsSpawnPlaced()) {
+            if (this.toolSelection.isMinimumObjectPlaced()) {
+                if (confirm('Are you sure you want to save the map?')) {
+                    this.saveBoard()
+                        .then((response) => {
+                            alert('Map saved successfully!\n' + response);
+                            this.router.navigate(['/admin']).then(() => {
+                                this.reset();
+                            });
+                        })
+                        .catch((error) => {
+                            alert('An error occurred while saving the map.\n' + error.message);
+                        });
+                }
+            } else {
+                alert('You need to place at least ' + this.toolSelection.getMaxObjectByType() + ' item on the map.');
+                return;
             }
         } else {
-            alert('You need to place all the spawns points on the board before saving the map.');
+            alert('You need to place all the spawn points on the map.');
+            return;
         }
     }
 
@@ -99,14 +111,8 @@ export class MapMakerComponent implements OnInit {
         this.mapService.initializeBoard();
     }
 
-    saveBoard() {
-        this.boardService.addBoard(this.mapService.getBoardToSave().value).subscribe(
-            (response) => {
-                return response;
-            },
-            (error) => {
-                return error;
-            },
-        );
+    async saveBoard(): Promise<string> {
+        const response = await firstValueFrom(this.boardService.addBoard(this.mapService.getBoardToSave().value));
+        return response.body as string;
     }
 }
