@@ -38,7 +38,11 @@ export class Board {
 
     @ApiProperty({ description: 'Date when the board was last modified' })
     @Prop({ required: true })
-    lastUpdatedAt: Date;
+    updatedAt: Date;
+
+    @ApiProperty({ description: 'Date when the board was created' })
+    @Prop({ required: true })
+    createdAt: Date;
 }
 
 export const boardSchema = SchemaFactory.createForClass(Board);
