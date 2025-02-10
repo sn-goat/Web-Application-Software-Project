@@ -24,7 +24,6 @@ export class FormDialogComponent {
             isCTF: false,
             visibility: Visibility.PUBLIC,
             image: '',
-            lastUpdatedAt: new Date(),
         };
     }
 }
