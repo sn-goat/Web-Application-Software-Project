@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { MapService } from '@app/services/code/map.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 
 describe('MapService', () => {
     let service: MapService;
+    let toolSelectionServiceSpy: jasmine.SpyObj<ToolSelectionService>;
+
     const dummyBoard: Board = {
         _id: 'dummyId',
         name: 'Dummy Board',
@@ -18,6 +21,9 @@ describe('MapService', () => {
     };
 
     beforeEach(() => {
+        // Create a spy for ToolSelectionService with the parseBoard method.
+        toolSelectionServiceSpy = jasmine.createSpyObj('ToolSelectionService', ['parseBoard']);
+
         spyOn(localStorage, 'getItem').and.callFake((key: string) => {
             if (key === 'firstBoardValue') {
                 return JSON.stringify(dummyBoard);
@@ -25,8 +31,9 @@ describe('MapService', () => {
             return null;
         });
         spyOn(localStorage, 'setItem');
+
         TestBed.configureTestingModule({
-            providers: [MapService],
+            providers: [MapService, { provide: ToolSelectionService, useValue: toolSelectionServiceSpy }],
         });
         service = TestBed.inject(MapService);
     });
@@ -48,7 +55,6 @@ describe('MapService', () => {
         } as Board;
 
         service['firstBoardValue'].next(mockFirstBoardValue);
-
         service.initializeBoard();
 
         expect(service['boardToSave'].value.board).toBeDefined();
@@ -111,16 +117,36 @@ describe('MapService', () => {
         expect(service.getMode()).toEqual(dummyBoard.isCTF);
     });
 
+    // Existing test for setBoardName (which already verifies the updated value)
     it('setBoardName should update the board name', () => {
         const newName = 'New Board Name';
         service.setBoardName(newName);
         expect(service.getBoardToSave().value.name).toEqual(newName);
     });
 
+    // Additional test to verify that boardToSave.next was called in setBoardName.
+    it('should call boardToSave.next with updated board in setBoardName', () => {
+        const boardSubject = service.getBoardToSave();
+        const spyNext = spyOn(boardSubject, 'next').and.callThrough();
+        const newName = 'New Board Name';
+        service.setBoardName(newName);
+        expect(spyNext).toHaveBeenCalledWith(jasmine.objectContaining({ name: newName }));
+    });
+
+    // Existing test for setBoardDescription (which already verifies the updated value)
     it('setBoardDescription should update the board description', () => {
         const newDesc = 'New Description';
         service.setBoardDescription(newDesc);
         expect(service.getBoardToSave().value.description).toEqual(newDesc);
+    });
+
+    // Additional test to verify that boardToSave.next was called in setBoardDescription.
+    it('should call boardToSave.next with updated board in setBoardDescription', () => {
+        const boardSubject = service.getBoardToSave();
+        const spyNext = spyOn(boardSubject, 'next').and.callThrough();
+        const newDesc = 'New Description';
+        service.setBoardDescription(newDesc);
+        expect(spyNext).toHaveBeenCalledWith(jasmine.objectContaining({ description: newDesc }));
     });
 
     it('should change tile of the cell', () => {
@@ -168,14 +194,15 @@ describe('MapService', () => {
         service.setCellItem(col, row, newItem);
         expect(service['boardToSave'].value.board[row][col].item).toBe(newItem);
     });
+
     describe('setBoardToFirstValue', () => {
         it('should generate a board if firstBoardValue.board is empty', () => {
-            // Arrange: Create a board with an empty "board" array (simulate no board created yet).
+            // Arrange: Create a board with an empty "board" array.
             const emptyBoard: Board = {
                 _id: 'empty',
                 name: 'Empty Board',
                 description: '',
-                size: 5, // set size to 5 so we expect a 5x5 board after generation.
+                size: 5, // Expect a 5x5 board after generation.
                 board: [],
                 isCTF: false,
                 visibility: Visibility.PRIVATE,
@@ -184,10 +211,13 @@ describe('MapService', () => {
             };
             service['firstBoardValue'].next(emptyBoard);
 
-            // Act: Call setBoardToFirstValue which should check the empty board and generate one.
+            // Reset the spy call history.
+            toolSelectionServiceSpy.parseBoard.calls.reset();
+
+            // Act: Call setBoardToFirstValue to generate the board.
             service.setBoardToFirstValue();
 
-            // Assert: The generated board should be 5x5 and parseBoard should not be called.
+            // Assert: The generated board should be 5x5.
             const boardToSave = service.getBoardToSave().value;
             expect(boardToSave.board).toBeDefined();
             expect(Array.isArray(boardToSave.board)).toBeTrue();
@@ -195,6 +225,8 @@ describe('MapService', () => {
             boardToSave.board.forEach((row) => {
                 expect(row.length).toEqual(emptyBoard.size);
             });
+            // parseBoard should not have been called.
+            expect(toolSelectionServiceSpy.parseBoard).not.toHaveBeenCalled();
         });
 
         it('should set boardToSave to firstBoardValue and call parseBoard when board is not empty', () => {
@@ -212,12 +244,17 @@ describe('MapService', () => {
             };
             service['firstBoardValue'].next(nonEmptyBoard);
 
-            // Act: Call setBoardToFirstValue which should now simply set boardToSave and call parseBoard.
+            // Reset the spy call history.
+            toolSelectionServiceSpy.parseBoard.calls.reset();
+
+            // Act: Call setBoardToFirstValue which should set boardToSave and call parseBoard.
             service.setBoardToFirstValue();
 
-            // Assert: boardToSave should be equal to nonEmptyBoard and parseBoard should have been called with it.
+            // Assert: boardToSave should equal nonEmptyBoard.
             const boardToSave = service.getBoardToSave().value;
             expect(boardToSave).toEqual(nonEmptyBoard);
+            // And parseBoard should have been called with nonEmptyBoard.
+            expect(toolSelectionServiceSpy.parseBoard).toHaveBeenCalledWith(nonEmptyBoard);
         });
     });
 });

@@ -20,6 +20,7 @@ describe('MapMakerComponent', () => {
             'setBoardDescription',
             'initializeBoard',
             'getBoardSize',
+            'setBoardToFirstValue',
         ]);
 
         const mockBoard = {
