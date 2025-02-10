@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { WaitingPageComponent } from './attente-page.component';
+import { WaitingPageComponent } from './waiting-page.component';
 
 describe('WaitingPageComponent', () => {
     let component: WaitingPageComponent;

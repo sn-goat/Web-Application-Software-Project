@@ -9,10 +9,10 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
 import { BoardGameComponent } from '@app/components/edit/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit/edit-item-area/edit-item-area.component';
-import { BoardService } from '@app/services/board.service';
-import { MapService } from '@app/services/map.service';
-import { MouseEditorService } from '@app/services/mouse-editor.service';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { BoardService } from '@app/services/code/board.service';
+import { MapService } from '@app/services/code/map.service';
+import { MouseEditorService } from '@app/services/code/mouse-editor.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({

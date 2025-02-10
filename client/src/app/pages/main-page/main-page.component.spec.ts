@@ -1,9 +1,9 @@
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Routes, provideRouter, RouterLink } from '@angular/router';
-import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { CommunicationService } from '@app/services/communication.service';
+import { provideRouter, RouterLink, Routes } from '@angular/router';
 import { TEAM_MEMBERS } from '@app/constants/team-members';
+import { MainPageComponent } from '@app/pages/main-page/main-page.component';
+import { CommunicationService } from '@app/services/code/communication.service';
 import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
