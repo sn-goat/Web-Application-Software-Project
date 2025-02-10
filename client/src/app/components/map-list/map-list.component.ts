@@ -23,7 +23,7 @@ export class MapListComponent implements OnInit {
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
     searchQuery: string = '';
-    sortBy: string = 'createdAt';
+    sortBy: string = 'lastUpdatedAt';
 
     private mapService = inject(MapService);
 
