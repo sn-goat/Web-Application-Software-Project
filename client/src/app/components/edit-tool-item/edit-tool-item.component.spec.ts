@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { MapService } from '@app/services/map.service';
-import { TileApplicatorService } from '@app/services/tile-applicator.service';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { MapService } from '@app/services/code/map.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Board } from '@common/board';
 import { Item, Size } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';

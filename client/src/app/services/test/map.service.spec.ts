@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
-import { MapService } from './map.service'; // Corrected import for MapService
+import { MapService } from '@app/services/code/map.service';
 
 describe('MapService', () => {
     let service: MapService;

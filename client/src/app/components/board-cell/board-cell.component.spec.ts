@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Cell } from '@common/board';
 import { BoardCellComponent } from './board-cell.component';
 

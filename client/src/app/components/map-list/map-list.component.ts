@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
-import { BoardService } from '@app/services/board.service';
-import { MapService } from '@app/services/map.service';
+import { BoardService } from '@app/services/code/board.service';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 

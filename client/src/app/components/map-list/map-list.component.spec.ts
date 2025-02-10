@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { BoardService } from '@app/services/board.service';
+import { BoardService } from '@app/services/code/board.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { of } from 'rxjs';

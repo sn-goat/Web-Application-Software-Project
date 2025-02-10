@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Cell } from '@common/board';
 
 @Component({

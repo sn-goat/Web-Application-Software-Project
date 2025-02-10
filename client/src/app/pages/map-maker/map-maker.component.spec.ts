@@ -2,7 +2,7 @@ import { HttpResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { MapService } from '@app/services/map.service';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { MapMakerComponent } from './map-maker.component';
@@ -168,30 +168,29 @@ describe('MapMakerComponent', () => {
         const mockBoard = { _id: '123', name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
-      
+
         const successResponse = new HttpResponse({ status: 200, body: 'Success Response' });
-      
+
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(of(successResponse));
-      
+
         component.saveBoard(); // Call the method to trigger the observable
         fixture.detectChanges(); // Ensure Angular processes changes
-      
+
         expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
-      });
-      
-      it('should handle error correctly in saveBoard', () => {
+    });
+
+    it('should handle error correctly in saveBoard', () => {
         const mockBoard = { _id: '123', name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
-      
+
         const errorResponse = new HttpResponse({ status: 500, body: 'Error Response' });
-      
+
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorResponse));
-      
+
         component.saveBoard(); // Call the method
         fixture.detectChanges(); // Ensure changes are applied
-      
+
         expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
-      });
-      
+    });
 });

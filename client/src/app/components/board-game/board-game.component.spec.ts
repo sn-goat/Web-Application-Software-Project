@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MapService } from '@app/services/map.service';
-import { TileApplicatorService } from '@app/services/tile-applicator.service';
+import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { BehaviorSubject } from 'rxjs';
 import { BoardGameComponent } from './board-game.component';

@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { Board } from '@common/board'; // Remplacez par votre modèle
 import { Visibility } from '@common/enums'; // Remplacez par votre modèle d'énumération
-import { BoardService } from './board.service';
+import { BoardService } from '@app/services/code/board.service';
 
 describe('BoardService', () => {
     let service: BoardService;

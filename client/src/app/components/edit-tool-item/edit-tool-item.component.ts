@@ -3,9 +3,9 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
-import { MapService } from '@app/services/map.service';
-import { TileApplicatorService } from '@app/services/tile-applicator.service';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { MapService } from '@app/services/code/map.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Item, Size } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
