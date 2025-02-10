@@ -102,8 +102,6 @@ describe('MapMakerComponent', () => {
         const saveBoardSpy = spyOn(component, 'saveBoard');
         const alertSpy = spyOn(window, 'alert');
         const resetSpy = spyOn(component, 'reset');
-
-        spyOn(component['toolSelection'], 'getIsReadyToSave').and.returnValue(true);
         component.checkIfReadyToSave();
 
         expect(saveBoardSpy).toHaveBeenCalled();
@@ -119,8 +117,6 @@ describe('MapMakerComponent', () => {
     it('should show alert when checkIfReadyToSave is called and not ready to save', () => {
         spyOn(window, 'confirm');
         const alertSpy = spyOn(window, 'alert');
-
-        spyOn(component['toolSelection'], 'getIsReadyToSave').and.returnValue(false);
         component.checkIfReadyToSave();
 
         expect(alertSpy).toHaveBeenCalledWith('You need to place all the spawns points on the board before saving the map.');
@@ -131,8 +127,6 @@ describe('MapMakerComponent', () => {
         const saveBoardSpy = spyOn(component, 'saveBoard');
         const alertSpy = spyOn(window, 'alert');
         spyOn(component, 'reset');
-
-        spyOn(component['toolSelection'], 'getIsReadyToSave').and.returnValue(true);
         component.checkIfReadyToSave();
 
         expect(saveBoardSpy).not.toHaveBeenCalled();
