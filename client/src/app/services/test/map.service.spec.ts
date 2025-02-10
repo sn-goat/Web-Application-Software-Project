@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { MapService } from '@app/services/code/map.service';
