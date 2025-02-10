@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Tile, Item, Size } from '@common/enums';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
+import { Board } from '@common/board';
+import { Item, Size, Tile } from '@common/enums';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -97,5 +98,21 @@ export class ToolSelectionService {
     decrementChest() {
         this.nbrChestOnBoard.next(this.nbrChestOnBoard.value - 1);
         this.itemCounter--;
+    }
+
+    parseBoard(board: Board) {
+        board.board.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item !== Item.DEFAULT) {
+                    if (cell.item === Item.CHEST) {
+                        this.incrementChest();
+                    } else if (cell.item === Item.SPAWN) {
+                        this.incrementSpawn();
+                    } else {
+                        this.addItem(cell.item);
+                    }
+                }
+            });
+        });
     }
 }

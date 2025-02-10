@@ -1,7 +1,8 @@
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
+import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
 import { BoardService } from '@app/services/board/board.service';
 import { Body, Controller, Delete, Get, HttpStatus, NotFoundException, Param, Patch, Post, Res } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
 @ApiTags('Boards')
@@ -42,13 +43,14 @@ export class BoardController {
         }
     }
 
-    @Patch('/:name')
-    async patchBoard(@Param('board') board: CreateBoardDto, @Res() response: Response) {
+    @ApiBody({ type: UpdateBoardDto })
+    @Patch('/')
+    async patchBoard(@Body() board: UpdateBoardDto, @Res() response: Response) {
         try {
             const updatedBoard = await this.boardService.updateBoard(board);
             response.status(HttpStatus.OK).json(updatedBoard);
         } catch (error) {
-            response.status(HttpStatus.NOT_FOUND).send(error.message);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error.message);
         }
     }
 

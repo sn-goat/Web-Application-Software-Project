@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Board } from '@common/board';
-import { Item, Tile } from '@common/enums';
+import { Item, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
+import { ToolSelectionService } from './tool-selection.service';
 
 @Injectable({
     providedIn: 'root',
@@ -10,18 +11,17 @@ export class MapService {
     private readonly storageKey = 'firstBoardValue';
     private firstBoardValue: BehaviorSubject<Board>;
     private boardToSave: BehaviorSubject<Board>;
+    private readonly toolSelectionService = inject(ToolSelectionService);
 
     constructor() {
         const savedData = localStorage.getItem(this.storageKey);
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
         this.firstBoardValue = new BehaviorSubject<Board>(initialData);
-        this.initializeBoard();
+        this.initializeBoardData();
     }
 
     setMapData(data: Board): void {
         this.firstBoardValue.next(data);
-        // eslint-disable-next-line no-console
-        console.log(data);
         localStorage.setItem(this.storageKey, JSON.stringify(data));
     }
 
@@ -80,16 +80,31 @@ export class MapService {
         this.boardToSave.next(currentBoard);
     }
 
+    setBoardToFirstValue() {
+        const data: Board = this.firstBoardValue.value;
+        if (!Array.isArray(data.board) || data.board.length === 0) {
+            this.generateBoard();
+        } else {
+            this.boardToSave = new BehaviorSubject<Board>(data);
+            this.toolSelectionService.parseBoard(this.boardToSave.value);
+        }
+    }
+
     private initializeBoardData() {
-        const data = this.firstBoardValue.value;
         this.boardToSave = new BehaviorSubject<Board>({
-            ...data,
+            name: '',
+            description: '',
+            size: 0,
+            isCTF: false,
+            visibility: Visibility.PRIVATE,
             board: [],
-        });
+            image: '',
+        } as Partial<Board> as Board);
     }
 
     private generateBoard() {
         const boardGame = this.boardToSave.value;
+        const data = this.firstBoardValue.value;
         for (let i = 0; i < this.firstBoardValue.value.size; i++) {
             const row = [];
             for (let j = 0; j < this.firstBoardValue.value.size; j++) {
@@ -97,6 +112,9 @@ export class MapService {
             }
             boardGame.board.push(row);
         }
-        this.boardToSave.next(boardGame);
+        this.boardToSave = new BehaviorSubject<Board>({
+            ...data,
+            board: boardGame.board,
+        });
     }
 }
