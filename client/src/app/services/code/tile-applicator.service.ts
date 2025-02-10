@@ -182,7 +182,6 @@ export class TileApplicatorService implements OnDestroy {
             }
         }
 
-        // Ensure the end point is also updated
         if (this.isOnBoard(endX, endY, rect)) {
             const tileCoord = this.screenToBoard(endX, endY, rect);
             const tileCoordKey = JSON.stringify(tileCoord);

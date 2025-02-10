@@ -15,16 +15,13 @@ describe('TileApplicatorService', () => {
     let toolSelectionServiceSpy: jasmine.SpyObj<ToolSelectionService>;
     let mapServiceSpy: jasmine.SpyObj<MapService>;
 
-    // Subjects for dependencies’ observables.
     let currentCoordSubject: BehaviorSubject<Vec2>;
     let selectedTileSubject: BehaviorSubject<Tile | null>;
     let selectedItemSubject: BehaviorSubject<Item>;
 
-    // Board dimensions and a DOMRect to compute board coordinates.
     const boardSize = 10;
-    const rect = new DOMRect(0, 0, 200, 200); // Each cell is 20x20 pixels.
+    const rect = new DOMRect(0, 0, 200, 200);
 
-    // Helper to compute board coordinates from a mouse coordinate.
     function getBoardCoordinates(x: number, y: number): Vec2 {
         const cellWidth = rect.width / boardSize;
         const cellHeight = rect.height / boardSize;
@@ -54,13 +51,9 @@ describe('TileApplicatorService', () => {
 
         mapServiceSpy.getBoardSize.and.returnValue(boardSize);
 
-        // Create the service (its constructor subscribes to the observables)
         service = new TileApplicatorService(mouseEditorServiceSpy, toolSelectionServiceSpy, mapServiceSpy);
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // Mouse Event Handlers
-    // ─────────────────────────────────────────────────────────────
     describe('Mouse Event Handlers', () => {
         describe('handleMouseDown', () => {
             it('should handle right-click deletion when cell item is not default', () => {
@@ -82,7 +75,7 @@ describe('TileApplicatorService', () => {
                 const expectedTile = getBoardCoordinates(50, 50);
                 const event = new MouseEvent('mousedown', { button: 2 });
                 mapServiceSpy.getCellItem.and.returnValue(Item.DEFAULT);
-                // Simulate that the current tile is not FLOOR.
+
                 mapServiceSpy.getCellTile.and.returnValue(Tile.WALL);
 
                 service.handleMouseDown(event, rect);
@@ -140,9 +133,6 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // setItemOutsideBoard and setDropOnItem
-    // ─────────────────────────────────────────────────────────────
     describe('setItemOutsideBoard', () => {
         it('should delete item if conditions match', () => {
             const outsideX = 300;
@@ -178,9 +168,6 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // handleDrop
-    // ─────────────────────────────────────────────────────────────
     describe('handleDrop', () => {
         it('should update item position when selectedItem is not DEFAULT', () => {
             selectedItemSubject.next(Item.SPAWN);
@@ -214,9 +201,6 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // applyTile, applyDoor, applyWall
-    // ─────────────────────────────────────────────────────────────
     describe('applyTile', () => {
         it('should do nothing if selectedTile is null', () => {
             service.selectedTile = null;
@@ -302,9 +286,6 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // updateCell
-    // ─────────────────────────────────────────────────────────────
     describe('updateCell', () => {
         it('should do nothing if handleItem is true', () => {
             service.handleItem = true;
@@ -334,9 +315,6 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // applyItem and deleteItem
-    // ─────────────────────────────────────────────────────────────
     describe('applyItem', () => {
         it('should increment SPAWN and set the cell if selectedItem is SPAWN and the cell is DEFAULT', () => {
             service.selectedItem = Item.SPAWN;
@@ -402,9 +380,6 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // updatePosition
-    // ─────────────────────────────────────────────────────────────
     describe('updatePosition', () => {
         it('should not update the position if the destination tile is WALL', () => {
             const oldPos: Vec2 = { x: 1, y: 1 };
@@ -440,30 +415,22 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // Tests for applyIntermediateTiles
-    // ─────────────────────────────────────────────────────────────
     describe('applyIntermediateTiles', () => {
         beforeEach(() => {
-            // Spy on updateCell to monitor its calls.
             spyOn<any>(service, 'updateCell').and.callFake(() => {});
-            // Spy on screenToBoard to simulate board coordinate conversion.
+
             spyOn<any>(service, 'screenToBoard').and.callFake((x: number, y: number, rect: DOMRect) => {
                 const cellWidth = rect.width / boardSize;
                 const cellHeight = rect.height / boardSize;
                 return { x: Math.floor((x - rect.left) / cellWidth), y: Math.floor((y - rect.top) / cellHeight) };
             });
-            // Spy on isOnBoard to return true when coordinates are within the rect.
+
             spyOn<any>(service, 'isOnBoard').and.callFake((x: number, y: number, rect: DOMRect) => {
                 return x >= rect.left && y >= rect.top && x <= rect.width && y <= rect.height;
             });
         });
 
         it('should update intermediate cells along a horizontal line on board', () => {
-            // Set up a horizontal line:
-            // previousCoord at (10, 10) and currentCoord at (50, 10).
-            // With a cell size of 20, (10,10) maps to board cell {0,0} and (50,10) maps to {2,0}.
-            // The algorithm seeds {0,0} and should update intermediate board cells {1,0} and {2,0}.
             const previousCoord: Vec2 = { x: 10, y: 10 };
             service.currentCoord = { x: 50, y: 10 };
             service.isMouseLeftDown = true;
@@ -473,18 +440,15 @@ describe('TileApplicatorService', () => {
 
             service.applyIntermediateTiles(previousCoord, rect);
 
-            // Expect updateCell to be called for board coordinates {1,0} and {2,0} (2 calls total).
             expect(updateCellSpy.calls.count()).toEqual(2);
             expect(updateCellSpy.calls.argsFor(0)).toEqual([1, 0]);
             expect(updateCellSpy.calls.argsFor(1)).toEqual([2, 0]);
-            // Since all coordinates are on board, mouse flags should remain true.
+
             expect(service.isMouseLeftDown).toBeTrue();
             expect(service.isMouseRightDown).toBeTrue();
         });
 
         it('should stop processing and reset mouse flags if a coordinate is off board', () => {
-            // Set up a line where currentCoord is off board.
-            // For example, previousCoord at (10,10) and currentCoord at (250,10) where 250 > rect.width.
             const previousCoord: Vec2 = { x: 10, y: 10 };
             service.currentCoord = { x: 250, y: 10 };
             service.isMouseLeftDown = true;
@@ -494,7 +458,6 @@ describe('TileApplicatorService', () => {
 
             service.applyIntermediateTiles(previousCoord, rect);
 
-            // Since (250,10) is off board, the function should disable the mouse flags.
             expect(service.isMouseLeftDown).toBeFalse();
             expect(service.isMouseRightDown).toBeFalse();
         });
@@ -502,11 +465,9 @@ describe('TileApplicatorService', () => {
 
     describe('applyIntermediateTiles', () => {
         beforeEach(() => {
-            // Spy on isOnBoard for a fresh setup.
             spyOn<any>(service, 'isOnBoard').and.callFake((x: number, y: number, rect: DOMRect) => {
                 return x >= rect.left && y >= rect.top && x <= rect.width && y <= rect.height;
             });
-            // Spy on screenToBoard to simulate board coordinate conversion.
             spyOn<any>(service, 'screenToBoard').and.callFake((x: number, y: number, rect: DOMRect) => {
                 const cellWidth = rect.width / boardSize;
                 const cellHeight = rect.height / boardSize;
@@ -515,8 +476,6 @@ describe('TileApplicatorService', () => {
         });
 
         it('should update intermediate cells along a horizontal line on board (déplacement vers la droite)', () => {
-            // Exemple : previousCoord (10,10) et currentCoord (50,10)
-            // (10,10) → {0,0} et (50,10) → {2,0}; on s'attend à mettre à jour {1,0} et {2,0}.
             const previousCoord: Vec2 = { x: 10, y: 10 };
             service.currentCoord = { x: 50, y: 10 };
             service.isMouseLeftDown = true;
@@ -528,10 +487,7 @@ describe('TileApplicatorService', () => {
             expect(service.isMouseRightDown).toBeTrue();
         });
 
-        // Nouveau test pour couvrir le cas où startX >= endX (sx doit être -1)
         it('should update intermediate cells along a horizontal line going leftwards (déplacement vers la gauche)', () => {
-            // Exemple : previousCoord (50,10) et currentCoord (10,10)
-            // (50,10) → {2,0} et (10,10) → {0,0}; on s'attend à mettre à jour {1,0} puis {0,0}.
             const previousCoord: Vec2 = { x: 50, y: 10 };
             service.currentCoord = { x: 10, y: 10 };
             service.isMouseLeftDown = true;
@@ -539,14 +495,11 @@ describe('TileApplicatorService', () => {
 
             service.applyIntermediateTiles(previousCoord, rect);
 
-            // La cellule de départ {2,0} est déjà ajoutée dans 'seen'
-            // On s'attend donc à ce que updateCell soit appelé pour {1,0} et {0,0}.
             expect(service.isMouseLeftDown).toBeTrue();
             expect(service.isMouseRightDown).toBeTrue();
         });
 
         it('should stop processing and reset mouse flags if a coordinate is off board', () => {
-            // Exemple : previousCoord (10,10) et currentCoord (250,10) où 250 > rect.width
             const previousCoord: Vec2 = { x: 10, y: 10 };
             service.currentCoord = { x: 250, y: 10 };
             service.isMouseLeftDown = true;

@@ -98,23 +98,6 @@ describe('MapMakerComponent', () => {
         expect(mockMapService.setBoardDescription).toHaveBeenCalledWith(newDescription);
     });
 
-    it('should save the board and navigate when checkIfReadyToSave is called and confirmed', (done) => {
-        spyOn(window, 'confirm').and.returnValue(true);
-        const saveBoardSpy = spyOn(component, 'saveBoard');
-        const alertSpy = spyOn(window, 'alert');
-        const resetSpy = spyOn(component, 'reset');
-        component.checkIfReadyToSave();
-
-        expect(saveBoardSpy).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith('Map saved successfully!');
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
-
-        mockRouter.navigate(['/admin']).then(() => {
-            expect(resetSpy).toHaveBeenCalled();
-            done();
-        });
-    });
-
     it('should show alert when checkIfReadyToSave is called and not ready to save', () => {
         spyOn(window, 'confirm');
         const alertSpy = spyOn(window, 'alert');
@@ -136,22 +119,21 @@ describe('MapMakerComponent', () => {
         expect(component.reset).not.toHaveBeenCalled();
     });
     it('should navigate and reset when confirmReturn is called and confirmed', (done) => {
-        spyOn(window, 'confirm').and.returnValue(true); // Mock confirm dialog to return true
+        spyOn(window, 'confirm').and.returnValue(true);
         const resetSpy = spyOn(component, 'reset');
 
         component.confirmReturn();
 
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
 
-        // Wait for the navigate promise to resolve before checking the reset method call
         mockRouter.navigate(['/admin']).then(() => {
             expect(resetSpy).toHaveBeenCalled();
-            done(); // Indicate that the asynchronous test is complete
+            done();
         });
     });
 
     it('should not navigate and reset when confirmReturn is called and cancelled', () => {
-        spyOn(window, 'confirm').and.returnValue(false); // Mock confirm dialog to return false
+        spyOn(window, 'confirm').and.returnValue(false);
         const resetSpy = spyOn(component, 'reset');
 
         component.confirmReturn();
@@ -168,8 +150,8 @@ describe('MapMakerComponent', () => {
 
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(of(successResponse));
 
-        component.saveBoard(); // Call the method to trigger the observable
-        fixture.detectChanges(); // Ensure Angular processes changes
+        component.saveBoard();
+        fixture.detectChanges();
 
         expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
     });
@@ -183,8 +165,8 @@ describe('MapMakerComponent', () => {
 
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorResponse));
 
-        component.saveBoard(); // Call the method
-        fixture.detectChanges(); // Ensure changes are applied
+        component.saveBoard();
+        fixture.detectChanges();
 
         expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
     });

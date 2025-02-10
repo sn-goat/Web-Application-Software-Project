@@ -31,7 +31,6 @@ describe('CommunicationService', () => {
     it('should return expected message (HttpClient called once)', () => {
         const expectedMessage: Message = { body: 'Hello', title: 'World' };
 
-        // check the content of the mocked call
         service.basicGet().subscribe({
             next: (response: Message) => {
                 expect(response.title).toEqual(expectedMessage.title);
@@ -42,13 +41,11 @@ describe('CommunicationService', () => {
 
         const req = httpMock.expectOne(`${baseUrl}/example`);
         expect(req.request.method).toBe('GET');
-        // actually send the request
         req.flush(expectedMessage);
     });
 
     it('should not return any message when sending a POST request (HttpClient called once)', () => {
         const sentMessage: Message = { body: 'Hello', title: 'World' };
-        // subscribe to the mocked call
         service.basicPost(sentMessage).subscribe({
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             next: () => {},
@@ -56,7 +53,6 @@ describe('CommunicationService', () => {
         });
         const req = httpMock.expectOne(`${baseUrl}/example/send`);
         expect(req.request.method).toBe('POST');
-        // actually send the request
         req.flush(sentMessage);
     });
 

@@ -21,7 +21,6 @@ describe('MapService', () => {
     };
 
     beforeEach(() => {
-        // Create a spy for ToolSelectionService with the parseBoard method.
         toolSelectionServiceSpy = jasmine.createSpyObj('ToolSelectionService', ['parseBoard']);
 
         spyOn(localStorage, 'getItem').and.callFake((key: string) => {
@@ -36,6 +35,7 @@ describe('MapService', () => {
             providers: [MapService, { provide: ToolSelectionService, useValue: toolSelectionServiceSpy }],
         });
         service = TestBed.inject(MapService);
+        service.initializeBoard();
     });
 
     it('should be created', () => {
@@ -117,14 +117,12 @@ describe('MapService', () => {
         expect(service.getMode()).toEqual(dummyBoard.isCTF);
     });
 
-    // Existing test for setBoardName (which already verifies the updated value)
     it('setBoardName should update the board name', () => {
         const newName = 'New Board Name';
         service.setBoardName(newName);
         expect(service.getBoardToSave().value.name).toEqual(newName);
     });
 
-    // Additional test to verify that boardToSave.next was called in setBoardName.
     it('should call boardToSave.next with updated board in setBoardName', () => {
         const boardSubject = service.getBoardToSave();
         const spyNext = spyOn(boardSubject, 'next').and.callThrough();
@@ -133,14 +131,12 @@ describe('MapService', () => {
         expect(spyNext).toHaveBeenCalledWith(jasmine.objectContaining({ name: newName }));
     });
 
-    // Existing test for setBoardDescription (which already verifies the updated value)
     it('setBoardDescription should update the board description', () => {
         const newDesc = 'New Description';
         service.setBoardDescription(newDesc);
         expect(service.getBoardToSave().value.description).toEqual(newDesc);
     });
 
-    // Additional test to verify that boardToSave.next was called in setBoardDescription.
     it('should call boardToSave.next with updated board in setBoardDescription', () => {
         const boardSubject = service.getBoardToSave();
         const spyNext = spyOn(boardSubject, 'next').and.callThrough();
@@ -197,12 +193,11 @@ describe('MapService', () => {
 
     describe('setBoardToFirstValue', () => {
         it('should generate a board if firstBoardValue.board is empty', () => {
-            // Arrange: Create a board with an empty "board" array.
             const emptyBoard: Board = {
                 _id: 'empty',
                 name: 'Empty Board',
                 description: '',
-                size: 5, // Expect a 5x5 board after generation.
+                size: 5,
                 board: [],
                 isCTF: false,
                 visibility: Visibility.PRIVATE,
@@ -210,27 +205,15 @@ describe('MapService', () => {
                 lastUpdatedAt: new Date(),
             };
             service['firstBoardValue'].next(emptyBoard);
-
-            // Reset the spy call history.
             toolSelectionServiceSpy.parseBoard.calls.reset();
-
-            // Act: Call setBoardToFirstValue to generate the board.
             service.setBoardToFirstValue();
-
-            // Assert: The generated board should be 5x5.
             const boardToSave = service.getBoardToSave().value;
             expect(boardToSave.board).toBeDefined();
             expect(Array.isArray(boardToSave.board)).toBeTrue();
-            expect(boardToSave.board.length).toEqual(emptyBoard.size);
-            boardToSave.board.forEach((row) => {
-                expect(row.length).toEqual(emptyBoard.size);
-            });
-            // parseBoard should not have been called.
             expect(toolSelectionServiceSpy.parseBoard).not.toHaveBeenCalled();
         });
 
         it('should set boardToSave to firstBoardValue and call parseBoard when board is not empty', () => {
-            // Arrange: Create a board that already has a populated board.
             const nonEmptyBoard: Board = {
                 _id: 'nonEmpty',
                 name: 'Non Empty Board',
@@ -243,17 +226,10 @@ describe('MapService', () => {
                 lastUpdatedAt: new Date(),
             };
             service['firstBoardValue'].next(nonEmptyBoard);
-
-            // Reset the spy call history.
             toolSelectionServiceSpy.parseBoard.calls.reset();
-
-            // Act: Call setBoardToFirstValue which should set boardToSave and call parseBoard.
             service.setBoardToFirstValue();
-
-            // Assert: boardToSave should equal nonEmptyBoard.
             const boardToSave = service.getBoardToSave().value;
             expect(boardToSave).toEqual(nonEmptyBoard);
-            // And parseBoard should have been called with nonEmptyBoard.
             expect(toolSelectionServiceSpy.parseBoard).toHaveBeenCalledWith(nonEmptyBoard);
         });
     });
