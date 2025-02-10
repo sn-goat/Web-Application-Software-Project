@@ -14,6 +14,7 @@ import { MapService } from '@app/services/map.service';
 import { MouseEditorService } from '@app/services/mouse-editor.service';
 import { ToolSelectionService } from '@app/services/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
+import { ScreenshotService } from '@app/services/screenshot.service';
 
 @Component({
     selector: 'app-map-maker',
@@ -39,6 +40,7 @@ export class MapMakerComponent implements OnInit {
         private toolSelection: ToolSelectionService,
         private boardService: BoardService,
         private readonly router: Router,
+        private screenshotService: ScreenshotService,
     ) {}
 
     get name() {
@@ -125,6 +127,18 @@ export class MapMakerComponent implements OnInit {
             return response.body as string;
         } catch (error) {
             return Promise.reject();
+        }
+    }
+
+    async screenshot() {
+        const file = await this.screenshotService.captureElementAsFile('map-screenshot');
+        if (file) {
+            const url = URL.createObjectURL(file);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = file.name; // Use the provided filename
+            document.body.appendChild(link);
+            link.click();
         }
     }
 }
