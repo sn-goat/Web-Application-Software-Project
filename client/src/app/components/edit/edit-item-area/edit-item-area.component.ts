@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { EditToolItemComponent } from '@app/components/edit-tool-item/edit-tool-item.component';
-import { EditToolTileComponent } from '@app/components/edit-tool-tile/edit-tool-tile.component';
+import { EditToolItemComponent } from '@app/components/edit/edit-tool-item/edit-tool-item.component';
+import { EditToolTileComponent } from '@app/components/edit/edit-tool-tile/edit-tool-tile.component';
 import { Item, Tile } from '@common/enums';
 
 @Component({

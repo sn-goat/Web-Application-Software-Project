@@ -6,12 +6,12 @@ const minNumber = 1000;
 const maxNumber = 9000;
 
 @Component({
-    selector: 'app-attente-page',
-    templateUrl: './attente-page.component.html',
-    styleUrls: ['./attente-page.component.scss'],
+    selector: 'app-waiting-page',
+    templateUrl: './waiting-page.component.html',
+    styleUrls: ['./waiting-page.component.scss'],
     imports: [CommonModule, FormsModule],
 })
-export class AttentePageComponent implements OnInit {
+export class WaitingPageComponent implements OnInit {
     accessCode: string = '';
 
     ngOnInit() {

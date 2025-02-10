@@ -1,20 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { AttentePageComponent } from './attente-page.component';
+import { WaitingPageComponent } from './attente-page.component';
 
-describe('AttentePageComponent', () => {
-    let component: AttentePageComponent;
-    let fixture: ComponentFixture<AttentePageComponent>;
+describe('WaitingPageComponent', () => {
+    let component: WaitingPageComponent;
+    let fixture: ComponentFixture<WaitingPageComponent>;
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            imports: [CommonModule, FormsModule, AttentePageComponent],
+            imports: [CommonModule, FormsModule, WaitingPageComponent],
         }).compileComponents();
     });
 
     beforeEach(() => {
-        fixture = TestBed.createComponent(AttentePageComponent);
+        fixture = TestBed.createComponent(WaitingPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });

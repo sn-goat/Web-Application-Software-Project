@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
-import { BoardCellComponent } from '@app/components/board-cell/board-cell.component';
+import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { MapService } from '@app/services/map.service';
 import { TileApplicatorService } from '@app/services/tile-applicator.service';
 import { Board } from '@common/board';
