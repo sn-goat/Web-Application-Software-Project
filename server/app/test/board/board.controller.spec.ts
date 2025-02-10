@@ -1,7 +1,8 @@
 import { BoardController } from '@app/controllers/board/board.controller';
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
+import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
 import { BoardService } from '@app/services/board/board.service';
-import { MOCK_STORED_BOARD_ARRAY } from '@app/test/helpers/board/stored-board.mock';
+import { MOCK_STORED_BOARD_ARRAY, UPDATE_BOARD } from '@app/test/helpers/board/stored-board.mock';
 import { HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
@@ -61,7 +62,7 @@ describe('BoardController', () => {
     });
 
     it('oneBoard() should return a board', async () => {
-        const fakeBoard = MOCK_STORED_BOARD_ARRAY[0];
+        const fakeBoard = UPDATE_BOARD;
 
         boardService.getBoard.resolves(fakeBoard);
 
@@ -131,20 +132,20 @@ describe('BoardController', () => {
             return res;
         };
 
-        await controller.patchBoard({ name: 'Updated board' } as CreateBoardDto, res);
+        await controller.patchBoard({ name: 'Updated board' } as UpdateBoardDto, res);
     });
 
-    it('patchBoard() should return NOT_FOUND when service fails', async () => {
+    it('patchBoard() should return INTERNAL_SERVER_ERROR when service fails', async () => {
         boardService.updateBoard.rejects();
 
         const res = {} as unknown as Response;
         res.status = (code) => {
-            expect(code).toEqual(HttpStatus.NOT_FOUND);
+            expect(code).toEqual(HttpStatus.INTERNAL_SERVER_ERROR);
             return res;
         };
         res.send = () => res;
 
-        await controller.patchBoard({ name: 'Updated Board' } as CreateBoardDto, res);
+        await controller.patchBoard({ name: 'Updated Board' } as UpdateBoardDto, res);
     });
 
     it('toggleBoardVisibility() should toggle board visibility', async () => {

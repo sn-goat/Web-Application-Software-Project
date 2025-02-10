@@ -5,7 +5,7 @@ export interface Cell {
     item: Item;
 }
 export interface Board {
-    _id: string;
+    _id?: string;
     name: string;
     description: string;
     size: number;

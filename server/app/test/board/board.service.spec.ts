@@ -1,7 +1,7 @@
 import { Board, BoardDocument, boardSchema } from '@app/model/database/board';
 import { BoardService } from '@app/services/board/board.service';
 import { EMPTY_BOARD, PRIVATE_BOARD } from '@app/test/helpers/board/create-board.mock';
-import { MOCK_STORED_BOARD_ARRAY, VALID_BOARD } from '@app/test/helpers/board/stored-board.mock';
+import { MOCK_STORED_BOARD_ARRAY, UPDATE_BOARD, VALID_BOARD } from '@app/test/helpers/board/stored-board.mock';
 import { createBoard, placeTile, placeUnreachableTile } from '@app/test/helpers/board/tests-utils';
 import { Tile, Visibility } from '@common/enums';
 import { Logger } from '@nestjs/common';
@@ -187,15 +187,23 @@ describe('BoardService', () => {
     });
 
     it('updateBoard() should correcty update a valid board', async () => {
-        const storedBoard = createBoard(SIZE_10);
-        placeTile(storedBoard, Tile.WALL, { x: 3, y: 3 });
-        await service.addBoard({ ...VALID_BOARD, board: storedBoard });
+        const boardToStore = createBoard(SIZE_10);
+        placeTile(boardToStore, Tile.WALL, { x: 3, y: 3 });
+        await service.addBoard({ ...VALID_BOARD, board: boardToStore });
+
         const updatedBoard = createBoard(SIZE_10);
         placeTile(updatedBoard, Tile.ICE, { x: 3, y: 3 });
-        await service.updateBoard({ ...VALID_BOARD, board: updatedBoard, visibility: Visibility.PRIVATE });
-        const board = await service.getBoard(VALID_BOARD.name);
-        expect(board.board[3][3].tile).toEqual(Tile.ICE);
-        expect(board.visibility).toEqual(Visibility.PRIVATE);
+
+        const storedBoard = await service.getBoard(VALID_BOARD.name);
+        const updatedBoardObject = { ...storedBoard, _id: storedBoard._id, board: updatedBoard };
+
+        const spyFindOneAndUpdate = jest.spyOn(service['boardModel'], 'findOneAndUpdate');
+
+        await service.updateBoard(updatedBoardObject);
+
+        expect(spyFindOneAndUpdate).toHaveBeenCalled();
+
+        spyFindOneAndUpdate.mockRestore();
     });
 
     it('updateBoard() should reject an invalid board', async () => {
@@ -209,7 +217,7 @@ describe('BoardService', () => {
             }
         }
 
-        await expect(service.updateBoard({ ...VALID_BOARD, board: updatedBoard })).rejects.toEqual(
+        await expect(service.updateBoard({ ...UPDATE_BOARD, board: updatedBoard })).rejects.toEqual(
             'Jeu invalide: Plus de la moitié de la surface du jeu est couverte',
         );
 

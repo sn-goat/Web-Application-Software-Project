@@ -1,4 +1,5 @@
 import { Board } from '@app/model/database/board';
+import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
 import { Visibility } from '@common/enums';
 
 export const EMPTY_BOARD: Board = {
@@ -47,6 +48,19 @@ export const INVALID_BOARD2: Board = {
     image: 'url',
     updatedAt: new Date(),
     createdAt: new Date('2023, 02, 10'),
+};
+
+export const UPDATE_BOARD: UpdateBoardDto = {
+    _id: '67a929a38ebc390a54b83bae',
+    name: 'mock_board2',
+    description: 'test board #2',
+    size: 10,
+    isCTF: false,
+    board: [],
+    visibility: Visibility.PUBLIC,
+    image: 'another/random/url',
+    updatedAt: new Date('2025,01,15'),
+    createdAt: new Date('2024, 02, 02'),
 };
 
 export const MOCK_STORED_BOARD_ARRAY: Board[] = [EMPTY_BOARD, VALID_BOARD, PRIVATE_BOARD, INVALID_BOARD2];
