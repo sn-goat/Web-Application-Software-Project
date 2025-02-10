@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { MapService } from './map.service';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
+import { MapService } from './code/map.service';
 
 describe('MapService', () => {
     let service: MapService;
