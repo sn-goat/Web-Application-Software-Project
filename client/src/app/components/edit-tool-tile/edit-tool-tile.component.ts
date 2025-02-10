@@ -18,9 +18,9 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     description: string = '';
     showTooltip = false;
     styleClass: string = 'unselected';
-    private destroy$ = new Subject<void>();
+    destroy$ = new Subject<void>();
 
-    constructor(private toolSelection: ToolSelectionService) {}
+    constructor( public toolSelection: ToolSelectionService) {}
 
     ngOnInit() {
         this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
@@ -30,7 +30,7 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
                 this.styleClass = 'unselected';
             }
         });
-        this.description = ASSETS_DESCRIPTION.get(this.type) ?? 'Pas de description';
+        this.getDescription(this.type);
     }
 
     ngOnDestroy() {
@@ -42,6 +42,6 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
         this.toolSelection.updateSelectedTile(this.type);
     }
     getDescription(type: Tile): string {
-        return ASSETS_DESCRIPTION.get(type) ?? '';
+        return ASSETS_DESCRIPTION.get(type) ?? 'Pas de description';
     }
 }
