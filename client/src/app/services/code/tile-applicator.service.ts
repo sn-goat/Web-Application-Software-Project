@@ -1,12 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 
+import { MapService } from './map.service';
 import { MouseEditorService } from './mouse-editor.service';
 import { ToolSelectionService } from './tool-selection.service';
-import { MapService } from './map.service';
 
-import { Tile, Item } from '@common/enums';
 import { Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -253,7 +253,7 @@ export class TileApplicatorService implements OnDestroy {
         }
         this.mapService.setCellItem(col, row, this.selectedItem as Item);
     }
-    private deleteItem(col: number, row: number) {
+    deleteItem(col: number, row: number) {
         if (this.mapService.getCellItem(col, row) === Item.SPAWN) {
             this.toolSelection.decrementSpawn();
         } else if (this.mapService.getCellItem(col, row) === Item.CHEST) {
