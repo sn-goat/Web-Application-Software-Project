@@ -152,7 +152,7 @@ describe('MapMakerComponent', () => {
         flush();
 
         expect(component.saveBoard).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith('Partie sauvegardée! Vous allez être redirigé.');
+        expect(alertSpy).toHaveBeenCalledWith('Partie sauvegardée! Vous allez être redirigé.\n');
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
         expect(resetSpy).toHaveBeenCalled();
     }));
