@@ -25,7 +25,7 @@
                 <p class="item-description">{{ map.description }}</p>
                 <div class="item-details">
                     <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
-                    <span class="item-ctf">{{ 'CTF Enabled' }}</span>
+                    <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
                 </div>
                 <div class="item-footer">
                     <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
