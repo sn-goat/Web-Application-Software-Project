@@ -70,6 +70,7 @@ describe('BoardService', () => {
     const MOREHALFSIZE = 8;
 
     beforeAll(async () => {
+        const timeoutdelay = 200;
         mongoServer = await MongoMemoryServer.create();
 
         const module: TestingModule = await Test.createTestingModule({
@@ -93,8 +94,7 @@ describe('BoardService', () => {
            as the start function is asynchronous but cannot be awaited since it's 
            in the constructor. 
         */
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, timeoutdelay));
     });
 
     beforeEach(async () => {

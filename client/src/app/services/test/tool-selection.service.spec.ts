@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Board } from '@common/board';

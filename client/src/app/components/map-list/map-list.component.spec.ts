@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -128,14 +127,16 @@ describe('MapListComponent', () => {
     });
 
     it('should sort items by size', () => {
+        const sortedItems1 = 10;
+        const sortedItems2 = 12;
         component.items = [
             { ...mockBoardGames[0], size: 10 },
             { ...mockBoardGames[1], size: 12 },
         ];
         component.sortBy = 'size';
         const sortedItems = component.getFilteredAndSortedItems();
-        expect(sortedItems[0].size).toBe(12);
-        expect(sortedItems[1].size).toBe(10);
+        expect(sortedItems[0].size).toBe(sortedItems1);
+        expect(sortedItems[1].size).toBe(sortedItems2);
     });
 
     it('should return items unsorted for default case', () => {
