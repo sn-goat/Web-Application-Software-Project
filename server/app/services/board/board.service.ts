@@ -1,5 +1,6 @@
 import { Board, BoardDocument } from '@app/model/database/board';
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
+import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
 import { MOCK_STORED_BOARD_ARRAY } from '@app/test/helpers/board/stored-board.mock';
 import { Cell, Vec2 } from '@common/board';
 import { Tile, Visibility } from '@common/enums';
@@ -25,7 +26,7 @@ export class BoardService {
         return this.boardModel.find({});
     }
 
-    async getBoard(boardName: string): Promise<Board> {
+    async getBoard(boardName: string): Promise<Required<Board>> {
         return this.boardModel.findOne({ name: boardName });
     }
 
@@ -43,24 +44,30 @@ export class BoardService {
             return Promise.reject(`Jeu invalide: ${validation.error}`);
         }
         try {
-            await this.boardModel.create({ ...board, updatedAt: new Date(), visibility: Visibility.PRIVATE });
+            await this.boardModel.create({ ...board, createdAt: new Date(), updatedAt: new Date(), visibility: Visibility.PRIVATE });
         } catch (error) {
             return Promise.reject(`Failed to insert board: ${error}`);
         }
     }
 
-    async updateBoard(board: CreateBoardDto): Promise<Board> {
+    async updateBoard(board: UpdateBoardDto): Promise<Board> {
         const validation = await this.validateBoard(board, false);
         if (!validation.isValid) {
             return Promise.reject(`Jeu invalide: ${validation.error}`);
         }
-
-        const updatedBoard = await this.boardModel.findOneAndUpdate({ name: board.name }, board, { new: true }).exec();
-
+        const updatedBoard = await this.boardModel
+            .findOneAndUpdate(
+                { _id: board._id },
+                {
+                    ...board,
+                },
+                { new: true },
+            )
+            .exec();
         if (!updatedBoard) {
-            const newBoard = { ...board, updatedAt: new Date(), visibility: Visibility.PRIVATE };
+            const newBoard = { ...board, createdAt: new Date(), updatedAt: new Date(), visibility: Visibility.PRIVATE };
             try {
-                await this.boardModel.create({ ...board, updatedAt: new Date(), visibility: Visibility.PRIVATE });
+                await this.boardModel.create(newBoard);
             } catch (error) {
                 return Promise.reject(`Failed to insert board: ${error}`);
             }
@@ -97,7 +104,7 @@ export class BoardService {
         }
     }
 
-    private async validateBoard(board: CreateBoardDto, newBoard: boolean): Promise<Validation> {
+    private async validateBoard(board: CreateBoardDto | UpdateBoardDto, newBoard: boolean): Promise<Validation> {
         if (board.board.length === 0) {
             return { isValid: false, error: 'Jeu vide' };
         }

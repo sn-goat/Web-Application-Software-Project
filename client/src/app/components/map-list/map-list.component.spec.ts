@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -26,10 +28,11 @@ describe('MapListComponent', () => {
             size: 10,
             description: 'Desc A',
             board: [],
-            isCTF: false,
             visibility: Visibility.PUBLIC,
-            image: '',
             updatedAt: new Date(),
+            createdAt: new Date(),
+            isCTF: false,
+            image: '',
         },
         {
             _id: '2',
@@ -39,6 +42,7 @@ describe('MapListComponent', () => {
             board: [],
             isCTF: false,
             visibility: Visibility.PRIVATE,
+            createdAt: new Date(),
             image: '',
             updatedAt: new Date(),
         },

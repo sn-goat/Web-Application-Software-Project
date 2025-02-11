@@ -112,7 +112,19 @@ export class MapMakerComponent implements OnInit {
     }
 
     async saveBoard(): Promise<string> {
-        const response = await firstValueFrom(this.boardService.addBoard(this.mapService.getBoardToSave().value));
-        return response.body as string;
+        const mapData = this.mapService.getBoardToSave().value;
+        let response;
+        try {
+            if (mapData._id) {
+                response = await firstValueFrom(this.boardService.updateBoard(mapData));
+            } else {
+                const mapDataCreation = Object.assign({}, mapData);
+                delete mapDataCreation._id;
+                response = await firstValueFrom(this.boardService.addBoard(mapDataCreation));
+            }
+            return response.body as string;
+        } catch (error) {
+            return Promise.reject();
+        }
     }
 }

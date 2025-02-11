@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
@@ -14,7 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
     templateUrl: './edit-tool-item.component.html',
     styleUrls: ['./edit-tool-item.component.scss'],
     standalone: true,
-    imports: [MatBadgeModule],
+    imports: [MatBadgeModule, CommonModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
     @Input() type: Item;

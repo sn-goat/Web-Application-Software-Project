@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
@@ -9,7 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
     selector: 'app-edit-tool-tile',
     templateUrl: './edit-tool-tile.component.html',
     styleUrl: './edit-tool-tile.component.scss',
-    imports: [],
+    imports: [CommonModule],
 })
 export class EditToolTileComponent implements OnInit, OnDestroy {
     @Input() type!: Tile;

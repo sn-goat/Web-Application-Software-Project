@@ -57,8 +57,8 @@ export class MapListComponent implements OnInit {
         this.boardService.getAllBoards().subscribe((boards) => {
             this.items = boards.map((item) => ({
                 ...item,
-                visibility: item.visibility === Visibility.PUBLIC ? Visibility.PUBLIC : Visibility.PRIVATE,
                 updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+                createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
             }));
             this.cdr.detectChanges(); // Manually trigger change detection
         });
@@ -80,7 +80,7 @@ export class MapListComponent implements OnInit {
         return filtered.sort((a, b) => {
             switch (this.sortBy) {
                 case 'createdAt':
-                    return (b.updatedAt?.getTime() ?? 0) - (a.updatedAt?.getTime() ?? 0);
+                    return (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0);
                 case 'name':
                     return a.name.localeCompare(b.name);
                 case 'size':

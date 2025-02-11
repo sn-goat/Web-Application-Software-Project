@@ -1,12 +1,26 @@
-<div class="cell" (dragover)="onDragOver($event)" (drop)="onDrop($event)" (mouseenter)="showTooltip = true" (mouseleave)="showTooltip = false">
+<div
+class="cell"
+(dragover)="onDragOver($event)"
+(drop)="onDrop($event)"
+(mouseenter)="showTooltip = true"
+(mouseleave)="showTooltip = false">
     <div class="image-container">
-        <img class="base-image" [src]="srcTiles + cell.tile + fileType" draggable="false" />
+        <img
+        class="base-image"
+        [src]="srcTiles + cell.tile + fileType"
+        draggable="false"
+        >
         @if (cell.item) {
-        <img class="image-stack" draggable="true" (drag)="onDrag()" [src]="srcItem + cell.item + fileType" />
+            <img
+            class="image-stack"
+            draggable="true"
+            (drag) ="onDrag()"
+            [src]="srcItem + cell.item + fileType"
+            >
 
-        <div class="tooltip" *ngIf="showTooltip">
-            {{ cell.item ? getItemDescription(cell.item) : '' }}
-        </div>
+            <div class="tooltip" *ngIf="showTooltip">
+           {{ cell.item ? getItemDescription(cell.item) : '' }}
+    </div>
         }
     </div>
 </div>
