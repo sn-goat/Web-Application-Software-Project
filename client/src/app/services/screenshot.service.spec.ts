@@ -19,7 +19,9 @@ describe('ScreenshotService', () => {
 
         mockCanvasElement = document.createElement('canvas');
 
-        html2canvasSpy = spyOn<unknown>(html2canvas, 'apply').and.callFake(async () => mockCanvasElement);
+        html2canvasSpy = spyOn(html2canvas as any, 'apply').and.callFake(async () => {
+            return mockCanvasElement;
+        });
     });
 
     afterEach(() => {
