@@ -7,7 +7,7 @@ import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.com
 import { BoardService } from '@app/services/board.service';
 import { MapService } from '@app/services/map.service';
 import { Board } from '@common/board';
-import { Visibility } from '@common/enums';
+import { Size, Visibility } from '@common/enums';
 
 @Component({
     selector: 'app-map-list',
@@ -137,5 +137,12 @@ export class MapListComponent implements OnInit {
     handleImageError(event: Event): void {
         const target = event.target as HTMLImageElement;
         target.src = 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba';
+    }
+
+    getSizeClass(mapSize: number): string {
+        if (mapSize <= Size.SMALL) return 'size-small';
+        if (mapSize <= Size.MEDIUM) return 'size-medium';
+        if (mapSize <= Size.LARGE) return 'size-large';
+        return 'size-default'; // Fallback for undefined sizes
     }
 }
