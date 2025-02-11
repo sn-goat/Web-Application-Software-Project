@@ -16,9 +16,6 @@ export class ScreenshotService {
             const canvas = await html2canvas(element);
             return canvas.toDataURL('image/jpeg', quality);
         } catch (error) {
-            if (error instanceof Error) {
-                return Promise.reject(error);
-            }
             return Promise.reject(new Error(String(error)));
         }
     }

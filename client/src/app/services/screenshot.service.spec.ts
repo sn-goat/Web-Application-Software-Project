@@ -71,18 +71,4 @@ describe('ScreenshotService', () => {
 
         await expectAsync(service.captureElementAsString('validId')).toBeRejectedWith(new Error('Unable to find element in cloned iframe'));
     });
-
-    it('should reject with the same error object if an Error is thrown', async () => {
-        const mockElement = document.createElement('div');
-        document.body.appendChild(mockElement);
-        spyOn(document, 'getElementById').and.returnValue(mockElement);
-
-        const errorInstance = new Error('html2canvas specific error');
-
-        html2canvasSpy.and.returnValue(Promise.reject(errorInstance));
-
-        await expectAsync(service.captureElementAsString('mockElement')).toBeRejectedWith(errorInstance);
-
-        document.body.removeChild(mockElement);
-    });
 });
