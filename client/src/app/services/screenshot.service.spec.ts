@@ -17,10 +17,9 @@ describe('ScreenshotService', () => {
 
         service = TestBed.inject(ScreenshotService);
 
-
         mockCanvasElement = document.createElement('canvas');
 
-        html2canvasSpy = spyOn<any>(html2canvas, 'apply').and.callFake(async () => mockCanvasElement);
+        html2canvasSpy = spyOn<unknown>(html2canvas, 'apply').and.callFake(async () => mockCanvasElement);
     });
 
     afterEach(() => {
@@ -58,9 +57,7 @@ describe('ScreenshotService', () => {
 
         html2canvasSpy.and.returnValue(Promise.reject(new Error('html2canvas error')));
 
-        await expectAsync(service.captureElementAsString('mockElement')).toBeRejectedWith(
-            jasmine.any(Error),
-        );
+        await expectAsync(service.captureElementAsString('mockElement')).toBeRejectedWith(jasmine.any(Error));
     });
 
     it('should enter the catch block and reject correctly', async () => {
