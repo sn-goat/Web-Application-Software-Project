@@ -16,9 +16,10 @@ export class ScreenshotService {
             const canvas = await html2canvas(element);
             return canvas.toDataURL('image/jpeg', quality);
         } catch (error) {
-            // Ensure the error is always an Error object
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            return Promise.reject(new Error(`Element conversion to string failed: ${errorMessage}`));
+            if (error instanceof Error) {
+                return Promise.reject(error);
+            }
+            return Promise.reject(new Error(String(error)));
         }
     }
 }
