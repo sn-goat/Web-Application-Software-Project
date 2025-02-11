@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { MouseEditorService } from '@app/services/code/mouse-editor.service';
 import { take } from 'rxjs/operators';
