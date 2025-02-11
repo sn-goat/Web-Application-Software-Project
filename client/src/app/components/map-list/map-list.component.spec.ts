@@ -36,7 +36,7 @@ describe('MapListComponent', () => {
         {
             _id: '2',
             name: 'Game B',
-            size: 12,
+            size: 20,
             description: 'Desc B',
             board: [],
             isCTF: false,
@@ -264,5 +264,12 @@ describe('MapListComponent', () => {
         component.onDivClick(mockMap);
 
         expect(component.divClicked.emit).toHaveBeenCalled();
+    });
+
+    it('devrait retourner "size-small" quand mapSize est inférieur ou égal à Size.SMALL', () => {
+        expect(component.getSizeClass(10)).toBe('size-small');
+        expect(component.getSizeClass(15)).toBe('size-medium');
+        expect(component.getSizeClass(20)).toBe('size-large');
+        expect(component.getSizeClass(25)).toBe('size-default');
     });
 });

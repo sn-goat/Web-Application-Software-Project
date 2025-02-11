@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { MapService } from '@app/services/code/map.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Board } from '@common/board';
+import { Visibility } from '@common/enums';
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { MapMakerComponent } from './map-maker.component';
 
@@ -230,4 +231,65 @@ describe('MapMakerComponent', () => {
         expect(mockRouter.navigate).not.toHaveBeenCalled();
         expect(resetSpy).not.toHaveBeenCalled();
     });
+
+    it('should update board when board has _id', async () => {
+        const mockBoardWithId: Board = {
+            _id: 'existing-board-id',
+            name: 'Existing Board',
+            description: 'New board description',
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            isCTF: false,
+            size: 10,
+        };
+        const boardSubject = new BehaviorSubject<Board>(mockBoardWithId);
+        mockMapService.getBoardToSave.and.returnValue(boardSubject);
+        spyOn(component, 'screenshot').and.returnValue(Promise.resolve('base64thumbnail'));
+        const successResponse = new HttpResponse({ status: 200, body: 'Update Success' });
+        const updateBoardSpy = spyOn(component['boardService'], 'updateBoard').and.returnValue(of(successResponse));
+    
+        const result = await component.saveBoard();
+        fixture.detectChanges();
+        expect(updateBoardSpy).toHaveBeenCalledWith({ ...mockBoardWithId, image: 'base64thumbnail' });
+        expect(result).toEqual('Update Success');
+    });
+    
+    it('should handle error with error property correctly in saveBoard', async () => {
+        const mockBoard: Board = {
+            name: 'New Board',
+            description: 'New board description',
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            isCTF: false,
+            size: 10,
+        };
+        const boardSubject = new BehaviorSubject<Board>(mockBoard);
+        mockMapService.getBoardToSave.and.returnValue(boardSubject);
+        spyOn(component, 'screenshot').and.returnValue(Promise.resolve('base64thumbnail'));
+        const errorObj = { error: { message: 'Custom error message' } };
+        const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorObj));
+        await expectAsync(component.saveBoard()).toBeRejectedWith('Custom error message');
+        fixture.detectChanges();
+        expect(addBoardSpy).toHaveBeenCalledWith(jasmine.objectContaining({ image: 'base64thumbnail' }));
+        const boardArg = addBoardSpy.calls.mostRecent().args[0];
+        expect(boardArg._id).toBeUndefined();
+    });
+
+    it('should return a screenshot string when captureElementAsString is successful', async () => {
+        const expectedScreenshot = 'base64thumbnail';
+        spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.resolve(expectedScreenshot));
+        const screenshotResult = await component.screenshot();
+        expect(screenshotResult).toEqual(expectedScreenshot);
+        expect(component['screenshotService'].captureElementAsString).toHaveBeenCalledWith('map-screenshot');
+    });
+    
+    it('should reject with an error message when captureElementAsString fails', async () => {
+        const errorMessage = 'capture error';
+        spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.reject(errorMessage));
+        await expectAsync(component.screenshot()).toBeRejectedWith(`Error while screenshot: ${errorMessage}`);
+    });
+    
+    
 });
