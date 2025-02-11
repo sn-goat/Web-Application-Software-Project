@@ -12,6 +12,7 @@ import { EditItemAreaComponent } from '@app/components/edit/edit-item-area/edit-
 import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { MouseEditorService } from '@app/services/code/mouse-editor.service';
+import { ScreenshotService } from '@app/services/code/screenshot.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -39,6 +40,7 @@ export class MapMakerComponent implements OnInit {
         private toolSelection: ToolSelectionService,
         private boardService: BoardService,
         private readonly router: Router,
+        private screenshotService: ScreenshotService,
     ) {}
 
     get name() {
@@ -113,18 +115,27 @@ export class MapMakerComponent implements OnInit {
 
     async saveBoard(): Promise<string> {
         const mapData = this.mapService.getBoardToSave().value;
+        const thumbnail = await this.screenshot();
         let response;
         try {
             if (mapData._id) {
-                response = await firstValueFrom(this.boardService.updateBoard(mapData));
+                response = await firstValueFrom(this.boardService.updateBoard({ ...mapData, image: thumbnail }));
             } else {
                 const mapDataCreation = Object.assign({}, mapData);
                 delete mapDataCreation._id;
-                response = await firstValueFrom(this.boardService.addBoard(mapDataCreation));
+                response = await firstValueFrom(this.boardService.addBoard({ ...mapDataCreation, image: thumbnail }));
             }
             return response.body as string;
         } catch (error) {
             return Promise.reject();
+        }
+    }
+
+    async screenshot(): Promise<string> {
+        try {
+            return await this.screenshotService.captureElementAsString('map-screenshot');
+        } catch (error) {
+            return Promise.reject(`Error while screenshot: ${error}`);
         }
     }
 }
