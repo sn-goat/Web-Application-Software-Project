@@ -10,6 +10,7 @@ describe('BoardGameComponent', () => {
     let fixture: ComponentFixture<BoardGameComponent>;
     let mapService: jasmine.SpyObj<MapService>;
     let tileApplicatorService: jasmine.SpyObj<TileApplicatorService>;
+    const POINTER_POSITION = 100;
 
     beforeEach(async () => {
         const mapServiceSpy = jasmine.createSpyObj('MapService', ['initializeBoard', 'getBoardToSave']);
@@ -80,11 +81,11 @@ describe('BoardGameComponent', () => {
     });
 
     it('should handle dragend event', () => {
-        const event = new DragEvent('dragend', { clientX: 100, clientY: 100 });
+        const event = new DragEvent('dragend', { clientX: POINTER_POSITION, clientY: POINTER_POSITION });
         spyOn(event, 'preventDefault');
         spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
         component.onDragOver(event);
         expect(event.preventDefault).toHaveBeenCalled();
-        expect(tileApplicatorService.setItemOutsideBoard).toHaveBeenCalledWith(100, 100, jasmine.any(Object));
+        expect(tileApplicatorService.setItemOutsideBoard).toHaveBeenCalledWith(POINTER_POSITION, POINTER_POSITION, jasmine.any(Object));
     });
 });
