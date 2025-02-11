@@ -2,11 +2,11 @@ import { HttpResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { BehaviorSubject, of, throwError } from 'rxjs';
-import { Board } from '@common/board';
-import { MapMakerComponent } from './map-maker.component';
 import { MapService } from '@app/services/code/map.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { Board } from '@common/board';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { MapMakerComponent } from './map-maker.component';
 
 describe('MapMakerComponent', () => {
     let component: MapMakerComponent;
@@ -108,7 +108,7 @@ describe('MapMakerComponent', () => {
         } as ToolSelectionService;
         const alertSpy = spyOn(window, 'alert');
         component.checkIfReadyToSave();
-        expect(alertSpy).toHaveBeenCalledWith('You need to place all the spawns points on the board before saving the map.');
+        expect(alertSpy).toHaveBeenCalledWith('Vous devez placer tous les points de départs du jeu.');
     });
 
     it('should alert when minimum objects are not placed', () => {
@@ -120,7 +120,7 @@ describe('MapMakerComponent', () => {
         } as ToolSelectionService;
         const alertSpy = spyOn(window, 'alert');
         component.checkIfReadyToSave();
-        expect(alertSpy).toHaveBeenCalledWith('You need to place at least 5 item on the map.');
+        expect(alertSpy).toHaveBeenCalledWith('Vous devez placer au moins 5 items sur la partie.');
     });
 
     it('should not save board when save confirmation is cancelled', () => {
@@ -152,7 +152,7 @@ describe('MapMakerComponent', () => {
         flush();
 
         expect(component.saveBoard).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith('Map saved successfully!\nBoardSaved');
+        expect(alertSpy).toHaveBeenCalledWith('Partie sauvegardée! Vous allez être redirigé.\nBoardSaved');
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
         expect(resetSpy).toHaveBeenCalled();
     }));
@@ -173,37 +173,38 @@ describe('MapMakerComponent', () => {
         flush();
 
         expect(component.saveBoard).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith('An error occurred while saving the map.\n' + errorObj.message);
+        expect(alertSpy).toHaveBeenCalledWith('Erreur dans la configuration de la partie.\n' + errorObj.message);
     }));
 
-    it('should handle response and error correctly in saveBoard', () => {
-        const mockBoard = { _id: '123', name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
+    it('should handle response and error correctly in saveBoard', async () => {
+        const mockBoard = { name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
+
+        spyOn(component, 'screenshot').and.returnValue(Promise.resolve('base64thumbnail'));
 
         const successResponse = new HttpResponse({ status: 200, body: 'Success Response' });
-
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(of(successResponse));
-
-        component.saveBoard();
+        const result = await component.saveBoard();
         fixture.detectChanges();
-
-        expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
+        expect(addBoardSpy).toHaveBeenCalledWith({ ...mockBoard, image: 'base64thumbnail' });
+        expect(result).toEqual('Success Response');
     });
 
-    it('should handle error correctly in saveBoard', () => {
-        const mockBoard = { _id: '123', name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
+    it('should handle error correctly in saveBoard', async () => {
+        const mockBoard: Board = { name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-        const errorResponse = new HttpResponse({ status: 500, body: 'Error Response' });
+        spyOn(component, 'screenshot').and.returnValue(Promise.resolve('base64thumbnail'));
 
+        const errorResponse = new HttpResponse({ status: 500, body: 'Error Response' });
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorResponse));
 
-        component.saveBoard();
-        fixture.detectChanges();
+        await expectAsync(component.saveBoard()).toBeRejected();
 
-        expect(addBoardSpy).toHaveBeenCalledWith(mockBoard);
+        fixture.detectChanges();
+        expect(addBoardSpy).toHaveBeenCalledWith({ ...mockBoard, image: 'base64thumbnail' });
     });
 
     it('should navigate and reset when confirmReturn is called and confirmed', (done) => {

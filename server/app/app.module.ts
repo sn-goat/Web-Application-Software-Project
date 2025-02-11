@@ -16,9 +16,7 @@ import { BoardService } from './services/board/board.service';
                 uri: config.get<string>('DATABASE_CONNECTION_STRING'), // Loaded from .env
             }),
         }),
-        MongooseModule.forFeature([
-            { name: Board.name, schema: boardSchema },
-        ]),
+        MongooseModule.forFeature([{ name: Board.name, schema: boardSchema }]),
     ],
     controllers: [BoardController],
     providers: [ChatGateway, BoardService, Logger],

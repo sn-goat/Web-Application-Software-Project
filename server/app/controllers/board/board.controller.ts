@@ -39,7 +39,7 @@ export class BoardController {
             await this.boardService.addBoard(board);
             response.status(HttpStatus.CREATED).send();
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
         }
     }
 
@@ -50,7 +50,7 @@ export class BoardController {
             const updatedBoard = await this.boardService.updateBoard(board);
             response.status(HttpStatus.OK).json(updatedBoard);
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error.message);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
         }
     }
 
