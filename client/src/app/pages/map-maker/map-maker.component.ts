@@ -77,8 +77,8 @@ export class MapMakerComponent implements OnInit {
             if (this.toolSelection.isMinimumObjectPlaced()) {
                 if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
                     this.saveBoard()
-                        .then((response) => {
-                            alert('Partie sauvegardée! Vous allez être redirigé.\n' + response);
+                        .then(() => {
+                            alert('Partie sauvegardée! Vous allez être redirigé.\n');
                             this.router.navigate(['/admin']).then(() => {
                                 this.reset();
                             });
