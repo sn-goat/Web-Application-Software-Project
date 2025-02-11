@@ -127,8 +127,8 @@ describe('MapListComponent', () => {
     });
 
     it('should sort items by size', () => {
-        const sortedItems1 = 10;
-        const sortedItems2 = 12;
+        const sortedItems1 = 12;
+        const sortedItems2 = 10;
         component.items = [
             { ...mockBoardGames[0], size: 10 },
             { ...mockBoardGames[1], size: 12 },
