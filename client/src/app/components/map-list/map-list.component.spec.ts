@@ -29,7 +29,7 @@ describe('MapListComponent', () => {
             isCTF: false,
             visibility: Visibility.PUBLIC,
             image: '',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         },
         {
             _id: '2',
@@ -40,7 +40,7 @@ describe('MapListComponent', () => {
             isCTF: false,
             visibility: Visibility.PRIVATE,
             image: '',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         },
     ];
 
@@ -82,7 +82,7 @@ describe('MapListComponent', () => {
             isCTF: false,
             visibility: Visibility.PUBLIC,
             image: '',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         };
 
         const fullMap: Board = {
@@ -215,7 +215,7 @@ describe('MapListComponent', () => {
             size: 10,
             visibility: Visibility.PUBLIC,
             board: [],
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
             isCTF: false,
             image: '',
         };
@@ -226,7 +226,7 @@ describe('MapListComponent', () => {
             size: 10,
             visibility: Visibility.PUBLIC,
             board: [],
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
             isCTF: false,
             image: '',
         };

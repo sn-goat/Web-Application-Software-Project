@@ -102,7 +102,7 @@ export class MapService {
             isCTF: false,
             visibility: Visibility.PRIVATE,
             board: [],
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
             image: '',
         } as Partial<Board> as Board);
     }

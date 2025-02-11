@@ -17,7 +17,7 @@ describe('MapService', () => {
         isCTF: false,
         visibility: Visibility.PUBLIC,
         image: 'dummyImage',
-        lastUpdatedAt: new Date(),
+        updatedAt: new Date(),
     };
 
     beforeEach(() => {
@@ -51,7 +51,7 @@ describe('MapService', () => {
             description: 'Test Description',
             visibility: Visibility.PUBLIC,
             image: 'image.jpg',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         } as Board;
 
         service['firstBoardValue'].next(mockFirstBoardValue);
@@ -92,7 +92,7 @@ describe('MapService', () => {
             isCTF: true,
             visibility: Visibility.PUBLIC,
             image: 'dummyImage',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         };
         service.setMapData(newBoard);
         expect(localStorage.setItem).toHaveBeenCalledWith('firstBoardValue', JSON.stringify(newBoard));
@@ -202,7 +202,7 @@ describe('MapService', () => {
                 isCTF: false,
                 visibility: Visibility.PRIVATE,
                 image: '',
-                lastUpdatedAt: new Date(),
+                updatedAt: new Date(),
             };
             service['firstBoardValue'].next(emptyBoard);
             toolSelectionServiceSpy.parseBoard.calls.reset();
@@ -223,7 +223,7 @@ describe('MapService', () => {
                 isCTF: true,
                 visibility: Visibility.PUBLIC,
                 image: 'img',
-                lastUpdatedAt: new Date(),
+                updatedAt: new Date(),
             };
             service['firstBoardValue'].next(nonEmptyBoard);
             toolSelectionServiceSpy.parseBoard.calls.reset();

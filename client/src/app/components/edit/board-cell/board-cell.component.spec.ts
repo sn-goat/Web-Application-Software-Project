@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Cell } from '@common/board';
+import { Item } from '@common/enums';
 import { BoardCellComponent } from './board-cell.component';
 
 describe('BoardCellComponent', () => {
@@ -56,5 +57,8 @@ describe('BoardCellComponent', () => {
 
     it('should have correct fileType', () => {
         expect(component.fileType).toBe('.png');
+    });
+    it('should get item description', () => {
+        expect(component.getItemDescription(Item.BOW)).toContain('Arc');
     });
 });

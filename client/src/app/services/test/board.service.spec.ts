@@ -32,7 +32,7 @@ describe('BoardService', () => {
             description: 'Test Description',
             visibility: Visibility.PUBLIC,
             image: 'image.jpg',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         } as Board;
 
         service.getBoard('Test Board').subscribe((board) => {
@@ -69,7 +69,7 @@ describe('BoardService', () => {
             description: 'New Board Description',
             visibility: Visibility.PUBLIC,
             image: 'image.jpg',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
             board: [],
         };
 

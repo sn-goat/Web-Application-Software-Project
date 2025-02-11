@@ -43,7 +43,7 @@ export class BoardService {
             return Promise.reject(`Jeu invalide: ${validation.error}`);
         }
         try {
-            await this.boardModel.create({ ...board, lastUpdatedAt: new Date(), visibility: Visibility.PRIVATE });
+            await this.boardModel.create({ ...board, updatedAt: new Date(), visibility: Visibility.PRIVATE });
         } catch (error) {
             return Promise.reject(`Failed to insert board: ${error}`);
         }
@@ -58,9 +58,9 @@ export class BoardService {
         const updatedBoard = await this.boardModel.findOneAndUpdate({ name: board.name }, board, { new: true }).exec();
 
         if (!updatedBoard) {
-            const newBoard = { ...board, lastUpdatedAt: new Date(), visibility: Visibility.PRIVATE };
+            const newBoard = { ...board, updatedAt: new Date(), visibility: Visibility.PRIVATE };
             try {
-                await this.boardModel.create({ ...board, lastUpdatedAt: new Date(), visibility: Visibility.PRIVATE });
+                await this.boardModel.create({ ...board, updatedAt: new Date(), visibility: Visibility.PRIVATE });
             } catch (error) {
                 return Promise.reject(`Failed to insert board: ${error}`);
             }

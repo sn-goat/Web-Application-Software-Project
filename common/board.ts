@@ -5,7 +5,7 @@ export interface Cell {
     item: Item;
 }
 export interface Board {
-    _id: string;
+    _id?: string;
     name: string;
     description: string;
     size: number;
@@ -13,7 +13,8 @@ export interface Board {
     board: Cell[][];
     visibility: Visibility;
     image: string;
-    lastUpdatedAt: Date | null;
+    updatedAt?: Date;
+    createdAt?: Date;
 }
 
 export interface Vec2 {

@@ -32,7 +32,7 @@ export class BoardCellComponent {
         event.preventDefault();
     }
 
-    getItemDescription(type: Item): string {
-        return ASSETS_DESCRIPTION.get(type) ?? '';
+    getItemDescription(type: Item): string | undefined {
+        return ASSETS_DESCRIPTION.get(type);
     }
 }

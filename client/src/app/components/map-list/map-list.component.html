@@ -3,7 +3,7 @@
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
         <div class="filter-sort">
             <select [(ngModel)]="sortBy" class="sort-select">
-                <option value="lastUpdatedAt">Date de dernière mise à jour</option>
+                <option value="updatedAt">Date de dernière mise à jour</option>
                 <option value="name">Nom</option>
                 <option value="size">Taille</option>
             </select>
@@ -20,7 +20,7 @@
             <div class="item-content">
                 <div class="item-header">
                     <h3 class="item-title">{{ map.name }}</h3>
-                    <span class="item-date">{{ map.lastUpdatedAt | date: 'MMM d, y' }}</span>
+                    <span class="item-date">{{ map.updatedAt | date: 'MMM d, y' }}</span>
                 </div>
                 <p class="item-description">{{ map.description }}</p>
                 <div class="item-details">

@@ -88,7 +88,7 @@ describe('ToolSelectionService', () => {
             description: 'Test Description',
             visibility: Visibility.PUBLIC,
             image: 'image.jpg',
-            lastUpdatedAt: new Date(),
+            updatedAt: new Date(),
         } as Board;
         it('should parse the board and update the item counter', () => {
             mockBoard.board = [

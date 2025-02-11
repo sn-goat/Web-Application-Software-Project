@@ -9,7 +9,7 @@ export const EMPTY_BOARD: Board = {
     board: [[]],
     visibility: Visibility.PUBLIC,
     image: 'random/url/',
-    lastUpdatedAt: new Date(),
+    updatedAt: new Date(),
 };
 
 export const VALID_BOARD: Board = {
@@ -20,7 +20,7 @@ export const VALID_BOARD: Board = {
     board: [],
     visibility: Visibility.PUBLIC,
     image: 'another/random/url',
-    lastUpdatedAt: new Date('2025,01,15'),
+    updatedAt: new Date('2025,01,15'),
 };
 
 export const PRIVATE_BOARD: Board = {
@@ -31,7 +31,7 @@ export const PRIVATE_BOARD: Board = {
     board: [[]],
     visibility: Visibility.PRIVATE,
     image: 'random/url/',
-    lastUpdatedAt: new Date(),
+    updatedAt: new Date(),
 };
 
 export const INVALID_BOARD2: Board = {
@@ -42,7 +42,7 @@ export const INVALID_BOARD2: Board = {
     board: [[]],
     visibility: Visibility.PUBLIC,
     image: 'url',
-    lastUpdatedAt: new Date(),
+    updatedAt: new Date(),
 };
 
 export const MOCK_STORED_BOARD_ARRAY: Board[] = [EMPTY_BOARD, VALID_BOARD, PRIVATE_BOARD, INVALID_BOARD2];
