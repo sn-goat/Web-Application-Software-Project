@@ -23,8 +23,8 @@ export class BoardService {
         return this.http.post<HttpResponse<unknown>>(`${this.apiUrl}/board`, board, { observe: 'response' });
     }
 
-    updateBoard(name: string, updates: Partial<Board>): Observable<Board> {
-        return this.http.patch<Board>(`${this.apiUrl}/${name}`, updates);
+    updateBoard(board: Board): Observable<HttpResponse<unknown>> {
+        return this.http.patch<HttpResponse<unknown>>(`${this.apiUrl}/`, board);
     }
 
     toggleVisibility(name: string): Observable<Board> {

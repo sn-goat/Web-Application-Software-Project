@@ -61,17 +61,24 @@ describe('BoardService', () => {
     });
 
     it('should update a board', () => {
-        const updates: Partial<Board> = { description: 'Updated Description' };
+        const mockBoard: Board = {
+            _id: '123',
+            name: 'New Board',
+            size: 12,
+            isCTF: false,
+            description: 'New Board Description',
+            visibility: Visibility.PUBLIC,
+            image: 'image.jpg',
+            lastUpdatedAt: new Date(),
+            board: [],
+        };
 
-        service.updateBoard('Test Board', updates).subscribe((board) => {
-            expect(board.name).toBe('Test Board');
-            expect(board.description).toBe('Updated Description');
-        });
+        service.updateBoard(mockBoard).subscribe();
 
-        const req = httpMock.expectOne(`${apiUrl}/Test Board`);
+        const req = httpMock.expectOne(`${apiUrl}/`);
         expect(req.request.method).toBe('PATCH');
-        expect(req.request.body).toEqual(updates);
-        req.flush({ name: 'Test Board', description: 'Updated Description' });
+        expect(req.request.body).toEqual(mockBoard);
+        req.flush({});
     });
 
     it('should toggle visibility of a board', () => {
