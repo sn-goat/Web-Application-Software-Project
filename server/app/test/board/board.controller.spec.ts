@@ -114,6 +114,7 @@ describe('BoardController', () => {
             return res;
         };
         res.send = () => res;
+        res.json = () => res;
 
         await controller.addBoard({ name: 'New Board' } as CreateBoardDto, res);
     });
@@ -144,6 +145,7 @@ describe('BoardController', () => {
             return res;
         };
         res.send = () => res;
+        res.json = () => res;
 
         await controller.patchBoard({ name: 'Updated Board' } as UpdateBoardDto, res);
     });

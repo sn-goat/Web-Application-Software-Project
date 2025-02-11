@@ -73,24 +73,24 @@ export class MapMakerComponent implements OnInit {
     checkIfReadyToSave() {
         if (this.toolSelection.getIsSpawnPlaced()) {
             if (this.toolSelection.isMinimumObjectPlaced()) {
-                if (confirm('Are you sure you want to save the map?')) {
+                if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
                     this.saveBoard()
                         .then((response) => {
-                            alert('Map saved successfully!\n' + response);
+                            alert('Partie sauvegardée! Vous allez être redirigé.\n' + response);
                             this.router.navigate(['/admin']).then(() => {
                                 this.reset();
                             });
                         })
                         .catch((error) => {
-                            alert('An error occurred while saving the map.\n' + error.message);
+                            alert('Erreur dans la configuration de la partie.\n' + error);
                         });
                 }
             } else {
-                alert('You need to place at least ' + this.toolSelection.getMaxObjectByType() + ' item on the map.');
+                alert('Vous devez placer au moins ' + this.toolSelection.getMaxObjectByType() + ' items sur la partie.');
                 return;
             }
         } else {
-            alert('You need to place all the spawn points on the map.');
+            alert('Vous devez placer tous les points de départs du jeu.');
             return;
         }
     }
@@ -124,7 +124,14 @@ export class MapMakerComponent implements OnInit {
             }
             return response.body as string;
         } catch (error) {
-            return Promise.reject();
+            let errorMessage = 'An unknown error occurred';
+
+            if (typeof error === 'object' && error !== null && 'error' in error) {
+                const errorObj = error as { error: { message?: string } };
+                errorMessage = errorObj.error?.message || errorMessage;
+            }
+
+            return Promise.reject(errorMessage);
         }
     }
 }
