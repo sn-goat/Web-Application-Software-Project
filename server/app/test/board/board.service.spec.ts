@@ -227,9 +227,14 @@ describe('BoardService', () => {
 
     it('updateBoard() should create a new board if it does not find one', async () => {
         const boardNotFound = createBoard(SIZE_10);
-        await service.addBoard({ ...VALID_BOARD, board: boardNotFound });
-        const board = await service.getBoard(VALID_BOARD.name);
-        expect(board.board).toMatchObject(boardNotFound);
+        const boardObject = { ...UPDATE_BOARD, board: boardNotFound };
+        const spyFindOneAndUpdate = jest.spyOn(service['boardModel'], 'findOneAndUpdate');
+
+        await service.updateBoard(boardObject);
+
+        expect(spyFindOneAndUpdate).toHaveBeenCalled();
+
+        spyFindOneAndUpdate.mockRestore();
     });
 
     it('deleteBoardByName() should delete a specific board', async () => {
@@ -241,6 +246,13 @@ describe('BoardService', () => {
 
     it('deleteBoardByName() should throw an error if board not found', async () => {
         await expect(service.deleteBoardByName('Nonexistent Board')).rejects.toThrow('Board with name "Nonexistent Board" not found.');
+    });
+
+    it('deleteAllBoards should delete all boards', async () => {
+        await service.populateDB();
+        await service.deleteAllBoards();
+        const boards = await service.getAllBoards();
+        expect(boards.length).toEqual(0);
     });
 
     it('toggleVisibility() should toggle the visibility of a board', async () => {

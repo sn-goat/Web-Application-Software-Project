@@ -1,8 +1,7 @@
+import { Cell } from '@common/board';
 import { Visibility } from '@common/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsArray, ValidateNested } from 'class-validator';
-import { BoardDto } from './board-dto';
+
 export class UpdateBoardDto {
     @ApiProperty()
     _id: string;
@@ -19,15 +18,8 @@ export class UpdateBoardDto {
     @ApiProperty({ description: 'Is the board made for the CTF game mode' })
     isCTF: boolean;
 
-    @ApiProperty({
-        type: [Array<BoardDto>],
-        description: '2D array representing the board',
-        example: [[{ row: 0, column: 0, tile: 'Ice', item: 'Sword' }], [{ row: 1, column: 1, tile: 'Water', item: 'Shield' }]],
-    })
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => Array<BoardDto>)
-    board: BoardDto[][];
+    @ApiProperty({ description: 'Board state' })
+    board: Cell[][];
 
     @ApiProperty({ description: 'Whether the board is available to everyone', required: false })
     visibility: Visibility;
