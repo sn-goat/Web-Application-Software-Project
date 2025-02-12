@@ -12,7 +12,6 @@ import { Visibility } from '@common/enums';
 import { of } from 'rxjs';
 import { MapListComponent } from './map-list.component';
 
-
 describe('MapListComponent', () => {
     let component: MapListComponent;
     let fixture: ComponentFixture<MapListComponent>;
