@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>Créons la partie!</h2>
+
+<mat-dialog-content>
+    <form #gameForm="ngForm">
+        <!-- Name Field -->
+        <mat-form-field class="full-width" appearance="fill">
+            <mat-label>Nom du jeu:</mat-label>
+            <input maxlength="15" matInput placeholder="Entrez le nom ici..." [(ngModel)]="data.name" name="name" required />
+            @if (gameForm.submitted && !data.name) {
+            <mat-error> Le nom est requis </mat-error>
+            }
+        </mat-form-field>
+
+        <!-- Description Field -->
+        <mat-form-field class="full-width" appearance="fill">
+            <mat-label>Description:</mat-label>
+            <input matInput maxlength="100" placeholder="Entrez une description ici..." [(ngModel)]="data.description" name="description" required />
+            @if (gameForm.submitted && !data.description) {
+            <mat-error> La description est requise </mat-error>
+            }
+        </mat-form-field>
+
+        <!-- Radio Buttons for Size -->
+        <div style="margin-top: 1em">
+            <mat-label>Choisissez la taille de votre jeu:</mat-label>
+            <br />
+            <mat-radio-group [(ngModel)]="data.size" name="size">
+                <mat-radio-button value="10">Petit (10x10)</mat-radio-button>
+                <mat-radio-button value="15">Moyen (15x15)</mat-radio-button>
+                <mat-radio-button value="20">Grand (20x20)</mat-radio-button>
+            </mat-radio-group>
+            <br />
+            <br />
+            <mat-label>Choisissez le mode de votre jeu:</mat-label>
+            <mat-radio-group [(ngModel)]="data.isCTF" name="ctf">
+                <mat-radio-button [value]="true">CTF </mat-radio-button>
+                <mat-radio-button [value]="false">Classique </mat-radio-button>
+            </mat-radio-group>
+        </div>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Annuler</button>
+    <button mat-button [mat-dialog-close]="data" [disabled]="!data.name || !data.description">Procéder</button>
+</mat-dialog-actions>
