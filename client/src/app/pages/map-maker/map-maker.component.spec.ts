@@ -248,13 +248,13 @@ describe('MapMakerComponent', () => {
         spyOn(component, 'screenshot').and.returnValue(Promise.resolve('base64thumbnail'));
         const successResponse = new HttpResponse({ status: 200, body: 'Update Success' });
         const updateBoardSpy = spyOn(component['boardService'], 'updateBoard').and.returnValue(of(successResponse));
-    
+
         const result = await component.saveBoard();
         fixture.detectChanges();
         expect(updateBoardSpy).toHaveBeenCalledWith({ ...mockBoardWithId, image: 'base64thumbnail' });
         expect(result).toEqual('Update Success');
     });
-    
+
     it('should handle error with error property correctly in saveBoard', async () => {
         const mockBoard: Board = {
             name: 'New Board',
@@ -284,12 +284,10 @@ describe('MapMakerComponent', () => {
         expect(screenshotResult).toEqual(expectedScreenshot);
         expect(component['screenshotService'].captureElementAsString).toHaveBeenCalledWith('map-screenshot');
     });
-    
+
     it('should reject with an error message when captureElementAsString fails', async () => {
         const errorMessage = 'capture error';
         spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.reject(errorMessage));
         await expectAsync(component.screenshot()).toBeRejectedWith(`Error while screenshot: ${errorMessage}`);
     });
-    
-    
 });
