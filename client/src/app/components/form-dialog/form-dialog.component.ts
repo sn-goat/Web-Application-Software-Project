@@ -19,7 +19,7 @@ export class FormDialogComponent {
             _id: '',
             name: '',
             description: '',
-            size: 10,
+            size: 0,
             board: [],
             isCTF: false,
             visibility: Visibility.PUBLIC,
