@@ -12,6 +12,7 @@ import { Visibility } from '@common/enums';
 import { of } from 'rxjs';
 import { MapListComponent } from './map-list.component';
 
+
 describe('MapListComponent', () => {
     let component: MapListComponent;
     let fixture: ComponentFixture<MapListComponent>;
@@ -267,7 +268,7 @@ describe('MapListComponent', () => {
         expect(component.divClicked.emit).toHaveBeenCalled();
     });
 
-    it('devrait retourner "size-small" quand mapSize est inférieur ou égal à Size.SMALL', () => {
+    it('should return the size in function of the size class', () => {
         expect(component.getSizeClass(10)).toBe('size-small');
         expect(component.getSizeClass(15)).toBe('size-medium');
         expect(component.getSizeClass(20)).toBe('size-large');
