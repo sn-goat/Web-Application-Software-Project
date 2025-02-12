@@ -84,7 +84,7 @@ export class MapMakerComponent implements OnInit {
                             });
                         })
                         .catch((error) => {
-                            alert('Erreur dans la configuration de la partie.\n' + error.message);
+                            alert('Erreur dans la configuration de la partie.\n' + error);
                         });
                 }
             } else {
