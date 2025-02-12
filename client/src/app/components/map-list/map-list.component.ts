@@ -41,7 +41,7 @@ export class MapListComponent implements OnInit {
     onDivClick(map: Board): void {
         this.boardService.getAllBoards().subscribe((serverMaps) => {
             const serverMap = serverMaps.find((m) => m._id === map._id);
-            if(this.isCreationPage) {
+            if (this.isCreationPage) {
                 if (!serverMap) {
                     alert('La carte a été supprimée du serveur.');
                     this.reloadPage();
@@ -52,7 +52,6 @@ export class MapListComponent implements OnInit {
                     this.divClicked.emit();
                 }
             }
-            
         });
     }
 

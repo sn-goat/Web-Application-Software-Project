@@ -66,15 +66,15 @@ describe('EditToolTileComponent', () => {
     });
 
     it('returns true for Tile.ICE', () => {
-      expect(component.shouldShowAbove(Tile.ICE)).toBe(true);
+        expect(component.shouldShowAbove(Tile.ICE)).toBe(true);
     });
-      
+
     it('returns true for Tile.WATER', () => {
-      expect(component.shouldShowAbove(Tile.WATER)).toBe(true);
+        expect(component.shouldShowAbove(Tile.WATER)).toBe(true);
     });
-      
+
     it('returns false for other Tile types', () => {
-      expect(component.shouldShowAbove(Tile.CLOSED_DOOR)).toBe(false);
-      expect(component.shouldShowAbove(Tile.WALL)).toBe(false);
+        expect(component.shouldShowAbove(Tile.CLOSED_DOOR)).toBe(false);
+        expect(component.shouldShowAbove(Tile.WALL)).toBe(false);
     });
 });
