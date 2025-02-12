@@ -167,14 +167,14 @@ describe('MapMakerComponent', () => {
         } as ToolSelectionService;
         spyOn(window, 'confirm').and.returnValue(true);
         const alertSpy = spyOn(window, 'alert');
-        const errorObj = { message: 'Save failed' };
+        const errorObj = 'Save failed';
         spyOn(component, 'saveBoard').and.returnValue(Promise.reject(errorObj));
 
         component.checkIfReadyToSave();
         flush();
 
         expect(component.saveBoard).toHaveBeenCalled();
-        expect(alertSpy).toHaveBeenCalledWith('Erreur dans la configuration de la partie.\n' + errorObj.message);
+        expect(alertSpy).toHaveBeenCalledWith('Erreur dans la configuration de la partie.\n' + errorObj);
     }));
 
     it('should handle response and error correctly in saveBoard', async () => {
