@@ -1,10 +1,9 @@
-import { HttpResponse } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Routes, provideRouter } from '@angular/router';
+import { provideRouter, RouterLink, Routes } from '@angular/router';
+import { TEAM_MEMBERS } from '@app/constants/team-members';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { CommunicationService } from '@app/services/communication.service';
-import { of, throwError } from 'rxjs';
+import { CommunicationService } from '@app/services/code/communication.service';
 import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
@@ -16,11 +15,8 @@ describe('MainPageComponent', () => {
 
     beforeEach(async () => {
         communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
-        communicationServiceSpy.basicGet.and.returnValue(of({ title: '', body: '' }));
-        communicationServiceSpy.basicPost.and.returnValue(of(new HttpResponse<string>({ status: 201, statusText: 'Created' })));
-
         await TestBed.configureTestingModule({
-            imports: [MainPageComponent],
+            imports: [MainPageComponent, RouterLink],
             providers: [
                 {
                     provide: CommunicationService,
@@ -42,34 +38,57 @@ describe('MainPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have as title 'LOG2990'", () => {
-        expect(component.title).toEqual('LOG2990');
+    it('should initialize with correct title', () => {
+        expect(component.title).toBe('POLYTOPIA');
     });
 
-    it('should call basicGet when calling getMessagesFromServer', () => {
-        component.getMessagesFromServer();
-        expect(communicationServiceSpy.basicGet).toHaveBeenCalled();
+    it('should initialize with correct team members', () => {
+        expect(component.teamMembers).toEqual(TEAM_MEMBERS);
     });
 
-    it('should call basicPost when calling sendTimeToServer', () => {
-        component.sendTimeToServer();
-        expect(communicationServiceSpy.basicPost).toHaveBeenCalled();
+    it('should initialize with correct game logo path', () => {
+        expect(component.gameLogoPath).toBe('/assets/POLYTOPIA_game_logo.png');
     });
 
-    it('should handle basicPost that returns a valid HTTP response', () => {
-        component.sendTimeToServer();
-        component.message.subscribe((res) => {
-            expect(res).toContain('201 : Created');
-        });
+    it('should initialize with gameLogoError as false', () => {
+        expect(component.gameLogoError).toBeFalse();
     });
 
-    it('should handle basicPost that returns an invalid HTTP response', () => {
-        communicationServiceSpy.basicPost.and.returnValue(throwError(() => new Error('test')));
-        component.sendTimeToServer();
-        component.message.subscribe({
-            next: (res) => {
-                expect(res).toContain('Le serveur ne répond pas');
-            },
+    it('should set gameLogoError to true when handleGameLogoError is called', () => {
+        expect(component.gameLogoError).toBeFalse();
+        component.handleGameLogoError();
+        expect(component.gameLogoError).toBeTrue();
+    });
+
+    it('should trigger handleGameLogoError when image error occurs', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        const img = compiled.querySelector('img');
+        expect(component.gameLogoError).toBeFalse();
+        img?.dispatchEvent(new Event('error'));
+        fixture.detectChanges();
+        expect(component.gameLogoError).toBeTrue();
+    });
+
+    it('should contain RouterLink in the imports', () => {
+        const componentDecorator = Reflect.getOwnPropertyDescriptor(MainPageComponent, '__annotations__')?.value[0];
+        expect(componentDecorator.imports).toContain(RouterLink);
+    });
+
+    it('should render title in the template', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        expect(compiled.textContent).toContain('POLYTOPIA');
+    });
+
+    it('should render game logo with correct src', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        const img = compiled.querySelector('img');
+        expect(img?.src).toContain('/assets/POLYTOPIA_game_logo.png');
+    });
+
+    it('should render team members list', () => {
+        const compiled = fixture.nativeElement as HTMLElement;
+        TEAM_MEMBERS.forEach((member) => {
+            expect(compiled.textContent).toContain(member);
         });
     });
 });

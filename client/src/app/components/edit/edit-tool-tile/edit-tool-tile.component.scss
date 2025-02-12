@@ -1,0 +1,82 @@
+.object {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 80%;
+    cursor: pointer;
+    position: relative;
+}
+
+img {
+    width: 100%;
+    height: auto;
+    border: 4px solid #000;
+    border-radius: 4px;
+    transition: opacity 0.3s ease-in-out, filter 0.3s ease-in-out;
+}
+
+img.selected {
+    border: 4px solid #e30909;
+}
+
+img:hover {
+    opacity: 0.25;
+    filter: grayscale(50%);
+}
+
+.tooltip {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1a1625;
+    color: #7ee0d0;
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 1000;
+    height: max-content;
+    width: max-content;
+    min-width: 180px;
+    max-width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    overflow: hidden;
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    pointer-events: none;
+}
+
+.tooltip.above {
+    bottom: calc(100% + 5px);
+}
+
+.tooltip.below {
+    top: calc(100% + 5px);
+}
+
+.item-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.object:hover .tooltip,
+.tooltip.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}

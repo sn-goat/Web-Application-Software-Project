@@ -1,0 +1,19 @@
+.content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.content > * {
+    width: 50; /* Largeur fixe pour chaque élément */
+    height: 50px; /* Hauteur fixe pour chaque élément */
+    box-sizing: border-box; /* Inclure les bordures et les padding dans les dimensions */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+
+mat-card-title {
+    color: #1a1625;
+}
+

@@ -1,0 +1,19 @@
+.grid {
+    display: flex;
+    flex-direction: column;
+    width: 540px;
+    height: 540px;
+    padding-left: 0;
+}
+
+
+.row {
+    display: flex;
+    height: 100%;
+}
+
+.row > * {
+    flex-grow: 1;
+    aspect-ratio: 1/1;
+    justify-self: center;
+}
