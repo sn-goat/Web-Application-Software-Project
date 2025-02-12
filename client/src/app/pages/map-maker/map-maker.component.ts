@@ -98,7 +98,7 @@ export class MapMakerComponent implements OnInit {
     }
 
     confirmReturn() {
-        if (confirm('Are you sure you want to leave this page?')) {
+        if (confirm('Etes-vous sûr de vouloir quitter cette page?')) {
             this.router.navigate(['/admin']).then(() => {
                 this.reset();
             });
