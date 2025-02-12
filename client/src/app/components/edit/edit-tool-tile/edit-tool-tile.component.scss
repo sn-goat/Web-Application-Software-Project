@@ -33,7 +33,6 @@ img:hover {
 
 .tooltip {
     position: absolute;
-    bottom: calc(100% + 5px); /* Keeps a small gap above the tile */
     left: 50%;
     transform: translateX(-50%);
     background-color: #1a1625;
@@ -42,24 +41,37 @@ img:hover {
     border-radius: 6px;
     font-size: 14px;
     z-index: 1000;
-
     height: max-content;
     width: max-content;
     min-width: 180px;
     max-width: 350px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-
     white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     overflow: hidden;
     text-align: center;
-
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 }
+
+.tooltip.above {
+    bottom: calc(100% + 5px);
+}
+
+.tooltip.below {
+    top: calc(100% + 5px);
+}
+
+.item-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
 
 .object:hover .tooltip,
 .tooltip.visible {

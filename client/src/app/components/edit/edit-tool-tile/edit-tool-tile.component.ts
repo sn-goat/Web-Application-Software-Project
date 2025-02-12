@@ -42,7 +42,12 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     onClick() {
         this.toolSelection.updateSelectedTile(this.type);
     }
+
     getDescription(type: Tile): string {
         return ASSETS_DESCRIPTION.get(type) ?? 'Pas de description';
+    }
+
+    shouldShowAbove(type: Tile): boolean {
+        return type === Tile.ICE || type === Tile.WATER;
     }
 }
