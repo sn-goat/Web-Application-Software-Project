@@ -68,6 +68,7 @@ describe('MapListComponent', () => {
 
         fixture = TestBed.createComponent(MapListComponent);
         component = fixture.componentInstance;
+        component.isCreationPage = true;
         mockBoardService.getAllBoards.and.returnValue(of(mockBoardGames));
         fixture.detectChanges();
     });

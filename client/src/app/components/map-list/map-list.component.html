@@ -31,7 +31,7 @@
                     <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
                 </div>
             </div>
-            @if (showActions) {
+            @if (isCreationPage == false) {
             <div class="item-actions">
                 <!-- Visibility Button -->
                 <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
@@ -57,7 +57,7 @@
         }
 
         <!-- Add Map Card -->
-        @if(showActions) {
+        @if(isCreationPage == false) {
         <div class="list-item new-map-card" (click)="createNewMap()">
             <div class="add-icon">+</div>
             <p class="add-text">Create New Map</p>

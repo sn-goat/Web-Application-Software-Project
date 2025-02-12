@@ -19,7 +19,7 @@ import { Size, Visibility } from '@common/enums';
 })
 export class MapListComponent implements OnInit {
     @Input() items: Board[] = [];
-    @Input() showActions: boolean = true;
+    @Input() isCreationPage: boolean = false;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
     searchQuery: string = '';
@@ -41,15 +41,18 @@ export class MapListComponent implements OnInit {
     onDivClick(map: Board): void {
         this.boardService.getAllBoards().subscribe((serverMaps) => {
             const serverMap = serverMaps.find((m) => m._id === map._id);
-            if (!serverMap) {
-                alert('La carte a été supprimée du serveur.');
-                this.reloadPage();
-            } else if (!this.areMapsEqual(map, serverMap)) {
-                alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
-                this.reloadPage();
-            } else {
-                this.divClicked.emit();
+            if(this.isCreationPage) {
+                if (!serverMap) {
+                    alert('La carte a été supprimée du serveur.');
+                    this.reloadPage();
+                } else if (!this.areMapsEqual(map, serverMap)) {
+                    alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
+                    this.reloadPage();
+                } else {
+                    this.divClicked.emit();
+                }
             }
+            
         });
     }
 
