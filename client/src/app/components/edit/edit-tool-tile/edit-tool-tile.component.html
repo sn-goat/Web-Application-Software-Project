@@ -11,7 +11,7 @@
         [title]="''"
     >
 
-    <div class="tooltip" *ngIf="showTooltip" [ngClass]="{'above': shouldShowAbove(type), 'below': !shouldShowAbove(type)}">
+    @if(showTooltip){<div class="tooltip" [ngClass]="{'above': shouldShowAbove(type), 'below': !shouldShowAbove(type)}">
         {{ getDescription(type) }}
-    </div>
+    </div>}
 </div>

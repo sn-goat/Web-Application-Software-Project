@@ -18,7 +18,7 @@
         [title]="''"
     >
 
-    <div class="tooltip" *ngIf="showTooltip">
+    @if(showTooltip){<div class="tooltip">
         {{ getDescription(type) }}
-    </div>
+    </div>}
 </div>

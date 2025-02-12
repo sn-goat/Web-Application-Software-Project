@@ -18,9 +18,9 @@ class="cell"
             [src]="srcItem + cell.item + fileType"
             >
 
-            <div class="tooltip" *ngIf="showTooltip">
+            @if(showTooltip){<div class="tooltip">
            {{ cell.item ? getItemDescription(cell.item) : '' }}
-    </div>
+    </div>}
         }
     </div>
 </div>
