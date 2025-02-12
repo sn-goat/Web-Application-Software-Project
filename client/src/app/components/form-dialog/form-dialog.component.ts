@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -8,7 +8,7 @@ import { Visibility } from '@common/enums';
 
 @Component({
     selector: 'app-form-dialog',
-    imports: [AppMaterialModule, FormsModule, NgIf],
+    imports: [AppMaterialModule, FormsModule, CommonModule],
     templateUrl: './form-dialog.component.html',
     styleUrl: './form-dialog.component.scss',
 })
@@ -24,6 +24,7 @@ export class FormDialogComponent {
             isCTF: false,
             visibility: Visibility.PUBLIC,
             image: '',
+            updatedAt: new Date(),
         };
     }
 }

@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
-import { BoardService } from '@app/services/board.service';
-import { MapService } from '@app/services/map.service';
+import { BoardService } from '@app/services/code/board.service';
+import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
-import { Visibility } from '@common/enums';
+import { Size, Visibility } from '@common/enums';
 
 @Component({
     selector: 'app-map-list',
@@ -19,11 +19,11 @@ import { Visibility } from '@common/enums';
 })
 export class MapListComponent implements OnInit {
     @Input() items: Board[] = [];
-    @Input() showActions: boolean = true;
+    @Input() isCreationPage: boolean = false;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
     searchQuery: string = '';
-    sortBy: string = 'lastUpdatedAt';
+    sortBy: string = 'createdAt';
 
     private mapService = inject(MapService);
 
@@ -34,17 +34,23 @@ export class MapListComponent implements OnInit {
         private readonly boardService: BoardService,
     ) {}
 
+    reloadPage(): void {
+        window.location.reload();
+    }
+
     onDivClick(map: Board): void {
         this.boardService.getAllBoards().subscribe((serverMaps) => {
             const serverMap = serverMaps.find((m) => m._id === map._id);
-            if (!serverMap) {
-                alert('La carte a été supprimée du serveur.');
-                window.location.reload();
-            } else if (!this.areMapsEqual(map, serverMap)) {
-                alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
-                window.location.reload();
-            } else {
-                this.divClicked.emit();
+            if (this.isCreationPage) {
+                if (!serverMap) {
+                    alert('La carte a été supprimée du serveur.');
+                    this.reloadPage();
+                } else if (!this.areMapsEqual(map, serverMap)) {
+                    alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
+                    this.reloadPage();
+                } else {
+                    this.divClicked.emit();
+                }
             }
         });
     }
@@ -137,5 +143,12 @@ export class MapListComponent implements OnInit {
     handleImageError(event: Event): void {
         const target = event.target as HTMLImageElement;
         target.src = 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba';
+    }
+
+    getSizeClass(mapSize: number): string {
+        if (mapSize <= Size.SMALL) return 'size-small';
+        if (mapSize <= Size.MEDIUM) return 'size-medium';
+        if (mapSize <= Size.LARGE) return 'size-large';
+        return 'size-default'; // Fallback for undefined sizes
     }
 }

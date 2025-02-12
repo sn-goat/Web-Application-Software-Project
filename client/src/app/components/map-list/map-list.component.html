@@ -3,7 +3,7 @@
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
         <div class="filter-sort">
             <select [(ngModel)]="sortBy" class="sort-select">
-                <option value="lastUpdatedAt">Date de dernière mise à jour</option>
+                <option value="updatedAt">Date de dernière mise à jour</option>
                 <option value="name">Nom</option>
                 <option value="size">Taille</option>
             </select>
@@ -14,8 +14,8 @@
         <!-- Map Cards -->
         @for (map of getFilteredAndSortedItems(); track map) {
         <div class="list-item" (click)="onDivClick(map)">
-            <div class="item-image">
-                <img src="https://picsum.photos/200/300?random=2" [alt]="map.name" (error)="handleImageError($event)" />
+            <div class="item-image" [ngClass]="getSizeClass(map.size)">
+                <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
             </div>
             <div class="item-content">
                 <div class="item-header">
@@ -25,21 +25,21 @@
                 <p class="item-description">{{ map.description }}</p>
                 <div class="item-details">
                     <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
-                    <span class="item-ctf">{{ 'CTF Enabled' }}</span>
+                    <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
                 </div>
                 <div class="item-footer">
                     <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
                 </div>
             </div>
-            @if (showActions) {
+            @if (isCreationPage === false) {
             <div class="item-actions">
                 <!-- Visibility Button -->
                 <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
                     <img
                         [src]="
                             map.visibility === 'Public'
-                                ? 'https://www.shareicon.net/data/512x512/2015/09/12/100039_visibility_512x512.png'
-                                : 'https://www.svgrepo.com/show/453442/visibility-off.svg'
+                                ? 'assets/visible-icon.png'
+                                : 'assets/not-visible-icon.png'
                         "
                         [alt]="map.visibility"
                         class="button-icon"
@@ -57,7 +57,7 @@
         }
 
         <!-- Add Map Card -->
-        @if(showActions) {
+        @if(isCreationPage === false) {
         <div class="list-item new-map-card" (click)="createNewMap()">
             <div class="add-icon">+</div>
             <p class="add-text">Create New Map</p>

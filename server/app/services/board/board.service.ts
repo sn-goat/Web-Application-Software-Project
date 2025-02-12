@@ -12,9 +12,7 @@ export class BoardService {
     constructor(
         @InjectModel(Board.name) public boardModel: Model<BoardDocument>,
         private logger: Logger,
-    ) {
-        this.start();
-    }
+    ) {}
 
     async start() {
         if ((await this.boardModel.countDocuments()) === 0) {

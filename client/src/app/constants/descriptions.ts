@@ -15,8 +15,8 @@ Cette tuile bloque le joueur dans ses déplacements. Il ne peut pas la traverser
     [
         Tile.CLOSED_DOOR,
         `Porte :
-Cette tuile peut être parcourue par le joueur seulement si elle est dans l'état ouvert.
-Afin de changer l'état de cette tuile, vous pouver sélectionner cet outil et cliquer sur une tuile porte`,
+Cette tuile est accessible si elle est ouverte. 
+Pour changer son état, utilisez cet outil et clique droit sur une tuile porte.`,
     ],
     [
         Tile.WATER,

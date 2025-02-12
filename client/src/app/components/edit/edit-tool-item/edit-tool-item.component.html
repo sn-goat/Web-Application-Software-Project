@@ -1,0 +1,24 @@
+<div class="object"
+    (mouseenter)="showTooltip = true"
+    (mouseleave)="showTooltip = false"
+    matBadge="{{remainingItem}}"
+    matBadgePosition="below"
+    matBadgeSize="medium"
+    matBadgeOverlap="false"
+    matBadgeHidden="{{!remainingItem}}"
+>
+    <img
+        [src]="src + type + fileType"
+        [alt]="type"
+        class="draggable-image"
+        [draggable]="isDraggable"
+        [class.item-moved]="!isDraggable"
+        (drag)="onDragStart()"
+        (dragleave)="onDragEnter($event)"
+        [title]="''"
+    >
+
+    @if(showTooltip){<div class="tooltip">
+        {{ getDescription(type) }}
+    </div>}
+</div>

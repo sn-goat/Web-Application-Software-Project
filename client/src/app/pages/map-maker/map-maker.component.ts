@@ -7,12 +7,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
-import { BoardGameComponent } from '@app/components/board-game/board-game.component';
-import { EditItemAreaComponent } from '@app/components/edit-item-area/edit-item-area.component';
-import { BoardService } from '@app/services/board.service';
-import { MapService } from '@app/services/map.service';
-import { MouseEditorService } from '@app/services/mouse-editor.service';
-import { ToolSelectionService } from '@app/services/tool-selection.service';
+import { BoardGameComponent } from '@app/components/edit/board-game/board-game.component';
+import { EditItemAreaComponent } from '@app/components/edit/edit-item-area/edit-item-area.component';
+import { BoardService } from '@app/services/code/board.service';
+import { MapService } from '@app/services/code/map.service';
+import { MouseEditorService } from '@app/services/code/mouse-editor.service';
+import { ScreenshotService } from '@app/services/code/screenshot.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -39,6 +40,7 @@ export class MapMakerComponent implements OnInit {
         private toolSelection: ToolSelectionService,
         private boardService: BoardService,
         private readonly router: Router,
+        private screenshotService: ScreenshotService,
     ) {}
 
     get name() {
@@ -75,8 +77,8 @@ export class MapMakerComponent implements OnInit {
             if (this.toolSelection.isMinimumObjectPlaced()) {
                 if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
                     this.saveBoard()
-                        .then((response) => {
-                            alert('Partie sauvegardée! Vous allez être redirigé.\n' + response);
+                        .then(() => {
+                            alert('Partie sauvegardée! Vous allez être redirigé.\n');
                             this.router.navigate(['/admin']).then(() => {
                                 this.reset();
                             });
@@ -113,14 +115,15 @@ export class MapMakerComponent implements OnInit {
 
     async saveBoard(): Promise<string> {
         const mapData = this.mapService.getBoardToSave().value;
+        const thumbnail = await this.screenshot();
         let response;
         try {
             if (mapData._id) {
-                response = await firstValueFrom(this.boardService.updateBoard(mapData));
+                response = await firstValueFrom(this.boardService.updateBoard({ ...mapData, image: thumbnail }));
             } else {
                 const mapDataCreation = Object.assign({}, mapData);
                 delete mapDataCreation._id;
-                response = await firstValueFrom(this.boardService.addBoard(mapDataCreation));
+                response = await firstValueFrom(this.boardService.addBoard({ ...mapDataCreation, image: thumbnail }));
             }
             return response.body as string;
         } catch (error) {
@@ -132,6 +135,14 @@ export class MapMakerComponent implements OnInit {
             }
 
             return Promise.reject(errorMessage);
+        }
+    }
+
+    async screenshot(): Promise<string> {
+        try {
+            return await this.screenshotService.captureElementAsString('map-screenshot');
+        } catch (error) {
+            return Promise.reject(`Error while screenshot: ${error}`);
         }
     }
 }
