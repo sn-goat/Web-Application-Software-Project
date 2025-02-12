@@ -9,14 +9,12 @@
             @if (gameForm.submitted && !data.name) {
             <mat-error> Le nom est requis </mat-error>
             }
-            <!-- <mat-error *ngIf="gameForm.submitted && !data.name"> Le nom est requis </mat-error> -->
         </mat-form-field>
 
         <!-- Description Field -->
         <mat-form-field class="full-width" appearance="fill">
             <mat-label>Description:</mat-label>
             <input matInput maxlength="100" placeholder="Entrez une description ici..." [(ngModel)]="data.description" name="description" required />
-            <!-- <mat-error *ngIf="gameForm.submitted && !data.description"> La description est requise </mat-error> -->
             @if (gameForm.submitted && !data.description) {
             <mat-error> La description est requise </mat-error>
             }
