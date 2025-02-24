@@ -39,7 +39,7 @@ export class MapListComponent implements OnInit {
     readonly srcVisible = DEFAULT_PATH_VISIBLE;
     readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
     readonly fileType = '.png';
-    readonly loadingInterval = 3500;
+    loadingInterval = 3500;
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 

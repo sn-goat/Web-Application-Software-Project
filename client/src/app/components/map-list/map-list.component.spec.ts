@@ -190,10 +190,14 @@ describe('MapListComponent', () => {
         expect(mockMap.visibility).toBe('Private');
     });
 
-    it('should display a preview image of the game', () => {
-        const previewImage = fixture.debugElement.query(By.css('image-container'));
-        expect(previewImage).not.toBeNull();
+    it('should display a preview image of the game', async () => {
+        component.mapsLoaded = true; // Ensure maps are loaded
+
+        const previewImage = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container img.base-image'));
+
+        expect(previewImage).not.toBeNull(); 
     });
+
 
     it('should display the game description on image hover', async () => {
         const previewContainer = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container'));

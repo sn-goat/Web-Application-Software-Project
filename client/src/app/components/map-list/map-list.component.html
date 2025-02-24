@@ -29,9 +29,9 @@
                                 @for (cell of row; track cell) {
                                     <div class="cell">
                                         <div class="image-container">
-                                            <img class="base-image" [src]="srcTiles + cell.tile + fileType" />
+                                            <img class="base-image" [src]="srcTiles + cell.tile + fileType" draggable="false"/>
                                             @if (cell.item) {
-                                                <img class="image-stack" [src]="srcItem + cell.item + fileType" />
+                                                <img class="image-stack" [src]="srcItem + cell.item + fileType" draggable="false"/>
                                             }
                                         </div>
                                     </div>
