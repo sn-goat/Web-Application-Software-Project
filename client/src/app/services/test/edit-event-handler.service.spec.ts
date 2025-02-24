@@ -1,16 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 
-import { EditEventHandlerService } from '../code/edit-event-handler.service';
+import { EditEventHandlerService } from '@app/services/code/edit-event-handler.service';
 
 describe('EditEventHandlerService', () => {
-  let service: EditEventHandlerService;
+    let service: EditEventHandlerService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(EditEventHandlerService);
-  });
+    beforeEach(() => {
+        TestBed.configureTestingModule({});
+        service = TestBed.inject(EditEventHandlerService);
+    });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 });
