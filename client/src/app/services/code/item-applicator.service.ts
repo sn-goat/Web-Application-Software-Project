@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { MapService } from '@app/services/code/map.service';
+import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 
-import { Item, Tile } from '@common/enums';
 import { Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -105,4 +105,5 @@ export class ItemApplicatorService {
     private isOnBoard(x: number, y: number, rect: DOMRect): boolean {
         return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
     }
+    
 }
