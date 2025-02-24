@@ -191,30 +191,21 @@ describe('MapListComponent', () => {
     });
 
     it('should display a preview image of the game', () => {
-        setInterval(() => {}, LOADING_INTERVAL);
         const previewImage = fixture.debugElement.query(By.css('image-container'));
         expect(previewImage).not.toBeNull();
     });
 
     it('should display the game description on image hover', async () => {
-        console.log(fixture.nativeElement.innerHTML);
-
-
-        // Find the first list item that is NOT the "Create New Map" card
         const previewContainer = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container'));
 
-        expect(previewContainer).toBeTruthy(); // Ensure it's not null before proceeding
-
-        // Simulate hover
+        expect(previewContainer).toBeTruthy();
         previewContainer.triggerEventHandler('mouseover', null);
         fixture.detectChanges();
 
-        // Check if the description is displayed
         const description = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .item-description'));
         expect(description).not.toBeNull();
         expect(description.nativeElement.textContent).toContain(mockBoardGames[0].description);
     });
-
 
     it('should allow deleting a game', () => {
         const mockMap = mockBoardGames[0];
