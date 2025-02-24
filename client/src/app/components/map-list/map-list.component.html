@@ -53,18 +53,18 @@
                     <img
                         [src]="
                             map.visibility === 'Public'
-                                ? 'assets/visible-icon.png'
-                                : 'assets/not-visible-icon.png'
+                                ? srcVisible + fileType
+                                : srcNotVisible + fileType
                         "
                         [alt]="map.visibility"
                         class="button-icon"
                     />
                 </button>
                 <button class="edit-btn" (click)="onEdit(map)" title="Edit">
-                    <img src="assets/edit-icon.png" alt="edit" class="button-icon" />
+                    <img [src]="srcEdit + fileType" alt="edit" class="button-icon" />
                 </button>
                 <button class="delete-btn" (click)="onDelete(map)" title="Delete">
-                    <img src="assets/delete-icon.png" alt="delete" class="button-icon" />
+                    <img [src]="srcDelete + fileType" alt="delete" class="button-icon" />
                 </button>
             </div>
             }
