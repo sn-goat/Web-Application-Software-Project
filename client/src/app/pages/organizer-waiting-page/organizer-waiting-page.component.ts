@@ -4,21 +4,21 @@ import { FormsModule } from '@angular/forms';
 import { SocketService } from '@app/services/code/socket.service';
 
 @Component({
-  selector: 'app-organizer-waiting-page',
-  templateUrl: './organizer-waiting-page.component.html',
-  styleUrls: ['./organizer-waiting-page.component.scss'],
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+    selector: 'app-organizer-waiting-page',
+    templateUrl: './organizer-waiting-page.component.html',
+    styleUrls: ['./organizer-waiting-page.component.scss'],
+    standalone: true,
+    imports: [CommonModule, FormsModule],
 })
 export class OrganizerWaitingPageComponent implements OnInit {
-  accessCode: string = '';
+    accessCode: string = '';
 
-  constructor(private socketService: SocketService) {}
+    constructor(private socketService: SocketService) {}
 
-  ngOnInit() {
-    this.socketService.onGameCreated().subscribe((data: any) => {
-      this.accessCode = data.accessCode;
-    });
-    this.socketService.createGame('organizer-1');
-  }
+    ngOnInit() {
+        this.socketService.onGameCreated().subscribe((data: unknown) => {
+            this.accessCode = data.accessCode;
+        });
+        this.socketService.createGame('organizer-1');
+    }
 }

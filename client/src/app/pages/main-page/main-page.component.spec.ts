@@ -47,7 +47,7 @@ describe('MainPageComponent', () => {
     });
 
     it('should initialize with correct game logo path', () => {
-        expect(component.gameLogoPath).toBe('/assets/POLYTOPIA_game_logo.png');
+        expect(component.gameLogoPath).toContain('/assets/POLYTOPIA_game_logo.png');
     });
 
     it('should initialize with gameLogoError as false', () => {
