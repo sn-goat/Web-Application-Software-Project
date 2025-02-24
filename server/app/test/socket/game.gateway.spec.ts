@@ -19,22 +19,22 @@ describe('GameGateway', () => {
       ),
       lockRoom: jest.fn().mockImplementation((accessCode: string) =>
         accessCode === '12345'
-          ? { accessCode, locked: true } as GameRoom
+          ? { accessCode, locked: true, organizerId: 'org1', players: [], isLocked: true } as GameRoom
           : null
       ),
       unlockRoom: jest.fn().mockImplementation((accessCode: string) =>
         accessCode === '12345'
-          ? { accessCode, locked: false } as GameRoom
+          ? { accessCode, locked: false, organizerId: 'org1', players: [], isLocked: false } as GameRoom
           : null
       ),
       startGame: jest.fn().mockImplementation((accessCode: string) =>
         accessCode === '12345'
-          ? { accessCode, started: true } as GameRoom
+          ? { accessCode, started: true, organizerId: 'org1', players: [], isLocked: false } as GameRoom
           : null
       ),
       submitMove: jest.fn().mockImplementation((accessCode: string, playerId: string, move: string) =>
         accessCode === '12345'
-          ? { accessCode, move } as GameRoom
+          ? { accessCode, move, organizerId: 'org1', players: [], isLocked: false } as GameRoom
           : null
       ),
     };
@@ -126,7 +126,7 @@ describe('GameGateway', () => {
       expect(gameService.lockRoom).toHaveBeenCalledWith('12345');
       expect(mockServer.to).toHaveBeenCalledWith('12345');
       expect(mockServer.emit).toHaveBeenCalledWith('roomLocked', {
-        room: { accessCode: '12345', locked: true },
+        room: { accessCode: '12345', locked: true, organizerId: 'org1', players: [], isLocked: true },
       });
     });
 
@@ -152,14 +152,14 @@ describe('GameGateway', () => {
         emit: jest.fn(),
       } as unknown as Socket;
 
-      (gameService.unlockRoom as jest.Mock).mockReturnValueOnce({ accessCode: '12345', locked: false } as GameRoom);
+      (gameService.unlockRoom as jest.Mock).mockReturnValueOnce({ accessCode: '12345', locked: false, organizerId: 'org1', players: [], isLocked: false } as GameRoom);
 
       gateway.handleUnlockRoom(client, { accessCode: '12345' });
 
       expect(gameService.unlockRoom).toHaveBeenCalledWith('12345');
       expect(mockServer.to).toHaveBeenCalledWith('12345');
       expect(mockServer.emit).toHaveBeenCalledWith('roomUnlocked', {
-        room: { accessCode: '12345', locked: false },
+        room: { accessCode: '12345', locked: false, organizerId: 'org1', players: [], isLocked: false },
       });
     });
 
@@ -185,14 +185,14 @@ describe('GameGateway', () => {
         emit: jest.fn(),
       } as unknown as Socket;
 
-      (gameService.startGame as jest.Mock).mockReturnValueOnce({ accessCode: '12345', started: true } as GameRoom);
+      (gameService.startGame as jest.Mock).mockReturnValueOnce({ accessCode: '12345', started: true, organizerId: 'org1', players: [], isLocked: false } as GameRoom);
 
       gateway.handleStartGame(client, { accessCode: '12345' });
 
       expect(gameService.startGame).toHaveBeenCalledWith('12345');
       expect(mockServer.to).toHaveBeenCalledWith('12345');
       expect(mockServer.emit).toHaveBeenCalledWith('gameStarted', {
-        room: { accessCode: '12345', started: true },
+        room: { accessCode: '12345', started: true, organizerId: 'org1', players: [], isLocked: false },
       });
     });
 
@@ -219,14 +219,14 @@ describe('GameGateway', () => {
       } as unknown as Socket;
       const payload = { accessCode: '12345', playerId: 'player1', move: 'X' };
 
-      (gameService.submitMove as jest.Mock).mockReturnValueOnce({ accessCode: '12345', move: 'X' } as GameRoom);
+      (gameService.submitMove as jest.Mock).mockReturnValueOnce({ accessCode: '12345', move: 'X', organizerId: 'org1', players: [], isLocked: false } as GameRoom);
 
       gateway.handleSubmitMove(client, payload);
 
       expect(gameService.submitMove).toHaveBeenCalledWith('12345', 'player1', 'X');
       expect(mockServer.to).toHaveBeenCalledWith('12345');
       expect(mockServer.emit).toHaveBeenCalledWith('moveSubmitted', {
-        room: { accessCode: '12345', move: 'X' },
+        room: { accessCode: '12345', move: 'X', organizerId: 'org1', players: [], isLocked: false },
         playerId: 'player1',
       });
     });
