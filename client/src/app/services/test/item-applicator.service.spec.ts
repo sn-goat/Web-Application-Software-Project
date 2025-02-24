@@ -204,4 +204,16 @@ describe('ItemApplicatorService', () => {
             expect(service['isBackToContainer']).toBeFalse();
         });
     });
+    
+    it('should set isBackToContainer to false when item does not match selectedItem', () => {
+        service['selectedItem'] = Item.FLAG;
+        service.setBackToContainer(Item.SPAWN);
+        expect(service['isBackToContainer']).toBeFalse();
+    });
+
+    it('should set isBackToContainer to false when called with default item', () => {
+        service['selectedItem'] = Item.SPAWN;
+        service.setBackToContainer();
+        expect(service['isBackToContainer']).toBeFalse();
+    });
 });
