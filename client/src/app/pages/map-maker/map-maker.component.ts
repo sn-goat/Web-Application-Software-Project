@@ -13,6 +13,7 @@ import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { MouseEditorService } from '@app/services/code/mouse-editor.service';
 import { ScreenshotService } from '@app/services/code/screenshot.service';
+import { Validation } from '@common/board';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -70,17 +71,20 @@ export class MapMakerComponent implements OnInit {
         this.mouseEditor.updateCoordinate(event);
     }
 
+    checkNameValid(): boolean {
+        return !this.name.trim().length;
+    }
+
     checkIfReadyToSave() {
-        if (!this.toolSelection.getIsSpawnPlaced()) {
-            alert('Vous devez placer tous les points de départs du jeu.');
+        const validation: Validation = this.mapService.isReadyToSave();
+        if (!validation.isValid) {
+            alert(validation.error);
             return;
         }
-
-        if (!this.toolSelection.isMinimumObjectPlaced()) {
-            alert('Vous devez placer au moins ' + this.toolSelection.getMaxObjectByType() + ' items sur la partie.');
+        if (this.checkNameValid()) {
+            alert('Veuillez donner un nom valide à votre carte');
             return;
         }
-
         if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
             this.saveBoard()
                 .then(() => {

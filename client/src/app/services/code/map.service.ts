@@ -20,9 +20,6 @@ export class MapService {
     private nbrItemsToPlace = new BehaviorSubject<number>(0);
     private hasFlagOnBoard = new BehaviorSubject<boolean>(false);
 
-    private hasEnoughSpawns: boolean = false;
-    private hasEnoughItems: boolean = false;
-
     constructor() {
         const savedData = localStorage.getItem(this.storageKey);
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
@@ -56,13 +53,13 @@ export class MapService {
     isReadyToSave(): Validation {
         let returnMessage = '';
         if (this.nbrSpawnsToPlace.value > 0) {
-            returnMessage += 'Il vous manque' + this.nbrSpawnsToPlace.value + "point d'apparition à placer\n";
+            returnMessage += 'Vous devez placer ' + this.nbrSpawnsToPlace.value + " points d'apparition sur la carte\n";
         }
         if (this.nbrItemsToPlace.value > 0) {
-            returnMessage += 'Il vous manque' + this.nbrItemsToPlace.value + ' items à placer\n';
+            returnMessage += 'Vous devez placer ' + this.nbrItemsToPlace.value + ' objets sur la carte\n';
         }
         if (this.isModeCTF() && !this.hasFlagOnBoard.value) {
-            returnMessage += 'Veuillez placer le drapeau';
+            returnMessage += 'Vous devez placer le drapeau sur la carte';
         }
         return { isValid: returnMessage === '', error: returnMessage };
     }
@@ -78,16 +75,6 @@ export class MapService {
 
     getFirstBoardValue(): Board {
         return this.firstBoardValue.value;
-    }
-
-    initializeBoard() {
-        this.initializeBoardData();
-        if (this.boardToSave.value.board.length === 0) {
-            this.generateBoard();
-        }
-        const maxMapObject: number = BOARD_SIZE_MAPPING[this.boardToSave.value.size as Size];
-        this.nbrSpawnsToPlace.next(maxMapObject);
-        this.nbrItemsToPlace.next(maxMapObject);
     }
 
     setBoardName(name: string) {
@@ -136,6 +123,9 @@ export class MapService {
 
     setBoardToFirstValue() {
         const data: Board = this.firstBoardValue.value;
+        const maxMapObject: number = BOARD_SIZE_MAPPING[this.firstBoardValue.value.size as Size];
+        this.nbrSpawnsToPlace.next(maxMapObject);
+        this.nbrItemsToPlace.next(maxMapObject);
         if (!Array.isArray(data.board) || data.board.length === 0) {
             this.generateBoard();
         } else {
