@@ -104,13 +104,13 @@ export class GameService {
         return room;
     }
 
-    submitMove(accessCode: string, playerId: string, move: any): GameRoom | null {
+    submitMove(accessCode: string, playerId: string, move: string): GameRoom | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for move submission.`);
             return null;
         }
-        this.logger.log(`Player ${playerId} submitted move ${JSON.stringify(move)} in room ${accessCode}`);
+        this.logger.log(`Player ${playerId} submitted move ${move} in room ${accessCode}`);
         return room;
     }
 
