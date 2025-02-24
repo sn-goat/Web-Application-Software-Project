@@ -2,12 +2,13 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Board } from '@common/board';
 import { Observable } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
 export class BoardService {
-    private readonly apiUrl = 'http://localhost:3000/api/board'; // Update if hosted elsewhere
+    private readonly apiUrl = environment.serverUrl + '/api/board'; // Update if hosted elsewhere
 
     constructor(private readonly http: HttpClient) {}
 
