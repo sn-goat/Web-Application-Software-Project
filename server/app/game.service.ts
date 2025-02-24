@@ -52,6 +52,22 @@ export class GameService {
         return room;
     }
 
+    removePlayer(accessCode: string, playerId: string): GameRoom | null {
+        const room = this.gameRooms.get(accessCode);
+        if (!room) {
+            this.logger.error(`Room with access code ${accessCode} not found for player removal.`);
+            return null;
+        }
+        const index = room.players.findIndex((p) => p.id === playerId);
+        if (index < 0) {
+            this.logger.error(`Player ${playerId} not found in room ${accessCode}`);
+            return null;
+        }
+        room.players.splice(index, 1);
+        this.logger.log(`Player ${playerId} removed from room ${accessCode}`);
+        return room;
+    }
+
     lockRoom(accessCode: string): GameRoom | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
