@@ -14,8 +14,23 @@
         <!-- Map Cards -->
         @for (map of getFilteredAndSortedItems(); track map) {
         <div class="list-item" (click)="onDivClick(map)">
-            <div class="item-image" [ngClass]="getSizeClass(map.size)">
+            <!-- <div class="item-image" [ngClass]="getSizeClass(map.size)">
                 <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
+            </div> -->
+            <div class="grid">
+                @for (row of map.board; track row) {
+                <div class="row">
+                    @for (cell of row; track cell) {
+                    <div class="cell">
+                        <div class="image-container">
+                            <img class="base-image" [src]="srcTiles + cell.tile + fileType" />
+                            @if (cell.item) {
+                            <img class="image-stack" [src]="srcItem + cell.item + fileType" /> }
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
             </div>
             <div class="item-content">
                 <div class="item-header">

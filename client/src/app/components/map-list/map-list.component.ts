@@ -8,6 +8,7 @@ import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
+import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
 
 @Component({
     selector: 'app-map-list',
@@ -22,6 +23,9 @@ export class MapListComponent implements OnInit {
     @Input() isCreationPage: boolean = false;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
+    readonly srcTiles = DEFAULT_PATH_TILES;
+    readonly srcItem = DEFAULT_PATH_ITEMS;
+    readonly fileType = '.png';
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
