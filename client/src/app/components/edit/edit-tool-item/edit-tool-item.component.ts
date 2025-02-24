@@ -5,8 +5,8 @@ import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { MapService } from '@app/services/code/map.service';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
 import { Item, Size } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -33,7 +33,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
 
     constructor(
         private toolSelection: ToolSelectionService,
-        private tileApplicator: TileApplicatorService,
+        private itemApplicator: ItemApplicatorService,
     ) {}
 
     ngOnInit() {
@@ -78,12 +78,15 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
 
     onDragStart() {
         this.toolSelection.updateSelectedItem(this.type);
-        this.tileApplicator.setDropOnItem(Item.DEFAULT);
     }
 
     onDragEnter(event: MouseEvent) {
         event.preventDefault();
-        this.tileApplicator.setDropOnItem(this.type);
+        this.itemApplicator.setBackToContainer(this.type);
+    }
+    onDragLeave(event: MouseEvent) {
+        event.preventDefault();
+        this.itemApplicator.setBackToContainer();
     }
 
     getDescription(type: Item): string {
