@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameService, GameRoom, Player } from './game.service';
+import { GameRoom, GameService, Player } from './game.service';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -62,7 +62,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('submitMove')
-    handleSubmitMove(client: Socket, payload: { accessCode: string; playerId: string; move: any }) {
+    handleSubmitMove(client: Socket, payload: { accessCode: string; playerId: string; move: unknown }) {
         const room = this.gameService.submitMove(payload.accessCode, payload.playerId, payload.move);
         if (!room) {
             client.emit('moveError', { message: 'Unable to submit move.' });
@@ -72,7 +72,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     afterInit(server: Server) {
-        this.logger.log('GameGateway Initialized');
+        this.logger.log('GameGateway Initialized' + server);
     }
 
     handleConnection(client: Socket) {
