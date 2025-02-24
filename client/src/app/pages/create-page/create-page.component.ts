@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FormCharacterComponent } from '@app/components/form-character/form-character.component';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
@@ -9,6 +9,7 @@ import { MapListComponent } from '@app/components/map-list/map-list.component';
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
     imports: [CommonModule, FormsModule, MapListComponent, FormCharacterComponent],
+    encapsulation: ViewEncapsulation.None,
 })
 export class CreatePageComponent {
     isPopupVisible = false;
