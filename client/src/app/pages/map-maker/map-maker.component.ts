@@ -71,32 +71,32 @@ export class MapMakerComponent implements OnInit {
     }
 
     checkIfReadyToSave() {
-        if (this.mapService.getHasEnoughSpawns()) {
-            if (this.mapService.getHasEnoughItems()) {
-                if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
-                    this.saveBoard()
-                        .then(() => {
-                            alert('Partie sauvegardée! Vous allez être redirigé.\n');
-                            this.router.navigate(['/admin']).then(() => {
-                                this.reset();
-                            });
-                        })
-                        .catch((error) => {
-                            alert('Erreur dans la configuration de la partie.\n' + error);
-                        });
-                }
-            } else {
-                alert('Vous devez placer au moins ' + this.mapService.getHasEnoughItems() + ' items sur la partie.');
-                return;
-            }
-        } else {
+        if (!this.toolSelection.getIsSpawnPlaced()) {
             alert('Vous devez placer tous les points de départs du jeu.');
             return;
+        }
+
+        if (!this.toolSelection.isMinimumObjectPlaced()) {
+            alert('Vous devez placer au moins ' + this.toolSelection.getMaxObjectByType() + ' items sur la partie.');
+            return;
+        }
+
+        if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
+            this.saveBoard()
+                .then(() => {
+                    alert('Partie sauvegardée! Vous allez être redirigé.\n');
+                    this.router.navigate(['/admin']).then(() => {
+                        this.reset();
+                    });
+                })
+                .catch((error) => {
+                    alert('Erreur dans la configuration de la partie.\n' + error);
+                });
         }
     }
 
     confirmReturn() {
-        if (confirm('Are you sure you want to leave this page?')) {
+        if (confirm('Etes-vous sûr de vouloir quitter cette page?')) {
             this.router.navigate(['/admin']).then(() => {
                 this.reset();
             });

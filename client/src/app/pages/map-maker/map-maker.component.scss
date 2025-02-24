@@ -1,17 +1,23 @@
+html {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
 $primary-bg: #1a1625;
 $primary-text: #7ee0d0;
 $glow-teal: rgba(126, 224, 208, 0.2);
 $glow-gold: rgba(255, 215, 0, 0.2);
 
- label {
+label {
     color: $primary-text;
     font-size: 16px;
     margin-bottom: 5px;
- }
+}
 
- h1 {
+h1 {
     color: $primary-text;
- }
+}
 
 .editor-container {
     display: flex;
@@ -23,7 +29,8 @@ $glow-gold: rgba(255, 215, 0, 0.2);
     background: $primary-bg;
 }
 
-.editor-panel, .tiles-panel {
+.editor-panel,
+.tiles-panel {
     width: 20%;
     border: 2px solid $glow-teal;
     border-radius: 10px;
@@ -47,55 +54,56 @@ h2 {
 }
 
 .form-container {
-  width: 100%;
-  padding: 10px;  // Ajoute un padding interne pour éviter que les champs touchent les bords
+    width: 100%;
+    padding: 10px; // Ajoute un padding interne pour éviter que les champs touchent les bords
 }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+input,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
 button {
-  background-color: $glow-teal;
-  color: $primary-text;
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  border-radius: 5px;
+    background-color: $glow-teal;
+    color: $primary-text;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
 button:hover {
-  background-color: $glow-teal;
-  box-shadow: 0 0 20px $glow-teal;
-  transform: translateY(-2px);
+    background-color: $glow-teal;
+    box-shadow: 0 0 20px $glow-teal;
+    transform: translateY(-2px);
 }
 
 .reset-button {
-  background: #888;
-  color: white;
+    background: #888;
+    color: white;
 }
 
 .reset-button:hover {
-  background: #555;
+    background: #555;
 }
 
 .editor-panel {
-  width: 30%;  // Augmente la largeur de la boîte
-  max-width: 400px;  // Fixe une largeur maximale
-  border: 2px solid $glow-teal;;
-  border-radius: 10px;
-  padding: 30px;  // Ajoute du padding pour espacer les éléments
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+    width: 30%; // Augmente la largeur de la boîte
+    max-width: 400px; // Fixe une largeur maximale
+    border: 2px solid $glow-teal;
+    border-radius: 10px;
+    padding: 30px; // Ajoute du padding pour espacer les éléments
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .container {
@@ -105,7 +113,7 @@ button:hover {
 }
 
 textarea {
-  resize: none;
+    resize: none;
 }
 
 .title {
@@ -142,7 +150,3 @@ textarea {
 .tools-container {
     margin-left: 20px;
 }
-
-
-
-
