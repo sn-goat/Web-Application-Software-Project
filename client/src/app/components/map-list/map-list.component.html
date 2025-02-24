@@ -1,89 +1,86 @@
 <div class="map-list-container">
-    <div class="search-bar">
-        <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
-        <div class="filter-sort">
-            <select [(ngModel)]="sortBy" class="sort-select">
-                <option value="updatedAt">Date de dernière mise à jour</option>
-                <option value="name">Nom</option>
-                <option value="size">Taille</option>
-            </select>
+    @if(isLoading) {
+        <div class="circ">
+            <div class="load">Loading . . .</div>
+            <div class="hands"></div>
+            <div class="body"></div>
+            <div class="head">
+                <div class="eye"></div>
+            </div>
         </div>
-    </div>
-
-    <div class="grid-container">
-        <!-- Map Cards -->
-        @for (map of getFilteredAndSortedItems(); track map) {
-        <div class="list-item" (click)="onDivClick(map)">
-            <!-- <div class="item-image" [ngClass]="getSizeClass(map.size)">
-                <img [src]="map.image" [alt]="map.name" (error)="handleImageError($event)" />
-            </div> -->
-            <div class="grid">
-                @for (row of map.board; track row) {
-                <div class="row">
-                    @for (cell of row; track cell) {
-                    <div class="cell">
-                        <div class="image-container">
-                            <img class="base-image" [src]="srcTiles + cell.tile + fileType" />
-                            @if (cell.item) {
-                            <img class="image-stack" [src]="srcItem + cell.item + fileType" /> }
+    }
+    @if(mapsLoaded) {
+        <div class="search-bar">
+            <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
+            <div class="filter-sort">
+                <select [(ngModel)]="sortBy" class="sort-select">
+                    <option value="updatedAt">Date de dernière mise à jour</option>
+                    <option value="name">Nom</option>
+                    <option value="size">Taille</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid-container">
+            @for (map of getFilteredAndSortedItems(); track map) {
+                <div class="list-item" (click)="onDivClick(map)">
+                    <div class="grid">
+                        @for (row of map.board; track row) {
+                            <div class="row">
+                                @for (cell of row; track cell) {
+                                    <div class="cell">
+                                        <div class="image-container">
+                                            <img class="base-image" [src]="srcTiles + cell.tile + fileType" />
+                                            @if (cell.item) {
+                                                <img class="image-stack" [src]="srcItem + cell.item + fileType" />
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                    <div class="item-content">
+                        <div class="item-header">
+                            <h3 class="item-title">{{ map.name }}</h3>
+                            <span class="item-date">{{ map.updatedAt | date: 'MMM d, y' }}</span>
+                        </div>
+                        <p class="item-description">{{ map.description }}</p>
+                        <div class="item-details">
+                            <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
+                            <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
+                        </div>
+                        <div class="item-footer">
+                            <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
                         </div>
                     </div>
+                    @if (isCreationPage === false) {
+                        <div class="item-actions">
+                            <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
+                                <img [src]="map.visibility === 'Public' ? srcVisible + fileType : srcNotVisible + fileType" [alt]="map.visibility" class="button-icon" />
+                            </button>
+                            <button class="edit-btn" (click)="onEdit(map)" title="Edit">
+                                <img [src]="srcEdit + fileType" alt="edit" class="button-icon" />
+                            </button>
+                            <button class="delete-btn" (click)="onDelete(map)" title="Delete">
+                                <img [src]="srcDelete + fileType" alt="delete" class="button-icon" />
+                            </button>
+                        </div>
                     }
                 </div>
-                }
-            </div>
-            <div class="item-content">
-                <div class="item-header">
-                    <h3 class="item-title">{{ map.name }}</h3>
-                    <span class="item-date">{{ map.updatedAt | date: 'MMM d, y' }}</span>
-                </div>
-                <p class="item-description">{{ map.description }}</p>
-                <div class="item-details">
-                    <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
-                    <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
-                </div>
-                <div class="item-footer">
-                    <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
-                </div>
-            </div>
-            @if (isCreationPage === false) {
-            <div class="item-actions">
-                <!-- Visibility Button -->
-                <button class="visibility-btn" (click)="toggleVisibility(map)" title="Toggle Visibility">
-                    <img
-                        [src]="
-                            map.visibility === 'Public'
-                                ? srcVisible + fileType
-                                : srcNotVisible + fileType
-                        "
-                        [alt]="map.visibility"
-                        class="button-icon"
-                    />
-                </button>
-                <button class="edit-btn" (click)="onEdit(map)" title="Edit">
-                    <img [src]="srcEdit + fileType" alt="edit" class="button-icon" />
-                </button>
-                <button class="delete-btn" (click)="onDelete(map)" title="Delete">
-                    <img [src]="srcDelete + fileType" alt="delete" class="button-icon" />
-                </button>
-            </div>
             }
-        </div>
-        }
 
-        <!-- Add Map Card -->
-        @if(isCreationPage === false) {
-        <div class="list-item new-map-card" (click)="createNewMap()">
+    @if (!isCreationPage) {
+    <div class="list-item new-map-card" (click)="createNewMap()">
             <div class="add-icon">+</div>
             <p class="add-text">Create New Map</p>
         </div>
         }
-    </div>
-
-    <!-- Empty State -->
+        </div>
+        <!-- Empty State -->
     @if (getFilteredAndSortedItems().length === 0) {
     <div class="empty-state">
         <p>Aucunes parties trouvées</p>
     </div>
+    }
     }
 </div>

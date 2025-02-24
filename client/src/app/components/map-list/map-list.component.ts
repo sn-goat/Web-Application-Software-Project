@@ -30,6 +30,8 @@ export class MapListComponent implements OnInit {
     @Input() isCreationPage: boolean = false;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
+    isLoading: boolean = true;
+    mapsLoaded: boolean = false;
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;
     readonly srcEdit = DEFAULT_PATH_EDIT;
@@ -37,6 +39,7 @@ export class MapListComponent implements OnInit {
     readonly srcVisible = DEFAULT_PATH_VISIBLE;
     readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
     readonly fileType = '.png';
+    readonly loadingInterval = 3500;
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
@@ -77,8 +80,13 @@ export class MapListComponent implements OnInit {
                 updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
                 createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
             }));
-            this.cdr.detectChanges(); // Manually trigger change detection
+            this.cdr.detectChanges();
         });
+        setTimeout(() => {
+            this.isLoading = false;
+            this.mapsLoaded = this.getFilteredAndSortedItems().length > 0;
+            this.cdr.detectChanges();
+        }, this.loadingInterval);
     }
 
     getFilteredAndSortedItems(): Board[] {
