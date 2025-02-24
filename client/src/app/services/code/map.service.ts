@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
-import { Board } from '@common/board';
-import { Item, Tile, Visibility } from '@common/enums';
+import { Board, Validation } from '@common/board';
+import { Item, Tile, Visibility, Size } from '@common/enums';
+import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class MapService {
-    nbrSpawnsOnBoard$: Observable<number>;
-    nbrItemsOnBoard$: Observable<number>;
+    nbrSpawnsToPlace$: Observable<number>;
+    nbrItemsToPlace$: Observable<number>;
     hasFlagOnBoard$: Observable<boolean>;
 
     private readonly storageKey = 'firstBoardValue';
 
     private firstBoardValue: BehaviorSubject<Board>;
     private boardToSave: BehaviorSubject<Board>;
-    private nbrSpawnsOnBoard = new BehaviorSubject<number>(0);
-    private nbrItemsOnBoard = new BehaviorSubject<number>(0);
+    private nbrSpawnsToPlace = new BehaviorSubject<number>(0);
+    private nbrItemsToPlace = new BehaviorSubject<number>(0);
     private hasFlagOnBoard = new BehaviorSubject<boolean>(false);
 
     private hasEnoughSpawns: boolean = false;
@@ -27,45 +28,43 @@ export class MapService {
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
         this.firstBoardValue = new BehaviorSubject<Board>(initialData);
 
-        this.nbrSpawnsOnBoard$ = this.nbrSpawnsOnBoard.asObservable();
-        this.nbrItemsOnBoard$ = this.nbrItemsOnBoard.asObservable();
+        this.nbrSpawnsToPlace$ = this.nbrSpawnsToPlace.asObservable();
+        this.nbrItemsToPlace$ = this.nbrItemsToPlace.asObservable();
         this.initializeBoardData();
     }
 
-    incrementSpawns() {
-        this.nbrSpawnsOnBoard.next(this.nbrSpawnsOnBoard.value + 1);
+    increaseSpawnsToPlace() {
+        this.nbrSpawnsToPlace.next(this.nbrSpawnsToPlace.value + 1);
     }
 
-    decrementSpawns() {
-        this.nbrSpawnsOnBoard.next(this.nbrSpawnsOnBoard.value - 1);
+    decreaseSpawnsToPlace() {
+        this.nbrSpawnsToPlace.next(this.nbrSpawnsToPlace.value - 1);
     }
 
-    incrementItems() {
-        this.nbrItemsOnBoard.next(this.nbrItemsOnBoard.value + 1);
+    increaseItemsToPlace() {
+        this.nbrItemsToPlace.next(this.nbrItemsToPlace.value + 1);
     }
 
-    decrementItems() {
-        this.nbrItemsOnBoard.next(this.nbrItemsOnBoard.value - 1);
+    decreaseItemsToPlace() {
+        this.nbrItemsToPlace.next(this.nbrItemsToPlace.value - 1);
     }
 
     setHasFlagOnBoard(hasFlag: boolean) {
         this.hasFlagOnBoard.next(hasFlag);
     }
 
-    setHasEnoughSpawns(hasEnough: boolean) {
-        this.hasEnoughSpawns = hasEnough;
-    }
-
-    getHasEnoughSpawns(): boolean {
-        return this.hasEnoughSpawns;
-    }
-
-    setHasEnoughItems(hasEnough: boolean) {
-        this.hasEnoughItems = hasEnough;
-    }
-
-    getHasEnoughItems(): boolean {
-        return this.hasEnoughItems;
+    isReadyToSave(): Validation {
+        let returnMessage = '';
+        if (this.nbrSpawnsToPlace.value > 0) {
+            returnMessage += 'Il vous manque' + this.nbrSpawnsToPlace.value + "point d'apparition à placer\n";
+        }
+        if (this.nbrItemsToPlace.value > 0) {
+            returnMessage += 'Il vous manque' + this.nbrItemsToPlace.value + ' items à placer\n';
+        }
+        if (this.isModeCTF() && !this.hasFlagOnBoard.value) {
+            returnMessage += 'Veuillez placer le drapeau';
+        }
+        return { isValid: returnMessage === '', error: returnMessage };
     }
 
     setMapData(data: Board): void {
@@ -86,6 +85,9 @@ export class MapService {
         if (this.boardToSave.value.board.length === 0) {
             this.generateBoard();
         }
+        const maxMapObject: number = BOARD_SIZE_MAPPING[this.boardToSave.value.size as Size];
+        this.nbrSpawnsToPlace.next(maxMapObject);
+        this.nbrItemsToPlace.next(maxMapObject);
     }
 
     setBoardName(name: string) {
@@ -170,14 +172,17 @@ export class MapService {
             board: boardGame.board,
         });
     }
+
     private parseBoard(board: Board) {
         board.board.forEach((row) => {
             row.forEach((cell) => {
                 if (cell.item !== Item.DEFAULT) {
                     if (cell.item === Item.SPAWN) {
-                        this.incrementSpawns();
+                        this.decreaseSpawnsToPlace();
+                    } else if (cell.item === Item.FLAG) {
+                        this.setHasFlagOnBoard(true);
                     } else {
-                        this.incrementItems();
+                        this.decreaseItemsToPlace();
                     }
                 }
             });

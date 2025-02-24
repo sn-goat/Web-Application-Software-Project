@@ -66,11 +66,11 @@ export class ItemApplicatorService {
 
     private applyItem(col: number, row: number) {
         if (this.selectedItem === Item.SPAWN) {
-            this.mapService.incrementSpawns();
+            this.mapService.decreaseSpawnsToPlace();
         } else if (this.selectedItem === Item.FLAG) {
             this.mapService.setHasFlagOnBoard(true);
         } else {
-            this.mapService.incrementItems();
+            this.mapService.decreaseItemsToPlace();
         }
 
         if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
@@ -81,11 +81,11 @@ export class ItemApplicatorService {
 
     private deleteItem(col: number, row: number) {
         if (this.mapService.getCellItem(col, row) === Item.SPAWN) {
-            this.mapService.decrementSpawns();
+            this.mapService.increaseSpawnsToPlace();
         } else if (this.mapService.getCellItem(col, row) === Item.FLAG) {
             this.mapService.setHasFlagOnBoard(false);
         } else {
-            this.mapService.decrementItems();
+            this.mapService.increaseItemsToPlace();
         }
         this.mapService.setCellItem(col, row, Item.DEFAULT);
     }

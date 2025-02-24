@@ -2,12 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { MapService } from '@app/services/code/map.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
-import { Item, Size } from '@common/enums';
+import { Item } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -26,8 +25,6 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     remainingItem: number = 0;
     showTooltip = false;
 
-    private maxObjectByType: number;
-    private boardSize: Size;
     private readonly mapService = inject(MapService);
     private destroy$ = new Subject<void>();
 
@@ -37,16 +34,10 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.boardSize = this.mapService.getBoardSize() as Size;
-        this.maxObjectByType = BOARD_SIZE_MAPPING[this.boardSize];
-
         if (this.type === Item.SPAWN) {
-            this.mapService.nbrSpawnsOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
-                if (this.maxObjectByType !== undefined) {
-                    this.remainingItem = this.maxObjectByType - nbrSpawns;
-                    this.isDraggable = this.remainingItem > 0;
-                    this.mapService.setHasEnoughSpawns(!this.isDraggable);
-                }
+            this.mapService.nbrSpawnsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingSpawns) => {
+                this.remainingItem = remainingSpawns;
+                this.isDraggable = this.remainingItem > 0;
             });
         } else if (this.type === Item.FLAG) {
             if (this.mapService.isModeCTF()) {
@@ -57,12 +48,9 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
                 this.isDraggable = false;
             }
         } else {
-            this.mapService.nbrItemsOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrItems) => {
-                if (this.maxObjectByType !== undefined) {
-                    this.remainingItem = this.maxObjectByType - nbrItems;
-                    this.isDraggable = this.remainingItem > 0;
-                    this.mapService.setHasEnoughItems(!this.isDraggable);
-                }
+            this.mapService.nbrItemsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingItems) => {
+                this.remainingItem = remainingItems;
+                this.isDraggable = this.remainingItem > 0;
             });
         }
     }
