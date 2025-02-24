@@ -178,27 +178,6 @@ body {
     -ms-user-select: none;
 }
 
-.item-image img {
-    object-fit: cover;
-    transform: scale(1.4);
-    transition: transform 0.3s ease-in-out;
-    border-radius: 6px;
-}
-
-.item-image.size-small img {
-    width: 85%;
-    height: 85%;
-}
-
-.item-image.size-medium img {
-    width: 85%;
-    height: 75%;
-}
-
-.item-image.size-large img {
-    width: 85%;
-    height: 85%;
-}
 
 .item-content {
     flex: 1;
