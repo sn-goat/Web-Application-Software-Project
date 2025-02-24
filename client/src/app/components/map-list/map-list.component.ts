@@ -16,6 +16,7 @@ import {
     DEFAULT_PATH_VISIBLE,
     DEFAULT_PATH_NOT_VISIBLE,
 } from '@app/constants/path';
+import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
 
 @Component({
     selector: 'app-map-list',
@@ -39,7 +40,7 @@ export class MapListComponent implements OnInit {
     readonly srcVisible = DEFAULT_PATH_VISIBLE;
     readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
     readonly fileType = '.png';
-    loadingInterval = 3500;
+    loadingInterval = LOADING_INTERVAL;
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 

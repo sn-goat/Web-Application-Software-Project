@@ -182,7 +182,6 @@ describe('MapMakerComponent', () => {
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-
         const successResponse = new HttpResponse({ status: 200, body: 'Success Response' });
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(of(successResponse));
         const result = await component.saveBoard();
@@ -195,7 +194,6 @@ describe('MapMakerComponent', () => {
         const mockBoard: Board = { name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
-
 
         const errorResponse = new HttpResponse({ status: 500, body: 'Error Response' });
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorResponse));

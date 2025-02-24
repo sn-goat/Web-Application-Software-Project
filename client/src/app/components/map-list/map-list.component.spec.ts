@@ -195,9 +195,8 @@ describe('MapListComponent', () => {
 
         const previewImage = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container img.base-image'));
 
-        expect(previewImage).not.toBeNull(); 
+        expect(previewImage).not.toBeNull();
     });
-
 
     it('should display the game description on image hover', async () => {
         const previewContainer = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container'));
