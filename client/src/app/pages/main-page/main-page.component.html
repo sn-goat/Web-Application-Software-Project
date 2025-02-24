@@ -1,21 +1,38 @@
-<div class="container justified">
+<div class="container justified" style="background: url('./assets/background.gif') no-repeat center center; background-size: cover;">
     <h1 class="header-item"> {{ title }}</h1>
     @if (!gameLogoError) {
-        <img 
-            [src]="gameLogoPath" 
-            (error)="handleGameLogoError()" 
-            alt="Logo Jeu" 
+        <img
+            [src]="gameLogoPath"
+            (error)="handleGameLogoError()"
+            alt="Logo Jeu"
         />
     } @else {
         <p class="error-message">Failed to load game logo.</p>
     }
 
     <section id="server-message" class="justified">
-
-        <div class="button-container ">
-            <button class="button" routerLink="/game"> Joindre une partie </button>
-            <button class="button" routerLink="/creation"> Créer une partie</button>
-            <button class="button" routerLink="/admin"> Administer les jeux</button>
+        <div class="button-container">
+            <button class="button" routerLink="/game">
+                <span>Joindre une partie</span>
+                <div class="top"></div>
+                <div class="left"></div>
+                <div class="bottom"></div>
+                <div class="right"></div>
+            </button>
+            <button class="button" routerLink="/creation">
+                <span>Créer une partie</span>
+                <div class="top"></div>
+                <div class="left"></div>
+                <div class="bottom"></div>
+                <div class="right"></div>
+            </button>
+            <button class="button" routerLink="/admin">
+                <span>Administer les jeux</span>
+                <div class="top"></div>
+                <div class="left"></div>
+                <div class="bottom"></div>
+                <div class="right"></div>
+            </button>
         </div>
     </section>
 
