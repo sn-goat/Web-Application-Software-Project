@@ -58,6 +58,7 @@ export class BoardService {
                 { _id: board._id },
                 {
                     ...board,
+                    visibility: Visibility.PRIVATE,
                 },
                 { new: true },
             )
@@ -124,9 +125,7 @@ export class BoardService {
     }
 
     private doorOnEdge(row: number, col: number, max: number): boolean {
-        if (row === 0 || col === 0 || row === max - 1 || col === max - 1) {
-            return true;
-        }
+        return row === 0 || col === 0 || row === max - 1 || col === max - 1;
     }
 
     private areDoorsValid(board: CreateBoardDto): Validation {
