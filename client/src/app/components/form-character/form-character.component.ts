@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { D4, D6, MAX_PORTRAITS } from '@app/constants/playerConst';
 import { Player } from '@common/player';
+import { GameMapService } from '@app/services/code/game-map.service';
 
 @Component({
     selector: 'app-form-character',
@@ -32,6 +33,8 @@ export class FormCharacterComponent {
         attackDice: '',
         defenseDice: '',
     };
+
+    private readonly gameMapService = inject(GameMapService);
 
     getCurrentPortraitImage(): string {
         return `./assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
@@ -89,5 +92,9 @@ export class FormCharacterComponent {
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
         return this.stats.username.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
+    }
+
+    shareGameMap(): void {
+        this.gameMapService.shareGameMap();
     }
 }

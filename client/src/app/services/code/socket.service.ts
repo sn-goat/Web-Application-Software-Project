@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Board } from '@common/board';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
@@ -26,6 +27,10 @@ export class SocketService {
 
     joinGame(accessCode: string, player: unknown) {
         this.socket.emit('joinGame', { accessCode, player });
+    }
+
+    shareGameMap(board: Board) {
+        this.socket.emit('shareGameMap', { board });
     }
 
     onPlayerJoined(): Observable<unknown> {
