@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
     providedIn: 'root',
 })
 export class BoardService {
-    private readonly apiUrl = 'http://localhost:3000/api/board'; // Update if hosted elsewhere
+    private readonly apiUrl = 'http://ec2-15-223-119-251.ca-central-1.compute.amazonaws.com:3000/api/board'; // Update if hosted elsewhere
 
     constructor(private readonly http: HttpClient) {}
 
