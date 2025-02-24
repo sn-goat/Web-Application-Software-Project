@@ -32,7 +32,6 @@ export class EditEventHandlerService {
     }
 
     handleDragEnd(event: DragEvent, rect: DOMRect) {
-        console.log('drag end');
         this.itemApplicatorService.handleDragEnd(event, rect);
     }
 

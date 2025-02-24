@@ -13,7 +13,6 @@ import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { MouseEditorService } from '@app/services/code/mouse-editor.service';
 import { ScreenshotService } from '@app/services/code/screenshot.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -37,7 +36,6 @@ export class MapMakerComponent implements OnInit {
 
     constructor(
         private mouseEditor: MouseEditorService,
-        private toolSelection: ToolSelectionService,
         private boardService: BoardService,
         private readonly router: Router,
         private screenshotService: ScreenshotService,
@@ -73,8 +71,8 @@ export class MapMakerComponent implements OnInit {
     }
 
     checkIfReadyToSave() {
-        if (this.toolSelection.getIsSpawnPlaced()) {
-            if (this.toolSelection.isMinimumObjectPlaced()) {
+        if (this.mapService.getHasEnoughSpawns()) {
+            if (this.mapService.getHasEnoughItems()) {
                 if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
                     this.saveBoard()
                         .then(() => {
@@ -88,7 +86,7 @@ export class MapMakerComponent implements OnInit {
                         });
                 }
             } else {
-                alert('Vous devez placer au moins ' + this.toolSelection.getMaxObjectByType() + ' items sur la partie.');
+                alert('Vous devez placer au moins ' + this.mapService.getHasEnoughItems() + ' items sur la partie.');
                 return;
             }
         } else {

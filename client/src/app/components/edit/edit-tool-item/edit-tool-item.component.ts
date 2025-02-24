@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
@@ -23,7 +23,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';
     isDraggable = true;
-    remainingItem: number = 1;
+    remainingItem: number = 0;
     showTooltip = false;
 
     private maxObjectByType: number;
@@ -39,38 +39,33 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.boardSize = this.mapService.getBoardSize() as Size;
         this.maxObjectByType = BOARD_SIZE_MAPPING[this.boardSize];
-        this.toolSelection.setMaxObjectByType(this.maxObjectByType);
-        this.toolSelection.setBoardSize(this.boardSize);
 
         if (this.type === Item.SPAWN) {
-            this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
+            this.mapService.nbrSpawnsOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
                 if (this.maxObjectByType !== undefined) {
                     this.remainingItem = this.maxObjectByType - nbrSpawns;
                     this.isDraggable = this.remainingItem > 0;
-                    this.toolSelection.setIsSpawnPlaced(this.remainingItem === 0);
+                    this.mapService.setHasEnoughSpawns(!this.isDraggable);
                 }
             });
-        } else if (this.type === Item.CHEST) {
-            this.toolSelection.nbrChestOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrChests) => {
-                if (this.maxObjectByType !== undefined) {
-                    this.remainingItem = this.maxObjectByType - nbrChests;
-                    this.isDraggable = this.remainingItem > 0;
-                }
-            });
+        } else if (this.type === Item.FLAG) {
+            if (this.mapService.isModeCTF()) {
+                this.mapService.hasFlagOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((hasFlag) => {
+                    this.isDraggable = !hasFlag;
+                });
+            } else {
+                this.isDraggable = false;
+            }
         } else {
-            this.toolSelection.itemOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((items) => {
-                if (!this.mapService.getMode() && this.type === Item.FLAG) {
-                    this.isDraggable = false;
-                    this.remainingItem = 0;
-                } else {
-                    this.isDraggable = false;
-                    this.remainingItem = !items.has(this.type) ? 1 : 0;
-                    this.isDraggable = !items.has(this.type);
+            this.mapService.nbrItemsOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrItems) => {
+                if (this.maxObjectByType !== undefined) {
+                    this.remainingItem = this.maxObjectByType - nbrItems;
+                    this.isDraggable = this.remainingItem > 0;
+                    this.mapService.setHasEnoughItems(!this.isDraggable);
                 }
             });
         }
     }
-
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();

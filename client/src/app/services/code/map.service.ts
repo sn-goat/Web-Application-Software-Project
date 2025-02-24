@@ -1,23 +1,71 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Board } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
-import { BehaviorSubject } from 'rxjs';
-import { ToolSelectionService } from './tool-selection.service';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class MapService {
+    nbrSpawnsOnBoard$: Observable<number>;
+    nbrItemsOnBoard$: Observable<number>;
+    hasFlagOnBoard$: Observable<boolean>;
+
     private readonly storageKey = 'firstBoardValue';
+
     private firstBoardValue: BehaviorSubject<Board>;
     private boardToSave: BehaviorSubject<Board>;
-    private readonly toolSelectionService = inject(ToolSelectionService);
+    private nbrSpawnsOnBoard = new BehaviorSubject<number>(0);
+    private nbrItemsOnBoard = new BehaviorSubject<number>(0);
+    private hasFlagOnBoard = new BehaviorSubject<boolean>(false);
+
+    private hasEnoughSpawns: boolean = false;
+    private hasEnoughItems: boolean = false;
 
     constructor() {
         const savedData = localStorage.getItem(this.storageKey);
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
         this.firstBoardValue = new BehaviorSubject<Board>(initialData);
+
+        this.nbrSpawnsOnBoard$ = this.nbrSpawnsOnBoard.asObservable();
+        this.nbrItemsOnBoard$ = this.nbrItemsOnBoard.asObservable();
         this.initializeBoardData();
+    }
+
+    incrementSpawns() {
+        this.nbrSpawnsOnBoard.next(this.nbrSpawnsOnBoard.value + 1);
+    }
+
+    decrementSpawns() {
+        this.nbrSpawnsOnBoard.next(this.nbrSpawnsOnBoard.value - 1);
+    }
+
+    incrementItems() {
+        this.nbrItemsOnBoard.next(this.nbrItemsOnBoard.value + 1);
+    }
+
+    decrementItems() {
+        this.nbrItemsOnBoard.next(this.nbrItemsOnBoard.value - 1);
+    }
+
+    setHasFlagOnBoard(hasFlag: boolean) {
+        this.hasFlagOnBoard.next(hasFlag);
+    }
+
+    setHasEnoughSpawns(hasEnough: boolean) {
+        this.hasEnoughSpawns = hasEnough;
+    }
+
+    getHasEnoughSpawns(): boolean {
+        return this.hasEnoughSpawns;
+    }
+
+    setHasEnoughItems(hasEnough: boolean) {
+        this.hasEnoughItems = hasEnough;
+    }
+
+    getHasEnoughItems(): boolean {
+        return this.hasEnoughItems;
     }
 
     setMapData(data: Board): void {
@@ -67,7 +115,7 @@ export class MapService {
         return currentBoard.board[row][col].item;
     }
 
-    getMode(): boolean {
+    isModeCTF(): boolean {
         const currentBoard = this.boardToSave.value;
         return currentBoard.isCTF;
     }
@@ -90,7 +138,7 @@ export class MapService {
             this.generateBoard();
         } else {
             this.boardToSave = new BehaviorSubject<Board>(data);
-            this.toolSelectionService.parseBoard(this.boardToSave.value);
+            this.parseBoard(this.boardToSave.value);
         }
     }
 
@@ -120,6 +168,19 @@ export class MapService {
         this.boardToSave = new BehaviorSubject<Board>({
             ...data,
             board: boardGame.board,
+        });
+    }
+    private parseBoard(board: Board) {
+        board.board.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item !== Item.DEFAULT) {
+                    if (cell.item === Item.SPAWN) {
+                        this.incrementSpawns();
+                    } else {
+                        this.incrementItems();
+                    }
+                }
+            });
         });
     }
 }
