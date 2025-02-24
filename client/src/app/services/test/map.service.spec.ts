@@ -229,7 +229,7 @@ describe('MapService', () => {
             // On définit firstBoardValue avec ce board non vide.
             service['firstBoardValue'].next(customBoard);
             // Pour vérifier que parseBoard est appelé, on peut espionner la méthode privée.
-            const parseSpy = spyOn<unknown>(service, 'parseBoard').and.callThrough();
+            const parseSpy = spyOn<any>(service, 'parseBoard').and.callThrough();
 
             // On réinitialise les compteurs à la valeur max pour size 2
             const maxObj = BOARD_SIZE_MAPPING[customBoard.size as Size];
