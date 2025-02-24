@@ -62,7 +62,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('submitMove')
-    handleSubmitMove(client: Socket, payload: { accessCode: string; playerId: string; move: unknown }) {
+    handleSubmitMove(client: Socket, payload: { accessCode: string; playerId: string; move: string }) {
         const room = this.gameService.submitMove(payload.accessCode, payload.playerId, payload.move);
         if (!room) {
             client.emit('moveError', { message: 'Unable to submit move.' });

@@ -4,10 +4,10 @@ import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BoardController } from './controllers/board/board.controller';
+import { GameWebSocketModule } from './gateways/game-websocket.module';
+import { GameGateway } from './gateways/game.gateway';
+import { GameService } from './gateways/game.service';
 import { BoardService } from './services/board/board.service';
-import { GameGateway } from './game.gateway';
-import { GameWebSocketModule } from './game-websocket.module';
-import { GameService } from './game.service';
 
 @Module({
     imports: [
