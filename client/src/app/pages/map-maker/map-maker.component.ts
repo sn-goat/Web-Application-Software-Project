@@ -73,27 +73,27 @@ export class MapMakerComponent implements OnInit {
     }
 
     checkIfReadyToSave() {
-        if (this.toolSelection.getIsSpawnPlaced()) {
-            if (this.toolSelection.isMinimumObjectPlaced()) {
-                if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
-                    this.saveBoard()
-                        .then(() => {
-                            alert('Partie sauvegardée! Vous allez être redirigé.\n');
-                            this.router.navigate(['/admin']).then(() => {
-                                this.reset();
-                            });
-                        })
-                        .catch((error) => {
-                            alert('Erreur dans la configuration de la partie.\n' + error);
-                        });
-                }
-            } else {
-                alert('Vous devez placer au moins ' + this.toolSelection.getMaxObjectByType() + ' items sur la partie.');
-                return;
-            }
-        } else {
+        if (!this.toolSelection.getIsSpawnPlaced()) {
             alert('Vous devez placer tous les points de départs du jeu.');
             return;
+        }
+
+        if (!this.toolSelection.isMinimumObjectPlaced()) {
+            alert('Vous devez placer au moins ' + this.toolSelection.getMaxObjectByType() + ' items sur la partie.');
+            return;
+        }
+
+        if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
+            this.saveBoard()
+                .then(() => {
+                    alert('Partie sauvegardée! Vous allez être redirigé.\n');
+                    this.router.navigate(['/admin']).then(() => {
+                        this.reset();
+                    });
+                })
+                .catch((error) => {
+                    alert('Erreur dans la configuration de la partie.\n' + error);
+                });
         }
     }
 

@@ -7,11 +7,13 @@ $glow-gold: rgba(255, 215, 0, 0.2);
 html,
 body {
     height: 100%;
+    width: 100%;
     margin: 0;
     padding: 0;
     background: $primary-bg;
     color: $primary-text;
     overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .map-list-container {
