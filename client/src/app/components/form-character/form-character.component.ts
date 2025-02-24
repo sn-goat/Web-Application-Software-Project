@@ -2,10 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-
-const MAX_PORTRAITS = 12;
-const D4 = './assets/dice/d4.png';
-const D6 = './assets/dice/d6.png';
+import { D4, D6, MAX_PORTRAITS } from '@app/constants/playerConst';
+import { Player } from '@common/player';
 
 @Component({
     selector: 'app-form-character',
@@ -23,12 +21,14 @@ export class FormCharacterComponent {
     attackSelected: boolean = false;
     defenseSelected: boolean = false;
 
-    stats = {
-        playerName: '',
+    stats: Player = {
+        id: '',
+        username: '',
+        avatar: this.getCurrentPortraitImage(),
         life: 4,
-        rapidity: 4,
         attack: 4,
         defense: 4,
+        rapidity: 4,
         attackDice: '',
         defenseDice: '',
     };
@@ -68,20 +68,17 @@ export class FormCharacterComponent {
         const otherSelectedStat = (otherStat + 'Selected') as 'attackSelected' | 'defenseSelected';
 
         if (this[selectedStat]) {
-            // If already selected, unselect and hide dice images for both stats.
             this[selectedStat] = false;
             this.stats[`${stat}Dice`] = '';
             this.stats[`${otherStat}Dice`] = '';
         } else {
-            // If not selected, select it and assign the dice images accordingly.
             this[selectedStat] = true;
-            this.stats[`${stat}Dice`] = D6; // Selected stat gets D6.
+            this.stats[`${stat}Dice`] = D6;
 
-            // Ensure the other stat is not selected.
             if (this[otherSelectedStat]) {
                 this[otherSelectedStat] = false;
             }
-            this.stats[`${otherStat}Dice`] = D4; // The other gets D4.
+            this.stats[`${otherStat}Dice`] = D4;
         }
     }
 
@@ -91,6 +88,6 @@ export class FormCharacterComponent {
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
-        return this.stats.playerName.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
+        return this.stats.username.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
 }
