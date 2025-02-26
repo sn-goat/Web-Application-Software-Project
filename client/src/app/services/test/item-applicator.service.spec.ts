@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
 import { MapService } from '@app/services/code/map.service';
@@ -24,15 +26,15 @@ describe('ItemApplicatorService', () => {
             'increaseItemsToPlace',
             'setHasFlagOnBoard',
             'getCellTile',
-            'getBoardSize'
+            'getBoardSize',
         ]);
 
         TestBed.configureTestingModule({
             providers: [
                 ItemApplicatorService,
                 { provide: ToolSelectionService, useValue: toolSelectionService },
-                { provide: MapService, useValue: mapService }
-            ]
+                { provide: MapService, useValue: mapService },
+            ],
         });
 
         service = TestBed.inject(ItemApplicatorService);
@@ -204,7 +206,7 @@ describe('ItemApplicatorService', () => {
             expect(service['isBackToContainer']).toBeFalse();
         });
     });
-    
+
     it('should set isBackToContainer to false when item does not match selectedItem', () => {
         service['selectedItem'] = Item.FLAG;
         service.setBackToContainer(Item.SPAWN);

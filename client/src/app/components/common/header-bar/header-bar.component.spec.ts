@@ -14,7 +14,7 @@ describe('HeaderBarComponent', () => {
         routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
         TestBed.configureTestingModule({
-            imports: [HeaderBarComponent,MatIconModule, MatButtonModule, MatToolbarModule],
+            imports: [HeaderBarComponent, MatIconModule, MatButtonModule, MatToolbarModule],
             providers: [{ provide: Router, useValue: routerSpy }],
         }).compileComponents();
 

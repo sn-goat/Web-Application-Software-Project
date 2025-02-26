@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { EditEventHandlerService } from '@app/services/code/edit-event-handler.service';
 import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
@@ -21,8 +23,8 @@ describe('EditEventHandlerService', () => {
                 EditEventHandlerService,
                 { provide: MapService, useValue: mapService },
                 { provide: ItemApplicatorService, useValue: itemApplicatorService },
-                { provide: TileApplicatorService, useValue: tileApplicatorService }
-            ]
+                { provide: TileApplicatorService, useValue: tileApplicatorService },
+            ],
         });
 
         service = TestBed.inject(EditEventHandlerService);
@@ -59,7 +61,7 @@ describe('EditEventHandlerService', () => {
     describe('handleMouseUp', () => {
         it('should call handleMouseUp on both itemApplicatorService and tileApplicatorService', () => {
             const event = new MouseEvent('mouseup');
-            
+
             service.handleMouseUp(event);
 
             expect(itemApplicatorService.handleMouseUp).toHaveBeenCalled();

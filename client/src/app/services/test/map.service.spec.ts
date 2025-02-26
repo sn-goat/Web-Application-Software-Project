@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { MapService } from '@app/services/code/map.service';
