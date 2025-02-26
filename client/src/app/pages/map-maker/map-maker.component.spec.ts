@@ -15,7 +15,6 @@ describe('MapMakerComponent', () => {
     let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(async () => {
-        // Create a spy object for MapService with the needed methods.
         mockMapService = jasmine.createSpyObj(
             'MapService',
             [
@@ -34,7 +33,6 @@ describe('MapMakerComponent', () => {
         mockMapService.nbrItemsToPlace$ = new BehaviorSubject<number>(2);
         mockMapService.nbrSpawnsToPlace$ = new BehaviorSubject<number>(2);
 
-        // Create a dummy board and return it via a BehaviorSubject.
         const mockBoard: Board = {
             _id: '123',
             name: 'Test Board',
@@ -49,10 +47,8 @@ describe('MapMakerComponent', () => {
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-        // For testing getters and valid state.
         mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
 
-        // Create a spy for Router.
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockRouter.navigate.and.returnValue(Promise.resolve(true));
 
@@ -301,5 +297,25 @@ describe('MapMakerComponent', () => {
         const errorMessage = 'capture error';
         spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.reject(errorMessage));
         await expectAsync(component.screenshot()).toBeRejectedWith(`Error while screenshot: ${errorMessage}`);
+    });
+
+    it('should alert for invalid board name when board name is empty', () => {
+        const boardWithEmptyName: Board = {
+            _id: '123',
+            name: '',
+            description: 'Test Desc',
+            isCTF: false,
+            size: 10,
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            updatedAt: new Date(),
+        };
+        mockMapService.getBoardToSave.and.returnValue(new BehaviorSubject(boardWithEmptyName));
+        spyOn(window, 'alert');
+
+        component.checkIfReadyToSave();
+
+        expect(window.alert).toHaveBeenCalledWith('Veuillez donner un nom valide à votre carte');
     });
 });
