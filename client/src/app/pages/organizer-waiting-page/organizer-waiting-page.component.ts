@@ -17,7 +17,7 @@ export class OrganizerWaitingPageComponent implements OnInit {
 
     ngOnInit() {
         this.socketService.onGameCreated().subscribe((data: unknown) => {
-            this.accessCode = data.accessCode;
+            this.accessCode = (data as { accessCode: string }).accessCode;
         });
         this.socketService.createGame('organizer-1');
     }

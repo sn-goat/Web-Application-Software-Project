@@ -13,6 +13,7 @@ import { MapMakerComponent } from '@app/pages/map-maker/map-maker.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { OrganizerWaitingPageComponent } from '@app/pages/organizer-waiting-page/organizer-waiting-page.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
+import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 
 Component({
     template: `
@@ -26,6 +27,7 @@ const routes: Routes = [
     { path: 'creation', component: CreatePageComponent },
     { path: 'material', component: MaterialPageComponent },
     { path: 'edit', component: MapMakerComponent },
+    { path: 'game', component: GamePageComponent },
     { path: 'waiting', component: WaitingPageComponent },
     { path: 'createGame', component: OrganizerWaitingPageComponent },
     { path: 'joinGame', component: JoinRoomComponent },
