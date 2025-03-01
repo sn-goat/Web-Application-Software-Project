@@ -49,4 +49,8 @@ export class GameMapService {
             this.socketService.shareGameMap(this.gameMap.value);
         }
     }
+
+    getGameMapSize(): number {
+        return this.gameMap.value.size;
+    }
 }

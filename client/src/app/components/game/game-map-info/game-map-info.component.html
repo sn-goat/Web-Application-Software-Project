@@ -1,0 +1,27 @@
+
+<div class="game-map-info">
+    <div class="container">
+        <div class="header">
+            <h2> Information de la partie </h2>
+        </div>
+        <div class="content">
+            <div class="info">
+                <h3>Taille de la carte: </h3>
+                <p>{{ mapSize }}</p>
+            </div>
+            <div class="info">
+                <h3>Joueur actif: </h3>
+                @if (!activePlayer) {
+                    <p>En attente de joueurs...</p>
+                }
+                @else {
+                    <p>{{ activePlayer }}</p>
+                }
+            </div>
+            <div class="info">
+                <h3>Nombre de joueurs actuels: </h3>
+                <p>{{ playerCount }}</p>
+            </div>
+        </div>
+    </div>
+</div>

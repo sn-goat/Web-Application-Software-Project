@@ -15,7 +15,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     boardGame: Board;
     private boardSubscription: Subscription;
 
-    private gameMapService = inject(GameMapService);
+    private gameMapService: GameMapService = inject(GameMapService);
 
     ngOnInit() {
         this.boardSubscription = this.gameMapService.getGameMap().subscribe((board: Board) => {
