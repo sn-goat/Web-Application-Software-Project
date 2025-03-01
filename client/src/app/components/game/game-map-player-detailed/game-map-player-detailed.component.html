@@ -1,0 +1,63 @@
+<div class="container">
+    <h2> Information du Joueur </h2>
+    <div class="player"> 
+        <img [src]="srcAvatar + player.avatar + fileType" [alt]="'portrait' + player.avatar" class="player-image">
+        <p>{{ player.username }}</p>
+    </div>
+    <div class="info">
+        <div class="life">
+            <h3>Vie</h3>
+            <div class="health-bar-container">
+              <div class="health-bar" [style.width]="roundHealth((player.life / maxHealth) * 100)+ '%'"
+                   [ngClass]="getHealthBar()">
+                <span class="health-text">{{roundHealth((player.life / maxHealth) * 100) + '%' }}</span>
+              </div>
+            </div>
+            <div class="life-left">
+              <h4>Points de vie restants:</h4>
+              <p>{{ player.life }}</p>
+            </div>
+            <div class="max-life">
+              <h4>Points de vie maximal:</h4>
+              <p>{{ maxHealth }}</p>
+            </div>
+          </div>
+        <div class="attribute">
+            <h3>Attributs</h3>
+            <div class="rapidity">
+                <h4>Rapidité:</h4>
+                <p>{{ player.rapidity }}</p>
+            </div>
+            <div class="attack">
+                <h4>Attaque:</h4>
+                <p>{{ player.attack }}</p>
+            </div>
+            <div class="defense">
+                <h4>Défense:</h4>
+                <p>{{ player.defense }}</p>
+            </div>
+        </div>
+        <div class="dices">
+            <h3>Dés</h3>
+            <div class="attack-dice">
+                <h4>Dé d'attaque:</h4>
+                <img [src]="srcDice + player.attackDice + fileType" [alt]="'dice' + player.attackDice" class="dice-image">
+            </div>
+            <div class="defense-dice">
+                <h4>Dé de défense:</h4>
+                <img [src]="srcDice + player.defenseDice + fileType" [alt]="'dice' + player.defenseDice" class="dice-image">
+            </div>
+        </div>
+        <div class="skills">
+            <h3>Compétences</h3>
+            <div class="mouvements">
+                <h4>Points de mouvements:</h4>
+                <p>{{ player.movementPts }}</p>
+            </div>
+            <div class="actions">
+                <h4>Nombre d'actions:</h4>
+                <p>{{ player.actions}}</p>
+            </div>
+        </div>
+    </div>
+</div>

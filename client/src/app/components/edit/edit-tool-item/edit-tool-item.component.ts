@@ -3,7 +3,7 @@ import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { DEFAULT_PATH_ITEMS, DEFAULT_FILE_TYPE } from '@app/constants/path';
 import { MapService } from '@app/services/code/map.service';
 import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
@@ -21,7 +21,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     @Input() type: Item;
 
     readonly src = DEFAULT_PATH_ITEMS;
-    readonly fileType = '.png';
+    readonly fileType = DEFAULT_FILE_TYPE;
     isDraggable = true;
     remainingItem: number = 1;
     showTooltip = false;

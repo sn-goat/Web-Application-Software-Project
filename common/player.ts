@@ -8,4 +8,6 @@ export interface Player {
     rapidity: number;
     attackDice: string;
     defenseDice: string;
+    movementPts: number;
+    actions: number;
 }

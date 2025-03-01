@@ -1,6 +1,3 @@
-// game-map-info.component.scss
-
-// Themed variables
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
 $primary-text: #7ee0d0;
@@ -8,35 +5,44 @@ $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
+$map-color: #4fc3f7;
+$player-color: #ff9800;
+$game-color: #9c27b0;
 
 .game-map-info {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.container {
+  background-color: $secondary-bg;
+  border-radius: $border-radius;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 10px $glow-teal;
   color: $primary-text;
   font-family: 'Rajdhani', sans-serif;
   
-  .container {
-    background-color: $secondary-bg;
-    border-radius: $border-radius;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 10px $glow-teal;
-  }
-  
   .header {
     background: linear-gradient(90deg, darken($primary-bg, 5%) 0%, $primary-bg 100%);
-    padding: 10px 15px;
     border-bottom: 1px solid $glow-teal;
-    text-align: center;
+    padding: 12px 15px;
     
     h2 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: 1rem;
       font-weight: 600;
+      text-align: center;
       color: $primary-text;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -45,15 +51,15 @@ $border-radius: 10px;
   }
   
   .content {
-    padding: 15px;
     flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px 15px;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    overflow-y: auto;
     
     &::-webkit-scrollbar {
-      width: 8px;
+      width: 5px;
     }
     
     &::-webkit-scrollbar-track {
@@ -64,46 +70,76 @@ $border-radius: 10px;
       background-color: $glow-teal;
       border-radius: 20px;
     }
-  }
-  
-  .info {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    padding: 12px;
-    border-left: 3px solid $primary-text;
     
-    h3 {
-      margin: 0 0 8px 0;
-      font-size: 1.1rem;
-      color: $secondary-text;
-      font-weight: 500;
-    }
-    
-    p {
-      margin: 0;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: $primary-text;
-      text-shadow: 0 0 5px $glow-teal;
-    }
-    
-    &:nth-child(2) {
-      border-left-color: $accent-color;
+    .info {
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      
+      &:nth-child(1) {
+        border-left: 3px solid $map-color;
+        
+        h3 {
+          color: lighten($map-color, 10%);
+        }
+        
+        p {
+          color: $map-color;
+          text-shadow: 0 0 5px rgba($map-color, 0.5);
+        }
+      }
+      
+      &:nth-child(2) {
+        border-left: 3px solid $player-color;
+        
+        h3 {
+          color: lighten($player-color, 10%);
+        }
+        
+        p {
+          color: $player-color;
+          text-shadow: 0 0 5px rgba($player-color, 0.5);
+        }
+      }
+      
+      &:nth-child(3) {
+        border-left: 3px solid $game-color;
+        
+        h3 {
+          color: lighten($game-color, 10%);
+        }
+        
+        p {
+          color: $game-color;
+          text-shadow: 0 0 5px rgba($game-color, 0.5);
+        }
+      }
+      
+      h3 {
+        margin: 0 0 8px 0;
+        font-size: 1.1rem;
+        color: $secondary-text;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba($primary-text, 0.3);
+        padding-bottom: 5px;
+      }
       
       p {
-        color: lighten($accent-color, 10%);
-        text-shadow: 0 0 5px rgba($accent-color, 0.5);
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+        text-shadow: 0 0 5px $glow-teal;
       }
     }
-  }
-}
-
-// Optional animation for hover effects
-.info {
-  transition: transform 0.2s, box-shadow 0.2s;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
 }

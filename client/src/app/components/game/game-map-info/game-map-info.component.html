@@ -1,8 +1,7 @@
-
 <div class="game-map-info">
     <div class="container">
         <div class="header">
-            <h2> Information de la partie </h2>
+            <h2>Information de partie</h2>
         </div>
         <div class="content">
             <div class="info">
@@ -12,7 +11,7 @@
             <div class="info">
                 <h3>Joueur actif: </h3>
                 @if (!activePlayer) {
-                    <p>En attente de joueurs...</p>
+                    <p>Aucun joueur actif...</p>
                 }
                 @else {
                     <p>{{ activePlayer }}</p>

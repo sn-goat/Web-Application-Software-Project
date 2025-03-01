@@ -73,7 +73,29 @@ $rectangle-border: 1px solid $primary-text;
 .right-rectangle {
     grid-area: right;
     overflow-y: auto;
-}
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100%;
+  }
+  
+  app-game-map-player-detailed,
+  app-game-map-info {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  app-game-map-player-detailed {
+    flex: 1;
+    min-height: 0;
+  }
+  
+  app-game-map-info {
+    flex: 1;
+    min-height: 0;
+  }
 
 .bottom-rectangle {
     grid-area: bottom;

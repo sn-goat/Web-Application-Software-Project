@@ -32,6 +32,8 @@ export class FormCharacterComponent {
         rapidity: 4,
         attackDice: '',
         defenseDice: '',
+        movementPts: 0,
+        actions: 0,
     };
 
     private readonly gameMapService = inject(GameMapService);
