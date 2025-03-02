@@ -5,9 +5,9 @@ $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
-$map-color: #4fc3f7;
+$map-color: #7ee0d0;;
 $player-color: #ff9800;
-$game-color: #9c27b0;
+$game-color: #7ee0d0;
 
 .game-map-info {
   width: 100%;
@@ -34,7 +34,7 @@ $game-color: #9c27b0;
   font-family: 'Rajdhani', sans-serif;
   
   .header {
-    background: linear-gradient(90deg, darken($primary-bg, 5%) 0%, $primary-bg 100%);
+    background-color: rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid $glow-teal;
     padding: 12px 15px;
     
@@ -56,6 +56,7 @@ $game-color: #9c27b0;
     padding: 10px 15px;
     display: flex;
     flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.3);
     gap: 15px;
     
     &::-webkit-scrollbar {
@@ -115,7 +116,7 @@ $game-color: #9c27b0;
         border-left: 3px solid $game-color;
         
         h3 {
-          color: lighten($game-color, 10%);
+          color: color-mix(in srgb, $game-color, white 10%);
         }
         
         p {

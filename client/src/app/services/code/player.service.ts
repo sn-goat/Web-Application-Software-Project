@@ -37,16 +37,8 @@ export class PlayerService {
         this.activePlayer.next(player);
     }
 
-    getActivePlayer(): BehaviorSubject<Player> {
-        return this.activePlayer;
-    }
-
     setPlayers(players: Set<Player>): void {
         this.players.next(players);
-    }
-
-    getPlayers(): BehaviorSubject<Set<Player>> {
-        return this.players;
     }
 
     getPlayer(username: string): Player | undefined {

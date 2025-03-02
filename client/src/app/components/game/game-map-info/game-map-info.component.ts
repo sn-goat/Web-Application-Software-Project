@@ -24,10 +24,10 @@ export class GameMapInfoComponent implements OnInit {
 
     ngOnInit() {
         this.mapSize = this.gameMapService.getGameMapSize();
-        this.playerService.getActivePlayer().subscribe((player) => {
+        this.playerService.activePlayer$.subscribe((player) => {
             this.activePlayer = player.username;
         });
-        this.playerService.getPlayers().subscribe((players) => {
+        this.playerService.players$.subscribe((players) => {
             this.playerCount = players.size;
         });
     }

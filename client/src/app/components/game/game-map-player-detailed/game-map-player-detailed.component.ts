@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
 import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
-import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_DECREMENT, HEALTH_MAX} from '@app/constants/health';
+import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_DECREMENT, HEALTH_MAX } from '@app/constants/health';
 import { PlayerService } from '@app/services/code/player.service';
 import { Player } from '@common/player';
 
@@ -27,7 +27,7 @@ export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
 
     ngOnInit() {
         this.maxHealth = this.playerService.getPlayer(this.playerService.getPlayerUsername())?.life || 0;
-        this.playerService.getPlayers().subscribe(() => {
+        this.playerService.players$.subscribe(() => {
             const player = this.playerService.getPlayer(this.playerService.getPlayerUsername());
             if (player !== undefined) {
                 this.player = player;

@@ -74,8 +74,6 @@ $rectangle-border: 1px solid $primary-text;
     grid-area: right;
     overflow-y: auto;
     display: flex;
-    gap: 5px;
-    padding: 5px;
     flex-direction: column;
     box-sizing: border-box;
     height: 100%;
@@ -97,8 +95,12 @@ $rectangle-border: 1px solid $primary-text;
     min-height: 0;
   }
 
+
 .bottom-rectangle {
     grid-area: bottom;
     background-color: $primary-bg;
-    padding: 0 20px;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
 }

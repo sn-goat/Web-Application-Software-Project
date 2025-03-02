@@ -6,9 +6,9 @@ $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
 $health-color: #ff5252;
-$attribute-color: #ffca28;
-$dice-color: #64b5f6;
-$skill-color: #66bb6a;
+$attribute-color: #7ee0d0;
+$dice-color: #7ee0d0;
+$skill-color: #7ee0d0;
 
 :host {
     display: block;
@@ -38,7 +38,7 @@ $skill-color: #66bb6a;
     text-transform: uppercase;
     letter-spacing: 1px;
     text-shadow: 0 0 10px $glow-teal;
-    background: linear-gradient(90deg, darken($primary-bg, 5%) 0%, $primary-bg 100%);
+    background-color: rgba(0, 0, 0, 0.3);
     border-bottom: 1px solid $glow-teal;
   }
   
@@ -74,6 +74,7 @@ $skill-color: #66bb6a;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
     
     &::-webkit-scrollbar {
       width: 5px;
@@ -128,7 +129,7 @@ $skill-color: #66bb6a;
     border-left: 3px solid $health-color;
     
     h3 {
-      color: lighten($health-color, 10%);
+      color: color-mix(in srgb, $health-color, white 10%);
     }
     
     .life-left p {
@@ -151,7 +152,7 @@ $skill-color: #66bb6a;
   
   .health-bar {
     height: 100%;
-    background: linear-gradient(to right, darken($health-color, 10%), $health-color);
+    background: linear-gradient(to right, color-mix(in srgb, $health-color, black 10%), $health-color);
     transition: width 0.5s ease-out;
     border-right: 2px solid rgba(0, 0, 0, 0.3);
     position: relative;
@@ -196,7 +197,7 @@ $skill-color: #66bb6a;
     border-left: 3px solid $attribute-color;
     
     h3 {
-      color: lighten($attribute-color, 10%);
+      color: color-mix(in srgb, $attribute-color, white 10%);
     }
     
     .rapidity p, .attack p, .defense p {
@@ -209,7 +210,7 @@ $skill-color: #66bb6a;
     border-left: 3px solid $dice-color;
     
     h3 {
-      color: lighten($dice-color, 10%);
+      color: color-mix(in srgb, $dice-color, white 10%);
     }
     
     .attack-dice p, .defense-dice p {
@@ -222,7 +223,7 @@ $skill-color: #66bb6a;
     border-left: 3px solid $skill-color;
     
     h3 {
-      color: lighten($skill-color, 10%);
+      color: color-mix(in srgb, $skill-color, white 10%);
     }
     
     .mouvements p, .actions p {
@@ -252,7 +253,7 @@ $skill-color: #66bb6a;
     border-left: 3px solid $dice-color;
     
     h3 {
-      color: lighten($dice-color, 10%);
+      color: color-mix(in srgb, $dice-color, white 10%);
     }
     
     .attack-dice, .defense-dice {
