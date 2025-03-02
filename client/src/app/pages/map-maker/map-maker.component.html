@@ -6,8 +6,6 @@
             <input id="Nom" type="text" maxlength="15" placeholder="15 caractères maximum" matInput [(ngModel)]="name" />
 
             <label for="Description">Description de la carte:</label>
-            <!-- <textarea id="Description" rows="4" maxlength="100" placeholder="100 caractères maximum"></textarea>
-              -->
             <textarea id="Description" rows="4" maxlength="100" placeholder="100 caractères maximum" matInput [(ngModel)]="description"></textarea>
 
             <button type="button" id="saveButton" (click)="checkIfReadyToSave()">Enregistrer</button>
