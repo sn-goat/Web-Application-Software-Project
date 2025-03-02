@@ -3,6 +3,7 @@ import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
 import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_DECREMENT, HEALTH_MAX } from '@app/constants/health';
 import { PlayerService } from '@app/services/code/player.service';
+import { GameService } from '@app/services/code/game.service';
 import { Player } from '@common/player';
 
 @Component({
@@ -20,6 +21,7 @@ export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
     player: Player;
 
     private playerService: PlayerService = inject(PlayerService);
+    private gameService: GameService = inject(GameService); // for testing purposes
 
     constructor() {
         this.player = {} as Player;
@@ -40,6 +42,11 @@ export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
         const updatedPlayer = { ...this.player };
         updatedPlayer.life = this.player.life - HEALTH_DECREMENT;
         this.playerService.editPlayer(updatedPlayer);
+        this.playerService.sortPlayers();
+        this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
+        this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
+        this.gameService.abandonGame('mockPlayer0');
+        // this.gameService.abandonGame('mockPlayer1');
     }
 
     getHealthBar(): string {

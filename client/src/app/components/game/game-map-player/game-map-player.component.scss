@@ -24,17 +24,17 @@ $border-radius: 10px;
     justify-content: space-evenly;
         
     .player {
-        height: 100%;
+        height: 95%;
         width: auto;
         min-width: 0;
-        max-width: 160px;
+        max-width: 150px;
         flex: 1;
         background-color: rgba(0, 0, 0, 0.3);
         border-radius: 8px;
         border-left: 2px solid $primary-text;
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.5), 0 0 6px $glow-teal;
         padding: 3px;
-        transition: transform 0.2s ease;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         display: flex;
         flex-direction: row;
         align-items: center;
@@ -49,13 +49,13 @@ $border-radius: 10px;
       .player-image {
         display: flex;
         flex-direction: column;
-        width: 65%;
+        width: 60%;
         align-items: center;
         margin-bottom: 2px;
         
         img {
-          width: 36px;
-          height: 36px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
           border: 1px solid $primary-text;
           box-shadow: 0 0 6px $glow-teal;
@@ -64,8 +64,8 @@ $border-radius: 10px;
         }
         
         .empty-player {
-          width: 36px;
-          height: 36px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
           border: 1px dashed rgba($primary-text, 0.4);
           background-color: rgba(0, 0, 0, 0.2);
@@ -84,7 +84,7 @@ $border-radius: 10px;
         
         h3 {
           margin: 2px 0 0 0;
-          font-size: 0.6rem;
+          font-size: 0.55rem;
           color: $primary-text;
           text-shadow: 0 0 5px $glow-teal;
           font-weight: 600;
@@ -92,30 +92,76 @@ $border-radius: 10px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          max-width: 90%;
+          max-width: 100%;
         }
       }
       
       .player-info {
-        background-color: rgba(0, 0, 0, 0.2);
         border-radius: 4px;
         padding: 2px;
         text-align: center;
-        flex: 0 0 auto;
-        width: 35%;
+        flex: 1 1 auto;
+        height: 100%;
+        width: 40%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
         
         h3 {
           margin: 0;
-          font-size: 0.4rem;
+          font-size: 0.35rem;
           color: $secondary-text;
           font-weight: 500;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: center;
         }
+
+        h3.admin, h3.active {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2px;
+            width: auto;
+            height: auto;
+            line-height: 1;
+            box-sizing: border-box;
+            vertical-align: middle;
+          }
+
+        h3.admin {
+            color: $accent-color;
+            font-weight: bold;
+            border-radius: 3px;
+            
+            border: 1px solid rgba($accent-color, 0.4);
+            text-shadow: 0 0 4px rgba($accent-color, 0.6);
+        }
+
+        h3.active {
+            color: #ff9800;
+            font-weight: bold;
+            border-radius: 3px;
+            border: 1px solid rgba(#ff9800, 0.4);
+            text-shadow: 0 0 4px rgba($primary-text, 0.6);
+            position: relative;
+            padding: 1px 3px;
+            animation: text-pulse 2s ease-in-out infinite;
+            overflow: visible;
+            
+        }
+
+        h3 + h3 {
+            margin-top: 2px;
+          }
         
         p {
           margin: 1px 0 0 0;
-          font-size: 0.8rem;
+          font-size: 0.6rem;
           color: $accent-color;
           font-weight: bold;
           line-height: 1.2; 
@@ -123,18 +169,51 @@ $border-radius: 10px;
         }
       }
     }
-  }
+}
 
-.player.active {
-  border-left: 3px solid $accent-color;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6), 0 0 12px rgba($accent-color, 0.4);
-  
-  .player-image img {
-    border: 2px solid $accent-color;
-    box-shadow: 0 0 10px rgba($accent-color, 0.5);
-  }
-  
-  .player-info h3 {
-    color: $accent-color;
-  }
+.player-not-in-game {
+    text-decoration: line-through;
+    opacity: 0.3;
+    color: #7a7a7a;
+    
+    &::after {
+      content: none;
+    }
+}
+
+
+.player-image:has(.player-not-in-game) {
+    img {
+        opacity: 0.3;
+        filter: grayscale(100%);
+    }
+}
+
+.player:has(.player-not-in-game) {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-left: 2px solid #4a4a4a;
+    h3,
+    p {
+        opacity: 0.3;
+        color: #7a7a7a;
+    }
+}
+
+
+@keyframes pulse {
+    0% { 
+        opacity: 1; 
+        border-color: rgba(#ff9800, 0.9); 
+        box-shadow: 0 0 5px rgba(#ff9800, 0.6);
+    }
+    50% { 
+        opacity: 0.3; 
+        border-color: rgba(#ff9800, 0.2);
+        box-shadow: 0 0 2px rgba(#ff9800, 0.2);
+    }
+    100% { 
+        opacity: 1; 
+        border-color: rgba(#ff9800, 0.9);
+        box-shadow: 0 0 5px rgba(#ff9800, 0.6);
+    }
 }

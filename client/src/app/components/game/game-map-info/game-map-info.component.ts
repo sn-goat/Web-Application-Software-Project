@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { PlayerService } from '@app/services/code/player.service';
+import { GameService } from '@app/services/code/game.service';
 
 @Component({
     selector: 'app-game-map-info',
@@ -15,6 +16,7 @@ export class GameMapInfoComponent implements OnInit {
 
     private gameMapService: GameMapService = inject(GameMapService);
     private playerService: PlayerService = inject(PlayerService);
+    private gameService: GameService = inject(GameService);
 
     constructor() {
         this.mapSize = 0;
@@ -25,10 +27,16 @@ export class GameMapInfoComponent implements OnInit {
     ngOnInit() {
         this.mapSize = this.gameMapService.getGameMapSize();
         this.playerService.activePlayer$.subscribe((player) => {
-            this.activePlayer = player.username;
+            this.activePlayer = player;
         });
-        this.playerService.players$.subscribe((players) => {
-            this.playerCount = players.size;
+        this.gameService.playersInGameMap$.subscribe((players) => {
+            let count = 0;
+            players.forEach((value) => {
+                if (value) {
+                    count++;
+                }
+            });
+            this.playerCount = count;
         });
     }
 }
