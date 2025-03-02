@@ -11,7 +11,7 @@ import { TEAM_MEMBERS } from '@app/constants/team-members';
 export class MainPageComponent {
     readonly title: string = 'POLYTOPIA';
     readonly teamMembers: string[] = TEAM_MEMBERS;
-    readonly gameLogoPath: string = '/assets/POLYTOPIA_game_logo.png';
+    readonly gameLogoPath: string = './assets/POLYTOPIA_game_logo.png';
     gameLogoError: boolean = false;
 
     handleGameLogoError(): void {

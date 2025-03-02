@@ -1,0 +1,12 @@
+<div>
+    <h1>Join a Game Room</h1>
+    <label for="code">Access Code:</label>
+    <input id="code" [(ngModel)]="accessCode" placeholder="Enter access code" />
+    <br/>
+    <label for="name">Player Name:</label>
+    <input id="name" [(ngModel)]="playerName" placeholder="Enter your name" />
+    <br/>
+    <button (click)="joinRoom()">Join Room</button>
+    <p>{{ joinResult }}</p>
+  </div>
+  
