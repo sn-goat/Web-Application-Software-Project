@@ -145,32 +145,24 @@ $buttons-color: #7ee0d0;
           object-fit: contain;
       }
       
-      .empty-inventory {
-        display: flex;
-        flex-direction: row;
-        gap: 2px;
-        width: 100%;
-        align-items: center;
-        justify-content: flex-start;
-
-        .item-slot.empty {
-            width: calc(16% - 8px);
-            padding-bottom: calc(16% - 8px);
-            height: 0;
-            margin: 3px;
-            border: 1px dashed rgba($inventory-color, 0.4);
-            box-shadow: none;
-        }
-        
-        p {
-          margin: 0;
-          color: rgba($primary-text, 0.7);
-          font-style: italic;
-          font-size: 0.6rem;
-          flex-basis: 100%;
-          text-align: center;
-        }
-      }
+    .item-slot.empty {
+        width: calc(15.5% - 8px);
+        padding-bottom: calc(15.5% - 8px);
+        height: 0;
+        margin: 3px;
+        border: 1px dashed rgba($inventory-color, 0.4);
+        box-shadow: none;
+    }
+    
+    p {
+        margin: 0;
+        color: rgba($primary-text, 0.7);
+        font-style: italic;
+        font-size: 0.6rem;
+        flex-basis: 100%;
+        text-align: center;
+    }
+    
     }
   }
   

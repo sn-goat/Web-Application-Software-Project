@@ -1,0 +1,26 @@
+<div class="player-section">
+    @for (player of players; track player) {
+        <div class="player">
+            <div class="player-image">
+                <img [src]="srcAvatar + player.avatar + fileType" [alt]="player.username">
+                <h3>{{ player.username }}</h3>
+            </div>
+            <div class="player-info">
+                <h3>Victoires:</h3>
+                <p>1</p>
+            </div>
+        </div>
+    }
+    @for (i of rangeEmptyPlayerSlot(); track i) {
+        <div class="player">
+            <div class="player-image">
+                <div class="empty-player"></div>
+                <h3>Vide</h3>
+            </div>
+            <div class="player-info">
+                <h3>Victoires:</h3>
+                <p>0</p>
+            </div>
+        </div>
+    }
+</div>

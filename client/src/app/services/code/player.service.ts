@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@common/player';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { MAX_PLAYERS } from '@app/constants/playerConst';
 
 @Injectable({
     providedIn: 'root',
@@ -38,7 +39,9 @@ export class PlayerService {
     }
 
     setPlayers(players: Set<Player>): void {
-        this.players.next(players);
+        if (players.size <= MAX_PLAYERS) {
+            this.players.next(players);
+        }
     }
 
     getPlayer(username: string): Player | undefined {
@@ -81,7 +84,7 @@ export class PlayerService {
 
     addPlayer(player: Player): void {
         const players = this.players.value;
-        if (!player || players.has(player)) {
+        if (!player || players.has(player) || players.size >= MAX_PLAYERS) {
             return;
         }
         players.add(player);
@@ -95,5 +98,9 @@ export class PlayerService {
         }
         players.delete(player);
         this.players.next(players);
+    }
+
+    removeAllPlayers(): void {
+        this.players.next(new Set<Player>());
     }
 }

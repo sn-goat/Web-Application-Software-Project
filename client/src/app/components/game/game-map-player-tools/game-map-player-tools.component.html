@@ -10,16 +10,13 @@
           }
 
           @if (items.length === 1) {
-            <div class="empty-inventory">
-              <div class="item-slot empty"></div>
-            </div>
+            <div class="item-slot empty"></div>
           }
           @else if (!items.length) {
-            <div class="empty-inventory">
-              <div class="item-slot empty"></div>
-              <div class="item-slot empty"></div>
-              <p>Vous n'avez pas d'items</p>
-            </div>
+            <div class="item-slot empty"></div>
+            <div class="item-slot empty"></div>
+            <p>Vous n'avez pas d'items</p>
+
           }
         </div>
       </div>
