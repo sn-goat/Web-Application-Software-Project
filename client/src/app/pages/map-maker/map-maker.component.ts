@@ -12,8 +12,8 @@ import { EditItemAreaComponent } from '@app/components/edit/edit-item-area/edit-
 import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { MouseEditorService } from '@app/services/code/mouse-editor.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { firstValueFrom } from 'rxjs';
+import { Validation } from '@common/board';
 
 @Component({
     selector: 'app-map-maker',

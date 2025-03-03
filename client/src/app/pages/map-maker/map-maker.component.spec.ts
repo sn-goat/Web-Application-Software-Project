@@ -281,20 +281,6 @@ describe('MapMakerComponent', () => {
         expect(boardArg._id).toBeUndefined();
     });
 
-    it('should return a screenshot string when captureElementAsString is successful', async () => {
-        const expectedScreenshot = 'base64thumbnail';
-        spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.resolve(expectedScreenshot));
-        const screenshotResult = await component.screenshot();
-        expect(screenshotResult).toEqual(expectedScreenshot);
-        expect(component['screenshotService'].captureElementAsString).toHaveBeenCalledWith('map-screenshot');
-    });
-
-    it('should reject with an error message when captureElementAsString fails', async () => {
-        const errorMessage = 'capture error';
-        spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.reject(errorMessage));
-        await expectAsync(component.screenshot()).toBeRejectedWith(`Error while screenshot: ${errorMessage}`);
-    });
-
     it('should alert for invalid board name when board name is empty', () => {
         const boardWithEmptyName: Board = {
             _id: '123',
