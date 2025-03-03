@@ -7,8 +7,8 @@ import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
-import { Board } from '@common/board';
-import { Visibility } from '@common/enums';
+import { Board, Cell, Vec2 } from '@common/board';
+import { Item, Tile, Visibility } from '@common/enums';
 import { of } from 'rxjs';
 import { MapListComponent } from './map-list.component';
 
@@ -21,13 +21,27 @@ describe('MapListComponent', () => {
     let mockMapService: jasmine.SpyObj<MapService>;
     let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
+    const generateMockBoard = (size: number): Cell[][] => {
+        return Array.from({ length: size }, (_, x) =>
+            Array.from(
+                { length: size },
+                (__, y) =>
+                    ({
+                        position: { x, y } as Vec2,
+                        tile: Tile.WALL,
+                        item: y % 2 === 0 ? Item.CHEST : Item.DEFAULT,
+                    }) as Cell,
+            ),
+        );
+    };
+
     const mockBoardGames: Board[] = [
         {
             _id: '1',
             name: 'Game A',
             size: 10,
             description: 'Desc A',
-            board: [],
+            board: generateMockBoard(10),
             visibility: Visibility.PUBLIC,
             updatedAt: new Date(),
             createdAt: new Date(),
@@ -39,7 +53,7 @@ describe('MapListComponent', () => {
             name: 'Game B',
             size: 20,
             description: 'Desc B',
-            board: [],
+            board: generateMockBoard(10),
             isCTF: false,
             visibility: Visibility.PRIVATE,
             createdAt: new Date(),
@@ -47,6 +61,8 @@ describe('MapListComponent', () => {
             updatedAt: new Date(),
         },
     ];
+
+    const LOADING_INTERVAL = 10;
 
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
@@ -69,8 +85,10 @@ describe('MapListComponent', () => {
         fixture = TestBed.createComponent(MapListComponent);
         component = fixture.componentInstance;
         component.isCreationPage = true;
+        component.loadingInterval = LOADING_INTERVAL;
         mockBoardService.getAllBoards.and.returnValue(of(mockBoardGames));
-        fixture.detectChanges();
+        fixture.autoDetectChanges();
+        await fixture.whenStable();
     });
 
     it('should create', () => {
@@ -172,19 +190,22 @@ describe('MapListComponent', () => {
         expect(mockMap.visibility).toBe('Private');
     });
 
-    it('should display a preview image of the game', () => {
-        const previewImage = fixture.debugElement.query(By.css('.item-image img'));
+    it('should display a preview image of the game', async () => {
+        component.mapsLoaded = true; // Ensure maps are loaded
+
+        const previewImage = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container img.base-image'));
+
         expect(previewImage).not.toBeNull();
     });
 
-    it('should display the game description on image hover', () => {
-        const previewContainer = fixture.debugElement.query(By.css('.item-image'));
-        expect(previewContainer).toBeTruthy();
+    it('should display the game description on image hover', async () => {
+        const previewContainer = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container'));
 
+        expect(previewContainer).toBeTruthy();
         previewContainer.triggerEventHandler('mouseover', null);
         fixture.detectChanges();
 
-        const description = fixture.debugElement.query(By.css('.item-description'));
+        const description = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .item-description'));
         expect(description).not.toBeNull();
         expect(description.nativeElement.textContent).toContain(mockBoardGames[0].description);
     });

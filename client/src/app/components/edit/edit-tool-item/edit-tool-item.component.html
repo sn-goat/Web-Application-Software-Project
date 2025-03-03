@@ -13,7 +13,7 @@
         class="draggable-image"
         [draggable]="isDraggable"
         [class.item-moved]="!isDraggable"
-        (drag)="onDragStart()"
+        (dragstart)="onDragStart()"
         (dragleave)="onDragEnter($event)"
         [title]="''"
     >
