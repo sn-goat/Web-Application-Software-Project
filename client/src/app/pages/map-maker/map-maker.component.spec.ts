@@ -3,7 +3,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, flush } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MapService } from '@app/services/code/map.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { BehaviorSubject, of, throwError } from 'rxjs';
@@ -16,24 +15,39 @@ describe('MapMakerComponent', () => {
     let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(async () => {
-        mockMapService = jasmine.createSpyObj('MapService', [
-            'getBoardToSave',
-            'setBoardName',
-            'setBoardDescription',
-            'initializeBoard',
-            'getBoardSize',
-            'setBoardToFirstValue',
-        ]);
+        mockMapService = jasmine.createSpyObj(
+            'MapService',
+            [
+                'getBoardToSave',
+                'setBoardName',
+                'setBoardDescription',
+                'initializeBoard',
+                'getBoardSize',
+                'setBoardToFirstValue',
+                'isReadyToSave',
+                'isModeCTF',
+            ],
+            ['remainingItemsToPlace', 'remainingSpawnsToPlace', 'hasFlagOnBoard'],
+        );
 
-        const mockBoard = {
+        mockMapService.nbrItemsToPlace$ = new BehaviorSubject<number>(2);
+        mockMapService.nbrSpawnsToPlace$ = new BehaviorSubject<number>(2);
+
+        const mockBoard: Board = {
             _id: '123',
             name: 'Test Board',
             description: 'New Desc',
             isCTF: false,
             size: 10,
-        } as Board;
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            updatedAt: new Date(),
+        };
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
+
+        mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
 
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockRouter.navigate.and.returnValue(Promise.resolve(true));
@@ -101,36 +115,23 @@ describe('MapMakerComponent', () => {
     });
 
     it('should alert when spawn points are not placed', () => {
-        const maxObject = 3;
-        component['toolSelection'] = {
-            getIsSpawnPlaced: () => false,
-            isMinimumObjectPlaced: () => true,
-            getMaxObjectByType: () => maxObject,
-        } as ToolSelectionService;
+        // Simulate an invalid state due to missing spawn points.
+        mockMapService.isReadyToSave.and.returnValue({ isValid: false, error: 'Vous devez placer tous les points de départs du jeu.' });
         const alertSpy = spyOn(window, 'alert');
         component.checkIfReadyToSave();
         expect(alertSpy).toHaveBeenCalledWith('Vous devez placer tous les points de départs du jeu.');
     });
 
     it('should alert when minimum objects are not placed', () => {
-        const maxObject = 5;
-        component['toolSelection'] = {
-            getIsSpawnPlaced: () => true,
-            isMinimumObjectPlaced: () => false,
-            getMaxObjectByType: () => maxObject,
-        } as ToolSelectionService;
+        // Simulate an invalid state due to missing objects.
+        mockMapService.isReadyToSave.and.returnValue({ isValid: false, error: 'Vous devez placer au moins 5 items sur la partie.' });
         const alertSpy = spyOn(window, 'alert');
         component.checkIfReadyToSave();
         expect(alertSpy).toHaveBeenCalledWith('Vous devez placer au moins 5 items sur la partie.');
     });
 
     it('should not save board when save confirmation is cancelled', () => {
-        const maxObject = 3;
-        component['toolSelection'] = {
-            getIsSpawnPlaced: () => true,
-            isMinimumObjectPlaced: () => true,
-            getMaxObjectByType: () => maxObject,
-        } as ToolSelectionService;
+        mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
         spyOn(window, 'confirm').and.returnValue(false);
         const saveBoardSpy = spyOn(component, 'saveBoard');
         component.checkIfReadyToSave();
@@ -138,12 +139,7 @@ describe('MapMakerComponent', () => {
     });
 
     it('should save board, alert success, navigate and reset when confirmed and save is successful', fakeAsync(() => {
-        const maxObject = 3;
-        component['toolSelection'] = {
-            getIsSpawnPlaced: () => true,
-            isMinimumObjectPlaced: () => true,
-            getMaxObjectByType: () => maxObject,
-        } as ToolSelectionService;
+        mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
         spyOn(window, 'confirm').and.returnValue(true);
         const alertSpy = spyOn(window, 'alert');
         const resetSpy = spyOn(component, 'reset');
@@ -159,12 +155,7 @@ describe('MapMakerComponent', () => {
     }));
 
     it('should alert error when saveBoard fails', fakeAsync(() => {
-        const maxObject = 3;
-        component['toolSelection'] = {
-            getIsSpawnPlaced: () => true,
-            isMinimumObjectPlaced: () => true,
-            getMaxObjectByType: () => maxObject,
-        } as ToolSelectionService;
+        mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
         spyOn(window, 'confirm').and.returnValue(true);
         const alertSpy = spyOn(window, 'alert');
         const errorObj = 'Save failed';
@@ -177,8 +168,17 @@ describe('MapMakerComponent', () => {
         expect(alertSpy).toHaveBeenCalledWith('Erreur dans la configuration de la partie.\n' + errorObj);
     }));
 
-    it('should handle response and error correctly in saveBoard', async () => {
-        const mockBoard = { name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
+    it('should handle response correctly in saveBoard when board has no _id', async () => {
+        const mockBoard: Board = {
+            name: 'Test Board',
+            description: 'New Desc',
+            isCTF: false,
+            size: 10,
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            updatedAt: new Date(),
+        };
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
@@ -190,8 +190,17 @@ describe('MapMakerComponent', () => {
         expect(result).toEqual('Success Response');
     });
 
-    it('should handle error correctly in saveBoard', async () => {
-        const mockBoard: Board = { name: 'Test Board', description: 'New Desc', isCTF: false, size: 10 } as Board;
+    it('should handle error correctly in saveBoard when adding board fails', async () => {
+        const mockBoard: Board = {
+            name: 'Test Board',
+            description: 'New Desc',
+            isCTF: false,
+            size: 10,
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            updatedAt: new Date(),
+        };
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
@@ -199,7 +208,6 @@ describe('MapMakerComponent', () => {
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorResponse));
 
         await expectAsync(component.saveBoard()).toBeRejected();
-
         fixture.detectChanges();
         expect(addBoardSpy).toHaveBeenCalledWith({ ...mockBoard, image: '' });
     });
@@ -238,6 +246,7 @@ describe('MapMakerComponent', () => {
             visibility: Visibility.PUBLIC,
             isCTF: false,
             size: 10,
+            updatedAt: new Date(),
         };
         const boardSubject = new BehaviorSubject<Board>(mockBoardWithId);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
@@ -259,6 +268,7 @@ describe('MapMakerComponent', () => {
             visibility: Visibility.PUBLIC,
             isCTF: false,
             size: 10,
+            updatedAt: new Date(),
         };
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
@@ -269,5 +279,39 @@ describe('MapMakerComponent', () => {
         expect(addBoardSpy).toHaveBeenCalledWith(jasmine.objectContaining({ image: '' }));
         const boardArg = addBoardSpy.calls.mostRecent().args[0];
         expect(boardArg._id).toBeUndefined();
+    });
+
+    it('should return a screenshot string when captureElementAsString is successful', async () => {
+        const expectedScreenshot = 'base64thumbnail';
+        spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.resolve(expectedScreenshot));
+        const screenshotResult = await component.screenshot();
+        expect(screenshotResult).toEqual(expectedScreenshot);
+        expect(component['screenshotService'].captureElementAsString).toHaveBeenCalledWith('map-screenshot');
+    });
+
+    it('should reject with an error message when captureElementAsString fails', async () => {
+        const errorMessage = 'capture error';
+        spyOn(component['screenshotService'], 'captureElementAsString').and.returnValue(Promise.reject(errorMessage));
+        await expectAsync(component.screenshot()).toBeRejectedWith(`Error while screenshot: ${errorMessage}`);
+    });
+
+    it('should alert for invalid board name when board name is empty', () => {
+        const boardWithEmptyName: Board = {
+            _id: '123',
+            name: '',
+            description: 'Test Desc',
+            isCTF: false,
+            size: 10,
+            board: [],
+            image: '',
+            visibility: Visibility.PUBLIC,
+            updatedAt: new Date(),
+        };
+        mockMapService.getBoardToSave.and.returnValue(new BehaviorSubject(boardWithEmptyName));
+        spyOn(window, 'alert');
+
+        component.checkIfReadyToSave();
+
+        expect(window.alert).toHaveBeenCalledWith('Veuillez donner un nom valide à votre carte');
     });
 });

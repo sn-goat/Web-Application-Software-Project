@@ -7,9 +7,11 @@ import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
+import { JoinRoomComponent } from '@app/pages/join-room/join-room.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MapMakerComponent } from '@app/pages/map-maker/map-maker.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
+import { OrganizerWaitingPageComponent } from '@app/pages/organizer-waiting-page/organizer-waiting-page.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
 
 Component({
@@ -25,6 +27,8 @@ const routes: Routes = [
     { path: 'material', component: MaterialPageComponent },
     { path: 'edit', component: MapMakerComponent },
     { path: 'waiting', component: WaitingPageComponent },
+    { path: 'createGame', component: OrganizerWaitingPageComponent },
+    { path: 'joinGame', component: JoinRoomComponent },
     { path: 'admin', component: AdminPageComponent },
     { path: '**', redirectTo: '/home' },
 ];

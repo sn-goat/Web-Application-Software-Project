@@ -1,0 +1,12 @@
+$primary-bg: #1a1625;
+$primary-text: #7ee0d0;
+$glow-teal: rgba(126, 224, 208, 0.2);
+$glow-gold: rgba(255, 215, 0, 0.2);
+
+mat-toolbar {
+    background-color: $primary-bg;
+}
+
+mat-icon {
+    color: #7ee0d0;
+}
