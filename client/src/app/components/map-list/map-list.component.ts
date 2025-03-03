@@ -8,6 +8,15 @@ import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
+import {
+    DEFAULT_PATH_ITEMS,
+    DEFAULT_PATH_TILES,
+    DEFAULT_PATH_DELETE,
+    DEFAULT_PATH_EDIT,
+    DEFAULT_PATH_VISIBLE,
+    DEFAULT_PATH_NOT_VISIBLE,
+} from '@app/constants/path';
+import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
 
 @Component({
     selector: 'app-map-list',
@@ -22,6 +31,16 @@ export class MapListComponent implements OnInit {
     @Input() isCreationPage: boolean = false;
     @Input() onlyVisible: boolean = false;
     @Output() divClicked = new EventEmitter<void>();
+    isLoading: boolean = true;
+    mapsLoaded: boolean = false;
+    readonly srcTiles = DEFAULT_PATH_TILES;
+    readonly srcItem = DEFAULT_PATH_ITEMS;
+    readonly srcEdit = DEFAULT_PATH_EDIT;
+    readonly srcDelete = DEFAULT_PATH_DELETE;
+    readonly srcVisible = DEFAULT_PATH_VISIBLE;
+    readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
+    readonly fileType = '.png';
+    loadingInterval = LOADING_INTERVAL;
     searchQuery: string = '';
     sortBy: string = 'createdAt';
 
@@ -62,8 +81,13 @@ export class MapListComponent implements OnInit {
                 updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
                 createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
             }));
-            this.cdr.detectChanges(); // Manually trigger change detection
+            this.cdr.detectChanges();
         });
+        setTimeout(() => {
+            this.isLoading = false;
+            this.mapsLoaded = this.getFilteredAndSortedItems().length > 0;
+            this.cdr.detectChanges();
+        }, this.loadingInterval);
     }
 
     getFilteredAndSortedItems(): Board[] {
