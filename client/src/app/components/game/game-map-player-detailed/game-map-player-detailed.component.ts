@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
 import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
-import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_DECREMENT, HEALTH_MAX } from '@app/constants/health';
+import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_MAX } from '@app/constants/health';
 import { PlayerService } from '@app/services/code/player.service';
 import { GameService } from '@app/services/code/game.service';
 import { Player } from '@common/player';
@@ -35,17 +35,25 @@ export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
                 this.player = player;
             }
         });
+
+        // For testing purposes
+        // const updatedPlayer = { ...this.player };
+        // updatedPlayer.life = this.player.life - HEALTH_DECREMENT;
+        // this.playerService.editPlayer(updatedPlayer);
+        this.playerService.sortPlayers();
     }
 
     // For testing purposes
     ngAfterViewInit(): void {
-        const updatedPlayer = { ...this.player };
-        updatedPlayer.life = this.player.life - HEALTH_DECREMENT;
-        this.playerService.editPlayer(updatedPlayer);
-        this.playerService.sortPlayers();
-        this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
-        this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
-        this.gameService.abandonGame('mockPlayer0');
+        // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
+        // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
+        this.gameService.confirmAndAbandonGame('mockPlayer0').then((confirmed) => {
+            if (confirmed) {
+                console.log('Player abandoned game');
+            } else {
+                console.log('Player cancelled abandonment');
+            }
+        });
         // this.gameService.abandonGame('mockPlayer1');
     }
 

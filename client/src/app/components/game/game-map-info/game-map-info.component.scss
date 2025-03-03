@@ -90,7 +90,7 @@ $game-color: #7ee0d0;
         border-left: 3px solid $map-color;
         
         h3 {
-          color: lighten($map-color, 10%);
+          color: color-mix(in srgb, $map-color, white 10%);
         }
         
         p {
@@ -103,7 +103,7 @@ $game-color: #7ee0d0;
         border-left: 3px solid $player-color;
         
         h3 {
-          color: lighten($player-color, 10%);
+          color: color-mix(in srgb, $player-color, white 10%);
         }
         
         p {

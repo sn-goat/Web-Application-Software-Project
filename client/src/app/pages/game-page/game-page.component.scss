@@ -23,6 +23,16 @@ $rectangle-border: 1px solid $primary-text;
     
 }
 
+.header-container {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 0; // Ensures header appears above other content
+    // Adjust width and height as needed
+    width: auto;
+    height: auto;
+}
+
 .game-grid {
     display: grid;
     grid-template-columns: minmax(150px, 28%) 1fr minmax(100px, 20%);

@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { PlayerService } from '@app/services/code/player.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 
 @Injectable({
     providedIn: 'root',
@@ -12,6 +14,7 @@ export class GameService {
     private playersWinsMap: BehaviorSubject<Map<string, number>> = new BehaviorSubject<Map<string, number>>(new Map());
     private playersInGameMap: BehaviorSubject<Map<string, boolean>> = new BehaviorSubject<Map<string, boolean>>(new Map());
     private playerService: PlayerService = inject(PlayerService);
+    private dialog = inject(MatDialog);
 
     constructor() {
         this.playersWinsMap$ = this.playersWinsMap.asObservable();
@@ -37,6 +40,32 @@ export class GameService {
         return this.playersWinsMap.value.get(username);
     }
 
+    async confirmAndAbandonGame(username: string): Promise<boolean> {
+        return new Promise((resolve) => {
+            const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                width: '350px',
+                data: {
+                    title: 'Abandonner la partie',
+                    message: `Êtes-vous sûr de vouloir abandonner cette partie ${username}?`,
+                    confirmText: 'Abandonner',
+                    cancelText: 'Annuler',
+                },
+            });
+
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result === true) {
+                    this.abandonGame(username); // Temporary
+                    // supposer envoyer la demande au serveur avec WS
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }
+
+    // Quand le server confirme l'abandon de la partie (broadcast)
+    // Chaque socket va call cette fonction avec le nom du joueur qui a abandonné
     abandonGame(username: string): void {
         if (this.playersInGameMap.value.has(username)) {
             const currentMap = this.playersInGameMap.value;
