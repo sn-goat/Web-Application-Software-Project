@@ -29,7 +29,7 @@ export class PlayerService {
     mockPlayer0: Player = {
         id: '1',
         username: 'mockPlayer0',
-        avatar: '6',
+        avatar: '4',
         life: 100,
         attack: 10,
         defense: 10,
@@ -43,7 +43,7 @@ export class PlayerService {
     mockPlayer1: Player = {
         id: '1',
         username: 'mockPlayer1',
-        avatar: '6',
+        avatar: '2',
         life: 100,
         attack: 10,
         defense: 10,

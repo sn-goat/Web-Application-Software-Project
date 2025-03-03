@@ -60,6 +60,7 @@ $rectangle-border: 1px solid $primary-text;
 }
 
 .left-rectangle {
+    color: $primary-text;
     grid-area: left;
     overflow-y: auto;
 }
