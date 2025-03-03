@@ -1,16 +1,20 @@
 {
     "folders": [
         {
+            "name": "LOG2990-112",
             "path": "."
         },
         {
-            "path": "./client/src/app"
+            "name": "common",
+            "path": "common"
         },
         {
-            "path": "./common"
+            "name": "app",
+            "path": "client/src/app"
         },
         {
-            "path": "./server"
+            "name": "server",
+            "path": "server"
         }
     ]
 }

@@ -20,6 +20,7 @@ h1 {
 }
 
 .editor-container {
+    user-select: none;
     display: flex;
     justify-content: space-between;
     align-items: stretch;
