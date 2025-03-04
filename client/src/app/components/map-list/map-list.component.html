@@ -24,6 +24,7 @@
             <app-map-card
                 [map]="map"
                 [isCreationPage]="isCreationPage"
+                (click)="onDivClick(map)"
                 (edit)="onEdit($event)"
                 (delete)="onDelete($event)"
                 (toggleVisibility)="toggleVisibility($event)"

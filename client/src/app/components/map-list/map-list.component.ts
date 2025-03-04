@@ -30,7 +30,7 @@ export class MapListComponent implements OnInit {
     searchQuery: string = '';
     sortBy: string = 'updatedAt';
 
-    private mapService = inject(MapService);
+    private readonly mapService = inject(MapService);
 
     constructor(
         private readonly router: Router,

@@ -32,11 +32,6 @@ export class MapCardComponent {
     readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
     readonly fileType = '.png';
 
-    // constructor(
-    //     // private readonly boardService: BoardService,
-    //     // private readonly mapService: MapService,
-    // ) {}
-
     onEdit(): void {
         this.edit.emit(this.map);
     }
