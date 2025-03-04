@@ -295,4 +295,99 @@ describe('MapListComponent', () => {
         expect(component.getSizeClass(20)).toBe('size-large');
         expect(component.getSizeClass(25)).toBe('size-default');
     });
+
+    it('should filter out non-public items when onlyVisible is true', () => {
+        component.onlyVisible = true;
+        component.items = [
+            { name: 'Game A', visibility: 'Public' },
+            { name: 'Game B', visibility: 'Private' },
+            { name: 'Game C', visibility: 'Public' },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result.length).toBe(2);
+        expect(result.every((item) => item.visibility === 'Public')).toBeTrue();
+    });
+
+    it('should not filter items when onlyVisible is false', () => {
+        component.onlyVisible = false;
+        component.items = [
+            { name: 'Game A', visibility: 'Public' },
+            { name: 'Game B', visibility: 'Private' },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result.length).toBe(2);
+    });
+
+    it('should return an empty list if all items are private and onlyVisible is true', () => {
+        component.onlyVisible = true;
+        component.items = [
+            { name: 'Game A', visibility: 'Private' },
+            { name: 'Game B', visibility: 'Private' },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result.length).toBe(0);
+    });
+
+    it('should return an empty list when items is empty', () => {
+        component.onlyVisible = true;
+        component.items = [];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result.length).toBe(0);
+    });
+
+    it('should sort items by createdAt in descending order', () => {
+        component.sortBy = 'createdAt';
+        component.items = [
+            { name: 'Game A', createdAt: new Date('2024-01-01') },
+            { name: 'Game B', createdAt: new Date('2024-02-01') },
+            { name: 'Game C', createdAt: new Date('2023-12-01') },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result[0].name).toBe('Game B');
+        expect(result[1].name).toBe('Game A');
+        expect(result[2].name).toBe('Game C');
+    });
+
+    it('should place items with undefined createdAt at the bottom', () => {
+        component.sortBy = 'createdAt';
+        component.items = [
+            { name: 'Game A', createdAt: new Date('2024-01-01') },
+            { name: 'Game B', createdAt: undefined },
+            { name: 'Game C', createdAt: new Date('2023-12-01') },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result[result.length - 1].name).toBe('Game B');
+    });
+
+    it('should handle null createdAt without crashing', () => {
+        component.sortBy = 'createdAt';
+        component.items = [
+            { name: 'Game A', createdAt: new Date('2024-01-01') },
+            { name: 'Game B', createdAt: null },
+            { name: 'Game C', createdAt: new Date('2023-12-01') },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result[result.length - 1].name).toBe('Game B');
+    });
+
+    it('should handle extreme date values correctly', () => {
+        component.sortBy = 'createdAt';
+        component.items = [
+            { name: 'Game A', createdAt: new Date('1970-01-01') },
+            { name: 'Game B', createdAt: new Date('2100-01-01') },
+            { name: 'Game C', createdAt: new Date('2023-12-01') },
+        ] as Board[];
+
+        const result = component.getFilteredAndSortedItems();
+        expect(result[0].name).toBe('Game B');
+        expect(result[1].name).toBe('Game C');
+        expect(result[2].name).toBe('Game A');
+    });
 });
