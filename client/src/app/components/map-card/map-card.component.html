@@ -14,13 +14,13 @@
                 }
             </div>
         }
+        <p class="item-description">{{ map.description }}</p>
     </div>
     <div class="item-content">
         <div class="item-header">
             <h3 class="item-title">{{ map.name }}</h3>
             <span class="item-date">{{ map.updatedAt | date: 'MMM d, y' }}</span>
         </div>
-        <p class="item-description">{{ map.description }}</p>
         <div class="item-details">
             <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
             <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
