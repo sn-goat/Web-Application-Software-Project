@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewChild, inject } from '@angular/core';
+import { Component, AfterViewInit, OnInit, ViewChild, inject } from '@angular/core';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameMapInfoComponent } from '@app/components/game/game-map-info/game-map-info.component';
 import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-player-detailed/game-map-player-detailed.component';
@@ -7,6 +7,9 @@ import { GameMapPlayerComponent } from '@app/components/game/game-map-player/gam
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
+import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
+import { CommonModule } from '@angular/common';
+// import { FightLogicService } from '@app/services/code/fight-logic.service';
 
 @Component({
     selector: 'app-game-page',
@@ -17,15 +20,27 @@ import { PlayerService } from '@app/services/code/player.service';
         GameMapPlayerToolsComponent,
         GameMapPlayerComponent,
         HeaderBarComponent,
+        GameFightInterfaceComponent,
+        CommonModule,
     ],
     templateUrl: './game-page.component.html',
     styleUrl: './game-page.component.scss',
 })
-export class GamePageComponent implements AfterViewInit {
+export class GamePageComponent implements OnInit, AfterViewInit {
     @ViewChild(HeaderBarComponent) headerBar!: HeaderBarComponent;
+
+    showFightInterface: boolean = false;
 
     private gameService = inject(GameService);
     private playerService = inject(PlayerService);
+    // private fightLogicService = inject(FightLogicService);
+
+    ngOnInit(): void {
+        this.gameService.showFightInterface$.subscribe((show) => {
+            this.showFightInterface = show;
+        });
+        // this.fightLogicService.startFight('mockPlayer1', 'mockPlayer'); // test
+    }
 
     ngAfterViewInit(): void {
         const originalAbandonMethod = this.headerBar.getBack;

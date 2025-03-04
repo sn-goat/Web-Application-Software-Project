@@ -1,7 +1,7 @@
 <div class="container">
     <h2> Information du Joueur </h2>
     <div class="player"> 
-        <img [src]="srcAvatar + player.avatar + fileType" [alt]="'portrait' + player.avatar" class="player-image">
+        <img draggable="false" [src]="srcAvatar + player.avatar + fileType" [alt]="'portrait' + player.avatar" class="player-image">
         <p>{{ player.username }}</p>
     </div>
     <div class="info">
@@ -41,11 +41,11 @@
             <h3>Dés</h3>
             <div class="attack-dice">
                 <h4>Dé d'attaque:</h4>
-                <img [src]="srcDice + player.attackDice + fileType" [alt]="'dice' + player.attackDice" class="dice-image">
+                <img draggable="false" [src]="srcDice + player.attackDice + fileType" [alt]="'dice' + player.attackDice" class="dice-image">
             </div>
             <div class="defense-dice">
                 <h4>Dé de défense:</h4>
-                <img [src]="srcDice + player.defenseDice + fileType" [alt]="'dice' + player.defenseDice" class="dice-image">
+                <img draggable="false" [src]="srcDice + player.defenseDice + fileType" [alt]="'dice' + player.defenseDice" class="dice-image">
             </div>
         </div>
         <div class="skills">

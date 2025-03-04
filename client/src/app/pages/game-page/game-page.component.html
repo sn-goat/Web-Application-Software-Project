@@ -2,26 +2,31 @@
   <div class="header-container">
     <app-header-bar></app-header-bar>
   </div>
-    <div class="game-grid">
-      <div class="left-rectangle">
-        Zone de messages
-      </div>
-      
-      <div class="top-rectangle">
-        <app-game-map-player></app-game-map-player>
-      </div>
-      
-      <div class="map-container">
-        <app-game-map></app-game-map>
-      </div>
-      
-      <div class="right-rectangle">
-        <app-game-map-player-detailed></app-game-map-player-detailed>
-        <app-game-map-info></app-game-map-info>
-      </div>
-      
-      <div class="bottom-rectangle">
-        <app-game-map-player-tools></app-game-map-player-tools>
-      </div>
+  <div class="game-grid">
+    <div class="left-rectangle">
+      Zone de messages
+    </div>
+    
+    <div class="top-rectangle">
+      <app-game-map-player></app-game-map-player>
+    </div>
+    
+    <div class="map-container">
+      <app-game-map></app-game-map>
+    </div>
+    
+    <div class="right-rectangle">
+      <app-game-map-player-detailed></app-game-map-player-detailed>
+      <app-game-map-info></app-game-map-info>
+    </div>
+    
+    <div class="bottom-rectangle">
+      <app-game-map-player-tools></app-game-map-player-tools>
     </div>
   </div>
+  @if (showFightInterface) {
+    <div class="fight-overlay">
+      <app-game-fight-interface></app-game-fight-interface>
+    </div>
+  }
+</div>

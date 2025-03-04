@@ -5,7 +5,7 @@
         <div class="items">
           @for (item of items; track item) {
             <div class="item-slot">
-              <img [src]="src + item + fileType" [alt]="item" class="item-image">
+              <img draggable="false" [src]="src + item + fileType" [alt]="item" class="item-image">
             </div>
           }
 

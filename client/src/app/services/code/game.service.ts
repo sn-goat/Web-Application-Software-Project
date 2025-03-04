@@ -3,6 +3,7 @@ import { PlayerService } from '@app/services/code/player.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
+import { FightLogicService } from './fight-logic.service';
 
 @Injectable({
     providedIn: 'root',
@@ -10,11 +11,13 @@ import { ConfirmationDialogComponent } from '@app/components/common/confirmation
 export class GameService {
     playersWinsMap$: Observable<Map<string, number>>;
     playersInGameMap$: Observable<Map<string, boolean>>;
+    showFightInterface$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     private playersWinsMap: BehaviorSubject<Map<string, number>> = new BehaviorSubject<Map<string, number>>(new Map());
     private playersInGameMap: BehaviorSubject<Map<string, boolean>> = new BehaviorSubject<Map<string, boolean>>(new Map());
     private playerService: PlayerService = inject(PlayerService);
     private dialog = inject(MatDialog);
+    private fightLogicService = inject(FightLogicService);
 
     constructor() {
         this.playersWinsMap$ = this.playersWinsMap.asObservable();
@@ -33,6 +36,10 @@ export class GameService {
             });
             this.playersWinsMap.next(newMap);
             this.playersInGameMap.next(playersInGame);
+        });
+
+        this.fightLogicService.fightStarted$.subscribe((started) => {
+            this.showFightInterface$.next(started);
         });
     }
 
@@ -54,8 +61,7 @@ export class GameService {
 
             dialogRef.afterClosed().subscribe((result) => {
                 if (result === true) {
-                    this.abandonGame(username); // Temporary
-                    // supposer envoyer la demande au serveur avec WS
+                    this.abandonGame(username);
                     resolve(true);
                 } else {
                     resolve(false);
@@ -64,8 +70,6 @@ export class GameService {
         });
     }
 
-    // Quand le server confirme l'abandon de la partie (broadcast)
-    // Chaque socket va call cette fonction avec le nom du joueur qui a abandonné
     abandonGame(username: string): void {
         if (this.playersInGameMap.value.has(username)) {
             const currentMap = this.playersInGameMap.value;

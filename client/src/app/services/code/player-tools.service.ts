@@ -3,6 +3,7 @@ import { Player } from '@common/player';
 import { Item } from '@common/enums';
 import { PlayerService } from './player.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+// import { SocketService } from '@app/services/code/socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -49,14 +50,14 @@ export class PlayerToolsService {
 
     endTurn(): void {
         if (this.player) {
-            // to be implemented
+            // to be implemented with socket
         }
         // to be implemented
     }
 
     performAction(): void {
         if (this.player) {
-            // to be implemented
+            // to be implemented with socket
         }
         // to be implemented
     }

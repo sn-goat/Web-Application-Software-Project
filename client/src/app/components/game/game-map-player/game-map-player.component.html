@@ -2,12 +2,15 @@
     @for (player of players; track player) {
         <div class="player">
             <div class="player-image">
-                <img [src]="srcAvatar + player.avatar + fileType" [alt]="player.username">
+                <img draggable="false" [src]="srcAvatar + player.avatar + fileType" [alt]="player.username">
                 <h3 [class.player-not-in-game]="!playersInGame.get(player.username)">{{ player.username }}</h3>
             </div>
             <div class="player-info">
                 @if (player.username === admin) {
                     <h3 class="admin">Admin</h3>
+                } 
+                @else {
+                    <h3 class="admin">Humain</h3>
                 }
                 @if (player.username === activePlayer) {
                     <h3 class="active">Actif</h3>
