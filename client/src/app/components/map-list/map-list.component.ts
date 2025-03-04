@@ -42,7 +42,7 @@ export class MapListComponent implements OnInit {
     readonly fileType = '.png';
     loadingInterval = LOADING_INTERVAL;
     searchQuery: string = '';
-    sortBy: string = 'createdAt';
+    sortBy: string = 'updatedAt';
 
     private mapService = inject(MapService);
 
