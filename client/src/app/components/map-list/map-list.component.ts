@@ -67,13 +67,11 @@ export class MapListComponent implements OnInit {
                 updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
                 createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
             }));
+
+            this.mapsLoaded = this.items.length > 0;
+            this.isLoading = false;
             this.cdr.detectChanges();
         });
-        setTimeout(() => {
-            this.isLoading = false;
-            this.mapsLoaded = this.getFilteredAndSortedItems().length > 0;
-            this.cdr.detectChanges();
-        }, this.loadingInterval);
     }
 
     getFilteredAndSortedItems(): Board[] {
