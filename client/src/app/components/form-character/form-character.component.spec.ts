@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
 import { FormCharacterComponent } from './form-character.component';
+import { GameMapService } from '@app/services/code/game-map.service';
 
 const BASE_STAT = 4;
 const UPGRADED_STAT = 6;
@@ -14,12 +15,23 @@ const D6 = './assets/dice/d6.png';
 describe('FormCharacterComponent', () => {
     let component: FormCharacterComponent;
     let fixture: ComponentFixture<FormCharacterComponent>;
+    let mockGameMapService: jasmine.SpyObj<GameMapService>;
 
     beforeEach(async () => {
+        // Create mock for GameMapService
+        mockGameMapService = jasmine.createSpyObj<GameMapService>('GameMapService', ['shareGameMap']);
+        mockGameMapService.shareGameMap.and.callFake(() => {
+            return;
+        });
+
         await TestBed.configureTestingModule({
             imports: [RouterLink, CommonModule, FormsModule, MapListComponent, FormCharacterComponent],
-            providers: [provideHttpClient()],
+            providers: [provideHttpClient(), { provide: GameMapService, useValue: mockGameMapService }],
         }).compileComponents();
+
+        fixture = TestBed.createComponent(FormCharacterComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
     });
 
     beforeEach(() => {
@@ -116,19 +128,19 @@ describe('FormCharacterComponent', () => {
     });
 
     it('should return true if two stats are selected and name is entered', () => {
-        component.stats.playerName = 'Test Player';
+        component.stats.username = 'Test Player';
         component.lifeSelected = true;
         component.rapiditySelected = true;
         expect(component.canJoin()).toBeTrue();
     });
 
     it('should return false if less than two stats are selected or name is not entered', () => {
-        component.stats.playerName = '';
+        component.stats.username = '';
         component.lifeSelected = true;
         component.rapiditySelected = true;
         expect(component.canJoin()).toBeFalse();
 
-        component.stats.playerName = 'Test Player';
+        component.stats.username = 'Test Player';
         component.lifeSelected = true;
         component.rapiditySelected = false;
         expect(component.canJoin()).toBeFalse();
@@ -138,5 +150,10 @@ describe('FormCharacterComponent', () => {
         spyOn(component.closePopup, 'emit');
         component.onClose();
         expect(component.closePopup.emit).toHaveBeenCalled();
+    });
+
+    it('should call gameMapService and emit event when shareGameMap is called', () => {
+        component.shareGameMap();
+        expect(mockGameMapService.shareGameMap).toHaveBeenCalled();
     });
 });

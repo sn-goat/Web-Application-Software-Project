@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_MAX } from '@app/constants/health';
 import { PlayerService } from '@app/services/code/player.service';
-import { GameService } from '@app/services/code/game.service';
+// import { GameService } from '@app/services/code/game.service';
 import { Player } from '@common/player';
 
 @Component({
@@ -12,7 +12,7 @@ import { Player } from '@common/player';
     templateUrl: './game-map-player-detailed.component.html',
     styleUrl: './game-map-player-detailed.component.scss',
 })
-export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
+export class GameMapPlayerDetailedComponent implements OnInit {
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly srcDice: string = DEFAULT_PATH_DICE;
     readonly fileType: string = DEFAULT_FILE_TYPE;
@@ -21,7 +21,7 @@ export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
     player: Player;
 
     private playerService: PlayerService = inject(PlayerService);
-    private gameService: GameService = inject(GameService); // for testing purposes
+    // private gameService: GameService = inject(GameService); // for testing purposes
 
     constructor() {
         this.player = {} as Player;
@@ -40,22 +40,22 @@ export class GameMapPlayerDetailedComponent implements OnInit, AfterViewInit {
         // const updatedPlayer = { ...this.player };
         // updatedPlayer.life = this.player.life - HEALTH_DECREMENT;
         // this.playerService.editPlayer(updatedPlayer);
-        this.playerService.sortPlayers();
+        // this.playerService.sortPlayers();
     }
 
     // For testing purposes
-    ngAfterViewInit(): void {
-        // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
-        // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
-        this.gameService.confirmAndAbandonGame('mockPlayer0').then((confirmed) => {
-            if (confirmed) {
-                console.log('Player abandoned game');
-            } else {
-                console.log('Player cancelled abandonment');
-            }
-        });
-        // this.gameService.abandonGame('mockPlayer1');
-    }
+    // ngAfterViewInit(): void {
+    //     // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
+    //     // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
+    //     this.gameService.confirmAndAbandonGame('mockPlayer0').then((confirmed) => {
+    //         if (confirmed) {
+    //             console.log('Player abandoned game');
+    //         } else {
+    //             console.log('Player cancelled abandonment');
+    //         }
+    //     });
+    //     // this.gameService.abandonGame('mockPlayer1');
+    // }
 
     getHealthBar(): string {
         const healthPercentage = this.roundHealth((this.player.life / this.maxHealth) * HEALTH_MAX);

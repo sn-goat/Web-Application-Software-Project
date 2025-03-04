@@ -62,14 +62,14 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     flee(): void {
         if (this.isMyTurn()) {
             this.fightLogicService.flee(this.playerService.getPlayerUsername());
-            console.log('Fleeing');
+            // console.log('Fleeing');
         }
     }
 
     attack(): void {
         if (this.isMyTurn()) {
             this.fightLogicService.attack(this.playerService.getPlayerUsername());
-            console.log('Attacking');
+            // console.log('Attacking');
         }
     }
 

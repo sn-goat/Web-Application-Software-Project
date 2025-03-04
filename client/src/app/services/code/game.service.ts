@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 import { FightLogicService } from './fight-logic.service';
+// import { SocketService } from '@app/services/code/socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -80,6 +81,8 @@ export class GameService {
             if (isInGame) {
                 newMap.set(username, false);
                 this.playersInGameMap.next(newMap);
+
+                // to be implemented with socket
             }
         }
     }
@@ -93,6 +96,8 @@ export class GameService {
 
             newMap.set(username, winCount + 1);
             this.playersWinsMap.next(newMap);
+
+            // to be implemented with socket
         }
     }
 }

@@ -11,53 +11,53 @@ export class PlayerService {
     admin$: Observable<string>;
     players$: Observable<Player[]>;
 
-    // This is a mock player for testing purposes
-    mockPlayer: Player = {
-        id: '1',
-        username: 'mockPlayer',
-        avatar: '6',
-        life: 100,
-        attack: 10,
-        defense: 10,
-        rapidity: 5,
-        attackDice: 'd6',
-        defenseDice: 'd4',
-        movementPts: 5,
-        actions: 2,
-    };
+    // // This is a mock player for testing purposes
+    // mockPlayer: Player = {
+    //     id: '1',
+    //     username: 'mockPlayer',
+    //     avatar: '6',
+    //     life: 100,
+    //     attack: 10,
+    //     defense: 10,
+    //     rapidity: 5,
+    //     attackDice: 'd6',
+    //     defenseDice: 'd4',
+    //     movementPts: 5,
+    //     actions: 2,
+    // };
 
-    mockPlayer0: Player = {
-        id: '1',
-        username: 'mockPlayer0',
-        avatar: '4',
-        life: 100,
-        attack: 10,
-        defense: 10,
-        rapidity: 2,
-        attackDice: 'd6',
-        defenseDice: 'd4',
-        movementPts: 5,
-        actions: 2,
-    };
+    // mockPlayer0: Player = {
+    //     id: '1',
+    //     username: 'mockPlayer0',
+    //     avatar: '4',
+    //     life: 100,
+    //     attack: 10,
+    //     defense: 10,
+    //     rapidity: 2,
+    //     attackDice: 'd6',
+    //     defenseDice: 'd4',
+    //     movementPts: 5,
+    //     actions: 2,
+    // };
 
-    mockPlayer1: Player = {
-        id: '1',
-        username: 'mockPlayer1',
-        avatar: '2',
-        life: 100,
-        attack: 10,
-        defense: 10,
-        rapidity: 10,
-        attackDice: 'd6',
-        defenseDice: 'd4',
-        movementPts: 5,
-        actions: 2,
-    };
+    // mockPlayer1: Player = {
+    //     id: '1',
+    //     username: 'mockPlayer1',
+    //     avatar: '2',
+    //     life: 100,
+    //     attack: 10,
+    //     defense: 10,
+    //     rapidity: 10,
+    //     attackDice: 'd6',
+    //     defenseDice: 'd4',
+    //     movementPts: 5,
+    //     actions: 2,
+    // };
 
-    private playerUsername: string = this.mockPlayer.username;
-    private activePlayer = new BehaviorSubject<string>(this.mockPlayer.username);
-    private admin = new BehaviorSubject<string>(this.mockPlayer.username);
-    private players = new BehaviorSubject<Player[]>([this.mockPlayer, this.mockPlayer0, this.mockPlayer1]);
+    private playerUsername: string;
+    private activePlayer = new BehaviorSubject<string>('');
+    private admin = new BehaviorSubject<string>('');
+    private players = new BehaviorSubject<Player[]>([]);
 
     constructor() {
         this.activePlayer$ = this.activePlayer.asObservable();

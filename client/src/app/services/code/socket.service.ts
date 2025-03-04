@@ -12,7 +12,13 @@ export class SocketService {
     private readonly url: string = environment.serverUrl;
 
     constructor() {
-        this.socket = io(this.url);
+        // This will allow us to mock this socket in tests
+        this.socket = this.createSocket();
+    }
+
+    // For testing purposes only
+    setSocket(socket: Socket): void {
+        this.socket = socket;
     }
 
     onGameCreated(): Observable<unknown> {
@@ -37,5 +43,10 @@ export class SocketService {
         return new Observable((observer) => {
             this.socket.on('playerJoined', (data) => observer.next(data));
         });
+    }
+
+    // Added this protected method to make it easier to mock in tests
+    protected createSocket(): Socket {
+        return io(this.url);
     }
 }

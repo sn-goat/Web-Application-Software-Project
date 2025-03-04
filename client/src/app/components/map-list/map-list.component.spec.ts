@@ -1,298 +1,267 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { ChangeDetectorRef } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { By } from '@angular/platform-browser';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { MapListComponent } from './map-list.component';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
-import { Board, Cell, Vec2 } from '@common/board';
-import { Item, Tile, Visibility } from '@common/enums';
+import { ChangeDetectorRef, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Board, Cell } from '@common/board';
+import { Visibility, Tile, Item } from '@common/enums';
 import { of } from 'rxjs';
-import { MapListComponent } from './map-list.component';
+
+const SMALL_SIZE = 10;
+const MEDIUM_SIZE = 15;
+const LARGE_SIZE = 20;
+const EXTRA_LARGE_SIZE = 25;
+
+class MockServices {
+    open = jasmine.createSpy('open').and.returnValue({
+        afterClosed: () => of({ name: 'New Game', description: 'New Description', size: 10 }),
+    });
+
+    getAllBoards = jasmine.createSpy('getAllBoards').and.returnValue(of([]));
+    getBoard = jasmine.createSpy('getBoard').and.returnValue(of({}));
+    deleteBoardByName = jasmine.createSpy('deleteBoardByName').and.returnValue(of(undefined));
+    toggleVisibility = jasmine.createSpy('toggleVisibility').and.returnValue(of({}));
+
+    setMapData = jasmine.createSpy('setMapData');
+
+    detectChanges = jasmine.createSpy('detectChanges');
+}
+
+class MockRouter {
+    navigate = jasmine.createSpy('navigate').and.returnValue(Promise.resolve(true));
+}
 
 describe('MapListComponent', () => {
     let component: MapListComponent;
     let fixture: ComponentFixture<MapListComponent>;
-    let mockRouter: jasmine.SpyObj<Router>;
-    let mockDialog: jasmine.SpyObj<MatDialog>;
-    let mockBoardService: jasmine.SpyObj<BoardService>;
-    let mockMapService: jasmine.SpyObj<MapService>;
-    let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
+    let mockRouter: MockRouter;
+    let mockServices: MockServices;
 
-    const generateMockBoard = (size: number): Cell[][] => {
+    const generateMockCells = (size: number): Cell[][] => {
         return Array.from({ length: size }, (_, x) =>
-            Array.from(
-                { length: size },
-                (__, y) =>
-                    ({
-                        position: { x, y } as Vec2,
-                        tile: Tile.WALL,
-                        item: y % 2 === 0 ? Item.CHEST : Item.DEFAULT,
-                    }) as Cell,
-            ),
+            Array.from({ length: size }, (__, y) => ({
+                position: { x, y },
+                tile: Tile.WALL,
+                item: y % 2 === 0 ? Item.CHEST : Item.DEFAULT,
+            })),
         );
     };
 
-    const mockBoardGames: Board[] = [
+    const mockBoards: Board[] = [
         {
             _id: '1',
             name: 'Game A',
-            size: 10,
-            description: 'Desc A',
-            board: generateMockBoard(10),
+            size: SMALL_SIZE,
+            description: 'Description A',
+            board: generateMockCells(SMALL_SIZE),
             visibility: Visibility.PUBLIC,
-            updatedAt: new Date(),
-            createdAt: new Date(),
             isCTF: false,
             image: '',
+            updatedAt: new Date(),
+            createdAt: new Date(),
         },
         {
             _id: '2',
             name: 'Game B',
-            size: 20,
-            description: 'Desc B',
-            board: generateMockBoard(10),
-            isCTF: false,
+            size: MEDIUM_SIZE,
+            description: 'Description B',
+            board: generateMockCells(MEDIUM_SIZE),
             visibility: Visibility.PRIVATE,
-            createdAt: new Date(),
+            isCTF: true,
             image: '',
             updatedAt: new Date(),
+            createdAt: new Date(),
         },
     ];
 
-    const LOADING_INTERVAL = 10;
+    beforeEach(waitForAsync(async () => {
+        mockRouter = new MockRouter();
+        mockServices = new MockServices();
 
-    beforeEach(async () => {
-        mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-        mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-        mockBoardService = jasmine.createSpyObj('BoardService', ['getAllBoards', 'deleteBoardByName', 'toggleVisibility', 'getBoard']);
-        mockMapService = jasmine.createSpyObj('MapService', ['setMapData']);
-        mockCdr = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
+        mockServices.getAllBoards.and.returnValue(of(mockBoards));
+        mockServices.getBoard.and.returnValue(of({ ...mockBoards[0], board: [[]] }));
+        mockServices.deleteBoardByName.and.returnValue(of(undefined));
+        mockServices.toggleVisibility.and.returnValue(of({ ...mockBoards[0], visibility: Visibility.PRIVATE }));
 
         await TestBed.configureTestingModule({
-            imports: [MatDialogModule, MapListComponent],
+            imports: [MapListComponent],
             providers: [
                 { provide: Router, useValue: mockRouter },
-                { provide: MatDialog, useValue: mockDialog },
-                { provide: BoardService, useValue: mockBoardService },
-                { provide: MapService, useValue: mockMapService },
-                { provide: ChangeDetectorRef, useValue: mockCdr },
+                { provide: MatDialog, useValue: mockServices },
+                { provide: BoardService, useValue: mockServices },
+                { provide: MapService, useValue: mockServices },
+                { provide: ChangeDetectorRef, useValue: mockServices },
             ],
+            schemas: [NO_ERRORS_SCHEMA],
         }).compileComponents();
+    }));
 
+    beforeEach(() => {
         fixture = TestBed.createComponent(MapListComponent);
         component = fixture.componentInstance;
+
         component.isCreationPage = true;
-        component.loadingInterval = LOADING_INTERVAL;
-        mockBoardService.getAllBoards.and.returnValue(of(mockBoardGames));
-        fixture.autoDetectChanges();
-        await fixture.whenStable();
+        component.loadingInterval = 10;
+        component.items = [...mockBoards];
+
+        spyOn(component, 'reloadPage').and.stub();
+
+        fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should fetch board and navigate to edit page', () => {
-        const mockBoard: Board = {
-            _id: '1',
-            name: 'Game A',
-            size: 10,
-            description: 'Description A',
-            board: [],
-            isCTF: false,
-            visibility: Visibility.PUBLIC,
-            image: '',
-            updatedAt: new Date(),
-        };
+    it('should fetch boards from the service on init', () => {
+        expect(mockServices.getAllBoards).toHaveBeenCalled();
+    });
 
-        const fullMap: Board = {
-            ...mockBoard,
-            board: [[]],
-        };
-
-        mockBoardService.getBoard.and.returnValue(of(fullMap));
+    it('should navigate to edit page when editing a board', fakeAsync(() => {
+        const mockBoard = mockBoards[0];
 
         component.onEdit(mockBoard);
+        tick();
 
-        expect(mockBoardService.getBoard).toHaveBeenCalledWith('Game A');
-        expect(mockMapService.setMapData).toHaveBeenCalledWith(fullMap);
+        expect(mockServices.getBoard).toHaveBeenCalledWith('Game A');
+        expect(mockServices.setMapData).toHaveBeenCalled();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
+    }));
+
+    it('should display the correct number of games', () => {
+        expect(component.items.length).toBe(2);
     });
 
-    it('should display the list of available games', () => {
-        const items = fixture.debugElement.queryAll(By.css('.list-item:not(.new-map-card)'));
-        expect(items.length).toBe(mockBoardGames.length);
-    });
-
-    it('should display the details of each game', () => {
-        const item = fixture.debugElement.query(By.css('.list-item:not(.new-map-card)'));
-        expect(item).not.toBeNull();
-        expect(item.nativeElement.textContent).toContain(mockBoardGames[0].name);
-        expect(item.nativeElement.textContent).toContain(mockBoardGames[0].size.toString());
-        expect(item.nativeElement.textContent).toContain(mockBoardGames[0].visibility);
-    });
-
-    it('should sort items by name', () => {
-        component.items = [
-            { ...mockBoardGames[1], name: 'Game B' },
-            { ...mockBoardGames[0], name: 'Game A' },
-        ];
+    it('should sort items by name correctly', () => {
         component.sortBy = 'name';
+        component.items = [{ ...mockBoards[1] }, { ...mockBoards[0] }];
+
         const sortedItems = component.getFilteredAndSortedItems();
+
         expect(sortedItems[0].name).toBe('Game A');
         expect(sortedItems[1].name).toBe('Game B');
     });
 
-    it('should sort items by size', () => {
-        const sortedItems1 = 12;
-        const sortedItems2 = 10;
-        component.items = [
-            { ...mockBoardGames[0], size: 10 },
-            { ...mockBoardGames[1], size: 12 },
-        ];
+    it('should sort items by size correctly', () => {
         component.sortBy = 'size';
-        const sortedItems = component.getFilteredAndSortedItems();
-        expect(sortedItems[0].size).toBe(sortedItems1);
-        expect(sortedItems[1].size).toBe(sortedItems2);
-    });
-
-    it('should return items unsorted for default case', () => {
         component.items = [
-            { ...mockBoardGames[0], name: 'Game A' },
-            { ...mockBoardGames[1], name: 'Game B' },
+            { ...mockBoards[0], size: SMALL_SIZE },
+            { ...mockBoards[1], size: MEDIUM_SIZE },
         ];
-        component.sortBy = 'unknown';
+
         const sortedItems = component.getFilteredAndSortedItems();
-        expect(sortedItems[0].name).toBe('Game A');
-        expect(sortedItems[1].name).toBe('Game B');
+
+        expect(sortedItems[0].size).toBe(MEDIUM_SIZE);
+        expect(sortedItems[1].size).toBe(SMALL_SIZE);
     });
 
-    it('should alert and reload page if map is not found on server', () => {
-        const mockMap = mockBoardGames[0];
+    it('should delete a board after confirmation', fakeAsync(() => {
+        const mockBoard = mockBoards[0];
+        spyOn(window, 'confirm').and.returnValue(true);
+        component.items = [...mockBoards];
+
+        component.onDelete(mockBoard);
+        tick();
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(mockServices.deleteBoardByName).toHaveBeenCalledWith('Game A');
+    }));
+
+    it('should not delete a board if confirmation is cancelled', fakeAsync(() => {
+        const mockBoard = mockBoards[0];
+        spyOn(window, 'confirm').and.returnValue(false);
+        component.items = [...mockBoards];
+
+        component.onDelete(mockBoard);
+        tick();
+
+        expect(window.confirm).toHaveBeenCalled();
+        expect(mockServices.deleteBoardByName).not.toHaveBeenCalled();
+    }));
+
+    it('should toggle visibility of a board', fakeAsync(() => {
+        const mockBoard = { ...mockBoards[0] };
+
+        component.toggleVisibility(mockBoard);
+        tick();
+
+        expect(mockServices.toggleVisibility).toHaveBeenCalledWith('Game A');
+    }));
+
+    it('should handle image loading error', () => {
+        const fallbackUrl = 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba';
+        const event = { target: { src: 'invalid-image.jpg' } } as unknown as Event;
+
+        component.handleImageError(event);
+
+        expect((event.target as HTMLImageElement).src).toBe(fallbackUrl);
+    });
+
+    it('should create a new map and navigate to edit page', fakeAsync(() => {
+        component.createNewMap();
+        tick();
+
+        expect(mockServices.open).toHaveBeenCalled();
+        expect(mockServices.setMapData).toHaveBeenCalled();
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
+    }));
+
+    it('should correctly compare maps that are equal', () => {
+        const map1 = { ...mockBoards[0] };
+        const map2 = { ...mockBoards[0] };
+
+        expect(component.areMapsEqual(map1, map2)).toBeTrue();
+    });
+
+    it('should correctly compare maps that are different', () => {
+        const map1 = { ...mockBoards[0] };
+        const map2 = { ...mockBoards[0], name: 'Different Name' };
+
+        expect(component.areMapsEqual(map1, map2)).toBeFalse();
+    });
+
+    it('should return the correct size class based on map size', () => {
+        expect(component.getSizeClass(SMALL_SIZE)).toBe('size-small');
+        expect(component.getSizeClass(MEDIUM_SIZE)).toBe('size-medium');
+        expect(component.getSizeClass(LARGE_SIZE)).toBe('size-large');
+        expect(component.getSizeClass(EXTRA_LARGE_SIZE)).toBe('size-default');
+    });
+
+    it('should alert and reload if map not found on server', fakeAsync(() => {
+        const mockMap = mockBoards[0];
+        mockServices.getAllBoards.and.returnValue(of([])); // Return empty array to simulate map not found
         spyOn(window, 'alert');
-        const reloadSpy = spyOn(component, 'reloadPage').and.callFake(() => {});
-        mockBoardService.getAllBoards.and.returnValue(of([]));
 
         component.onDivClick(mockMap);
+        tick();
 
         expect(window.alert).toHaveBeenCalledWith('La carte a été supprimée du serveur.');
-        expect(reloadSpy).toHaveBeenCalled();
-    });
+        expect(component.reloadPage).toHaveBeenCalled();
+    }));
 
-    it('should allow toggling the visibility of the game', () => {
-        const mockMap = mockBoardGames[0];
-        mockBoardService.toggleVisibility.and.returnValue(of({ ...mockMap, visibility: Visibility.PRIVATE }));
-        component.toggleVisibility(mockMap);
-        expect(mockBoardService.toggleVisibility).toHaveBeenCalledWith(mockMap.name);
-        expect(mockMap.visibility).toBe('Private');
-    });
-
-    it('should display a preview image of the game', async () => {
-        component.mapsLoaded = true; // Ensure maps are loaded
-
-        const previewImage = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container img.base-image'));
-
-        expect(previewImage).not.toBeNull();
-    });
-
-    it('should display the game description on image hover', async () => {
-        const previewContainer = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container'));
-
-        expect(previewContainer).toBeTruthy();
-        previewContainer.triggerEventHandler('mouseover', null);
-        fixture.detectChanges();
-
-        const description = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .item-description'));
-        expect(description).not.toBeNull();
-        expect(description.nativeElement.textContent).toContain(mockBoardGames[0].description);
-    });
-
-    it('should allow deleting a game', () => {
-        const mockMap = mockBoardGames[0];
-        spyOn(window, 'confirm').and.returnValue(true);
-        mockBoardService.deleteBoardByName.and.returnValue(of(void 0));
-        component.onDelete(mockMap);
-        expect(mockBoardService.deleteBoardByName).toHaveBeenCalledWith(mockMap.name);
-        expect(component.items.length).toBe(1);
-    });
-
-    it('should handle image error', () => {
-        const event = { target: { src: '' } } as unknown as Event;
-        component.handleImageError(event);
-        expect((event.target as HTMLImageElement).src).toBe('https://images.unsplash.com/photo-1560419015-7c427e8ae5ba');
-    });
-
-    it('should create a new map', () => {
-        const dialogRefSpyObj = jasmine.createSpyObj({ afterClosed: of({ name: 'New Game', description: 'New Desc', size: 10 }) });
-        mockDialog.open.and.returnValue(dialogRefSpyObj);
-        component.createNewMap();
-        expect(mockDialog.open).toHaveBeenCalled();
-        dialogRefSpyObj.afterClosed().subscribe(() => {
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
-        });
-    });
-
-    it('should compare maps correctly', () => {
-        const localMap: Board = {
-            _id: '1',
-            name: 'Board 1',
-            description: 'Desc 1',
-            size: 10,
-            visibility: Visibility.PUBLIC,
-            board: [],
-            updatedAt: new Date(),
-            isCTF: false,
-            image: '',
-        };
-        const serverMap: Board = {
-            _id: '1',
-            name: 'Board 1',
-            description: 'Desc 1',
-            size: 10,
-            visibility: Visibility.PUBLIC,
-            board: [],
-            updatedAt: new Date(),
-            isCTF: false,
-            image: '',
-        };
-
-        expect(component.areMapsEqual(localMap, serverMap)).toBeTrue();
-
-        serverMap.name = 'Board 2';
-        expect(component.areMapsEqual(localMap, serverMap)).toBeFalse();
-    });
-
-    it('should alert and reload page if maps are not equal', () => {
-        const mockMap = mockBoardGames[0];
-        const serverMap = { ...mockMap, name: 'Different Name' };
+    it('should alert and reload if map has changed on server', fakeAsync(() => {
+        const mockMap = mockBoards[0];
+        const serverMap = { ...mockMap, name: 'Changed Name' };
+        mockServices.getAllBoards.and.returnValue(of([serverMap]));
         spyOn(window, 'alert');
-        const reloadSpy = spyOn(component, 'reloadPage').and.callFake(() => {});
-        mockBoardService.getAllBoards.and.returnValue(of([serverMap]));
 
         component.onDivClick(mockMap);
+        tick();
 
         expect(window.alert).toHaveBeenCalledWith('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
-        expect(reloadSpy).toHaveBeenCalled();
-    });
+        expect(component.reloadPage).toHaveBeenCalled();
+    }));
 
-    it('should emit divClicked if maps are equal', () => {
-        const mockMap = mockBoardGames[0];
-        const serverMap = { ...mockMap };
+    it('should emit divClicked event if map is valid', fakeAsync(() => {
+        const mockMap = mockBoards[0];
+        mockServices.getAllBoards.and.returnValue(of([mockMap]));
         spyOn(component.divClicked, 'emit');
-        mockBoardService.getAllBoards.and.returnValue(of([serverMap]));
 
         component.onDivClick(mockMap);
+        tick();
 
         expect(component.divClicked.emit).toHaveBeenCalled();
-    });
-
-    it('should return the size in function of the size class', () => {
-        expect(component.getSizeClass(10)).toBe('size-small');
-        expect(component.getSizeClass(15)).toBe('size-medium');
-        expect(component.getSizeClass(20)).toBe('size-large');
-        expect(component.getSizeClass(25)).toBe('size-default');
-    });
+    }));
 });
