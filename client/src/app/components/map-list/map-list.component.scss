@@ -131,11 +131,11 @@ body {
 
 .item-image {
     display: flex;
-    justify-content: center; // Centers horizontally
-    align-items: center; // Centers vertically (optional)
-    width: 100%; // Ensures it takes full width of the card
-    max-width: 200px; // Adjust max width as needed
-    margin: 0 auto; // Ensures centering within flex container
+    justify-content: center; 
+    align-items: center;
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
     border: 2px solid $glow-teal;
     border-radius: 8px;
     overflow: hidden;
