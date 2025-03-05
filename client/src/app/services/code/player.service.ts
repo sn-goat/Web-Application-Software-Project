@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
+import { MAX_PLAYERS } from '@app/constants/playerConst';
 import { Player } from '@common/player';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { MAX_PLAYERS } from '@app/constants/playerConst';
 
 @Injectable({
     providedIn: 'root',
@@ -89,16 +89,19 @@ export class PlayerService {
     }
 
     editPlayer(player: Player): void {
+        if (!player) return; // First check if player exists
+
         const players: Player[] = this.players.value;
         const playerToUpdate = this.getPlayer(player.username);
-        if (!player || !playerToUpdate || playerToUpdate.username !== this.playerUsername) {
+        if (!playerToUpdate || playerToUpdate.username !== this.playerUsername) {
             return;
         }
 
-        const index = players.indexOf(playerToUpdate);
-        players[index] = player;
-
-        this.players.next(players);
+        const index = players.findIndex((p) => p.username === player.username);
+        if (index >= 0) {
+            players[index] = player;
+            this.players.next(players);
+        }
     }
 
     removePlayerByName(username: string): boolean {
@@ -123,22 +126,28 @@ export class PlayerService {
     }
 
     addPlayer(player: Player): void {
+        if (!player) return; // Handle undefined player
+
         const players = this.players.value;
         const playerExists = players.find((p) => p.username === player.username);
-        if (!player || !playerExists || players.length >= MAX_PLAYERS) {
+        if (!playerExists || players.length >= MAX_PLAYERS) {
             return;
         }
         players.push(player);
-        this.players.next(players);
+        this.players.next([...players]); // Create new array to ensure state change detection
     }
 
     removePlayer(player: Player): void {
+        if (!player) return; // First check if player exists
+
         const players = this.players.value;
+        if (!players.length) return;
+
         const playerExists = players.find((p) => p.username === player.username);
-        if (!player || !playerExists || !players.length) {
-            return;
-        }
-        players.splice(players.indexOf(player), 1);
+        if (!playerExists) return;
+
+        const index = players.findIndex((p) => p.username === player.username);
+        players.splice(index, 1);
         this.players.next(players);
     }
 
