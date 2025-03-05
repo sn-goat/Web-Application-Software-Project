@@ -10,7 +10,6 @@ import { CreatePageComponent } from '@app/pages/create-page/create-page.componen
 import { JoinRoomComponent } from '@app/pages/join-room/join-room.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MapMakerComponent } from '@app/pages/map-maker/map-maker.component';
-import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { OrganizerWaitingPageComponent } from '@app/pages/organizer-waiting-page/organizer-waiting-page.component';
 import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
 
@@ -24,7 +23,6 @@ const routes: Routes = [
     { path: '', redirectTo: '/home', pathMatch: 'full' },
     { path: 'home', component: MainPageComponent },
     { path: 'creation', component: CreatePageComponent },
-    { path: 'material', component: MaterialPageComponent },
     { path: 'edit', component: MapMakerComponent },
     { path: 'waiting', component: WaitingPageComponent },
     { path: 'createGame', component: OrganizerWaitingPageComponent },
