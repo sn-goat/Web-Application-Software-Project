@@ -1,0 +1,32 @@
+.horizontal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+}
+
+.full-width {
+    flex: 1;
+    border-radius: 8px;
+}
+
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.rounded {
+    border-radius: 8px;
+}
+
+.rounded-button {
+    border-radius: 12px;
+    padding: 8px 16px;
+}

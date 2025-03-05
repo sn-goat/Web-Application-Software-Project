@@ -152,7 +152,6 @@ export class MapListComponent implements OnInit {
 
     createNewMap(): void {
         const dialogRef = this.dialog.open(FormDialogComponent, {
-            width: '280px',
             data: { name: '', description: '', size: 10, isCTF: false },
         });
 

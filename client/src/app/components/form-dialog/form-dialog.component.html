@@ -1,46 +1,55 @@
-<h2 mat-dialog-title>Créons la partie!</h2>
+<h2 mat-dialog-title>Créer la partie</h2>
 
 <mat-dialog-content>
-    <form #gameForm="ngForm">
-        <!-- Name Field -->
-        <mat-form-field class="full-width" appearance="fill">
-            <mat-label>Nom du jeu:</mat-label>
-            <input maxlength="15" matInput placeholder="Entrez le nom ici..." [(ngModel)]="data.name" name="name" required />
-            @if (gameForm.submitted && !data.name) {
-            <mat-error> Le nom est requis </mat-error>
-            }
-        </mat-form-field>
+    <form #gameForm="ngForm" class="horizontal-form">
+        <div class="form-row">
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Nom du jeu:</mat-label>
+                <input #nameInput="ngModel" maxlength="15" matInput placeholder="Entrez le nom ici..." [(ngModel)]="data.name" name="name" required />
+                @if (nameInput.invalid || nameInput.errors?.whitespace) {
+                <mat-error> Le nom est requis et ne peut pas être uniquement des espaces: {{ data.name }} </mat-error>
+                }
+            </mat-form-field>
+        </div>
 
-        <!-- Description Field -->
-        <mat-form-field class="full-width" appearance="fill">
-            <mat-label>Description:</mat-label>
-            <input matInput maxlength="100" placeholder="Entrez une description ici..." [(ngModel)]="data.description" name="description" required />
-            @if (gameForm.submitted && !data.description) {
-            <mat-error> La description est requise </mat-error>
-            }
-        </mat-form-field>
+        <div class="form-row">
+            <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Description:</mat-label>
+                <input
+                    #descriptionInput="ngModel"
+                    matInput
+                    maxlength="100"
+                    placeholder="Entrez une description ici..."
+                    [(ngModel)]="data.description"
+                    name="description"
+                    required
+                />
+                @if (descriptionInput.invalid || descriptionInput.errors?.whitespace) {
+                <mat-error> La description est requise et ne peut pas pas être uniquement des espaces</mat-error>
+                }
+            </mat-form-field>
+        </div>
 
-        <!-- Radio Buttons for Size -->
-        <div style="margin-top: 1em">
+        <div class="form-row">
             <mat-label>Choisissez la taille de votre jeu:</mat-label>
-            <br />
-            <mat-radio-group [(ngModel)]="data.size" name="size">
-                <mat-radio-button value=10>Petit (10x10)</mat-radio-button>
-                <mat-radio-button value=15>Moyen (15x15)</mat-radio-button>
-                <mat-radio-button value=20>Grand (20x20)</mat-radio-button>
+            <mat-radio-group [(ngModel)]="data.size" name="size" class="radio-group">
+                <mat-radio-button value="10">Petit (10x10)</mat-radio-button>
+                <mat-radio-button value="15">Moyen (15x15)</mat-radio-button>
+                <mat-radio-button value="20">Grand (20x20)</mat-radio-button>
             </mat-radio-group>
-            <br />
-            <br />
+        </div>
+
+        <div class="form-row">
             <mat-label>Choisissez le mode de votre jeu:</mat-label>
-            <mat-radio-group [(ngModel)]="data.isCTF" name="ctf">
-                <mat-radio-button [value]="true">CTF </mat-radio-button>
-                <mat-radio-button [value]="false">Classique </mat-radio-button>
+            <mat-radio-group [(ngModel)]="data.isCTF" name="ctf" class="radio-group">
+                <mat-radio-button [value]="true">CTF</mat-radio-button>
+                <mat-radio-button [value]="false">Classique</mat-radio-button>
             </mat-radio-group>
         </div>
     </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-    <button mat-button mat-dialog-close>Annuler</button>
-    <button mat-button [mat-dialog-close]="data" [disabled]="!data.name || !data.description || data.size < 10">Procéder</button>
+    <button mat-button mat-dialog-close class="rounded-button">Annuler</button>
+    <button mat-button class="rounded-button" (click)="submitForm(gameForm)" [disabled]="gameForm.invalid">Procéder</button>
 </mat-dialog-actions>
