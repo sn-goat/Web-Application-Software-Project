@@ -1,13 +1,13 @@
+import { ChangeDetectorRef, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
-import { MapListComponent } from './map-list.component';
-import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
-import { ChangeDetectorRef, NO_ERRORS_SCHEMA } from '@angular/core';
 import { Board, Cell } from '@common/board';
-import { Visibility, Tile, Item } from '@common/enums';
+import { Item, Tile, Visibility } from '@common/enums';
 import { of } from 'rxjs';
+import { MapListComponent } from './map-list.component';
 
 const SMALL_SIZE = 10;
 const MEDIUM_SIZE = 15;
@@ -157,28 +157,28 @@ describe('MapListComponent', () => {
         expect(sortedItems[1].size).toBe(SMALL_SIZE);
     });
 
-    it('should delete a board after confirmation', fakeAsync(() => {
+    it('should delete a board when onDelete is called', fakeAsync(() => {
         const mockBoard = mockBoards[0];
-        spyOn(window, 'confirm').and.returnValue(true);
         component.items = [...mockBoards];
 
         component.onDelete(mockBoard);
         tick();
 
-        expect(window.confirm).toHaveBeenCalled();
         expect(mockServices.deleteBoardByName).toHaveBeenCalledWith('Game A');
+        expect(component.items.length).toBe(1);
+        expect(mockServices.detectChanges).toHaveBeenCalled();
     }));
 
-    it('should not delete a board if confirmation is cancelled', fakeAsync(() => {
+    it('should update items after board deletion', fakeAsync(() => {
         const mockBoard = mockBoards[0];
-        spyOn(window, 'confirm').and.returnValue(false);
         component.items = [...mockBoards];
+        const initialLength = component.items.length;
 
         component.onDelete(mockBoard);
         tick();
 
-        expect(window.confirm).toHaveBeenCalled();
-        expect(mockServices.deleteBoardByName).not.toHaveBeenCalled();
+        expect(component.items.length).toBe(initialLength - 1);
+        expect(component.items.find((item) => item._id === mockBoard._id)).toBeFalsy();
     }));
 
     it('should toggle visibility of a board', fakeAsync(() => {
