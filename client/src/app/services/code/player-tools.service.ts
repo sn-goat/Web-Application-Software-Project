@@ -14,7 +14,7 @@ export class PlayerToolsService {
 
     private player: Player;
     private playerService: PlayerService = inject(PlayerService);
-    private items = new BehaviorSubject<Item[]>([]); // for testing purposes
+    private items = new BehaviorSubject<Item[]>([]);
     private timer: BehaviorSubject<string> = new BehaviorSubject<string>('00:00');
 
     constructor() {

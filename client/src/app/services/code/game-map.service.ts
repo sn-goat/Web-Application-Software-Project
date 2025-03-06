@@ -19,28 +19,6 @@ export class GameMapService {
     }
 
     getGameMap(): BehaviorSubject<Board> {
-        // This is temporary code to generate a default map
-        // const size = 20;
-        // const mockBoard = Array(size)
-        //     .fill(null)
-        //     .map((_, rowIndex) =>
-        //         Array(size)
-        //             .fill(null)
-        //             .map((__, colIndex) => ({
-        //                 tile: Tile.FLOOR,
-        //                 item: Item.DEFAULT,
-        //                 position: { x: colIndex, y: rowIndex },
-        //             })),
-        //     );
-        // this.setGameMap({
-        //     board: mockBoard,
-        //     size,
-        //     name: 'Default Map',
-        //     description: 'Default map description',
-        //     isCTF: false,
-        //     visibility: Visibility.PRIVATE,
-        //     image: '',
-        // });
         return this.gameMap;
     }
 

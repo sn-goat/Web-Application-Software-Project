@@ -12,11 +12,9 @@ export class SocketService {
     private readonly url: string = environment.serverUrl;
 
     constructor() {
-        // This will allow us to mock this socket in tests
         this.socket = this.createSocket();
     }
 
-    // For testing purposes only
     setSocket(socket: Socket): void {
         this.socket = socket;
     }
@@ -45,7 +43,6 @@ export class SocketService {
         });
     }
 
-    // Added this protected method to make it easier to mock in tests
     protected createSocket(): Socket {
         return io(this.url);
     }

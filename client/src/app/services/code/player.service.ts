@@ -11,49 +11,6 @@ export class PlayerService {
     admin$: Observable<string>;
     players$: Observable<Player[]>;
 
-    // // This is a mock player for testing purposes
-    // mockPlayer: Player = {
-    //     id: '1',
-    //     username: 'mockPlayer',
-    //     avatar: '6',
-    //     life: 100,
-    //     attack: 10,
-    //     defense: 10,
-    //     rapidity: 5,
-    //     attackDice: 'd6',
-    //     defenseDice: 'd4',
-    //     movementPts: 5,
-    //     actions: 2,
-    // };
-
-    // mockPlayer0: Player = {
-    //     id: '1',
-    //     username: 'mockPlayer0',
-    //     avatar: '4',
-    //     life: 100,
-    //     attack: 10,
-    //     defense: 10,
-    //     rapidity: 2,
-    //     attackDice: 'd6',
-    //     defenseDice: 'd4',
-    //     movementPts: 5,
-    //     actions: 2,
-    // };
-
-    // mockPlayer1: Player = {
-    //     id: '1',
-    //     username: 'mockPlayer1',
-    //     avatar: '2',
-    //     life: 100,
-    //     attack: 10,
-    //     defense: 10,
-    //     rapidity: 10,
-    //     attackDice: 'd6',
-    //     defenseDice: 'd4',
-    //     movementPts: 5,
-    //     actions: 2,
-    // };
-
     private playerUsername: string;
     private activePlayer = new BehaviorSubject<string>('');
     private admin = new BehaviorSubject<string>('');
@@ -89,7 +46,7 @@ export class PlayerService {
     }
 
     editPlayer(player: Player): void {
-        if (!player) return; // First check if player exists
+        if (!player) return;
 
         const players: Player[] = this.players.value;
         const playerToUpdate = this.getPlayer(player.username);
@@ -126,7 +83,7 @@ export class PlayerService {
     }
 
     addPlayer(player: Player): void {
-        if (!player) return; // Handle undefined player
+        if (!player) return;
 
         const players = this.players.value;
         const playerExists = players.find((p) => p.username === player.username);
@@ -134,11 +91,11 @@ export class PlayerService {
             return;
         }
         players.push(player);
-        this.players.next([...players]); // Create new array to ensure state change detection
+        this.players.next([...players]);
     }
 
     removePlayer(player: Player): void {
-        if (!player) return; // First check if player exists
+        if (!player) return;
 
         const players = this.players.value;
         if (!players.length) return;

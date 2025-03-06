@@ -3,7 +3,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_MAX } from '@app/constants/health';
 import { PlayerService } from '@app/services/code/player.service';
-// import { GameService } from '@app/services/code/game.service';
 import { Player } from '@common/player';
 
 @Component({
@@ -21,7 +20,6 @@ export class GameMapPlayerDetailedComponent implements OnInit {
     player: Player;
 
     private playerService: PlayerService = inject(PlayerService);
-    // private gameService: GameService = inject(GameService); // for testing purposes
 
     constructor() {
         this.player = {} as Player;
@@ -35,27 +33,7 @@ export class GameMapPlayerDetailedComponent implements OnInit {
                 this.player = player;
             }
         });
-
-        // For testing purposes
-        // const updatedPlayer = { ...this.player };
-        // updatedPlayer.life = this.player.life - HEALTH_DECREMENT;
-        // this.playerService.editPlayer(updatedPlayer);
-        // this.playerService.sortPlayers();
     }
-
-    // For testing purposes
-    // ngAfterViewInit(): void {
-    //     // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
-    //     // this.gameService.incrementWinCount(this.playerService.getPlayerUsername());
-    //     this.gameService.confirmAndAbandonGame('mockPlayer0').then((confirmed) => {
-    //         if (confirmed) {
-    //             console.log('Player abandoned game');
-    //         } else {
-    //             console.log('Player cancelled abandonment');
-    //         }
-    //     });
-    //     // this.gameService.abandonGame('mockPlayer1');
-    // }
 
     getHealthBar(): string {
         const healthPercentage = this.roundHealth((this.player.life / this.maxHealth) * HEALTH_MAX);

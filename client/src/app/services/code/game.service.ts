@@ -74,13 +74,10 @@ export class GameService {
     abandonGame(username: string): void {
         if (this.playersInGameMap.value.has(username)) {
             const currentMap = this.playersInGameMap.value;
-            // const newMap = new Map(currentMap);
 
             const isInGame = currentMap.get(username);
 
             if (isInGame) {
-                // newMap.set(username, false);
-                // this.playersInGameMap.next(newMap);
                 // to be implemented with socket
             }
         }

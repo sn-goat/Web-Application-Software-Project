@@ -9,7 +9,6 @@ import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 import { CommonModule } from '@angular/common';
-// import { FightLogicService } from '@app/services/code/fight-logic.service';
 
 @Component({
     selector: 'app-game-page',
@@ -33,13 +32,11 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     private gameService = inject(GameService);
     private playerService = inject(PlayerService);
-    // private fightLogicService = inject(FightLogicService);
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
             this.showFightInterface = show;
         });
-        // this.fightLogicService.startFight('mockPlayer1', 'mockPlayer'); // test
     }
 
     ngAfterViewInit(): void {
