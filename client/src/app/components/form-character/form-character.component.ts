@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-
-const MAX_PORTRAITS = 12;
-const D4 = './assets/dice/d4.png';
-const D6 = './assets/dice/d6.png';
+import { Router, RouterLink } from '@angular/router';
+import { D4, D6, MAX_PORTRAITS } from '@app/constants/playerConst';
+import { GameMapService } from '@app/services/code/game-map.service';
+import { SocketService } from '@app/services/code/socket.service';
+import { Player } from '@common/player';
+import { first } from 'rxjs/operators';
 
 @Component({
     selector: 'app-form-character',
@@ -13,8 +14,11 @@ const D6 = './assets/dice/d6.png';
     styleUrls: ['./form-character.component.scss'],
     imports: [CommonModule, FormsModule, RouterLink],
 })
-export class FormCharacterComponent {
+export class FormCharacterComponent implements OnInit {
     @Output() closePopup: EventEmitter<void> = new EventEmitter<void>();
+    @Input() isCreationPage: boolean = false;
+    @Input() accessCode: string = '';
+
     totalPortraits = MAX_PORTRAITS;
     currentPortraitIndex = 0;
 
@@ -23,18 +27,49 @@ export class FormCharacterComponent {
     attackSelected: boolean = false;
     defenseSelected: boolean = false;
 
-    stats = {
-        playerName: '',
+    stats: Player = {
+        id: this.generateId(),
+        name: '',
+        avatar: this.getCurrentPortraitImage(),
         life: 4,
-        rapidity: 4,
         attack: 4,
         defense: 4,
+        rapidity: 4,
         attackDice: '',
         defenseDice: '',
     };
 
+    takenAvatars: string[] = [];
+
+    private readonly gameMapService = inject(GameMapService);
+    private readonly socketService = inject(SocketService);
+
+    constructor(private router: Router) {}
+
+    get isCurrentAvatarTaken(): boolean {
+        return this.takenAvatars.includes(this.getCurrentPortraitImage());
+    }
+
+    ngOnInit(): void {
+        if (!this.isCreationPage) {
+            this.takenAvatars = this.socketService.gameRoom?.players.map((player) => player.avatar);
+        }
+
+        this.socketService.onPlayerJoined().subscribe((data) => {
+            if (!this.isCreationPage) {
+                this.takenAvatars = data.room.players.map((player) => player.avatar);
+            }
+        });
+    }
+
     getCurrentPortraitImage(): string {
         return `./assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
+    }
+
+    generateId(): string {
+        const base = 36;
+        const limit = 9;
+        return Math.random().toString(base).substring(2, limit);
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -43,6 +78,7 @@ export class FormCharacterComponent {
         } else if (direction === 'next') {
             this.currentPortraitIndex = (this.currentPortraitIndex + 1) % this.totalPortraits;
         }
+        this.stats.avatar = this.getCurrentPortraitImage();
     }
 
     selectStat(stat: 'life' | 'rapidity') {
@@ -68,20 +104,17 @@ export class FormCharacterComponent {
         const otherSelectedStat = (otherStat + 'Selected') as 'attackSelected' | 'defenseSelected';
 
         if (this[selectedStat]) {
-            // If already selected, unselect and hide dice images for both stats.
             this[selectedStat] = false;
             this.stats[`${stat}Dice`] = '';
             this.stats[`${otherStat}Dice`] = '';
         } else {
-            // If not selected, select it and assign the dice images accordingly.
             this[selectedStat] = true;
-            this.stats[`${stat}Dice`] = D6; // Selected stat gets D6.
+            this.stats[`${stat}Dice`] = D6;
 
-            // Ensure the other stat is not selected.
             if (this[otherSelectedStat]) {
                 this[otherSelectedStat] = false;
             }
-            this.stats[`${otherStat}Dice`] = D4; // The other gets D4.
+            this.stats[`${otherStat}Dice`] = D4;
         }
     }
 
@@ -91,6 +124,29 @@ export class FormCharacterComponent {
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.rapiditySelected, this.attackSelected, this.defenseSelected];
-        return this.stats.playerName.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
+        return this.stats.name.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
+    }
+
+    shareGameMap(): void {
+        this.gameMapService.shareGameMap();
+    }
+
+    shareCharacter(): void {
+        this.socketService.shareCharacter(this.accessCode, this.stats);
+    }
+
+    createGame(): void {
+        this.gameMapService
+            .getGameMap()
+            .pipe(first())
+            .subscribe((map) => {
+                const selectedMapSize = map.size;
+                this.socketService.createRoom(this.stats.id, selectedMapSize);
+                this.socketService.onRoomCreated().subscribe((data: unknown) => {
+                    this.accessCode = (data as { accessCode: string }).accessCode;
+                    this.socketService.shareCharacter(this.accessCode, this.stats);
+                    this.router.navigate(['/lobby'], { state: { accessCode: this.accessCode } });
+                });
+            });
     }
 }

@@ -1,12 +1,11 @@
-<div>
-    <h1>Join a Game Room</h1>
-    <label for="code">Access Code:</label>
-    <input id="code" [(ngModel)]="accessCode" placeholder="Enter access code" />
-    <br/>
-    <label for="name">Player Name:</label>
-    <input id="name" [(ngModel)]="playerName" placeholder="Enter your name" />
-    <br/>
-    <button (click)="joinRoom()">Join Room</button>
+@if (!showCharacterForm)
+{
+    <h1>Rejoindre une salle de jeu</h1>
+    <label for="code">Code d'accès :</label>
+    <input id="code" [(ngModel)]="accessCode" placeholder="Entrez le code d'accès" />
+    <button (click)="joinRoom()">Rejoindre</button>
     <p>{{ joinResult }}</p>
-  </div>
-  
+}
+@else {
+    <app-form-character [accessCode]="accessCode" (closePopup)="closeCharacterForm()"></app-form-character>
+}

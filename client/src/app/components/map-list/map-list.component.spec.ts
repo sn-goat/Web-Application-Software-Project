@@ -88,7 +88,6 @@ describe('MapListComponent', () => {
         component.loadingInterval = LOADING_INTERVAL;
         mockBoardService.getAllBoards.and.returnValue(of(mockBoardGames));
         fixture.autoDetectChanges();
-        await fixture.whenStable();
     });
 
     it('should create', () => {

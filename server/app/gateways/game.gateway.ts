@@ -1,39 +1,40 @@
+import { GameRoom } from '@common/game-room';
+import { Player } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameRoom, GameService, Player } from './game.service';
-
+import { RoomService } from './room.service';
 @WebSocketGateway({ cors: true })
 @Injectable()
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger(GameGateway.name);
 
-    constructor(private readonly gameService: GameService) {}
+    constructor(private readonly roomService: RoomService) {}
 
-    @SubscribeMessage('createGame')
-    handleCreateGame(client: Socket, payload: { organizerId: string }) {
-        const room: GameRoom = this.gameService.createGame(payload.organizerId);
+    @SubscribeMessage('createRoom')
+    handleCreateRoom(client: Socket, payload: { organizerId: string; size: number }) {
+        const room: GameRoom = this.roomService.createRoom(payload.organizerId, payload.size);
 
         client.join(room.accessCode);
-        client.emit('gameCreated', room);
-        this.logger.log(`Game created with room code ${room.accessCode}`);
+        client.emit('roomCreated', room);
+        this.logger.log(`gameRoom created with room code ${room.accessCode}`);
     }
 
-    @SubscribeMessage('joinGame')
-    handleJoinGame(client: Socket, payload: { accessCode: string; player: Player }) {
-        const room = this.gameService.joinGame(payload.accessCode, payload.player);
+    @SubscribeMessage('joinRoom')
+    handleJoinRoom(client: Socket, payload: { accessCode: string }) {
+        const room = this.roomService.joinRoom(payload.accessCode);
         if (!room) {
             client.emit('joinError', { message: 'Unable to join room. It may be locked or does not exist.' });
             return;
         }
         client.join(payload.accessCode);
-        this.server.to(payload.accessCode).emit('playerJoined', { player: payload.player, room });
+        this.server.to(payload.accessCode).emit('playerJoined', { room });
     }
 
     @SubscribeMessage('lockRoom')
     handleLockRoom(client: Socket, payload: { accessCode: string }) {
-        const room = this.gameService.lockRoom(payload.accessCode);
+        const room = this.roomService.lockRoom(payload.accessCode);
         if (!room) {
             client.emit('lockError', { message: 'Unable to lock room.' });
             return;
@@ -43,7 +44,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('unlockRoom')
     handleUnlockRoom(client: Socket, payload: { accessCode: string }) {
-        const room = this.gameService.unlockRoom(payload.accessCode);
+        const room = this.roomService.unlockRoom(payload.accessCode);
         if (!room) {
             client.emit('unlockError', { message: 'Unable to unlock room.' });
             return;
@@ -51,24 +52,45 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(payload.accessCode).emit('roomUnlocked', { room });
     }
 
-    @SubscribeMessage('startGame')
-    handleStartGame(client: Socket, payload: { accessCode: string }) {
-        const room = this.gameService.startGame(payload.accessCode);
+    @SubscribeMessage('shareCharacter')
+    handleShareCharacter(client: Socket, payload: { accessCode: string; player: Player }) {
+        const room = this.roomService.shareCharacter(payload.accessCode, payload.player);
         if (!room) {
-            client.emit('startError', { message: 'Unable to start game. Make sure the room is locked and valid.' });
+            client.emit('characterError', { message: 'Unable to share character.' });
             return;
         }
-        this.server.to(payload.accessCode).emit('gameStarted', { room });
+
+        this.server.to(payload.accessCode).emit('playerJoined', { room });
     }
 
-    @SubscribeMessage('submitMove')
-    handleSubmitMove(client: Socket, payload: { accessCode: string; playerId: string; move: string }) {
-        const room = this.gameService.submitMove(payload.accessCode, payload.playerId, payload.move);
+    @SubscribeMessage('removePlayer')
+    handleRemovePlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
+        const room = this.roomService.removePlayer(payload.accessCode, payload.playerId);
         if (!room) {
-            client.emit('moveError', { message: 'Unable to submit move.' });
+            client.emit('removeError', { message: 'Unable to remove player.' });
             return;
         }
-        this.server.to(payload.accessCode).emit('moveSubmitted', { room, playerId: payload.playerId });
+        this.server.to(payload.accessCode).emit('playerRemoved', room.players);
+    }
+
+    @SubscribeMessage('disconnectPlayer')
+    handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
+        const room = this.roomService.disconnectPlayer(payload.accessCode, payload.playerId);
+        if (!room) {
+            client.emit('disconnectError', { message: 'Unable to disconnect player.' });
+            return;
+        }
+        this.server.to(payload.accessCode).emit('playerDisconnected', room.players);
+    }
+
+    @SubscribeMessage('getRoom')
+    handleGetRoom(client: Socket, payload: { accessCode: string }) {
+        const room = this.roomService.getRoom(payload.accessCode);
+        if (!room) {
+            client.emit('roomError', { message: 'Room not found.' });
+            return;
+        }
+        client.emit('roomData', room);
     }
 
     afterInit(server: Server) {
