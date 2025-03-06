@@ -4,19 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
+import { MapCardComponent } from '@app/components/map-card/map-card.component';
 import { BoardService } from '@app/services/code/board.service';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
-import {
-    DEFAULT_PATH_ITEMS,
-    DEFAULT_PATH_TILES,
-    DEFAULT_PATH_DELETE,
-    DEFAULT_PATH_EDIT,
-    DEFAULT_PATH_VISIBLE,
-    DEFAULT_PATH_NOT_VISIBLE,
-} from '@app/constants/path';
 import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
 
 @Component({
@@ -25,7 +18,7 @@ import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, MapCardComponent],
 })
 export class MapListComponent implements OnInit {
     @Input() items: Board[] = [];
@@ -34,18 +27,11 @@ export class MapListComponent implements OnInit {
     @Output() divClicked = new EventEmitter<void>();
     isLoading: boolean = true;
     mapsLoaded: boolean = false;
-    readonly srcTiles = DEFAULT_PATH_TILES;
-    readonly srcItem = DEFAULT_PATH_ITEMS;
-    readonly srcEdit = DEFAULT_PATH_EDIT;
-    readonly srcDelete = DEFAULT_PATH_DELETE;
-    readonly srcVisible = DEFAULT_PATH_VISIBLE;
-    readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
-    readonly fileType = '.png';
     loadingInterval = LOADING_INTERVAL;
     searchQuery: string = '';
-    sortBy: string = 'createdAt';
+    sortBy: string = 'updatedAt';
 
-    private mapService = inject(MapService);
+    private readonly mapService = inject(MapService);
 
     constructor(
         private readonly router: Router,
@@ -84,13 +70,11 @@ export class MapListComponent implements OnInit {
                 updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
                 createdAt: item.createdAt ? new Date(item.createdAt) : undefined,
             }));
+
+            this.mapsLoaded = this.items.length > 0;
+            this.isLoading = false;
             this.cdr.detectChanges();
         });
-        setTimeout(() => {
-            this.isLoading = false;
-            this.mapsLoaded = this.getFilteredAndSortedItems().length > 0;
-            this.cdr.detectChanges();
-        }, this.loadingInterval);
     }
 
     getFilteredAndSortedItems(): Board[] {
@@ -138,12 +122,10 @@ export class MapListComponent implements OnInit {
     }
 
     onDelete(map: Board): void {
-        if (confirm(`Are you sure you want to delete "${map.name}"?`)) {
-            this.boardService.deleteBoardByName(map.name).subscribe(() => {
-                this.items = this.items.filter((item) => item._id !== map._id);
-                this.cdr.detectChanges();
-            });
-        }
+        this.boardService.deleteBoardByName(map.name).subscribe(() => {
+            this.items = this.items.filter((item) => item._id !== map._id);
+            this.cdr.detectChanges();
+        });
     }
 
     toggleVisibility(map: Board): void {
@@ -155,7 +137,6 @@ export class MapListComponent implements OnInit {
 
     createNewMap(): void {
         const dialogRef = this.dialog.open(FormDialogComponent, {
-            width: '280px',
             data: { name: '', description: '', size: 10, isCTF: false },
         });
 

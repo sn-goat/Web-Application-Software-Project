@@ -1,0 +1,46 @@
+<div class="list-item">
+    <div class="grid">
+        @for (row of map.board; track row) {
+            <div class="row">
+                @for (cell of row; track cell) {
+                    <div class="cell">
+                        <div class="image-container">
+                            <img class="base-image" [src]="srcTiles + cell.tile + fileType" draggable="false"/>
+                            @if (cell.item) {
+                                <img class="image-stack" [src]="srcItem + cell.item + fileType" draggable="false"/>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        <p class="item-description">{{ map.description }}</p>
+    </div>
+    <div class="item-content">
+        <div class="item-header">
+            <h3 class="item-title">{{ map.name }}</h3>
+            <span class="item-date">{{ map.updatedAt | date: 'MMM d, y' }}</span>
+        </div>
+        <div class="item-details">
+            <span class="item-size">Size: {{ map.size }}x{{ map.size }}</span>
+            <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
+        </div>
+        <div class="item-footer">
+            <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
+        </div>
+    </div>
+
+    @if (!isCreationPage) {
+        <div class="item-actions">
+            <button class="visibility-btn" (click)="toggleMapVisibility()" title="Toggle Visibility">
+                <img [src]="map.visibility === 'Public' ? srcVisible + fileType : srcNotVisible + fileType" [alt]="map.visibility" class="button-icon" />
+            </button>
+            <button class="edit-btn" (click)="onEdit()" title="Edit">
+                <img [src]="srcEdit + fileType" alt="edit" class="button-icon" />
+            </button>
+            <button class="delete-btn" (click)="onDelete()" title="Delete">
+                <img [src]="srcDelete + fileType" alt="delete" class="button-icon" />
+            </button>
+        </div>
+    }
+</div>
