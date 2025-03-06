@@ -1,16 +1,80 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
+import { MAX_PLAYERS } from '@app/constants/playerConst';
+import { GameService } from '@app/services/code/game.service';
+import { PlayerService } from '@app/services/code/player.service';
+import { Player } from '@common/player';
+import { BehaviorSubject } from 'rxjs';
+import { GameMapPlayerComponent } from './game-map-player.component';
 
 describe('GameMapPlayerComponent', () => {
     let component: GameMapPlayerComponent;
     let fixture: ComponentFixture<GameMapPlayerComponent>;
+    let playerServiceMock: jasmine.SpyObj<PlayerService>;
+    let gameServiceMock: jasmine.SpyObj<GameService>;
+    let playersSubject: BehaviorSubject<Player[]>;
+    let activePlayerSubject: BehaviorSubject<string>;
+    let adminSubject: BehaviorSubject<string>;
+    let playersWinsSubject: BehaviorSubject<Map<string, number>>;
+    let playersInGameSubject: BehaviorSubject<Map<string, boolean>>;
+
+    const mockPlayers: Player[] = [
+        {
+            id: '1',
+            username: 'player1',
+            avatar: '1',
+            life: 100,
+            attack: 10,
+            defense: 10,
+            rapidity: 5,
+            attackDice: 'd6',
+            defenseDice: 'd4',
+            movementPts: 5,
+            actions: 2,
+        },
+        {
+            id: '2',
+            username: 'player2',
+            avatar: '2',
+            life: 90,
+            attack: 12,
+            defense: 8,
+            rapidity: 7,
+            attackDice: 'd8',
+            defenseDice: 'd6',
+            movementPts: 4,
+            actions: 2,
+        },
+    ];
 
     beforeEach(async () => {
-        await TestBed.configureTestingModule({
-            imports: [GameMapPlayerComponent],
-        }).compileComponents();
+        playersSubject = new BehaviorSubject<Player[]>([]);
+        activePlayerSubject = new BehaviorSubject<string>('');
+        adminSubject = new BehaviorSubject<string>('');
+        playersWinsSubject = new BehaviorSubject<Map<string, number>>(new Map());
+        playersInGameSubject = new BehaviorSubject<Map<string, boolean>>(new Map());
 
+        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer']);
+        playerServiceMock.players$ = playersSubject.asObservable();
+        playerServiceMock.activePlayer$ = activePlayerSubject.asObservable();
+        playerServiceMock.admin$ = adminSubject.asObservable();
+
+        gameServiceMock = jasmine.createSpyObj('GameService', ['updateGameState']);
+        gameServiceMock.playersWinsMap$ = playersWinsSubject.asObservable();
+        gameServiceMock.playersInGameMap$ = playersInGameSubject.asObservable();
+
+        await TestBed.configureTestingModule({
+            imports: [CommonModule, GameMapPlayerComponent],
+            providers: [
+                { provide: PlayerService, useValue: playerServiceMock },
+                { provide: GameService, useValue: gameServiceMock },
+            ],
+        }).compileComponents();
+    });
+
+    beforeEach(() => {
         fixture = TestBed.createComponent(GameMapPlayerComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
@@ -18,5 +82,151 @@ describe('GameMapPlayerComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
+    });
+
+    it('should initialize with constant paths', () => {
+        expect(component.srcAvatar).toBe(DEFAULT_PATH_AVATARS);
+        expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
+    });
+
+    it('should initialize with empty arrays and default values', () => {
+        expect(component.players).toEqual([]);
+        expect(component.admin).toBe('');
+        expect(component.activePlayer).toBe('');
+        expect(component.playersWins).toBeInstanceOf(Map);
+        expect(component.playersWins.size).toBe(0);
+    });
+
+    it('should update players when players$ emits', () => {
+        playersSubject.next(mockPlayers);
+
+        expect(component.players).toEqual(mockPlayers);
+    });
+
+    it('should update activePlayer when activePlayer$ emits', () => {
+        const activePlayer = 'player1';
+        activePlayerSubject.next(activePlayer);
+
+        expect(component.activePlayer).toEqual(activePlayer);
+    });
+
+    it('should update admin when admin$ emits', () => {
+        const admin = 'player1';
+        adminSubject.next(admin);
+
+        expect(component.admin).toEqual(admin);
+    });
+
+    it('should update playersWins when playersWinsMap$ emits', () => {
+        const winsMap = new Map<string, number>([
+            ['player1', 3],
+            ['player2', 1],
+        ]);
+        playersWinsSubject.next(winsMap);
+
+        expect(component.playersWins).toEqual(winsMap);
+    });
+
+    it('should update playersInGame when playersInGameMap$ emits', () => {
+        const inGameMap = new Map<string, boolean>([
+            ['player1', true],
+            ['player2', false],
+        ]);
+        playersInGameSubject.next(inGameMap);
+
+        expect(component.playersInGame).toEqual(inGameMap);
+    });
+
+    it('should return correct empty slots count with empty players array', () => {
+        component.players = [];
+
+        const emptySlots = component.rangeEmptyPlayerSlot();
+
+        expect(emptySlots.length).toEqual(MAX_PLAYERS);
+        expect(emptySlots).toEqual(Array.from({ length: MAX_PLAYERS }, (_, i) => i));
+    });
+
+    it('should return correct empty slots count with some players', () => {
+        component.players = mockPlayers;
+
+        const emptySlots = component.rangeEmptyPlayerSlot();
+
+        expect(emptySlots.length).toEqual(MAX_PLAYERS - mockPlayers.length);
+        expect(emptySlots).toEqual(Array.from({ length: MAX_PLAYERS - mockPlayers.length }, (_, i) => i));
+    });
+
+    it('should return empty array when players count equals MAX_PLAYERS', () => {
+        component.players = Array(MAX_PLAYERS)
+            .fill(null)
+            .map((_, i) => ({
+                id: i.toString(),
+                username: `player${i}`,
+                avatar: i.toString(),
+                life: 100,
+                attack: 10,
+                defense: 10,
+                rapidity: 5,
+                attackDice: 'd6',
+                defenseDice: 'd4',
+                movementPts: 5,
+                actions: 2,
+            }));
+
+        const emptySlots = component.rangeEmptyPlayerSlot();
+
+        expect(emptySlots.length).toEqual(0);
+        expect(emptySlots).toEqual([]);
+    });
+
+    it('should handle undefined players array in players$ subscription', () => {
+        playersSubject.next(undefined as unknown as Player[]);
+
+        expect(component.players).toEqual([]);
+    });
+
+    it('should handle multiple emissions from all observables', () => {
+        playersSubject.next([mockPlayers[0]]);
+        activePlayerSubject.next('player1');
+        adminSubject.next('player1');
+        playersWinsSubject.next(new Map([['player1', 1]]));
+        playersInGameSubject.next(new Map([['player1', true]]));
+
+        expect(component.players).toEqual([mockPlayers[0]]);
+        expect(component.activePlayer).toBe('player1');
+        expect(component.admin).toBe('player1');
+        expect(component.playersWins).toEqual(new Map([['player1', 1]]));
+        expect(component.playersInGame).toEqual(new Map([['player1', true]]));
+
+        playersSubject.next(mockPlayers);
+        activePlayerSubject.next('player2');
+        adminSubject.next('player2');
+        playersWinsSubject.next(
+            new Map([
+                ['player1', 1],
+                ['player2', 2],
+            ]),
+        );
+        playersInGameSubject.next(
+            new Map([
+                ['player1', true],
+                ['player2', true],
+            ]),
+        );
+
+        expect(component.players).toEqual(mockPlayers);
+        expect(component.activePlayer).toBe('player2');
+        expect(component.admin).toBe('player2');
+        expect(component.playersWins).toEqual(
+            new Map([
+                ['player1', 1],
+                ['player2', 2],
+            ]),
+        );
+        expect(component.playersInGame).toEqual(
+            new Map([
+                ['player1', true],
+                ['player2', true],
+            ]),
+        );
     });
 });
