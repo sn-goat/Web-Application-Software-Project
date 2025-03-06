@@ -7,7 +7,7 @@ import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { Player } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { GameFightInterfaceComponent } from './game-fight-interface.component';
+import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 
 describe('GameFightInterfaceComponent', () => {
     let component: GameFightInterfaceComponent;
