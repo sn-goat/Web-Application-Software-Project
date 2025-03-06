@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { FormCharacterComponent } from '@app/components/form-character/form-character.component';
 import { MapListComponent } from '@app/components/map-list/map-list.component';
-import { CreatePageComponent } from './create-page.component';
+import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;

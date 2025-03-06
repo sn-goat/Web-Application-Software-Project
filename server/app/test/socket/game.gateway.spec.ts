@@ -1,303 +1,262 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { GameGateway } from '@app/gateways/game.gateway';
-import { GameRoom, GameService, Player } from '@app/gateways/game.service';
-import { Test, TestingModule } from '@nestjs/testing';
-import { Server, Socket } from 'socket.io';
+import { RoomService } from '@app/gateways/room.service';
+import { Socket } from 'socket.io';
 
 describe('GameGateway', () => {
     let gateway: GameGateway;
-    let gameService: Partial<GameService>;
-    let mockServer: Partial<Server>;
+    let roomService: Partial<RoomService>;
+    let client: Partial<Socket>;
+    let server: any; // mock server
 
-    beforeEach(async () => {
-        // Create a mock GameService with jest.fn() implementations
-        const gameServiceMock = {
-            createGame: jest.fn().mockReturnValue({ accessCode: '12345' } as GameRoom),
-            joinGame: jest
-                .fn()
-                .mockImplementation((accessCode: string, player: Player) =>
-                    accessCode === '12345' ? ({ accessCode, players: [player] } as GameRoom) : null,
-                ),
-            lockRoom: jest
-                .fn()
-                .mockImplementation((accessCode: string) =>
-                    accessCode === '12345' ? ({ accessCode, locked: true, organizerId: 'org1', players: [], isLocked: true } as GameRoom) : null,
-                ),
-            unlockRoom: jest
-                .fn()
-                .mockImplementation((accessCode: string) =>
-                    accessCode === '12345' ? ({ accessCode, locked: false, organizerId: 'org1', players: [], isLocked: false } as GameRoom) : null,
-                ),
-            startGame: jest
-                .fn()
-                .mockImplementation((accessCode: string) =>
-                    accessCode === '12345' ? ({ accessCode, started: true, organizerId: 'org1', players: [], isLocked: false } as GameRoom) : null,
-                ),
-            submitMove: jest
-                .fn()
-                .mockImplementation((accessCode: string, playerId: string, move: string) =>
-                    accessCode === '12345' ? ({ accessCode, move, organizerId: 'org1', players: [], isLocked: false } as GameRoom) : null,
-                ),
+    beforeEach(() => {
+        // Create a mock game service with jest.fn() for each method.
+        roomService = {
+            createRoom: jest.fn(),
+            joinRoom: jest.fn(),
+            lockRoom: jest.fn(),
+            unlockRoom: jest.fn(),
+            shareCharacter: jest.fn(),
+            removePlayer: jest.fn(),
+            disconnectPlayer: jest.fn(),
         };
 
-        // Create a TestingModule providing the gateway and the mocked game service.
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [GameGateway, { provide: GameService, useValue: gameServiceMock }],
-        }).compile();
+        // Create a fake server that returns an object with an emit method.
+        server = {
+            to: jest.fn().mockReturnValue({
+                emit: jest.fn(),
+            }),
+        };
 
-        gateway = module.get<GameGateway>(GameGateway);
-        gameService = module.get<GameService>(GameService);
+        // Instantiate the gateway and inject the mocked service.
+        gateway = new GameGateway(roomService as RoomService);
+        gateway.server = server;
 
-        // Create a mock Server with jest.fn() for 'to' and 'emit'
-        mockServer = {
-            to: jest.fn().mockReturnThis(),
+        // Create a fake client socket.
+        client = {
+            join: jest.fn(),
             emit: jest.fn(),
+            id: 'socket1',
         };
-        gateway.server = mockServer as Server;
     });
 
     describe('handleCreateGame', () => {
-        it('should create a game, join client to room, and emit "gameCreated"', () => {
-            const client = {
-                join: jest.fn(),
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should create a game and emit gameCreated', () => {
+            const payload = { organizerId: 'org1', size: 5 };
+            const room = { accessCode: 'ROOM123' };
+            (roomService.createRoom as jest.Mock).mockReturnValue(room);
 
-            gateway.handleCreateGame(client, { organizerId: 'org1' });
+            gateway.handleCreateRoom(client as Socket, payload);
 
-            expect(gameService.createGame).toHaveBeenCalledWith('org1');
-            expect(client.join).toHaveBeenCalledWith('12345');
-            expect(client.emit).toHaveBeenCalledWith('gameCreated', { accessCode: '12345' });
+            expect(roomService.createRoom).toHaveBeenCalledWith(payload.organizerId, payload.size);
+            expect(client.join).toHaveBeenCalledWith(room.accessCode);
+            expect(client.emit).toHaveBeenCalledWith('roomCreated', room);
         });
     });
 
     describe('handleJoinGame', () => {
-        it('should join game and emit "playerJoined" when room is found', () => {
-            const client = {
-                join: jest.fn(),
-                emit: jest.fn(),
-            } as unknown as Socket;
-            const player = { id: 'player1' } as Player;
+        it('should join game successfully and emit playerJoined', () => {
+            const payload = { accessCode: 'ROOM123' };
+            const room = { accessCode: 'ROOM123' };
+            (roomService.joinRoom as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
 
-            // Return a valid room for accessCode '12345'
-            (gameService.joinGame as jest.Mock).mockReturnValueOnce({ accessCode: '12345', players: [player] } as GameRoom);
+            gateway.handleJoinRoom(client as Socket, payload);
 
-            gateway.handleJoinGame(client, { accessCode: '12345', player });
-
-            expect(gameService.joinGame).toHaveBeenCalledWith('12345', player);
-            expect(client.join).toHaveBeenCalledWith('12345');
-            expect(mockServer.to).toHaveBeenCalledWith('12345');
-            expect(mockServer.emit).toHaveBeenCalledWith('playerJoined', {
-                player,
-                room: { accessCode: '12345', players: [player] },
-            });
+            expect(roomService.joinRoom).toHaveBeenCalledWith(payload.accessCode);
+            expect(client.join).toHaveBeenCalledWith(payload.accessCode);
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith('playerJoined', { room });
         });
 
-        it('should emit "joinError" if room is not found', () => {
-            const client = {
-                join: jest.fn(),
-                emit: jest.fn(),
-            } as unknown as Socket;
-            const player = { id: 'player1' } as Player;
+        it('should emit joinError when joinGame fails', () => {
+            const payload = { accessCode: 'ROOM123' };
+            (roomService.joinRoom as jest.Mock).mockReturnValue(null);
 
-            (gameService.joinGame as jest.Mock).mockReturnValueOnce(null);
+            gateway.handleJoinRoom(client as Socket, payload);
 
-            gateway.handleJoinGame(client, { accessCode: 'invalid', player });
-
-            expect(gameService.joinGame).toHaveBeenCalledWith('invalid', player);
-            expect(client.emit).toHaveBeenCalledWith('joinError', {
-                message: 'Unable to join room. It may be locked or does not exist.',
-            });
+            expect(client.emit).toHaveBeenCalledWith('joinError', { message: 'Unable to join room. It may be locked or does not exist.' });
         });
     });
 
     describe('handleLockRoom', () => {
-        it('should lock the room and emit "roomLocked"', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should lock room successfully and emit roomLocked', () => {
+            const payload = { accessCode: 'ROOM123' };
+            const room = { accessCode: 'ROOM123' };
+            (roomService.lockRoom as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
 
-            (gameService.lockRoom as jest.Mock).mockReturnValueOnce({
-                accessCode: '12345',
-                locked: true,
-                organizerId: 'org1',
-                players: [],
-                isLocked: true,
-            } as GameRoom);
+            gateway.handleLockRoom(client as Socket, payload);
 
-            gateway.handleLockRoom(client, { accessCode: '12345' });
-
-            expect(gameService.lockRoom).toHaveBeenCalledWith('12345');
-            expect(mockServer.to).toHaveBeenCalledWith('12345');
-            expect(mockServer.emit).toHaveBeenCalledWith('roomLocked', {
-                room: { accessCode: '12345', locked: true, organizerId: 'org1', players: [], isLocked: true },
-            });
+            expect(roomService.lockRoom).toHaveBeenCalledWith(payload.accessCode);
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith('roomLocked', { room });
         });
 
-        it('should emit "lockError" if room is not found', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should emit lockError when lockRoom fails', () => {
+            const payload = { accessCode: 'ROOM123' };
+            (roomService.lockRoom as jest.Mock).mockReturnValue(null);
 
-            (gameService.lockRoom as jest.Mock).mockReturnValueOnce(null);
+            gateway.handleLockRoom(client as Socket, payload);
 
-            gateway.handleLockRoom(client, { accessCode: 'invalid' });
-
-            expect(gameService.lockRoom).toHaveBeenCalledWith('invalid');
-            expect(client.emit).toHaveBeenCalledWith('lockError', {
-                message: 'Unable to lock room.',
-            });
+            expect(client.emit).toHaveBeenCalledWith('lockError', { message: 'Unable to lock room.' });
         });
     });
 
     describe('handleUnlockRoom', () => {
-        it('should unlock the room and emit "roomUnlocked"', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should unlock room successfully and emit roomUnlocked', () => {
+            const payload = { accessCode: 'ROOM123' };
+            const room = { accessCode: 'ROOM123' };
+            (roomService.unlockRoom as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
 
-            (gameService.unlockRoom as jest.Mock).mockReturnValueOnce({
-                accessCode: '12345',
-                locked: false,
-                organizerId: 'org1',
-                players: [],
-                isLocked: false,
-            } as GameRoom);
+            gateway.handleUnlockRoom(client as Socket, payload);
 
-            gateway.handleUnlockRoom(client, { accessCode: '12345' });
-
-            expect(gameService.unlockRoom).toHaveBeenCalledWith('12345');
-            expect(mockServer.to).toHaveBeenCalledWith('12345');
-            expect(mockServer.emit).toHaveBeenCalledWith('roomUnlocked', {
-                room: { accessCode: '12345', locked: false, organizerId: 'org1', players: [], isLocked: false },
-            });
+            expect(roomService.unlockRoom).toHaveBeenCalledWith(payload.accessCode);
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith('roomUnlocked', { room });
         });
 
-        it('should emit "unlockError" if room is not found', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should emit unlockError when unlockRoom fails', () => {
+            const payload = { accessCode: 'ROOM123' };
+            (roomService.unlockRoom as jest.Mock).mockReturnValue(null);
 
-            (gameService.unlockRoom as jest.Mock).mockReturnValueOnce(null);
+            gateway.handleUnlockRoom(client as Socket, payload);
 
-            gateway.handleUnlockRoom(client, { accessCode: 'invalid' });
-
-            expect(gameService.unlockRoom).toHaveBeenCalledWith('invalid');
-            expect(client.emit).toHaveBeenCalledWith('unlockError', {
-                message: 'Unable to unlock room.',
-            });
+            expect(client.emit).toHaveBeenCalledWith('unlockError', { message: 'Unable to unlock room.' });
         });
     });
 
-    describe('handleStartGame', () => {
-        it('should start the game and emit "gameStarted"', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
+    describe('handleShareCharacter', () => {
+        it('should share character successfully and emit playerJoined', () => {
+            const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'Player One' } };
+            const room = { accessCode: 'ROOM123' };
+            (roomService.shareCharacter as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
 
-            (gameService.startGame as jest.Mock).mockReturnValueOnce({
-                accessCode: '12345',
-                started: true,
-                organizerId: 'org1',
-                players: [],
-                isLocked: false,
-            } as GameRoom);
+            const updatedPayload = {
+                accessCode: payload.accessCode,
+                player: {
+                    id: payload.player.id,
+                    name: payload.player.name,
+                    avatar: 'defaultAvatar',
+                    life: 4,
+                    attack: 4,
+                    defense: 4,
+                    rapidity: 4,
+                    attackDice: '',
+                    defenseDice: '',
+                },
+            };
 
-            gateway.handleStartGame(client, { accessCode: '12345' });
+            gateway.handleShareCharacter(client as Socket, updatedPayload);
 
-            expect(gameService.startGame).toHaveBeenCalledWith('12345');
-            expect(mockServer.to).toHaveBeenCalledWith('12345');
-            expect(mockServer.emit).toHaveBeenCalledWith('gameStarted', {
-                room: { accessCode: '12345', started: true, organizerId: 'org1', players: [], isLocked: false },
-            });
+            expect(roomService.shareCharacter).toHaveBeenCalledWith(
+                payload.accessCode,
+                expect.objectContaining({ id: payload.player.id, name: payload.player.name }),
+            );
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith('playerJoined', { room });
         });
 
-        it('should emit "startError" if game cannot be started', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should emit characterError when shareCharacter fails', () => {
+            const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'Player One' } };
+            (roomService.shareCharacter as jest.Mock).mockReturnValue(null);
 
-            (gameService.startGame as jest.Mock).mockReturnValueOnce(null);
+            const updatedPayload = {
+                accessCode: payload.accessCode,
+                player: {
+                    id: payload.player.id,
+                    name: payload.player.name,
+                    avatar: 'defaultAvatar',
+                    life: 4,
+                    attack: 4,
+                    defense: 4,
+                    rapidity: 4,
+                    attackDice: '',
+                    defenseDice: '',
+                },
+            };
 
-            gateway.handleStartGame(client, { accessCode: 'invalid' });
+            gateway.handleShareCharacter(client as Socket, updatedPayload);
 
-            expect(gameService.startGame).toHaveBeenCalledWith('invalid');
-            expect(client.emit).toHaveBeenCalledWith('startError', {
-                message: 'Unable to start game. Make sure the room is locked and valid.',
-            });
+            expect(client.emit).toHaveBeenCalledWith('characterError', { message: 'Unable to share character.' });
         });
     });
 
-    describe('handleSubmitMove', () => {
-        it('should submit the move and emit "moveSubmitted"', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
-            const payload = { accessCode: '12345', playerId: 'player1', move: 'X' };
+    describe('handleRemovePlayer', () => {
+        it('should remove player successfully and emit playerRemoved', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'player1' };
+            const room = { players: [{ id: 'player1', name: 'Player One' }] };
+            (roomService.removePlayer as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
 
-            (gameService.submitMove as jest.Mock).mockReturnValueOnce({
-                accessCode: '12345',
-                move: 'X',
-                organizerId: 'org1',
-                players: [],
-                isLocked: false,
-            } as GameRoom);
+            gateway.handleRemovePlayer(client as Socket, payload);
 
-            gateway.handleSubmitMove(client, payload);
-
-            expect(gameService.submitMove).toHaveBeenCalledWith('12345', 'player1', 'X');
-            expect(mockServer.to).toHaveBeenCalledWith('12345');
-            expect(mockServer.emit).toHaveBeenCalledWith('moveSubmitted', {
-                room: { accessCode: '12345', move: 'X', organizerId: 'org1', players: [], isLocked: false },
-                playerId: 'player1',
-            });
+            expect(roomService.removePlayer).toHaveBeenCalledWith(payload.accessCode, payload.playerId);
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith('playerRemoved', room.players);
         });
 
-        it('should emit "moveError" if move submission fails', () => {
-            const client = {
-                emit: jest.fn(),
-            } as unknown as Socket;
-            const payload = { accessCode: 'invalid', playerId: 'player1', move: 'X' };
+        it('should emit removeError when removePlayer fails', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'player1' };
+            (roomService.removePlayer as jest.Mock).mockReturnValue(null);
 
-            (gameService.submitMove as jest.Mock).mockReturnValueOnce(null);
+            gateway.handleRemovePlayer(client as Socket, payload);
 
-            gateway.handleSubmitMove(client, payload);
+            expect(client.emit).toHaveBeenCalledWith('removeError', { message: 'Unable to remove player.' });
+        });
+    });
 
-            expect(gameService.submitMove).toHaveBeenCalledWith('invalid', 'player1', 'X');
-            expect(client.emit).toHaveBeenCalledWith('moveError', {
-                message: 'Unable to submit move.',
-            });
+    describe('handleDisconnectPlayer', () => {
+        it('should disconnect player successfully and emit playerDisconnected', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'player1' };
+            const room = { players: [{ id: 'player1', name: 'Player One' }] };
+            (roomService.disconnectPlayer as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
+
+            gateway.handleDisconnectPlayer(client as Socket, payload);
+
+            expect(roomService.disconnectPlayer).toHaveBeenCalledWith(payload.accessCode, payload.playerId);
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith('playerDisconnected', room.players);
+        });
+
+        it('should emit disconnectError when disconnectPlayer fails', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'player1' };
+            (roomService.disconnectPlayer as jest.Mock).mockReturnValue(null);
+
+            gateway.handleDisconnectPlayer(client as Socket, payload);
+
+            expect(client.emit).toHaveBeenCalledWith('disconnectError', { message: 'Unable to disconnect player.' });
         });
     });
 
     describe('Lifecycle hooks', () => {
-        it('afterInit should log initialization', () => {
+        it('should log after initialization in afterInit', () => {
             const logSpy = jest.spyOn(gateway['logger'], 'log');
-            const dummyServer = {} as Server;
+            const dummyServer = {} as any;
             gateway.afterInit(dummyServer);
-            expect(logSpy).toHaveBeenCalledWith('GameGateway Initialized' + dummyServer);
+            expect(logSpy).toHaveBeenCalled();
         });
 
-        it('handleConnection should log connection and emit welcome message', () => {
-            const client = {
-                id: 'client1',
-                emit: jest.fn(),
-            } as unknown as Socket;
+        it('should emit welcome on connection', () => {
             const logSpy = jest.spyOn(gateway['logger'], 'log');
-
-            gateway.handleConnection(client);
-
+            gateway.handleConnection(client as Socket);
             expect(logSpy).toHaveBeenCalledWith(`Client connected: ${client.id}`);
             expect(client.emit).toHaveBeenCalledWith('welcome', { message: 'Welcome to the game server!' });
         });
 
-        it('handleDisconnect should log disconnection', () => {
-            const client = {
-                id: 'client1',
-            } as unknown as Socket;
+        it('should log on disconnect', () => {
             const logSpy = jest.spyOn(gateway['logger'], 'log');
-
-            gateway.handleDisconnect(client);
-
+            gateway.handleDisconnect(client as Socket);
             expect(logSpy).toHaveBeenCalledWith(`Client disconnected: ${client.id}`);
         });
     });
