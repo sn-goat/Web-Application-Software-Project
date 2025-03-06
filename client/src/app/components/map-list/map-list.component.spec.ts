@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ChangeDetectorRef, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
@@ -161,8 +162,15 @@ describe('MapListComponent', () => {
         const mockBoard = mockBoards[0];
         component.items = [...mockBoards];
 
+        mockServices.deleteBoardByName.and.callFake(() => {
+            setTimeout(() => {
+                mockServices.detectChanges();
+            });
+            return of(undefined);
+        });
+
         component.onDelete(mockBoard);
-        tick();
+        tick(100);
 
         expect(mockServices.deleteBoardByName).toHaveBeenCalledWith('Game A');
         expect(component.items.length).toBe(1);
