@@ -21,7 +21,10 @@ export class PlayerToolsService {
         this.player = {} as Player;
         this.items$ = this.items.asObservable();
         this.timer$ = this.timer.asObservable();
+        this.setPlayer();
+    }
 
+    setPlayer() {
         this.playerService.players$.subscribe(() => {
             const player = this.playerService.getPlayer(this.playerService.getPlayerUsername());
             if (player) {
