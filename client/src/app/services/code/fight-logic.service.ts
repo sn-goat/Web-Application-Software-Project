@@ -90,6 +90,9 @@ export class FightLogicService {
             const player1 = this.playerService.getPlayer(username1);
             const player2 = this.playerService.getPlayer(username2);
             if (player1 && player2) {
+                this.fightStarted.next(true); // test
+                this.setTurn('mockPlayer'); // test
+
                 // to be implemented with socket
             }
         }
