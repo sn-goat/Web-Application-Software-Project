@@ -1,33 +1,36 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { FormCharacterComponent } from '@app/components/form-character/form-character.component';
 import { SocketService } from '@app/services/code/socket.service';
 
 @Component({
     selector: 'app-join-room',
     templateUrl: './join-room.component.html',
     styleUrls: ['./join-room.component.scss'],
-    standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, FormCharacterComponent],
 })
 export class JoinRoomComponent {
-    accessCode: string = '';
-    playerName: string = '';
+    @Input() accessCode: string = '';
     joinResult: string = '';
+    showCharacterForm: boolean = false;
 
     constructor(private socketService: SocketService) {}
 
     joinRoom() {
-        const player = { id: this.generateId(), name: this.playerName, avatar: 'default' };
-        this.socketService.joinGame(this.accessCode, player);
-        this.socketService.onPlayerJoined().subscribe((data: unknown) => {
-            this.joinResult = `Joined room ${this.accessCode} as ${player.name}: ${data}`;
+        this.socketService.joinRoom(this.accessCode);
+        this.socketService.onPlayerJoined().subscribe(() => {
+            this.joinResult = `Salle ${this.accessCode} rejointe`;
+            this.showCharacterForm = true;
+        });
+
+        this.socketService.onJoinError().subscribe((data: { message: string }) => {
+            this.joinResult = data.message;
+            this.showCharacterForm = false;
         });
     }
 
-    private generateId(): string {
-        const base = 36;
-        const limit = 9;
-        return Math.random().toString(base).substring(2, limit);
+    closeCharacterForm(): void {
+        this.showCharacterForm = false;
     }
 }

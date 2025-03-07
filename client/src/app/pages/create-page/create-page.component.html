@@ -1,5 +1,5 @@
 <app-map-list class="map-list" [isCreationPage]="true" [onlyVisible]="true" (divClicked)="openPopup()"></app-map-list>
 <!-- Popup -->
 @if (isPopupVisible) {
-<app-form-character (closePopup)="closePopup()"></app-form-character>
+<app-form-character (closePopup)="closePopup()" [isCreationPage]="true"></app-form-character>
 }

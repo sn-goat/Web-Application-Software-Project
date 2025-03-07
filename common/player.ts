@@ -1,6 +1,6 @@
 export interface Player {
     id: string;
-    username: string;
+    name: string;
     avatar: string;
     life: number;
     attack: number;

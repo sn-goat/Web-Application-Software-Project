@@ -2,19 +2,26 @@
 <div class="popup">
     <div class="popup-content">
         <!-- Portrait Navigation -->
-
         <div class="portrait-container">
             <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
             <div class="portrait-display">
+                @if (isCurrentAvatarTaken) {
+                <img [src]="getCurrentPortraitImage()" alt="Portrait" class="portrait-image taken" />
+                } @else {
                 <img [src]="getCurrentPortraitImage()" alt="Portrait" class="portrait-image" />
+                }
             </div>
             <button class="arrow-button" (click)="navigatePortrait('next')">→</button>
         </div>
 
+        @if(isCurrentAvatarTaken) {
+        <p style="color: red">Avatar already taken</p>
+        }
+
         <!-- Name Input -->
         <div class="name-container">
             <label for="player-name">Who are you ?</label>
-            <input type="text" id="player-name" [(ngModel)]="stats.username" placeholder="Enter your name" class="name-input" maxlength="20" />
+            <input type="text" id="player-name" [(ngModel)]="stats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
         </div>
 
         <!-- Stat Selection -->
@@ -36,18 +43,16 @@
                 <p class="stat-description">Attribuer un D6</p>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
-                        Attaque: {{ stats.attack }} + 
-                        @if(stats.attackDice) {
-                            <img [src]="stats.attackDice" alt="Attack Dice" class="dice-image" />
+                        Attaque: {{ stats.attack }} + @if(stats.attackDice) {
+                        <img [src]="stats.attackDice" alt="Attack Dice" class="dice-image" />
                         }
                     </button>
                     <span class="tooltiptext">dégats d'une attaque</span>
                 </div>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
-                        Défense: {{ stats.defense }} + 
-                        @if(stats.defenseDice) {
-                            <img [src]="stats.defenseDice" alt="Defense Dice" class="dice-image"/>
+                        Défense: {{ stats.defense }} + @if(stats.defenseDice) {
+                        <img [src]="stats.defenseDice" alt="Defense Dice" class="dice-image" />
                         }
                     </button>
                     <span class="tooltiptext">capacité à bloquer une attaque </span>
@@ -56,8 +61,12 @@
         </div>
 
         <button class="close-popup-button" (click)="onClose()">Close</button>
-        @if (canJoin()) {
-        <button class="join-button" (click)="shareGameMap()" routerLink="/waiting">Créer la partie</button>
-        }
+        @if (canJoin()) { @if(isCreationPage) {
+        <button class="join-button" (click)="shareGameMap()" (click)="createGame()">Commencer partie</button>
+        } @else {
+        <button class="join-button" (click)="shareGameMap()" (click)="shareCharacter()" routerLink="/lobby" [disabled]="isCurrentAvatarTaken">
+            Joindre
+        </button>
+        } }
     </div>
 </div>

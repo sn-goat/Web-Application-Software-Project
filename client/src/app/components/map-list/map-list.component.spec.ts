@@ -104,12 +104,9 @@ describe('MapListComponent', () => {
         component = fixture.componentInstance;
 
         component.isCreationPage = true;
-        component.loadingInterval = 10;
-        component.items = [...mockBoards];
-
-        spyOn(component, 'reloadPage').and.stub();
-
-        fixture.detectChanges();
+        component.loadingInterval = LOADING_INTERVAL;
+        mockBoardService.getAllBoards.and.returnValue(of(mockBoardGames));
+        fixture.autoDetectChanges();
     });
 
     it('should create the component', () => {
