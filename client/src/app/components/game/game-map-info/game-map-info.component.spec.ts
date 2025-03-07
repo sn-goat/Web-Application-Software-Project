@@ -21,7 +21,7 @@ describe('GameMapInfoComponent', () => {
         playersInGameSubject = new BehaviorSubject<Map<string, boolean>>(new Map());
 
         gameMapServiceMock = jasmine.createSpyObj('GameMapService', ['getGameMapSize']);
-        gameMapServiceMock.getGameMapSize.and.returnValue(10); // Default map size for testing
+        gameMapServiceMock.getGameMapSize.and.returnValue(10);
 
         playerServiceMock = jasmine.createSpyObj('PlayerService', [], {
             activePlayer$: activePlayerSubject.asObservable(),

@@ -6,40 +6,40 @@
     </div>
     
     <div class="players-container">
-      <div class="player-card" [class.active]="currentTurn === player1?.username">
+      <div class="player-card" [class.active]="currentTurn === player1?.name">
         <div class="player-avatar">
             @if (player1) {
-                <img [src]="srcAvatar + player1.avatar + fileType" [alt]="player1.username">
+                <img [src]="srcAvatar + player1.avatar + fileType" [alt]="player1.name">
             }
         </div>
         <div class="player-info">
-          <h3>{{ player1?.username }}</h3>
+          <h3>{{ player1?.name }}</h3>
           <div class="health-bar">
             <div class="health-fill" [style.width.%]="player1?.life"></div>
             <span>{{ player1?.life }}/100</span>
           </div>
           <div class="flee-attempts">
-            <span>Fuites: {{ getFleeAttempts(player1?.username || '') }}/2</span>
+            <span>Fuites: {{ getFleeAttempts(player1?.name || '') }}/2</span>
           </div>
         </div>
       </div>
       
       <div class="vs">VS</div>
       
-      <div class="player-card" [class.active]="currentTurn === player2?.username">
+      <div class="player-card" [class.active]="currentTurn === player2?.name">
         <div class="player-avatar">
             @if (player2) {
-                <img [src]="srcAvatar + player2.avatar + fileType" [alt]="player2.username">
+                <img [src]="srcAvatar + player2.avatar + fileType" [alt]="player2.name">
             }
         </div>
         <div class="player-info">
-          <h3>{{ player2?.username }}</h3>
+          <h3>{{ player2?.name }}</h3>
           <div class="health-bar">
             <div class="health-fill" [style.width.%]="player2?.life"></div>
             <span>{{ player2?.life }}/100</span>
           </div>
           <div class="flee-attempts">
-            <span>Fuites: {{ getFleeAttempts(player2?.username || '') }}/2</span>
+            <span>Fuites: {{ getFleeAttempts(player2?.name || '') }}/2</span>
           </div>
         </div>
       </div>

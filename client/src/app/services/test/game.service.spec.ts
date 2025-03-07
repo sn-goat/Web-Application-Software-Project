@@ -19,7 +19,7 @@ describe('GameService', () => {
     const testPlayers: Player[] = [
         {
             id: '1',
-            username: 'player1',
+            name: 'player1',
             avatar: '1',
             life: 100,
             attack: 10,
@@ -32,7 +32,7 @@ describe('GameService', () => {
         },
         {
             id: '2',
-            username: 'player2',
+            name: 'player2',
             avatar: '2',
             life: 100,
             attack: 10,
@@ -91,7 +91,6 @@ describe('GameService', () => {
     });
 
     it('should update maps when players$ emits', () => {
-        // Initial state should be empty maps
         let playersWinsMap: Map<string, number> | undefined;
         let playersInGameMap: Map<string, boolean> | undefined;
 
@@ -101,7 +100,6 @@ describe('GameService', () => {
         expect(playersWinsMap?.size).toBe(0);
         expect(playersInGameMap?.size).toBe(0);
 
-        // Emit players and check maps are updated
         playersSubject.next(testPlayers);
 
         expect(playersWinsMap?.size).toBe(2);
@@ -117,20 +115,16 @@ describe('GameService', () => {
         let showFightInterface: boolean | undefined;
         service.showFightInterface$.subscribe((value) => (showFightInterface = value));
 
-        // Initial value should be false
         expect(showFightInterface).toBe(false);
 
-        // When fightStarted$ emits true, showFightInterface$ should emit true
         fightStartedSubject.next(true);
         expect(showFightInterface).toBe(true);
 
-        // When fightStarted$ emits false, showFightInterface$ should emit false
         fightStartedSubject.next(false);
         expect(showFightInterface).toBe(false);
     });
 
     it('should return win count for a player', () => {
-        // Setup test data
         playersSubject.next(testPlayers);
         (service as any).playersWinsMap.next(
             new Map([
@@ -139,80 +133,60 @@ describe('GameService', () => {
             ]),
         );
 
-        // Test getWinCount
         expect(service.getWinCount('player1')).toBe(2);
         expect(service.getWinCount('player2')).toBe(1);
         expect(service.getWinCount('nonexistent')).toBeUndefined();
     });
 
     it('should increment win count for a player', () => {
-        // Setup test data
         playersSubject.next(testPlayers);
 
-        // Initial win count should be 0
         expect(service.getWinCount('player1')).toBe(0);
 
-        // Increment and check
         service.incrementWinCount('player1');
         expect(service.getWinCount('player1')).toBe(1);
 
-        // Increment again and check
         service.incrementWinCount('player1');
         expect(service.getWinCount('player1')).toBe(2);
 
-        // Don't increment nonexistent player
         service.incrementWinCount('nonexistent');
         expect(service.getWinCount('nonexistent')).toBeUndefined();
     });
 
     it('should handle the case where win count is undefined and default to 0', () => {
-        // Setup test data with players
         playersSubject.next(testPlayers);
 
-        // Create a map where one player has a valid count and one has undefined
         const customMap = new Map<string, number>();
-        customMap.set('player1', undefined as unknown as number); // Force undefined value
+        customMap.set('player1', undefined as unknown as number);
         customMap.set('player2', 5);
 
-        // Set the map directly to test the undefined scenario
         (service as any).playersWinsMap.next(customMap);
-
-        // When we increment, it should treat undefined as 0
         service.incrementWinCount('player1');
 
-        expect(service.getWinCount('player1')).toBe(1); // undefined + 1 = 1
-        expect(service.getWinCount('player2')).toBe(5); // unchanged
+        expect(service.getWinCount('player1')).toBe(1);
+        expect(service.getWinCount('player2')).toBe(5);
     });
 
     it('should handle abandonGame correctly', () => {
-        // Setup test data
         playersSubject.next(testPlayers);
 
-        // Call abandonGame - though we're only testing the branch coverage since
-        // the actual behavior is noted as "to be implemented with socket"
         service.abandonGame('player1');
         service.abandonGame('nonexistent');
 
-        // Since the implementation is pending, we're just ensuring the method doesn't throw
         expect().nothing();
     });
 
     it('should open dialog and abandon game when confirmed', async () => {
-        // Setup test data
         playersSubject.next(testPlayers);
 
-        // Setup dialog mock
         const mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
-        mockDialogRef.afterClosed.and.returnValue(of(true)); // User clicked confirm
+        mockDialogRef.afterClosed.and.returnValue(of(true));
         dialogMock.open.and.returnValue(mockDialogRef as unknown as MatDialogRef<ConfirmationDialogComponent>);
 
-        // Spy on abandonGame
         spyOn(service, 'abandonGame');
 
-        // Call confirmAndAbandonGame
         const result = await service.confirmAndAbandonGame('player1');
 
-        // Check dialog was opened with correct params
         expect(dialogMock.open).toHaveBeenCalledWith(ConfirmationDialogComponent, {
             width: '350px',
             data: {
@@ -223,29 +197,22 @@ describe('GameService', () => {
             },
         });
 
-        // Check abandonGame was called
         expect(service.abandonGame).toHaveBeenCalledWith('player1');
 
-        // Check result
         expect(result).toBe(true);
     });
 
     it('should open dialog and not abandon game when cancelled', async () => {
-        // Setup dialog mock to return false (user cancelled)
         const mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
         mockDialogRef.afterClosed.and.returnValue(of(false));
         dialogMock.open.and.returnValue(mockDialogRef as unknown as MatDialogRef<ConfirmationDialogComponent>);
 
-        // Spy on abandonGame
         spyOn(service, 'abandonGame');
 
-        // Call confirmAndAbandonGame
         const result = await service.confirmAndAbandonGame('player1');
 
-        // Check abandonGame was not called
         expect(service.abandonGame).not.toHaveBeenCalled();
 
-        // Check result
         expect(result).toBe(false);
     });
 });

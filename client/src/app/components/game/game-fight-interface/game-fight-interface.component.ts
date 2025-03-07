@@ -37,17 +37,17 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
         this.fightLogicService.d4$.pipe(takeUntil(this.destroy$)).subscribe((value) => (this.diceD4 = value));
         this.fightLogicService.d6$.pipe(takeUntil(this.destroy$)).subscribe((value) => (this.diceD6 = value));
 
-        this.fightLogicService.turn$.pipe(takeUntil(this.destroy$)).subscribe((username) => {
-            this.currentTurn = username;
-            this.player1 = this.playerService.getPlayer(this.fightLogicService.getUsername1());
-            this.player2 = this.playerService.getPlayer(this.fightLogicService.getUsername2());
+        this.fightLogicService.turn$.pipe(takeUntil(this.destroy$)).subscribe((name) => {
+            this.currentTurn = name;
+            this.player1 = this.playerService.getPlayer(this.fightLogicService.getName1());
+            this.player2 = this.playerService.getPlayer(this.fightLogicService.getName2());
         });
 
         this.fightLogicService.fleeAttempt1$.pipe(takeUntil(this.destroy$)).subscribe((attempts) => (this.fleeAttempt1 = attempts));
         this.fightLogicService.fleeAttempt2$.pipe(takeUntil(this.destroy$)).subscribe((attempts) => (this.fleeAttempt2 = attempts));
 
-        this.player1 = this.playerService.getPlayer(this.fightLogicService.getUsername1());
-        this.player2 = this.playerService.getPlayer(this.fightLogicService.getUsername2());
+        this.player1 = this.playerService.getPlayer(this.fightLogicService.getName1());
+        this.player2 = this.playerService.getPlayer(this.fightLogicService.getName2());
     }
 
     ngOnDestroy(): void {
@@ -56,25 +56,25 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     }
 
     isMyTurn(): boolean {
-        return this.currentTurn === this.playerService.getPlayerUsername();
+        return this.currentTurn === this.playerService.getPlayerName();
     }
 
     flee(): void {
         if (this.isMyTurn()) {
-            this.fightLogicService.flee(this.playerService.getPlayerUsername());
+            this.fightLogicService.flee(this.playerService.getPlayerName());
         }
     }
 
     attack(): void {
         if (this.isMyTurn()) {
-            this.fightLogicService.attack(this.playerService.getPlayerUsername());
+            this.fightLogicService.attack(this.playerService.getPlayerName());
         }
     }
 
-    getFleeAttempts(username: string): number {
-        if (this.player1 && username === this.player1.username) {
+    getFleeAttempts(name: string): number {
+        if (this.player1 && name === this.player1.name) {
             return this.fleeAttempt1;
-        } else if (this.player2 && username === this.player2.username) {
+        } else if (this.player2 && name === this.player2.name) {
             return this.fleeAttempt2;
         }
         return 0;

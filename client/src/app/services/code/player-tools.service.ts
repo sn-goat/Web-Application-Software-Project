@@ -26,7 +26,7 @@ export class PlayerToolsService {
 
     setPlayer() {
         this.playerService.players$.subscribe(() => {
-            const player = this.playerService.getPlayer(this.playerService.getPlayerUsername());
+            const player = this.playerService.getPlayer(this.playerService.getPlayerName());
             if (player) {
                 this.player = player;
             }

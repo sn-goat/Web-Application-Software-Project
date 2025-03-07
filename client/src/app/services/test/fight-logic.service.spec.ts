@@ -23,9 +23,9 @@ describe('FightLogicService', () => {
         expect(service).toBeTruthy();
     });
 
-    it('should initialize with empty usernames and default values', () => {
-        expect(service.getUsername1()).toBe('');
-        expect(service.getUsername2()).toBe('');
+    it('should initialize with empty names and default values', () => {
+        expect(service.getName1()).toBe('');
+        expect(service.getName2()).toBe('');
 
         let d4Value: number | undefined;
         service.d4$.subscribe((val) => (d4Value = val));
@@ -88,25 +88,25 @@ describe('FightLogicService', () => {
         expect(turnValue).toBe('Player1');
     });
 
-    it('should update fleeAttempt1 when setFleeAttempt is called with username1', () => {
-        service['username1'] = 'Player1';
-        service['username2'] = 'Player2';
+    it('should update fleeAttempt1 when setFleeAttempt is called with name1', () => {
+        service['name1'] = 'Player1';
+        service['name2'] = 'Player2';
 
         let fleeAttempt1Value: number | undefined;
         service.fleeAttempt1$.subscribe((val) => (fleeAttempt1Value = val));
 
-        service.setFleeAttempt({ username: 'Player1', value: 1 });
+        service.setFleeAttempt({ name: 'Player1', value: 1 });
         expect(fleeAttempt1Value).toBe(1);
     });
 
-    it('should update fleeAttempt2 when setFleeAttempt is called with username2', () => {
-        service['username1'] = 'Player1';
-        service['username2'] = 'Player2';
+    it('should update fleeAttempt2 when setFleeAttempt is called with name2', () => {
+        service['name1'] = 'Player1';
+        service['name2'] = 'Player2';
 
         let fleeAttempt2Value: number | undefined;
         service.fleeAttempt2$.subscribe((val) => (fleeAttempt2Value = val));
 
-        service.setFleeAttempt({ username: 'Player2', value: 0 });
+        service.setFleeAttempt({ name: 'Player2', value: 0 });
         expect(fleeAttempt2Value).toBe(0);
     });
 
@@ -115,10 +115,10 @@ describe('FightLogicService', () => {
         expect(() => service.flee('Player1')).not.toThrow();
     });
 
-    it('should start fight when valid usernames and players are provided', () => {
+    it('should start fight when valid names and players are provided', () => {
         const mockPlayer1: Player = {
             id: '1',
-            username: 'mockPlayer',
+            name: 'mockPlayer',
             avatar: '6',
             life: 100,
             attack: 10,
@@ -132,7 +132,7 @@ describe('FightLogicService', () => {
 
         const mockPlayer2: Player = {
             id: '1',
-            username: 'mockPlayer0',
+            name: 'mockPlayer0',
             avatar: '4',
             life: 100,
             attack: 10,
@@ -154,15 +154,15 @@ describe('FightLogicService', () => {
 
         service.startFight('Player1', 'Player2');
 
-        expect(service.getUsername1()).toBe('Player1');
-        expect(service.getUsername2()).toBe('Player2');
+        expect(service.getName1()).toBe('Player1');
+        expect(service.getName2()).toBe('Player2');
         expect(fightStartedValue).toBe(true);
         expect(turnValue).toBe('mockPlayer');
         expect(playerServiceSpy.getPlayer).toHaveBeenCalledWith('Player1');
         expect(playerServiceSpy.getPlayer).toHaveBeenCalledWith('Player2');
     });
 
-    it('should not start fight when usernames are provided but players do not exist', () => {
+    it('should not start fight when names are provided but players do not exist', () => {
         playerServiceSpy.getPlayer.and.returnValues(undefined, undefined);
 
         let fightStartedValue: boolean | undefined;
@@ -173,7 +173,7 @@ describe('FightLogicService', () => {
         expect(fightStartedValue).toBe(false);
     });
 
-    it('should not start fight when usernames are empty', () => {
+    it('should not start fight when names are empty', () => {
         let fightStartedValue: boolean | undefined;
         service.fightStarted$.subscribe((val) => (fightStartedValue = val));
 
@@ -182,29 +182,29 @@ describe('FightLogicService', () => {
         expect(fightStartedValue).toBe(false);
     });
 
-    it('should end fight when usernames match', () => {
-        service['username1'] = 'Player1';
-        service['username2'] = 'Player2';
+    it('should end fight when names match', () => {
+        service['name1'] = 'Player1';
+        service['name2'] = 'Player2';
 
         service.endFight('Player1', 'Player2');
 
-        expect(service.getUsername1()).toBe('');
-        expect(service.getUsername2()).toBe('');
+        expect(service.getName1()).toBe('');
+        expect(service.getName2()).toBe('');
     });
 
-    it('should not end fight when usernames do not match', () => {
-        service['username1'] = 'Player1';
-        service['username2'] = 'Player2';
+    it('should not end fight when names do not match', () => {
+        service['name1'] = 'Player1';
+        service['name2'] = 'Player2';
 
         service.endFight('Player3', 'Player4');
 
-        expect(service.getUsername1()).toBe('Player1');
-        expect(service.getUsername2()).toBe('Player2');
+        expect(service.getName1()).toBe('Player1');
+        expect(service.getName2()).toBe('Player2');
     });
 
     it('should call attack method without error', () => {
-        service['username1'] = 'Player1';
-        service['username2'] = 'Player2';
+        service['name1'] = 'Player1';
+        service['name2'] = 'Player2';
 
         expect(() => service.attack('Player1')).not.toThrow();
         expect(() => service.attack('Player2')).not.toThrow();

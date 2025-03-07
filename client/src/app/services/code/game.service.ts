@@ -28,11 +28,11 @@ export class GameService {
             const newMap = new Map(this.playersWinsMap.value);
             const playersInGame = new Map<string, boolean>();
             players.forEach((player) => {
-                if (!newMap.has(player.username)) {
-                    newMap.set(player.username, 0);
+                if (!newMap.has(player.name)) {
+                    newMap.set(player.name, 0);
                 }
-                if (!playersInGame.has(player.username)) {
-                    playersInGame.set(player.username, true);
+                if (!playersInGame.has(player.name)) {
+                    playersInGame.set(player.name, true);
                 }
             });
             this.playersWinsMap.next(newMap);
@@ -44,17 +44,17 @@ export class GameService {
         });
     }
 
-    getWinCount(username: string): number | undefined {
-        return this.playersWinsMap.value.get(username);
+    getWinCount(name: string): number | undefined {
+        return this.playersWinsMap.value.get(name);
     }
 
-    async confirmAndAbandonGame(username: string): Promise<boolean> {
+    async confirmAndAbandonGame(name: string): Promise<boolean> {
         return new Promise((resolve) => {
             const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
                 width: '350px',
                 data: {
                     title: 'Abandonner la partie',
-                    message: `Êtes-vous sûr de vouloir abandonner cette partie ${username}?`,
+                    message: `Êtes-vous sûr de vouloir abandonner cette partie ${name}?`,
                     confirmText: 'Abandonner',
                     cancelText: 'Annuler',
                 },
@@ -62,7 +62,7 @@ export class GameService {
 
             dialogRef.afterClosed().subscribe((result) => {
                 if (result === true) {
-                    this.abandonGame(username);
+                    this.abandonGame(name);
                     resolve(true);
                 } else {
                     resolve(false);
@@ -71,11 +71,11 @@ export class GameService {
         });
     }
 
-    abandonGame(username: string): void {
-        if (this.playersInGameMap.value.has(username)) {
+    abandonGame(name: string): void {
+        if (this.playersInGameMap.value.has(name)) {
             const currentMap = this.playersInGameMap.value;
 
-            const isInGame = currentMap.get(username);
+            const isInGame = currentMap.get(name);
 
             if (isInGame) {
                 // to be implemented with socket
@@ -83,14 +83,14 @@ export class GameService {
         }
     }
 
-    incrementWinCount(username: string): void {
-        if (this.playersWinsMap.value.has(username)) {
+    incrementWinCount(name: string): void {
+        if (this.playersWinsMap.value.has(name)) {
             const currentMap = this.playersWinsMap.value;
             const newMap = new Map(currentMap);
 
-            const winCount = currentMap.get(username) ?? 0;
+            const winCount = currentMap.get(name) ?? 0;
 
-            newMap.set(username, winCount + 1);
+            newMap.set(name, winCount + 1);
             this.playersWinsMap.next(newMap);
 
             // to be implemented with socket

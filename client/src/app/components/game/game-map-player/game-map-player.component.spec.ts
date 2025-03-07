@@ -23,7 +23,7 @@ describe('GameMapPlayerComponent', () => {
     const mockPlayers: Player[] = [
         {
             id: '1',
-            username: 'player1',
+            name: 'player1',
             avatar: '1',
             life: 100,
             attack: 10,
@@ -36,7 +36,7 @@ describe('GameMapPlayerComponent', () => {
         },
         {
             id: '2',
-            username: 'player2',
+            name: 'player2',
             avatar: '2',
             life: 90,
             attack: 12,
@@ -160,7 +160,7 @@ describe('GameMapPlayerComponent', () => {
             .fill(null)
             .map((_, i) => ({
                 id: i.toString(),
-                username: `player${i}`,
+                name: `player${i}`,
                 avatar: i.toString(),
                 life: 100,
                 attack: 10,

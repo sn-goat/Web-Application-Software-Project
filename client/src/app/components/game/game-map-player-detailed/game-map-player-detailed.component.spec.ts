@@ -16,7 +16,7 @@ describe('GameMapPlayerDetailedComponent', () => {
 
     const mockPlayer: Player = {
         id: '1',
-        username: 'testUser',
+        name: 'testUser',
         avatar: '1',
         life: 100,
         attack: 10,
@@ -31,9 +31,9 @@ describe('GameMapPlayerDetailedComponent', () => {
     beforeEach(async () => {
         playersSubject = new BehaviorSubject<Player[]>([mockPlayer]);
 
-        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerUsername']);
+        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName']);
         playerServiceMock.players$ = playersSubject.asObservable();
-        playerServiceMock.getPlayerUsername.and.returnValue('testUser');
+        playerServiceMock.getPlayerName.and.returnValue('testUser');
         playerServiceMock.getPlayer.and.returnValue(mockPlayer);
 
         await TestBed.configureTestingModule({

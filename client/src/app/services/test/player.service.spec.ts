@@ -12,7 +12,7 @@ describe('PlayerService', () => {
     const mockPlayers: Player[] = [
         {
             id: '1',
-            username: 'player1',
+            name: 'player1',
             avatar: '1',
             life: 100,
             attack: 10,
@@ -25,7 +25,7 @@ describe('PlayerService', () => {
         },
         {
             id: '2',
-            username: 'player2',
+            name: 'player2',
             avatar: '2',
             life: 100,
             attack: 10,
@@ -38,7 +38,7 @@ describe('PlayerService', () => {
         },
         {
             id: '3',
-            username: 'player3',
+            name: 'player3',
             avatar: '3',
             life: 100,
             attack: 10,
@@ -91,7 +91,7 @@ describe('PlayerService', () => {
         const testPlayers = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -104,7 +104,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '2',
-                username: 'player2',
+                name: 'player2',
                 avatar: '2',
                 life: 100,
                 attack: 10,
@@ -124,8 +124,8 @@ describe('PlayerService', () => {
 
         expect(players.length).toBe(2);
         // Player2 has higher rapidity, so it should be first
-        expect(players[0].username).toBe('player2');
-        expect(players[1].username).toBe('player1');
+        expect(players[0].name).toBe('player2');
+        expect(players[1].name).toBe('player1');
     });
 
     it('should not set players if count exceeds maximum', () => {
@@ -134,7 +134,7 @@ describe('PlayerService', () => {
             manyPlayers.push({
                 ...mockPlayers[0],
                 id: `${i}`,
-                username: `player${i}`,
+                name: `player${i}`,
             });
         }
 
@@ -149,7 +149,7 @@ describe('PlayerService', () => {
         const testPlayers = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -162,7 +162,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '2',
-                username: 'player2',
+                name: 'player2',
                 avatar: '2',
                 life: 100,
                 attack: 10,
@@ -175,7 +175,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '3',
-                username: 'player3',
+                name: 'player3',
                 avatar: '3',
                 life: 100,
                 attack: 10,
@@ -193,16 +193,16 @@ describe('PlayerService', () => {
         let sortedPlayers: Player[] = [];
         service.players$.subscribe((players) => (sortedPlayers = players));
 
-        expect(sortedPlayers[0].username).toBe('player2');
-        expect(sortedPlayers[1].username).toBe('player1');
-        expect(sortedPlayers[2].username).toBe('player3');
+        expect(sortedPlayers[0].name).toBe('player2');
+        expect(sortedPlayers[1].name).toBe('player1');
+        expect(sortedPlayers[2].name).toBe('player3');
     });
 
-    it('should get player by username', () => {
+    it('should get player by name', () => {
         const players = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -215,7 +215,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '2',
-                username: 'player2',
+                name: 'player2',
                 avatar: '2',
                 life: 100,
                 attack: 10,
@@ -233,7 +233,7 @@ describe('PlayerService', () => {
         const player = service.getPlayer('player2');
 
         expect(player).toBeTruthy();
-        expect(player?.username).toBe('player2');
+        expect(player?.name).toBe('player2');
     });
 
     it('should return undefined for non-existent player', () => {
@@ -243,7 +243,7 @@ describe('PlayerService', () => {
         expect(player).toBeUndefined();
     });
 
-    it('should return undefined when getting player with falsy username', () => {
+    it('should return undefined when getting player with falsy name', () => {
         service.setPlayers(mockPlayers);
 
         const player = service.getPlayer('');
@@ -254,7 +254,7 @@ describe('PlayerService', () => {
         const testPlayers = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -268,7 +268,7 @@ describe('PlayerService', () => {
         ];
 
         service.setPlayers(testPlayers);
-        service.setPlayerUsername('player1');
+        service.setPlayerName('player1');
 
         const updatedPlayer = {
             ...testPlayers[0],
@@ -285,7 +285,7 @@ describe('PlayerService', () => {
     it('should not edit player when player is undefined', () => {
         const testPlayers = getNewPlayers();
         service.setPlayers(testPlayers);
-        service.setPlayerUsername('player1');
+        service.setPlayerName('player1');
 
         const player = service.getPlayer('player1');
         expect(player).toBeTruthy();
@@ -301,7 +301,7 @@ describe('PlayerService', () => {
         const testPlayers = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -315,11 +315,11 @@ describe('PlayerService', () => {
         ];
 
         service.setPlayers(testPlayers);
-        service.setPlayerUsername('player1');
+        service.setPlayerName('player1');
 
         const nonExistentPlayer: Player = {
             id: '999',
-            username: 'nonExistent',
+            name: 'nonExistent',
             avatar: '1',
             life: 100,
             attack: 10,
@@ -341,9 +341,9 @@ describe('PlayerService', () => {
         expect(nonExistentResult).toBeUndefined();
     });
 
-    it('should not edit player when username does not match playerUsername', () => {
+    it('should not edit player when name does not match playerName', () => {
         service.setPlayers(mockPlayers);
-        service.setPlayerUsername('player3');
+        service.setPlayerName('player3');
 
         const updatedPlayer: Player = {
             ...mockPlayers[0],
@@ -369,7 +369,7 @@ describe('PlayerService', () => {
         const freshPlayers = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -382,7 +382,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '2',
-                username: 'player2',
+                name: 'player2',
                 avatar: '2',
                 life: 100,
                 attack: 10,
@@ -395,7 +395,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '3',
-                username: 'player3',
+                name: 'player3',
                 avatar: '3',
                 life: 100,
                 attack: 10,
@@ -419,9 +419,9 @@ describe('PlayerService', () => {
         expect(players.length).toBe(3);
     });
 
-    it('should set and get player username', () => {
-        service.setPlayerUsername('myUsername');
-        expect(service.getPlayerUsername()).toBe('myUsername');
+    it('should set and get player name', () => {
+        service.setPlayerName('myname');
+        expect(service.getPlayerName()).toBe('myname');
     });
 
     it('should set admin', () => {
@@ -435,7 +435,7 @@ describe('PlayerService', () => {
     it('should add player when conditions are met', () => {
         const initialPlayer = {
             id: '2',
-            username: 'player2',
+            name: 'player2',
             avatar: '2',
             life: 100,
             attack: 10,
@@ -451,7 +451,7 @@ describe('PlayerService', () => {
 
         const playerToAdd: Player = {
             id: '5',
-            username: 'player2',
+            name: 'player2',
             avatar: '5',
             life: 90,
             attack: 15,
@@ -508,7 +508,7 @@ describe('PlayerService', () => {
             maxPlayers.push({
                 ...mockPlayers[0],
                 id: `${i}`,
-                username: `player${i}`,
+                name: `player${i}`,
             });
         }
 
@@ -517,7 +517,7 @@ describe('PlayerService', () => {
         const newPlayer: Player = {
             ...mockPlayers[0],
             id: 'new',
-            username: 'newPlayer',
+            name: 'newPlayer',
         };
 
         service.addPlayer(newPlayer);
@@ -532,7 +532,7 @@ describe('PlayerService', () => {
         const testPlayers = [
             {
                 id: '1',
-                username: 'player1',
+                name: 'player1',
                 avatar: '1',
                 life: 100,
                 attack: 10,
@@ -545,7 +545,7 @@ describe('PlayerService', () => {
             },
             {
                 id: '2',
-                username: 'player2',
+                name: 'player2',
                 avatar: '2',
                 life: 100,
                 attack: 10,
@@ -564,7 +564,7 @@ describe('PlayerService', () => {
         service.players$.subscribe((players) => (initialPlayers = players));
         const initialCount = initialPlayers.length;
 
-        const playerToRemove = initialPlayers.find((p) => p.username === 'player2');
+        const playerToRemove = initialPlayers.find((p) => p.name === 'player2');
         expect(playerToRemove).toBeTruthy();
 
         if (playerToRemove) {
@@ -574,7 +574,7 @@ describe('PlayerService', () => {
             service.players$.subscribe((players) => (updatedPlayers = players));
 
             expect(updatedPlayers.length).toBe(initialCount - 1);
-            expect(updatedPlayers.find((p) => p.username === 'player2')).toBeUndefined();
+            expect(updatedPlayers.find((p) => p.name === 'player2')).toBeUndefined();
         }
     });
 
@@ -605,7 +605,7 @@ describe('PlayerService', () => {
 
         const nonExistentPlayer: Player = {
             id: '999',
-            username: 'nonExistent',
+            name: 'nonExistent',
             avatar: '1',
             life: 100,
             attack: 10,

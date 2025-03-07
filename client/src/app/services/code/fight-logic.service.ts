@@ -15,8 +15,8 @@ export class FightLogicService {
     fleeAttempt2$: Observable<number>;
     fightStarted$: Observable<boolean>;
 
-    private username1: string;
-    private username2: string;
+    private name1: string;
+    private name2: string;
     // private socketService: SocketService = inject(SocketService);
     private playerService: PlayerService = inject(PlayerService);
 
@@ -37,16 +37,16 @@ export class FightLogicService {
         this.fleeAttempt2$ = this.fleeAttempt2.asObservable();
         this.fightStarted$ = this.fightStarted.asObservable();
 
-        this.username1 = '';
-        this.username2 = '';
+        this.name1 = '';
+        this.name2 = '';
     }
 
-    getUsername1(): string {
-        return this.username1;
+    getName1(): string {
+        return this.name1;
     }
 
-    getUsername2(): string {
-        return this.username2;
+    getName2(): string {
+        return this.name2;
     }
 
     rollDiceD4(value: number): void {
@@ -66,16 +66,16 @@ export class FightLogicService {
         this.turn.next(value);
     }
 
-    setFleeAttempt(data: { username: string; value: number }): void {
-        if (data.username === this.username1) {
+    setFleeAttempt(data: { name: string; value: number }): void {
+        if (data.name === this.name1) {
             this.fleeAttempt1.next(data.value);
         } else {
             this.fleeAttempt2.next(data.value);
         }
     }
 
-    flee(username: string): void {
-        if (username === this.username1) {
+    flee(name: string): void {
+        if (name === this.name1) {
             // to be implemented with socket
         } else {
             // to be implemented with socket
@@ -83,12 +83,12 @@ export class FightLogicService {
         // to be implemented with socket
     }
 
-    startFight(username1: string, username2: string) {
-        if (username1 && username2) {
-            this.username1 = username1;
-            this.username2 = username2;
-            const player1 = this.playerService.getPlayer(username1);
-            const player2 = this.playerService.getPlayer(username2);
+    startFight(name1: string, name2: string) {
+        if (name1 && name2) {
+            this.name1 = name1;
+            this.name2 = name2;
+            const player1 = this.playerService.getPlayer(name1);
+            const player2 = this.playerService.getPlayer(name2);
             if (player1 && player2) {
                 this.fightStarted.next(true); // test
                 this.setTurn('mockPlayer'); // test
@@ -98,17 +98,17 @@ export class FightLogicService {
         }
     }
 
-    endFight(username1: string, username2: string): void {
-        if (this.username1 !== username1 || this.username2 !== username2) {
+    endFight(name1: string, name2: string): void {
+        if (this.name1 !== name1 || this.name2 !== name2) {
             return;
         }
-        this.username1 = '';
-        this.username2 = '';
+        this.name1 = '';
+        this.name2 = '';
         // to be implemented with socket
     }
 
-    attack(username: string): void {
-        if (username === this.username1) {
+    attack(name: string): void {
+        if (name === this.name1) {
             // to be implemented with socket
         } else {
             // to be implemented with socket

@@ -11,7 +11,7 @@ export class PlayerService {
     admin$: Observable<string>;
     players$: Observable<Player[]>;
 
-    private playerUsername: string;
+    private playerName: string;
     private activePlayer = new BehaviorSubject<string>('');
     private admin = new BehaviorSubject<string>('');
     private players = new BehaviorSubject<Player[]>([]);
@@ -22,8 +22,8 @@ export class PlayerService {
         this.admin$ = this.admin.asObservable();
     }
 
-    setActivePlayer(username: string): void {
-        this.activePlayer.next(username);
+    setActivePlayer(name: string): void {
+        this.activePlayer.next(name);
     }
 
     setPlayers(players: Player[]): void {
@@ -38,31 +38,31 @@ export class PlayerService {
         this.players.next(sortedPlayers);
     }
 
-    getPlayer(username: string): Player | undefined {
-        if (!username) {
+    getPlayer(name: string): Player | undefined {
+        if (!name) {
             return undefined;
         }
-        return this.players.value.find((player) => player.username === username);
+        return this.players.value.find((player) => player.name === name);
     }
 
     editPlayer(player: Player): void {
         if (!player) return;
 
         const players: Player[] = this.players.value;
-        const playerToUpdate = this.getPlayer(player.username);
-        if (!playerToUpdate || playerToUpdate.username !== this.playerUsername) {
+        const playerToUpdate = this.getPlayer(player.name);
+        if (!playerToUpdate || playerToUpdate.name !== this.playerName) {
             return;
         }
 
-        const index = players.findIndex((p) => p.username === player.username);
+        const index = players.findIndex((p) => p.name === player.name);
         if (index >= 0) {
             players[index] = player;
             this.players.next(players);
         }
     }
 
-    removePlayerByName(username: string): boolean {
-        const player = this.getPlayer(username);
+    removePlayerByName(name: string): boolean {
+        const player = this.getPlayer(name);
         if (player) {
             this.removePlayer(player);
             return true;
@@ -70,23 +70,23 @@ export class PlayerService {
         return false;
     }
 
-    setPlayerUsername(username: string): void {
-        this.playerUsername = username;
+    setPlayerName(name: string): void {
+        this.playerName = name;
     }
 
-    getPlayerUsername(): string {
-        return this.playerUsername;
+    getPlayerName(): string {
+        return this.playerName;
     }
 
-    setAdmin(username: string): void {
-        this.admin.next(username);
+    setAdmin(name: string): void {
+        this.admin.next(name);
     }
 
     addPlayer(player: Player): void {
         if (!player) return;
 
         const players = this.players.value;
-        const playerExists = players.find((p) => p.username === player.username);
+        const playerExists = players.find((p) => p.name === player.name);
         if (!playerExists || players.length >= MAX_PLAYERS) {
             return;
         }
@@ -100,10 +100,10 @@ export class PlayerService {
         const players = this.players.value;
         if (!players.length) return;
 
-        const playerExists = players.find((p) => p.username === player.username);
+        const playerExists = players.find((p) => p.name === player.name);
         if (!playerExists) return;
 
-        const index = players.findIndex((p) => p.username === player.username);
+        const index = players.findIndex((p) => p.name === player.name);
         players.splice(index, 1);
         this.players.next(players);
     }

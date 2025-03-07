@@ -26,9 +26,9 @@ export class GameMapPlayerDetailedComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.maxHealth = this.playerService.getPlayer(this.playerService.getPlayerUsername())?.life || 0;
+        this.maxHealth = this.playerService.getPlayer(this.playerService.getPlayerName())?.life || 0;
         this.playerService.players$.subscribe(() => {
-            const player = this.playerService.getPlayer(this.playerService.getPlayerUsername());
+            const player = this.playerService.getPlayer(this.playerService.getPlayerName());
             if (player !== undefined) {
                 this.player = player;
             }

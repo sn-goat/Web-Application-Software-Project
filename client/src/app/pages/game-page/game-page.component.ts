@@ -43,7 +43,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         const originalAbandonMethod = this.headerBar.getBack;
 
         this.headerBar.getBack = () => {
-            this.gameService.confirmAndAbandonGame(this.playerService.getPlayerUsername()).then((confirmed) => {
+            this.gameService.confirmAndAbandonGame(this.playerService.getPlayerName()).then((confirmed) => {
                 if (confirmed) {
                     originalAbandonMethod.call(this.headerBar);
                 }

@@ -10,7 +10,6 @@ import { GameMapService } from '@app/services/code/game-map.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { of } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
-import { GameMapService } from '@app/services/code/game-map.service';
 
 const BASE_STAT = 4;
 const UPGRADED_STAT = 6;
@@ -328,6 +327,8 @@ describe('FormCharacterComponent', () => {
             rapidity: 4,
             attackDice: '',
             defenseDice: '',
+            movementPts: 4,
+            actions: 4,
         };
 
         component.shareCharacter();

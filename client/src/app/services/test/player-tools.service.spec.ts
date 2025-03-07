@@ -14,7 +14,7 @@ describe('PlayerToolsService', () => {
 
     const mockPlayer: Player = {
         id: '1',
-        username: 'testPlayer',
+        name: 'testPlayer',
         avatar: '1',
         life: 100,
         attack: 10,
@@ -29,11 +29,11 @@ describe('PlayerToolsService', () => {
     beforeEach(() => {
         playersSubject = new BehaviorSubject<Player[]>([]);
 
-        const spy = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerUsername'], {
+        const spy = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName'], {
             players$: playersSubject.asObservable(),
         });
 
-        spy.getPlayerUsername.and.returnValue('testPlayer');
+        spy.getPlayerName.and.returnValue('testPlayer');
         spy.getPlayer.and.returnValue(undefined);
 
         TestBed.configureTestingModule({
