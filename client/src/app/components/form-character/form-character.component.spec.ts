@@ -169,7 +169,6 @@ describe('FormCharacterComponent', () => {
         expect(component.closePopup.emit).toHaveBeenCalled();
     });
 
-    // Tests pour navigatePortrait (lignes 59–60)
     it('should update currentPortraitIndex and stats.avatar when navigating to next portrait', () => {
         component.currentPortraitIndex = 0;
         component.navigatePortrait('next');
@@ -178,7 +177,6 @@ describe('FormCharacterComponent', () => {
     });
 
     it('should update currentPortraitIndex and stats.avatar when navigating to previous portrait', () => {
-        // Si on est sur le premier portrait, passer au dernier
         component.currentPortraitIndex = 0;
         component.totalPortraits = 5;
         component.navigatePortrait('prev');
@@ -186,11 +184,8 @@ describe('FormCharacterComponent', () => {
         expect(component.stats.avatar).toBe(`./assets/portraits/portrait${4 + 1}.png`);
     });
 
-    // Tests pour selectStat (lignes 76–148)
     it('should select "life" stat correctly and update stat value', () => {
-        // Initial : life = BASE_STAT
         component.stats.life = BASE_STAT;
-        // Aucune autre stat sélectionnée
         component.rapiditySelected = false;
         component.lifeSelected = false;
 
@@ -198,7 +193,6 @@ describe('FormCharacterComponent', () => {
         expect(component.lifeSelected).toBeTrue();
         expect(component.stats.life).toBe(UPGRADED_STAT);
 
-        // Désactivation de "life"
         component.selectStat('life');
         expect(component.lifeSelected).toBeFalse();
         expect(component.stats.life).toBe(BASE_STAT);
@@ -219,23 +213,17 @@ describe('FormCharacterComponent', () => {
     });
 
     it('should reset the other stat if one stat is selected while the other is active', () => {
-        // Imaginons que "life" est déjà sélectionné et upgrade
         component.lifeSelected = true;
         component.stats.life = UPGRADED_STAT;
-        // Maintenant, on sélectionne rapidity
-        component.rapiditySelected = false; // assurez-vous qu'elle est désactivée
+        component.rapiditySelected = false;
         component.selectStat('rapidity');
         expect(component.rapiditySelected).toBeTrue();
-        // Le stat opposé ("life") doit être réinitialisé
         expect(component.lifeSelected).toBeFalse();
         expect(component.stats.life).toBe(BASE_STAT);
-        // rapidity doit être augmentée
         expect(component.stats.rapidity).toBe(UPGRADED_STAT);
     });
 
-    // Tests pour selectCombatStat (inclus dans lignes 76–148 si implanté après selectStat)
     it('should toggle combat stat "attack": select and deselect correctly', () => {
-        // Cas de sélection
         component.attackSelected = false;
         component.stats.attackDice = '';
         component.stats.defenseDice = '';
@@ -243,7 +231,6 @@ describe('FormCharacterComponent', () => {
         expect(component.attackSelected).toBeTrue();
         expect(component.stats.attackDice).toBe(D6);
 
-        // Cas de désactivation
         component.selectCombatStat('attack');
         expect(component.attackSelected).toBeFalse();
         expect(component.stats.attackDice).toBe('');
@@ -251,10 +238,8 @@ describe('FormCharacterComponent', () => {
     });
 
     it('should reset combat stat "defense" when "attack" is selected', () => {
-        // Préparer : défense sélectionnée et avec image de dé
         component.defenseSelected = true;
         component.stats.defenseDice = D6;
-        // Sélectionne attack : cela doit désactiver defense et utiliser D4 pour defense
         component.selectCombatStat('attack');
         expect(component.defenseSelected).toBeFalse();
         expect(component.stats.defenseDice).toBe(D4);

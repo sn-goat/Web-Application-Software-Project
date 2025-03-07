@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
+import { SocketService } from '@app/services/code/socket.service';
 import { Board } from '@common/board';
 import { BehaviorSubject } from 'rxjs';
-// import { Item, Tile, Visibility } from '@common/enums';
-import { SocketService } from '@app/services/code/socket.service';
 
 @Injectable({
     providedIn: 'root',

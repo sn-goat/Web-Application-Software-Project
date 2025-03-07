@@ -108,11 +108,12 @@ export class RoomService {
             this.logger.error(`Room with access code ${accessCode} not found.`);
             return null;
         }
+        const sameNameCount = room.players.filter((p) => p.name === player.name || p.name.startsWith(`${player.name}-`)).length;
 
-        const existingNames = room.players.map((p) => p.name);
-        if (existingNames.includes(player.name)) {
-            player.name = `${player.name}-${existingNames.length + 1}`;
+        if (sameNameCount > 0) {
+            player.name = `${player.name}-${sameNameCount + 1}`;
         }
+
         room.players.push(player);
         this.logger.log(`Player ${player.id} joined room ${accessCode}`);
 
