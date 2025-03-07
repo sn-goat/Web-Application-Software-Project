@@ -151,6 +151,8 @@ describe('GameGateway', () => {
                     rapidity: 4,
                     attackDice: '',
                     defenseDice: '',
+                    movementPts: 4,
+                    actions: 4,
                 },
             };
 
@@ -180,6 +182,8 @@ describe('GameGateway', () => {
                     rapidity: 4,
                     attackDice: '',
                     defenseDice: '',
+                    movementPts: 4,
+                    actions: 4,
                 },
             };
 

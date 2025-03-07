@@ -72,6 +72,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
 
             // Add a player via shareCharacter (which also uses getLobbyLimit)
@@ -110,6 +112,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
             const player2: Player = {
                 id: 'player1',
@@ -121,6 +125,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
 
             service.shareCharacter(room.accessCode, player1);
@@ -147,6 +153,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
 
             service.shareCharacter(room.accessCode, player);
@@ -193,6 +201,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
             const player2: Player = {
                 id: 'player1',
@@ -204,6 +214,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
 
             service.shareCharacter(room.accessCode, player1);
@@ -231,6 +243,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
             const player2: Player = {
                 id: 'player1',
@@ -242,6 +256,8 @@ describe('RoomService', () => {
                 rapidity: 4,
                 attackDice: 'd6',
                 defenseDice: 'd4',
+                movementPts: 4,
+                actions: 4,
             };
             service.shareCharacter(room.accessCode, player1);
             const updatedRoom = service.shareCharacter(room.accessCode, player2);
@@ -308,6 +324,8 @@ describe('RoomService - non-existent room handling', () => {
             rapidity: 4,
             attackDice: 'd6',
             defenseDice: 'd4',
+            movementPts: 4,
+            actions: 4,
         };
         const result = service.shareCharacter(accessCode, player);
         expect(result).toBeNull();
