@@ -69,21 +69,23 @@ $indigo-pink-theme: mat.m2-define-light-theme(
 }
 
 /* You can add global styles to this file, and also import other style files */
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
-html,
-body {
-    height: 100%;
-}
-body {
-    margin: 0;
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
+.backdrop-block {
+    // Augmenter l'opacité du backdrop pour montrer clairement que l'arrière-plan est désactivé
+    background-color: rgba(0, 0, 0, 0.7) !important;
+    // S'assurer qu'il recouvre tout l'écran
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    // S'assurer qu'il est au-dessus de tous les autres éléments
+    z-index: 999 !important;
 }
 
-html,
-body {
-    height: 100%;
-}
-body {
-    margin: 0;
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
+.alert-dialog {
+    // S'assurer que le panneau de dialogue est au-dessus du backdrop
+    z-index: 1000 !important;
 }

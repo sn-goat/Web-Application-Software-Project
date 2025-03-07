@@ -69,9 +69,6 @@ describe('MapService', () => {
     describe('isReadyToSave', () => {
         it('should return an error message when spawns or items remain to be placed', () => {
             // On s'assure que les compteurs sont > 0 en laissant setBoardToFirstValue tel quel.
-            // dummyBoard.size vaut 3, donc maxMapObject = BOARD_SIZE_MAPPING[3 as Size] (supposé > 0).
-            // De plus, comme le board est généré automatiquement, aucun flag n'est placé.
-            // Par ailleurs, isModeCTF est faux (dummyBoard.isCTF === false) par défaut.
             const validation: Validation = service.isReadyToSave();
             expect(validation.isValid).toBeFalse();
             expect(validation.error).toContain('Vous devez placer');
@@ -122,7 +119,7 @@ describe('MapService', () => {
         };
         service.setMapData(newBoard);
         expect(localStorage.setItem).toHaveBeenCalledWith('firstBoardValue', JSON.stringify(newBoard));
-        expect(service.getFirstBoardValue()).toEqual(newBoard);
+        expect(service['firstBoardValue']).toEqual(newBoard);
     });
 
     it('getBoardToSave should return the BehaviorSubject for board', () => {
@@ -165,7 +162,7 @@ describe('MapService', () => {
     });
 
     it('setCellTile should update the tile of the specified cell', () => {
-        // Préparation d\'une grille complète pour être sûr de la structure
+        // Préparation d'une grille complète pour être sûr de la structure
         const board = service.getBoardToSave().value;
         board.board = Array(board.size)
             .fill(null)
@@ -204,51 +201,111 @@ describe('MapService', () => {
 
     /* ==== Tests sur la génération et le parsing du board ==== */
     describe('setBoardToFirstValue', () => {
-        it('should set boardToSave to firstBoardValue and call parseBoard when board is not empty', () => {
-            // Création d'un board personnalisé avec quelques cellules non-default
-            const customBoard: Board = {
-                _id: 'nonEmpty',
-                name: 'Non Empty Board',
-                description: 'Board already generated',
-                size: 10,
+        it('should make a deep copy of firstBoardValue when setting boardToSave', () => {
+            // Setup: Créer un firstBoardValue avec une structure spécifique
+            const originalBoard: Board = {
+                _id: 'original',
+                name: 'Original Board',
+                description: 'Original description',
+                size: 5,
+                board: [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 } }]],
+                isCTF: false,
+                visibility: Visibility.PUBLIC,
+                image: '',
+                updatedAt: new Date(),
+            };
+
+            // Mettre en place firstBoardValue
+            service['firstBoardValue'] = originalBoard;
+
+            // Appeler setBoardToFirstValue
+            service.setBoardToFirstValue();
+
+            // Vérifier que boardToSave a une copie profonde (et non une référence)
+            const savedBoard = service.getBoardToSave().value;
+
+            // Modifier firstBoardValue
+            service['firstBoardValue'].name = 'Modified Original';
+
+            // Vérifier que la modification de firstBoardValue n'affecte pas boardToSave
+            expect(savedBoard.name).not.toEqual('Modified Original');
+            expect(savedBoard.name).toEqual('Original Board');
+        });
+
+        it('should call generateBoard when firstBoardValue has no board array', () => {
+            // Setup: Créer un firstBoardValue sans tableau board
+            const emptyBoard: Board = {
+                _id: 'empty',
+                name: 'Empty Board',
+                description: 'No board array',
+                size: 5,
+                board: [], // tableau vide
+                isCTF: false,
+                visibility: Visibility.PUBLIC,
+                image: '',
+                updatedAt: new Date(),
+            };
+
+            service['firstBoardValue'] = emptyBoard;
+
+            // Espionner generateBoard
+            const generateSpy = spyOn<any>(service, 'generateBoard').and.callThrough();
+
+            // Appeler setBoardToFirstValue
+            service.setBoardToFirstValue();
+
+            // Vérifier que generateBoard a été appelé
+            expect(generateSpy).toHaveBeenCalled();
+        });
+
+        it('should parse items in the board correctly', () => {
+            // Utiliser Size.SMALL (10) qui existe certainement dans BOARD_SIZE_MAPPING
+            const boardSize = 10;
+
+            // Setup: Board avec items spécifiques mais taille valide
+            const boardWithItems: Board = {
+                _id: 'items',
+                name: 'Board with Items',
+                description: 'Has items',
+                size: boardSize,
                 board: [
+                    // Garder une board 2x2 pour simplicité avec les mêmes items
                     [
                         { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 } },
                         { tile: Tile.FLOOR, item: Item.FLAG, position: { x: 1, y: 0 } },
                     ],
                     [
-                        { tile: Tile.FLOOR, item: 999 as unknown as Item, position: { x: 0, y: 1 } }, // autre item non-default
+                        { tile: Tile.WALL, item: Item.BOW, position: { x: 0, y: 1 } },
                         { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 } },
                     ],
                 ],
                 isCTF: true,
                 visibility: Visibility.PUBLIC,
-                image: 'img',
+                image: '',
                 updatedAt: new Date(),
             };
 
-            // On définit firstBoardValue avec ce board non vide.
-            service['firstBoardValue'].next(customBoard);
-            // Pour vérifier que parseBoard est appelé, on peut espionner la méthode privée.
-            const parseSpy = spyOn<any>(service, 'parseBoard').and.callThrough();
+            service['firstBoardValue'] = boardWithItems;
 
-            // On réinitialise les compteurs à la valeur max pour size 2
-            const maxObj = BOARD_SIZE_MAPPING[customBoard.size as Size];
-            service['nbrSpawnsToPlace'].next(maxObj);
-            service['nbrItemsToPlace'].next(maxObj);
+            // Espionner les méthodes
+            const decreaseSpawnsSpy = spyOn(service, 'decreaseSpawnsToPlace').and.callThrough();
+            const decreaseItemsSpy = spyOn(service, 'decreaseItemsToPlace').and.callThrough();
+            const setFlagSpy = spyOn(service, 'setHasFlagOnBoard').and.callThrough();
+
+            // Réinitialiser avec une taille valide
+            const maxItems = BOARD_SIZE_MAPPING[boardSize as Size];
+            service['nbrSpawnsToPlace'].next(maxItems);
+            service['nbrItemsToPlace'].next(maxItems);
+            service['hasFlagOnBoard'].next(false);
+
             service.setBoardToFirstValue();
 
-            const boardSaved = service.getBoardToSave().value;
-            // La board retournée doit être identique au board custom
-            expect(boardSaved).toEqual(customBoard);
-            expect(parseSpy).toHaveBeenCalledWith(customBoard);
-
-            // Vérification des effets de parseBoard :
-            // - Une cellule avec SPAWN : décrémente nbrSpawnsToPlace de 1
-            // - Une cellule avec ITEM différent de DEFAULT, SPAWN et FLAG (ici 999) : décrémente nbrItemsToPlace de 1
-            // - Une cellule avec FLAG : setHasFlagOnBoard(true) doit être appelé
-            expect(service['nbrSpawnsToPlace'].value).toEqual(maxObj - 1);
-            expect(service['nbrItemsToPlace'].value).toEqual(maxObj - 1);
+            // Vérifications
+            expect(decreaseSpawnsSpy).toHaveBeenCalledTimes(1);
+            expect(decreaseItemsSpy).toHaveBeenCalledTimes(1);
+            expect(setFlagSpy).toHaveBeenCalledWith(true);
+            expect(service['nbrSpawnsToPlace'].value).toBe(maxItems - 1);
+            expect(service['nbrItemsToPlace'].value).toBe(maxItems - 1);
             expect(service['hasFlagOnBoard'].value).toBeTrue();
         });
     });
