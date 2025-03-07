@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { RoomService } from '@app/gateways/room.service';
+import { RoomService } from '@app/services/room.service';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { Player } from '@common/player';
 

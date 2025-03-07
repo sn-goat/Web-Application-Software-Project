@@ -42,12 +42,14 @@ export class LobbyComponent implements OnInit {
         this.socketService.onPlayersList().subscribe((players: Player[]) => {
             this.players = players;
             this.checkIfAdmin();
-            if (this.players.length === this.maxPlayers) {
-                if (!this.isRoomLocked) {
-                    this.socketService.lockRoom(this.accessCode);
-                    this.isRoomLocked = true;
-                }
+            if (this.players.length === this.maxPlayers && !this.isRoomLocked) {
+                this.socketService.lockRoom(this.accessCode);
+                this.isRoomLocked = true;
             }
+        });
+
+        this.socketService.onRoomLocked().subscribe(() => {
+            this.isRoomLocked = true;
         });
 
         this.socketService.onPlayerRemoved().subscribe((players: Player[]) => {
@@ -94,6 +96,11 @@ export class LobbyComponent implements OnInit {
     }
 
     disconnect() {
+        this.socketService.disconnect(this.accessCode, this.socketService.getCurrentPlayerId());
+        this.router.navigate(['/home']).then(() => window.location.reload());
+    }
+
+    disconnectWithoutReload() {
         this.socketService.disconnect(this.accessCode, this.socketService.getCurrentPlayerId());
         this.router.navigate(['/home']);
     }

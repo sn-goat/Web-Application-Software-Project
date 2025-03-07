@@ -4,9 +4,9 @@ import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BoardController } from './controllers/board/board.controller';
-import { GameGateway } from './gateways/game.gateway';
-import { RoomService } from './gateways/room.service';
+import { RoomGateway } from './gateways/room/room.gateway';
 import { BoardService } from './services/board/board.service';
+import { RoomService } from './services/room.service';
 
 @Module({
     imports: [
@@ -21,6 +21,6 @@ import { BoardService } from './services/board/board.service';
         MongooseModule.forFeature([{ name: Board.name, schema: boardSchema }]),
     ],
     controllers: [BoardController],
-    providers: [ChatGateway, BoardService, Logger, RoomService, GameGateway],
+    providers: [ChatGateway, BoardService, Logger, RoomService, RoomGateway],
 })
 export class AppModule {}

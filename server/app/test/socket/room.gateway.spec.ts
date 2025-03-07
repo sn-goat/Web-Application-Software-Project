@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { GameGateway } from '@app/gateways/game.gateway';
-import { RoomService } from '@app/gateways/room.service';
+import { RoomGateway } from '@app/gateways/room/room.gateway';
+import { RoomService } from '@app/services/room.service';
 import { Socket } from 'socket.io';
 
 describe('GameGateway', () => {
-    let gateway: GameGateway;
+    let gateway: RoomGateway;
     let roomService: Partial<RoomService>;
     let client: Partial<Socket>;
     let server: any; // mock server
@@ -30,7 +30,7 @@ describe('GameGateway', () => {
         };
 
         // Instantiate the gateway and inject the mocked service.
-        gateway = new GameGateway(roomService as RoomService);
+        gateway = new RoomGateway(roomService as RoomService);
         gateway.server = server;
 
         // Create a fake client socket.

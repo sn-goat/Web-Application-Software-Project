@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { Board } from '@common/board';
 import { GameRoom } from '@common/game-room';
 import { Player } from '@common/player';
+import { RoomEvents } from '@common/room.gateway.events';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from 'src/environments/environment';
@@ -17,27 +17,27 @@ export class SocketService {
     private currentPlayerId: string = '';
     private size: number = 0;
 
-    constructor(private router: Router) {
+    constructor() {
         this.socket = io(this.url);
-        this.socket.on('redirectHome', () => {
-            this.router.navigate(['/home']);
-        });
     }
 
     onRoomCreated(): Observable<unknown> {
         return new Observable((observer) => {
-            this.socket.on('roomCreated', (data) => observer.next(data));
+            this.socket.on(RoomEvents.RoomCreated, (data) => {
+                this.gameRoom = data as GameRoom; // Mettre à jour les données de la partie
+                observer.next(data);
+            });
         });
     }
 
     createRoom(organizerId: string, size: number) {
         this.currentPlayerId = organizerId;
         this.size = size;
-        this.socket.emit('createRoom', { organizerId, size });
+        this.socket.emit(RoomEvents.CreateRoom, { organizerId, size });
     }
 
     joinRoom(accessCode: string) {
-        this.socket.emit('joinRoom', { accessCode });
+        this.socket.emit(RoomEvents.JoinRoom, { accessCode });
     }
 
     shareGameMap(board: Board) {
@@ -46,12 +46,12 @@ export class SocketService {
 
     shareCharacter(accessCode: string, player: Player) {
         this.currentPlayerId = player.id;
-        this.socket.emit('shareCharacter', { accessCode, player });
+        this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
 
     onPlayerJoined(): Observable<{ room: GameRoom }> {
         return new Observable((observer) => {
-            this.socket.on('playerJoined', (room: { room: GameRoom }) => {
+            this.socket.on(RoomEvents.PlayerJoined, (room: { room: GameRoom }) => {
                 this.gameRoom = room.room;
                 observer.next(room);
             });
@@ -59,15 +59,15 @@ export class SocketService {
     }
 
     lockRoom(accessCode: string) {
-        this.socket.emit('lockRoom', { accessCode });
+        this.socket.emit(RoomEvents.LockRoom, { accessCode });
     }
 
     unlockRoom(accessCode: string) {
-        this.socket.emit('unlockRoom', { accessCode });
+        this.socket.emit(RoomEvents.UnlockRoom, { accessCode });
     }
 
     removePlayer(accessCode: string, playerId: string) {
-        this.socket.emit('removePlayer', { accessCode, playerId });
+        this.socket.emit(RoomEvents.RemovePlayer, { accessCode, playerId });
     }
 
     onPlayersList(): Observable<Player[]> {
@@ -78,21 +78,27 @@ export class SocketService {
 
     onPlayerRemoved(): Observable<Player[]> {
         return new Observable((observer) => {
-            this.socket.on('playerRemoved', (players: Player[]) => observer.next(players));
+            this.socket.on(RoomEvents.PlayerRemoved, (players: Player[]) => observer.next(players));
         });
     }
 
     onPlayerDisconnected(): Observable<Player[]> {
         return new Observable((observer) => {
-            this.socket.on('playerDisconnected', (players: Player[]) => observer.next(players));
+            this.socket.on(RoomEvents.PlayerDisconnected, (players: Player[]) => observer.next(players));
         });
     }
 
     onJoinError(): Observable<{ message: string }> {
         return new Observable((observer) => {
-            this.socket.on('joinError', (errorData: { message: string }) => {
+            this.socket.on(RoomEvents.JoinError, (errorData: { message: string }) => {
                 observer.next(errorData);
             });
+        });
+    }
+
+    onRoomLocked(): Observable<unknown> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.RoomLocked, (data) => observer.next(data));
         });
     }
 
@@ -105,6 +111,6 @@ export class SocketService {
     }
 
     disconnect(accessCode: string, playerId: string) {
-        this.socket.emit('disconnectPlayer', { accessCode, playerId });
+        this.socket.emit(RoomEvents.DisconnectPlayer, { accessCode, playerId });
     }
 }

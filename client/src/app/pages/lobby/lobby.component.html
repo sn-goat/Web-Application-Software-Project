@@ -13,7 +13,7 @@
 
     <!-- Nouveau bouton "Start Game" accessible uniquement à l'admin, activable si le lobby est verrouillé et qu'il y a au moins 2 joueurs -->
      @if (isAdmin) {
-      <button [disabled]="!isRoomLocked || (players.length < 2)"> Start Game </button>
+      <button [disabled]="(players.length < 2) && (players.length !== maxPlayers)"> Start Game </button>
     }
   </div>
 

@@ -16,6 +16,7 @@ class FakeSocketService {
     private playersListSubject = new Subject<Player[]>();
     private playerRemovedSubject = new Subject<Player[]>();
     private playerDisconnectedSubject = new Subject<Player[]>();
+    private roomLockedSubject = new Subject<unknown>();
 
     getGameSize() {
         return 15; // Retourne une taille numérique appropriée
@@ -41,6 +42,10 @@ class FakeSocketService {
         return this.playerDisconnectedSubject.asObservable();
     }
 
+    onRoomLocked() {
+        return this.roomLockedSubject.asObservable();
+    }
+
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
     removePlayer(_accessCode: string, _playerId: string): void {}
@@ -62,10 +67,14 @@ class FakeSocketService {
     triggerPlayerDisconnected(players: Player[]) {
         this.playerDisconnectedSubject.next(players);
     }
+
+    triggerRoomLocked(data: unknown) {
+        this.roomLockedSubject.next(data);
+    }
 }
 
 class FakeRouter {
-    navigate = jasmine.createSpy('navigate');
+    navigate = jasmine.createSpy('navigate').and.returnValue(Promise.resolve(true));
 }
 
 describe('LobbyComponent', () => {
@@ -204,30 +213,57 @@ describe('LobbyComponent', () => {
         expect(socketService.removePlayer).toHaveBeenCalledWith('ABC', 'player2');
     });
 
-    it('disconnect should call socketService.disconnect and navigate home', () => {
+    it('disconnect should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
         spyOn(socketService, 'disconnect');
         component.accessCode = 'ABC';
-        component.disconnect();
+        component.disconnectWithoutReload();
+        tick();
+        expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
+    }));
+
+    it('disconnect should call socketService.disconnect', fakeAsync(() => {
+        spyOn(socketService, 'disconnect');
+        component.accessCode = 'ABC';
+        component.disconnectWithoutReload();
+        tick();
+        expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
+    }));
+
+    it('disconnect should call socketService.disconnect without reloading the page', fakeAsync(() => {
+        spyOn(socketService, 'disconnect');
+
+        component.accessCode = 'ABC';
+        component.disconnectWithoutReload();
+        tick();
+
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
         expect(router.navigate).toHaveBeenCalledWith(['/home']);
-    });
+    }));
 
-    it('should set accessCode from history state if available (ligne 32)', () => {
-        // On simule l'état de history en retournant un accessCode
+    it('disconnectWithoutReload should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
+        spyOn(socketService, 'disconnect');
+
+        component.accessCode = 'ABC';
+        component.disconnectWithoutReload();
+        tick();
+
+        expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
+        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    }));
+
+    it('should set accessCode from history state if available', () => {
         spyOnProperty(history, 'state').and.returnValue({ accessCode: 'HISTORY_CODE' });
         component.ngOnInit();
         expect(component.accessCode).toBe('HISTORY_CODE');
     });
 
-    it('checkIfAdmin should set isAdmin false if first player is not current-player (ligne 81)', () => {
-        // Cas où le premier joueur n'est pas le current-player
+    it('checkIfAdmin should set isAdmin false if first player is not current-player', () => {
         component.players = [{ id: 'other-player' } as Player, { id: 'current-player' } as Player];
         component.checkIfAdmin();
         expect(component.isAdmin).toBeFalse();
     });
 
-    it('getCurrentPlayerId should return the id from socketService (ligne 102)', () => {
-        // On s'assure que getCurrentPlayerId du composant délègue bien à socketService.getCurrentPlayerId()
+    it('getCurrentPlayerId should return the id from socketService', () => {
         spyOn(socketService, 'getCurrentPlayerId').and.returnValue('current-player');
         expect(component.getCurrentPlayerId()).toBe('current-player');
     });
