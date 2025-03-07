@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Board, Validation } from '@common/board';
-import { Item, Tile, Visibility, Size } from '@common/enums';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
+import { Board, Validation } from '@common/board';
+import { Item, Size, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
@@ -14,7 +14,7 @@ export class MapService {
 
     private readonly storageKey = 'firstBoardValue';
 
-    private firstBoardValue: BehaviorSubject<Board>;
+    private firstBoardValue: Board;
     private boardToSave: BehaviorSubject<Board>;
     private nbrSpawnsToPlace = new BehaviorSubject<number>(0);
     private nbrItemsToPlace = new BehaviorSubject<number>(0);
@@ -23,10 +23,11 @@ export class MapService {
     constructor() {
         const savedData = localStorage.getItem(this.storageKey);
         const initialData = savedData ? JSON.parse(savedData) : ({} as Board);
-        this.firstBoardValue = new BehaviorSubject<Board>(initialData);
+        this.firstBoardValue = initialData;
 
         this.nbrSpawnsToPlace$ = this.nbrSpawnsToPlace.asObservable();
         this.nbrItemsToPlace$ = this.nbrItemsToPlace.asObservable();
+        this.hasFlagOnBoard$ = this.hasFlagOnBoard.asObservable();
         this.initializeBoardData();
     }
 
@@ -65,16 +66,12 @@ export class MapService {
     }
 
     setMapData(data: Board): void {
-        this.firstBoardValue.next(data);
+        this.firstBoardValue = data;
         localStorage.setItem(this.storageKey, JSON.stringify(data));
     }
 
     getBoardToSave(): BehaviorSubject<Board> {
         return this.boardToSave;
-    }
-
-    getFirstBoardValue(): Board {
-        return this.firstBoardValue.value;
     }
 
     setBoardName(name: string) {
@@ -122,14 +119,20 @@ export class MapService {
     }
 
     setBoardToFirstValue() {
-        const data: Board = this.firstBoardValue.value;
-        const maxMapObject: number = BOARD_SIZE_MAPPING[this.firstBoardValue.value.size as Size];
+        // Créer une copie profonde de firstBoardValue
+        const data: Board = JSON.parse(JSON.stringify(this.firstBoardValue));
+
+        const maxMapObject: number = BOARD_SIZE_MAPPING[this.firstBoardValue.size as Size];
+
+        // Reset all state variables
         this.nbrSpawnsToPlace.next(maxMapObject);
         this.nbrItemsToPlace.next(maxMapObject);
+        this.setHasFlagOnBoard(false);
+
         if (!Array.isArray(data.board) || data.board.length === 0) {
             this.generateBoard();
         } else {
-            this.boardToSave = new BehaviorSubject<Board>(data);
+            this.boardToSave.next(data);
             this.parseBoard(this.boardToSave.value);
         }
     }
@@ -148,19 +151,19 @@ export class MapService {
     }
 
     private generateBoard() {
-        const boardGame = this.boardToSave.value;
-        const data = this.firstBoardValue.value;
-        for (let i = 0; i < this.firstBoardValue.value.size; i++) {
+        const boardGame = [];
+        const data = this.firstBoardValue;
+        for (let i = 0; i < this.firstBoardValue.size; i++) {
             const row = [];
-            for (let j = 0; j < this.firstBoardValue.value.size; j++) {
+            for (let j = 0; j < this.firstBoardValue.size; j++) {
                 row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
             }
-            boardGame.board.push(row);
+            boardGame.push(row);
         }
-        this.boardToSave = new BehaviorSubject<Board>({
+        this.boardToSave.next({
             ...data,
-            board: boardGame.board,
-        });
+            board: boardGame,
+        } as Board);
     }
 
     private parseBoard(board: Board) {

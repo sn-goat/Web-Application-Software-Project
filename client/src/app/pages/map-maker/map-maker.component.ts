@@ -1,19 +1,22 @@
 import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { Router } from '@angular/router';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { BoardGameComponent } from '@app/components/edit/board-game/board-game.component';
 import { EditItemAreaComponent } from '@app/components/edit/edit-item-area/edit-item-area.component';
+import { Alert } from '@app/constants/enums';
 import { BoardService } from '@app/services/code/board.service';
 import { MapService } from '@app/services/code/map.service';
 import { MouseEditorService } from '@app/services/code/mouse-editor.service';
-import { firstValueFrom } from 'rxjs';
 import { Validation } from '@common/board';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-map-maker',
@@ -33,11 +36,12 @@ import { Validation } from '@common/board';
 })
 export class MapMakerComponent implements OnInit {
     private readonly mapService = inject(MapService);
+    private readonly dialog = inject(MatDialog);
 
     constructor(
+        private readonly router: Router,
         private mouseEditor: MouseEditorService,
         private boardService: BoardService,
-        private readonly router: Router,
     ) {}
 
     get name() {
@@ -54,7 +58,7 @@ export class MapMakerComponent implements OnInit {
         this.mapService.setBoardDescription(value);
     }
 
-    @HostListener('contextmenu', ['$event'])
+    @HostListener('window:contextmenu', ['$event'])
     onRightClick(event: MouseEvent) {
         this.mouseEditor.preventRightClick(event);
     }
@@ -73,40 +77,45 @@ export class MapMakerComponent implements OnInit {
         return !this.name.trim().length;
     }
 
-    checkIfReadyToSave() {
+    async checkIfReadyToSave() {
         const validation: Validation = this.mapService.isReadyToSave();
         if (!validation.isValid) {
-            alert(validation.error);
+            this.openDialog(validation.error as string, Alert.ERROR);
             return;
         }
         if (this.checkNameValid()) {
-            alert('Veuillez donner un nom valide à votre carte');
+            this.openDialog('Veuillez donner un nom valide à votre carte', Alert.ERROR);
             return;
         }
-        if (confirm('Êtes vous certain de vouloir sauvegarder?')) {
+
+        const result = await this.openDialog('Êtes vous certain de vouloir sauvegarder?', Alert.CONFIRM);
+        if (result) {
             this.saveBoard()
                 .then(() => {
-                    alert('Partie sauvegardée! Vous allez être redirigé.\n');
-                    this.router.navigate(['/admin']).then(() => {
-                        this.reset();
-                    });
+                    this.openDialog('Partie sauvegardée! Vous allez être redirigé.\n', Alert.SUCCESS);
+                    this.router.navigate(['/admin']);
                 })
                 .catch((error) => {
-                    alert('Erreur dans la configuration de la partie.\n' + error);
+                    this.openDialog(error, Alert.ERROR);
                 });
         }
     }
 
-    confirmReturn() {
-        if (confirm('Etes-vous sûr de vouloir quitter cette page?')) {
-            this.router.navigate(['/admin']).then(() => {
-                this.reset();
-            });
+    async confirmReturn() {
+        const result = await this.openDialog(
+            'Êtes vous certain de vouloir quitter cette page ?\nAucune modifications ne sera sauvegardée',
+            Alert.CONFIRM,
+        );
+        if (result) {
+            this.router.navigate(['/admin']);
         }
     }
 
-    reset() {
-        window.location.reload();
+    async reset() {
+        const result = await this.openDialog('Êtes vous certain de vouloir réinitialiser ?\nToutes les modifications seront perdue', Alert.CONFIRM);
+        if (result) {
+            this.mapService.setBoardToFirstValue();
+        }
     }
 
     ngOnInit() {
@@ -135,5 +144,16 @@ export class MapMakerComponent implements OnInit {
 
             return Promise.reject(errorMessage);
         }
+    }
+
+    private async openDialog(message: string, type: Alert): Promise<boolean> {
+        const dialogRef = this.dialog.open(AlertComponent, {
+            data: { type, message },
+            disableClose: true,
+            hasBackdrop: true,
+            backdropClass: 'backdrop-block',
+            panelClass: 'alert-dialog',
+        });
+        return firstValueFrom(dialogRef.afterClosed());
     }
 }
