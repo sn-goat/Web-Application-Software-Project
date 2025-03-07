@@ -5,7 +5,6 @@ import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { BehaviorSubject } from 'rxjs';
 
-
 interface HeaderBarMock {
     getBack: () => void;
     backUrl: string;
