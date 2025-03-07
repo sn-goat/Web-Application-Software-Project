@@ -12,9 +12,6 @@ import { JoinRoomComponent } from '@app/pages/join-room/join-room.component';
 import { LobbyComponent } from '@app/pages/lobby/lobby.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MapMakerComponent } from '@app/pages/map-maker/map-maker.component';
-import { OrganizerWaitingPageComponent } from '@app/pages/organizer-waiting-page/organizer-waiting-page.component';
-import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
-import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 
 Component({
     template: `
@@ -28,8 +25,7 @@ const routes: Routes = [
     { path: 'creation', component: CreatePageComponent },
     { path: 'edit', component: MapMakerComponent },
     { path: 'game', component: GamePageComponent },
-    { path: 'waiting', component: WaitingPageComponent },
-    { path: 'createGame', component: OrganizerWaitingPageComponent },
+    { path: 'lobby', component: LobbyComponent },
     { path: 'joinGame', component: JoinRoomComponent },
     { path: 'admin', component: AdminPageComponent },
     { path: '**', redirectTo: '/home' },
