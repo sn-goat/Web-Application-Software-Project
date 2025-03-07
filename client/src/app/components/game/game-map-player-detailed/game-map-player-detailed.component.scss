@@ -168,7 +168,7 @@ $skill-color: #7ee0d0;
     text-shadow: 0 0 2px black, 0 0 4px black;
     font-size: 14px;
     left: 0;
-    mix-blend-mode: difference; // Makes text visible on both light and dark backgrounds
+    mix-blend-mode: difference;
   }
   
   .health-high {
