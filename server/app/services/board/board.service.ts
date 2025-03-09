@@ -128,6 +128,15 @@ export class BoardService {
         return row === 0 || col === 0 || row === max - 1 || col === max - 1;
     }
 
+    private isDoorStructureValid(board: CreateBoardDto, row: number, col: number): boolean {
+        const horizontalFloors = board.board[row][col - 1].tile !== Tile.WALL && board.board[row][col + 1].tile !== Tile.WALL;
+        const verticalFloors = board.board[row - 1][col].tile !== Tile.WALL && board.board[row + 1][col].tile !== Tile.WALL;
+        const horizontalWalls = board.board[row][col - 1].tile === Tile.WALL && board.board[row][col + 1].tile === Tile.WALL;
+        const verticalWalls = board.board[row - 1][col].tile === Tile.WALL && board.board[row + 1][col].tile === Tile.WALL;
+
+        return !((horizontalFloors && verticalWalls) || (verticalFloors && horizontalWalls));
+    }
+
     private areDoorsValid(board: CreateBoardDto): Validation {
         const rows = board.board.length;
         const cols = board.board[0].length;
@@ -138,12 +147,7 @@ export class BoardService {
                         return { isValid: false, error: 'Des portes sont placées sur les rebords du jeu' };
                     }
 
-                    const horizontalFloors = board.board[i][j - 1].tile !== Tile.WALL && board.board[i][j + 1].tile !== Tile.WALL;
-                    const verticalFloors = board.board[i - 1][j].tile !== Tile.WALL && board.board[i + 1][j].tile !== Tile.WALL;
-                    const horizontalWalls = board.board[i][j - 1].tile === Tile.WALL && board.board[i][j + 1].tile === Tile.WALL;
-                    const verticalWalls = board.board[i - 1][j].tile === Tile.WALL && board.board[i + 1][j].tile === Tile.WALL;
-
-                    if (!((horizontalFloors && verticalWalls) || (verticalFloors && horizontalWalls))) {
+                    if (this.isDoorStructureValid(board, i, j)) {
                         return { isValid: false, error: "Des portes n'ont pas de structure valide" };
                     }
                 }

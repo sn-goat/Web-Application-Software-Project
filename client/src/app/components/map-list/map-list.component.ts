@@ -5,12 +5,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapCardComponent } from '@app/components/map-card/map-card.component';
+import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
 import { BoardService } from '@app/services/code/board.service';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
-import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
+
+type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
 
 @Component({
     selector: 'app-map-list',
@@ -29,7 +31,7 @@ export class MapListComponent implements OnInit {
     mapsLoaded: boolean = false;
     loadingInterval = LOADING_INTERVAL;
     searchQuery: string = '';
-    sortBy: string = 'updatedAt';
+    sortBy: SortingCategories = 'updatedAt';
 
     private readonly mapService = inject(MapService);
 

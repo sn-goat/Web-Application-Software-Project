@@ -1,9 +1,9 @@
-import { Player } from './player';
+import { PlayerStats } from './player';
 
 export interface GameRoom {
     accessCode: string;
     organizerId: string;
-    players: Player[];
+    players: PlayerStats[];
     isLocked: boolean;
     mapSize: number;
 }

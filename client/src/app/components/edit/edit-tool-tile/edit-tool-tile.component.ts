@@ -16,20 +16,16 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     @Input() type!: Tile;
     src: string = DEFAULT_PATH_TILES;
     extension: string = '.png';
-    description: string = '';
     showTooltip = false;
     styleClass: string = 'unselected';
-    destroy$ = new Subject<void>();
+    description: string = '';
+    private destroy$ = new Subject<void>();
 
-    constructor(public toolSelection: ToolSelectionService) {}
+    constructor(private toolSelection: ToolSelectionService) {}
 
     ngOnInit() {
         this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
-            if (tile === this.type) {
-                this.styleClass = 'selected';
-            } else {
-                this.styleClass = 'unselected';
-            }
+            this.styleClass = tile === this.type ? 'selected' : 'unselected';
         });
         this.getDescription(this.type);
     }

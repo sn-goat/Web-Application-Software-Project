@@ -4,7 +4,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HEALTH_HIGH_THRESHOLD, HEALTH_MAX, HEALTH_MEDIUM_THRESHOLD } from '@app/constants/health';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { GameMapPlayerDetailedComponent } from './game-map-player-detailed.component';
 
@@ -12,24 +12,25 @@ describe('GameMapPlayerDetailedComponent', () => {
     let component: GameMapPlayerDetailedComponent;
     let fixture: ComponentFixture<GameMapPlayerDetailedComponent>;
     let playerServiceMock: jasmine.SpyObj<PlayerService>;
-    let playersSubject: BehaviorSubject<Player[]>;
+    let playersSubject: BehaviorSubject<PlayerStats[]>;
 
-    const mockPlayer: Player = {
+    const mockPlayer: PlayerStats = {
         id: '1',
         name: 'testUser',
         avatar: '1',
         life: 100,
         attack: 10,
         defense: 10,
-        rapidity: 5,
-        attackDice: 'd6',
-        defenseDice: 'd4',
+        speed: 5,
+        attackDice: 'D6',
+        defenseDice: 'D4',
         movementPts: 5,
         actions: 2,
+        wins: 0,
     };
 
     beforeEach(async () => {
-        playersSubject = new BehaviorSubject<Player[]>([mockPlayer]);
+        playersSubject = new BehaviorSubject<PlayerStats[]>([mockPlayer]);
 
         playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName']);
         playerServiceMock.players$ = playersSubject.asObservable();
@@ -65,7 +66,7 @@ describe('GameMapPlayerDetailedComponent', () => {
     });
 
     it('should update player when players$ emits', () => {
-        const updatedPlayer: Player = { ...mockPlayer, life: 80 };
+        const updatedPlayer: PlayerStats = { ...mockPlayer, life: 80 };
         playerServiceMock.getPlayer.and.returnValue(updatedPlayer);
 
         playersSubject.next([updatedPlayer]);

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Board } from '@common/board';
 import { GameRoom } from '@common/game-room';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
@@ -44,7 +44,7 @@ export class SocketService {
         this.socket.emit('shareGameMap', { board });
     }
 
-    shareCharacter(accessCode: string, player: Player) {
+    shareCharacter(accessCode: string, player: PlayerStats) {
         this.currentPlayerId = player.id;
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
@@ -70,21 +70,21 @@ export class SocketService {
         this.socket.emit(RoomEvents.RemovePlayer, { accessCode, playerId });
     }
 
-    onPlayersList(): Observable<Player[]> {
+    onPlayersList(): Observable<PlayerStats[]> {
         return new Observable((observer) => {
-            this.socket.on('playersList', (players: Player[]) => observer.next(players));
+            this.socket.on('playersList', (players: PlayerStats[]) => observer.next(players));
         });
     }
 
-    onPlayerRemoved(): Observable<Player[]> {
+    onPlayerRemoved(): Observable<PlayerStats[]> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.PlayerRemoved, (players: Player[]) => observer.next(players));
+            this.socket.on(RoomEvents.PlayerRemoved, (players: PlayerStats[]) => observer.next(players));
         });
     }
 
-    onPlayerDisconnected(): Observable<Player[]> {
+    onPlayerDisconnected(): Observable<PlayerStats[]> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.PlayerDisconnected, (players: Player[]) => observer.next(players));
+            this.socket.on(RoomEvents.PlayerDisconnected, (players: PlayerStats[]) => observer.next(players));
         });
     }
 

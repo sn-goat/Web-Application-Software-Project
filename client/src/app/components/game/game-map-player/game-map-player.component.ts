@@ -1,9 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE } from '@app/constants/path';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { MAX_PLAYERS } from '@app/constants/playerConst';
-import { PlayerService } from '@app/services/code/player.service';
 import { GameService } from '@app/services/code/game.service';
-import { Player } from '@common/player';
+import { PlayerService } from '@app/services/code/player.service';
+import { PlayerStats } from '@common/player';
 
 @Component({
     selector: 'app-game-map-player',
@@ -15,7 +15,7 @@ export class GameMapPlayerComponent implements OnInit {
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly fileType: string = DEFAULT_FILE_TYPE;
 
-    players: Player[];
+    players: PlayerStats[];
     admin: string;
     activePlayer: string;
     playersWins: Map<string, number>;

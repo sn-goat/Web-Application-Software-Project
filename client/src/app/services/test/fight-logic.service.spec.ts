@@ -2,7 +2,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 
 describe('FightLogicService', () => {
     let service: FightLogicService;
@@ -116,32 +116,34 @@ describe('FightLogicService', () => {
     });
 
     it('should start fight when valid names and players are provided', () => {
-        const mockPlayer1: Player = {
+        const mockPlayer1: PlayerStats = {
             id: '1',
             name: 'mockPlayer',
             avatar: '6',
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         };
 
-        const mockPlayer2: Player = {
+        const mockPlayer2: PlayerStats = {
             id: '1',
             name: 'mockPlayer0',
             avatar: '4',
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 2,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 2,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         };
 
         playerServiceSpy.getPlayer.and.returnValues(mockPlayer1, mockPlayer2);

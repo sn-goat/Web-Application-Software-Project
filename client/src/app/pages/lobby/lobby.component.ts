@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { diceToImageLink } from '@app/constants/playerConst';
 import { SocketService } from '@app/services/code/socket.service';
 import { getLobbyLimit } from '@common/lobby-limits';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 
 @Component({
     selector: 'app-lobby',
@@ -14,10 +15,11 @@ import { Player } from '@common/player';
 })
 export class LobbyComponent implements OnInit {
     accessCode: string = '';
-    players: Player[] = [];
+    players: PlayerStats[] = [];
     isRoomLocked: boolean = false;
     isAdmin: boolean = false;
     maxPlayers: number = 0;
+    diceToImageLink = diceToImageLink;
 
     constructor(
         private socketService: SocketService,
@@ -39,7 +41,7 @@ export class LobbyComponent implements OnInit {
             this.checkIfAdmin();
         });
 
-        this.socketService.onPlayersList().subscribe((players: Player[]) => {
+        this.socketService.onPlayersList().subscribe((players: PlayerStats[]) => {
             this.players = players;
             this.checkIfAdmin();
             if (this.players.length === this.maxPlayers && !this.isRoomLocked) {
@@ -52,7 +54,7 @@ export class LobbyComponent implements OnInit {
             this.isRoomLocked = true;
         });
 
-        this.socketService.onPlayerRemoved().subscribe((players: Player[]) => {
+        this.socketService.onPlayerRemoved().subscribe((players: PlayerStats[]) => {
             this.players = players;
             if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                 if (!this.isAdmin) {
@@ -62,7 +64,7 @@ export class LobbyComponent implements OnInit {
             }
         });
 
-        this.socketService.onPlayerDisconnected().subscribe((players: Player[]) => {
+        this.socketService.onPlayerDisconnected().subscribe((players: PlayerStats[]) => {
             // Mise à jour de la liste des joueurs
             this.players = players;
             if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {

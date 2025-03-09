@@ -60,7 +60,7 @@ export class BoardController {
             await this.boardService.toggleVisibility(name);
             response.status(HttpStatus.ACCEPTED).send();
         } catch (error) {
-            response.status(HttpStatus.UNAUTHORIZED).send(error.message);
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error.message);
         }
     }
 

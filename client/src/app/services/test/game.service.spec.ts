@@ -6,17 +6,17 @@ import { ConfirmationDialogComponent } from '@app/components/common/confirmation
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject, of } from 'rxjs';
 
 describe('GameService', () => {
     let service: GameService;
     let dialogMock: jasmine.SpyObj<MatDialog>;
 
-    let playersSubject: BehaviorSubject<Player[]>;
+    let playersSubject: BehaviorSubject<PlayerStats[]>;
     let fightStartedSubject: BehaviorSubject<boolean>;
 
-    const testPlayers: Player[] = [
+    const testPlayers: PlayerStats[] = [
         {
             id: '1',
             name: 'player1',
@@ -24,11 +24,12 @@ describe('GameService', () => {
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         },
         {
             id: '2',
@@ -37,16 +38,17 @@ describe('GameService', () => {
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         },
     ];
 
     beforeEach(() => {
-        playersSubject = new BehaviorSubject<Player[]>([]);
+        playersSubject = new BehaviorSubject<PlayerStats[]>([]);
         fightStartedSubject = new BehaviorSubject<boolean>(false);
 
         const playerSpy = jasmine.createSpyObj('PlayerService', ['getPlayer'], {

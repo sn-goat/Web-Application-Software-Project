@@ -4,30 +4,31 @@ import { TestBed } from '@angular/core/testing';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { Item } from '@common/enums';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 
 describe('PlayerToolsService', () => {
     let service: PlayerToolsService;
     let playerServiceSpy: jasmine.SpyObj<PlayerService>;
-    let playersSubject: BehaviorSubject<Player[]>;
+    let playersSubject: BehaviorSubject<PlayerStats[]>;
 
-    const mockPlayer: Player = {
+    const mockPlayer: PlayerStats = {
         id: '1',
         name: 'testPlayer',
         avatar: '1',
         life: 100,
         attack: 10,
         defense: 10,
-        rapidity: 5,
-        attackDice: 'd6',
-        defenseDice: 'd4',
+        speed: 5,
+        attackDice: 'D6',
+        defenseDice: 'D4',
         movementPts: 5,
         actions: 2,
+        wins: 0,
     };
 
     beforeEach(() => {
-        playersSubject = new BehaviorSubject<Player[]>([]);
+        playersSubject = new BehaviorSubject<PlayerStats[]>([]);
 
         const spy = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName'], {
             players$: playersSubject.asObservable(),
@@ -167,13 +168,13 @@ describe('PlayerToolsService', () => {
     });
 
     it('should handle endTurn with empty player', () => {
-        (service as any).player = {} as Player;
+        (service as any).player = {} as PlayerStats;
 
         expect(() => service.endTurn()).not.toThrow();
     });
 
     it('should handle performAction with empty player', () => {
-        (service as any).player = {} as Player;
+        (service as any).player = {} as PlayerStats;
 
         expect(() => service.performAction()).not.toThrow();
     });

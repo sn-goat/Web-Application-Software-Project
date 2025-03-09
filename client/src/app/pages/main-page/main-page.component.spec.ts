@@ -3,28 +3,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, RouterLink, Routes } from '@angular/router';
 import { TEAM_MEMBERS } from '@app/constants/team-members';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { CommunicationService } from '@app/services/code/communication.service';
-import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
 
 describe('MainPageComponent', () => {
     let component: MainPageComponent;
     let fixture: ComponentFixture<MainPageComponent>;
-    let communicationServiceSpy: SpyObj<CommunicationService>;
 
     beforeEach(async () => {
-        communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
         await TestBed.configureTestingModule({
             imports: [MainPageComponent, RouterLink],
-            providers: [
-                {
-                    provide: CommunicationService,
-                    useValue: communicationServiceSpy,
-                },
-                provideHttpClientTesting(),
-                provideRouter(routes),
-            ],
+            providers: [provideHttpClientTesting(), provideRouter(routes)],
         }).compileComponents();
     });
 

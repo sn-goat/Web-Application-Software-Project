@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { DEFAULT_PATH_ITEMS, DEFAULT_FILE_TYPE } from '@app/constants/path';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
 import { MapService } from '@app/services/code/map.service';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
-import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
 import { Item } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -41,8 +41,8 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
             });
         } else if (this.type === Item.FLAG) {
             if (this.mapService.isModeCTF()) {
-                this.mapService.hasFlagOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((hasFlag) => {
-                    this.isDraggable = !hasFlag;
+                this.mapService.hasFlagOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((isFlagPlaced) => {
+                    this.isDraggable = !isFlagPlaced;
                 });
             } else {
                 this.isDraggable = false;

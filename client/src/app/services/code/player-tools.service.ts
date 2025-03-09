@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Player } from '@common/player';
 import { Item } from '@common/enums';
-import { PlayerService } from './player.service';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { PlayerService } from './player.service';
 // import { SocketService } from '@app/services/code/socket.service';
 
 @Injectable({
@@ -12,13 +12,13 @@ export class PlayerToolsService {
     items$: Observable<Item[]>;
     timer$: Observable<string>;
 
-    private player: Player;
+    private player: PlayerStats;
     private playerService: PlayerService = inject(PlayerService);
     private items = new BehaviorSubject<Item[]>([]);
     private timer: BehaviorSubject<string> = new BehaviorSubject<string>('00:00');
 
     constructor() {
-        this.player = {} as Player;
+        this.player = {} as PlayerStats;
         this.items$ = this.items.asObservable();
         this.timer$ = this.timer.asObservable();
         this.setPlayer();
