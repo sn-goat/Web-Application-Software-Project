@@ -7,15 +7,15 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { Router } from '@angular/router';
 import { SocketService } from '@app/services/code/socket.service';
 import { getLobbyLimit } from '@common/lobby-limits';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { Subject } from 'rxjs';
 import { LobbyComponent } from './lobby.component';
 
 class FakeSocketService {
     private playerJoinedSubject = new Subject<unknown>();
-    private playersListSubject = new Subject<Player[]>();
-    private playerRemovedSubject = new Subject<Player[]>();
-    private playerDisconnectedSubject = new Subject<Player[]>();
+    private playersListSubject = new Subject<PlayerStats[]>();
+    private playerRemovedSubject = new Subject<PlayerStats[]>();
+    private playerDisconnectedSubject = new Subject<PlayerStats[]>();
     private roomLockedSubject = new Subject<unknown>();
 
     getGameSize() {
@@ -56,15 +56,15 @@ class FakeSocketService {
         this.playerJoinedSubject.next(data);
     }
 
-    triggerPlayersList(players: Player[]) {
+    triggerPlayersList(players: PlayerStats[]) {
         this.playersListSubject.next(players);
     }
 
-    triggerPlayerRemoved(players: Player[]) {
+    triggerPlayerRemoved(players: PlayerStats[]) {
         this.playerRemovedSubject.next(players);
     }
 
-    triggerPlayerDisconnected(players: Player[]) {
+    triggerPlayerDisconnected(players: PlayerStats[]) {
         this.playerDisconnectedSubject.next(players);
     }
 
@@ -107,7 +107,7 @@ describe('LobbyComponent', () => {
     });
 
     it('should update players when a player joins', fakeAsync(() => {
-        const newPlayer: Player = { id: 'player1' } as Player;
+        const newPlayer: PlayerStats = { id: 'player1' } as PlayerStats;
         const data = { room: { players: [newPlayer], accessCode: 'ABC123' } };
         socketService.triggerPlayerJoined(data);
         tick();
@@ -124,12 +124,12 @@ describe('LobbyComponent', () => {
         component.accessCode = 'XYZ';
 
         // simulate players list with players count equals lobbyLimit
-        const players: Player[] = [];
+        const players: PlayerStats[] = [];
         // First player is current-player for admin
-        players.push({ id: 'current-player' } as Player);
+        players.push({ id: 'current-player' } as PlayerStats);
         // Fill with dummy players up to lobbyLimit
         for (let i = 1; i < lobbyLimit; i++) {
-            players.push({ id: 'player' + i } as Player);
+            players.push({ id: 'player' + i } as PlayerStats);
         }
         socketService.triggerPlayersList(players);
         tick();
@@ -155,7 +155,7 @@ describe('LobbyComponent', () => {
     }));
 
     it('checkIfAdmin should set isAdmin true if current player is first in list', () => {
-        const players: Player[] = [{ id: 'current-player' } as Player, { id: 'player2' } as Player];
+        const players: PlayerStats[] = [{ id: 'current-player' } as PlayerStats, { id: 'player2' } as PlayerStats];
         component.players = players;
         component.checkIfAdmin();
         expect(component.isAdmin).toBeTrue();
@@ -164,7 +164,7 @@ describe('LobbyComponent', () => {
     it('toggleRoomLock should call unlockRoom if room is locked', () => {
         spyOn(socketService, 'unlockRoom');
         // Forcer l'état: la room est verrouillée et il y a moins de joueurs que maxPlayers
-        component.players = [{ id: 'current-player' } as Player];
+        component.players = [{ id: 'current-player' } as PlayerStats];
         component.maxPlayers = 5; // s'assurer que 1 < maxPlayers
         component.isRoomLocked = true;
         component.accessCode = 'XYZ';
@@ -176,7 +176,7 @@ describe('LobbyComponent', () => {
     it('toggleRoomLock should call lockRoom if room is unlocked', () => {
         spyOn(socketService, 'lockRoom');
         // force state: room is unlocked and players below max
-        component.players = [{ id: 'current-player' } as Player];
+        component.players = [{ id: 'current-player' } as PlayerStats];
         component.isRoomLocked = false;
         component.accessCode = 'XYZ';
         component.toggleRoomLock();
@@ -190,7 +190,7 @@ describe('LobbyComponent', () => {
         spyOn(socketService, 'unlockRoom');
         // On force maxPlayers et le nombre de joueurs à être égaux ou supérieurs
         component.maxPlayers = 3;
-        component.players = [{ id: 'player1' } as Player, { id: 'player2' } as Player, { id: 'player3' } as Player];
+        component.players = [{ id: 'player1' } as PlayerStats, { id: 'player2' } as PlayerStats, { id: 'player3' } as PlayerStats];
         component.accessCode = 'XYZ';
         // On définit isRoomLocked à l'une ou l'autre valeur (peu importe)
         component.isRoomLocked = false;
@@ -258,7 +258,7 @@ describe('LobbyComponent', () => {
     });
 
     it('checkIfAdmin should set isAdmin false if first player is not current-player', () => {
-        component.players = [{ id: 'other-player' } as Player, { id: 'current-player' } as Player];
+        component.players = [{ id: 'other-player' } as PlayerStats, { id: 'current-player' } as PlayerStats];
         component.checkIfAdmin();
         expect(component.isAdmin).toBeFalse();
     });

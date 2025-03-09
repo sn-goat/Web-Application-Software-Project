@@ -163,12 +163,12 @@ describe('BoardController', () => {
         await controller.toggleBoardVisibility('Test Board', res);
     });
 
-    it('toggleBoardVisibility() should return UNAUTHORIZED when service fails', async () => {
+    it('toggleBoardVisibility() should return 500 when service fails', async () => {
         boardService.toggleVisibility.rejects();
 
         const res = {} as unknown as Response;
         res.status = (code) => {
-            expect(code).toEqual(HttpStatus.UNAUTHORIZED);
+            expect(code).toEqual(HttpStatus.INTERNAL_SERVER_ERROR);
             return res;
         };
         res.send = () => res;

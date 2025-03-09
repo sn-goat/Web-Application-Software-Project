@@ -4,12 +4,12 @@
 import { TestBed } from '@angular/core/testing';
 import { MAX_PLAYERS } from '@app/constants/playerConst';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 
 describe('PlayerService', () => {
     let service: PlayerService;
 
-    const mockPlayers: Player[] = [
+    const mockPlayers: PlayerStats[] = [
         {
             id: '1',
             name: 'player1',
@@ -17,11 +17,12 @@ describe('PlayerService', () => {
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         },
         {
             id: '2',
@@ -30,11 +31,12 @@ describe('PlayerService', () => {
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 10,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 10,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         },
         {
             id: '3',
@@ -43,11 +45,12 @@ describe('PlayerService', () => {
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 3,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 3,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         },
     ];
 
@@ -67,7 +70,7 @@ describe('PlayerService', () => {
     it('should initialize with empty values', () => {
         let activePlayer: string | undefined;
         let admin: string | undefined;
-        let players: Player[] | undefined;
+        let players: PlayerStats[] | undefined;
 
         service.activePlayer$.subscribe((value) => (activePlayer = value));
         service.admin$.subscribe((value) => (admin = value));
@@ -88,7 +91,7 @@ describe('PlayerService', () => {
 
     it('should set players if count is within limit', () => {
         // Use specific test instances to avoid conflicts
-        const testPlayers = [
+        const testPlayers: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -96,11 +99,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '2',
@@ -109,27 +113,28 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 10,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 10,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
         service.setPlayers(testPlayers);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
 
         expect(players.length).toBe(2);
-        // Player2 has higher rapidity, so it should be first
+        // Player2 has higher speed, so it should be first
         expect(players[0].name).toBe('player2');
         expect(players[1].name).toBe('player1');
     });
 
     it('should not set players if count exceeds maximum', () => {
-        const manyPlayers: Player[] = [];
+        const manyPlayers: PlayerStats[] = [];
         for (let i = 0; i < MAX_PLAYERS + 1; i++) {
             manyPlayers.push({
                 ...mockPlayers[0],
@@ -138,15 +143,15 @@ describe('PlayerService', () => {
             });
         }
 
-        let players: Player[] | undefined;
+        let players: PlayerStats[] | undefined;
         service.players$.subscribe((value) => (players = value));
 
         service.setPlayers(manyPlayers);
         expect(players?.length).toBe(0);
     });
 
-    it('should sort players by rapidity in descending order', () => {
-        const testPlayers = [
+    it('should sort players by speed in descending order', () => {
+        const testPlayers: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -154,11 +159,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '2',
@@ -167,11 +173,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 10, // Highest
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 10, // Highest
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '3',
@@ -180,17 +187,18 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 3,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 3,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
         service.setPlayers(testPlayers);
 
-        let sortedPlayers: Player[] = [];
+        let sortedPlayers: PlayerStats[] = [];
         service.players$.subscribe((players) => (sortedPlayers = players));
 
         expect(sortedPlayers[0].name).toBe('player2');
@@ -199,7 +207,7 @@ describe('PlayerService', () => {
     });
 
     it('should get player by name', () => {
-        const players = [
+        const players: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -207,11 +215,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '2',
@@ -220,11 +229,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 10,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 10,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
@@ -251,7 +261,7 @@ describe('PlayerService', () => {
     });
 
     it('should edit player when conditions are met', () => {
-        const testPlayers = [
+        const testPlayers: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -259,11 +269,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
@@ -292,13 +303,13 @@ describe('PlayerService', () => {
 
         const initialPlayer = player ? { ...player } : undefined;
 
-        service.editPlayer(undefined as unknown as Player);
+        service.editPlayer(undefined as unknown as PlayerStats);
         const playerAfter = service.getPlayer('player1');
         expect(playerAfter).toEqual(initialPlayer);
     });
 
     it('should not edit player when player does not exist', () => {
-        const testPlayers = [
+        const testPlayers: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -306,29 +317,31 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
         service.setPlayers(testPlayers);
         service.setPlayerName('player1');
 
-        const nonExistentPlayer: Player = {
+        const nonExistentPlayer: PlayerStats = {
             id: '999',
             name: 'nonExistent',
             avatar: '1',
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         };
 
         service.editPlayer(nonExistentPlayer);
@@ -345,7 +358,7 @@ describe('PlayerService', () => {
         service.setPlayers(mockPlayers);
         service.setPlayerName('player3');
 
-        const updatedPlayer: Player = {
+        const updatedPlayer: PlayerStats = {
             ...mockPlayers[0],
             life: 80,
         };
@@ -366,7 +379,7 @@ describe('PlayerService', () => {
     });
 
     it('should return false when removing non-existent player by name', () => {
-        const freshPlayers = [
+        const freshPlayers: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -374,11 +387,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '2',
@@ -387,11 +401,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 10,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 10,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '3',
@@ -400,11 +415,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 3,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 3,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
@@ -414,7 +430,7 @@ describe('PlayerService', () => {
 
         expect(result).toBe(false);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
         expect(players.length).toBe(3);
     });
@@ -433,39 +449,41 @@ describe('PlayerService', () => {
     });
 
     it('should add player when conditions are met', () => {
-        const initialPlayer = {
+        const initialPlayer: PlayerStats = {
             id: '2',
             name: 'player2',
             avatar: '2',
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 10,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 10,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         };
 
         service.setPlayers([initialPlayer]);
 
-        const playerToAdd: Player = {
+        const playerToAdd: PlayerStats = {
             id: '5',
             name: 'player2',
             avatar: '5',
             life: 90,
             attack: 15,
             defense: 12,
-            rapidity: 7,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 7,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 4,
             actions: 3,
+            wins: 0,
         };
 
         service.addPlayer(playerToAdd);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
 
         expect(players.length).toBe(2);
@@ -479,13 +497,13 @@ describe('PlayerService', () => {
         const initialPlayer = { ...mockPlayers[0] };
         service.setPlayers([initialPlayer]);
 
-        let initialPlayers: Player[] = [];
+        let initialPlayers: PlayerStats[] = [];
         service.players$.subscribe((value) => (initialPlayers = value));
         const initialCount = initialPlayers.length;
 
-        service.addPlayer(undefined as unknown as Player);
+        service.addPlayer(undefined as unknown as PlayerStats);
 
-        let finalPlayers: Player[] = [];
+        let finalPlayers: PlayerStats[] = [];
         service.players$.subscribe((value) => (finalPlayers = value));
 
         expect(finalPlayers.length).toBe(initialCount);
@@ -496,14 +514,14 @@ describe('PlayerService', () => {
 
         service.addPlayer(mockPlayers[0]);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
 
         expect(players.length).toBe(0);
     });
 
     it('should not add player when max players reached', () => {
-        const maxPlayers: Player[] = [];
+        const maxPlayers: PlayerStats[] = [];
         for (let i = 0; i < MAX_PLAYERS; i++) {
             maxPlayers.push({
                 ...mockPlayers[0],
@@ -514,7 +532,7 @@ describe('PlayerService', () => {
 
         service.setPlayers(maxPlayers);
 
-        const newPlayer: Player = {
+        const newPlayer: PlayerStats = {
             ...mockPlayers[0],
             id: 'new',
             name: 'newPlayer',
@@ -522,14 +540,14 @@ describe('PlayerService', () => {
 
         service.addPlayer(newPlayer);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
 
         expect(players.length).toBe(MAX_PLAYERS);
     });
 
     it('should remove player when conditions are met', () => {
-        const testPlayers = [
+        const testPlayers: PlayerStats[] = [
             {
                 id: '1',
                 name: 'player1',
@@ -537,11 +555,12 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
             {
                 id: '2',
@@ -550,17 +569,18 @@ describe('PlayerService', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 10,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 10,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             },
         ];
 
         service.setPlayers(testPlayers);
 
-        let initialPlayers: Player[] = [];
+        let initialPlayers: PlayerStats[] = [];
         service.players$.subscribe((players) => (initialPlayers = players));
         const initialCount = initialPlayers.length;
 
@@ -570,7 +590,7 @@ describe('PlayerService', () => {
         if (playerToRemove) {
             service.removePlayer(playerToRemove);
 
-            let updatedPlayers: Player[] = [];
+            let updatedPlayers: PlayerStats[] = [];
             service.players$.subscribe((players) => (updatedPlayers = players));
 
             expect(updatedPlayers.length).toBe(initialCount - 1);
@@ -581,19 +601,19 @@ describe('PlayerService', () => {
     it('should not remove player when player is undefined', () => {
         service.setPlayers(mockPlayers);
 
-        let playersBefore: Player[] = [];
+        let playersBefore: PlayerStats[] = [];
         service.players$.subscribe((value) => (playersBefore = value));
         const initialCount = playersBefore.length;
 
         try {
-            service.removePlayer(undefined as unknown as Player);
+            service.removePlayer(undefined as unknown as PlayerStats);
 
             expect(true).toBe(true);
         } catch (error) {
             fail('removePlayer should handle undefined player without error');
         }
 
-        let playersAfter: Player[] = [];
+        let playersAfter: PlayerStats[] = [];
         service.players$.subscribe((value) => (playersAfter = value));
 
         expect(playersAfter.length).toBe(initialCount);
@@ -603,23 +623,24 @@ describe('PlayerService', () => {
         const testPlayers = getNewPlayers().slice(0, 2);
         service.setPlayers(testPlayers);
 
-        const nonExistentPlayer: Player = {
+        const nonExistentPlayer: PlayerStats = {
             id: '999',
             name: 'nonExistent',
             avatar: '1',
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         };
 
         service.removePlayer(nonExistentPlayer);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
         expect(players.length).toBe(2);
     });
@@ -629,7 +650,7 @@ describe('PlayerService', () => {
 
         service.removePlayer(mockPlayers[0]);
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
 
         expect(players.length).toBe(0);
@@ -640,7 +661,7 @@ describe('PlayerService', () => {
 
         service.removeAllPlayers();
 
-        let players: Player[] = [];
+        let players: PlayerStats[] = [];
         service.players$.subscribe((value) => (players = value));
 
         expect(players.length).toBe(0);

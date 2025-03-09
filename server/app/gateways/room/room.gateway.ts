@@ -1,6 +1,6 @@
 import { RoomService } from '@app/services/room.service';
 import { GameRoom } from '@common/game-room';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -55,7 +55,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(RoomEvents.ShareCharacter)
-    handleShareCharacter(client: Socket, payload: { accessCode: string; player: Player }) {
+    handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerStats }) {
         const room = this.roomService.shareCharacter(payload.accessCode, payload.player);
         if (!room) {
             client.emit(RoomEvents.CharacterError, { message: 'Unable to share character.' });

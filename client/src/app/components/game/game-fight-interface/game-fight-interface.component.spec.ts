@@ -2,12 +2,12 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatButtonModule } from '@angular/material/button';
+import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 
 describe('GameFightInterfaceComponent', () => {
     let component: GameFightInterfaceComponent;
@@ -22,32 +22,34 @@ describe('GameFightInterfaceComponent', () => {
     let fleeAttempt1Subject: BehaviorSubject<number>;
     let fleeAttempt2Subject: BehaviorSubject<number>;
 
-    const mockPlayer1: Player = {
+    const mockPlayer1: PlayerStats = {
         id: '1',
         name: 'player1',
         avatar: '1',
         life: 100,
         attack: 10,
         defense: 10,
-        rapidity: 5,
-        attackDice: 'd6',
-        defenseDice: 'd4',
+        speed: 5,
+        attackDice: 'D6',
+        defenseDice: 'D4',
         movementPts: 5,
         actions: 2,
+        wins: 0,
     };
 
-    const mockPlayer2: Player = {
+    const mockPlayer2: PlayerStats = {
         id: '2',
         name: 'player2',
         avatar: '2',
         life: 90,
         attack: 12,
         defense: 8,
-        rapidity: 7,
-        attackDice: 'd8',
-        defenseDice: 'd6',
+        speed: 7,
+        attackDice: 'D4',
+        defenseDice: 'D6',
         movementPts: 4,
         actions: 1,
+        wins: 0,
     };
 
     beforeEach(async () => {

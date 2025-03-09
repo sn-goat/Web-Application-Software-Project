@@ -1,6 +1,6 @@
 import { GameRoom } from '@common/game-room';
 import { getLobbyLimit } from '@common/lobby-limits';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 const minNumber = 1000;
 const maxNumber = 9000;
@@ -34,7 +34,7 @@ export class RoomService {
             this.logger.error(`Room with access code ${accessCode} is locked.`);
             return null;
         }
-        this.logger.log(`Player joined room ${accessCode}`);
+        this.logger.log(`PlayerStats joined room ${accessCode}`);
         return room;
     }
 
@@ -46,11 +46,11 @@ export class RoomService {
         }
         const index = room.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
-            this.logger.error(`Player ${playerId} not found in room ${accessCode}`);
+            this.logger.error(`PlayerStats ${playerId} not found in room ${accessCode}`);
             return null;
         }
         room.players.splice(index, 1);
-        this.logger.log(`Player ${playerId} removed from room ${accessCode}`);
+        this.logger.log(`PlayerStats ${playerId} removed from room ${accessCode}`);
         return room;
     }
 
@@ -64,14 +64,14 @@ export class RoomService {
             for (let i = room.players.length - 1; i >= 0; i--) {
                 const player = room.players[i];
                 this.removePlayer(accessCode, player.id);
-                this.logger.log(`Player ${player.id} disconnected from room ${accessCode}.`);
+                this.logger.log(`PlayerStats ${player.id} disconnected from room ${accessCode}.`);
             }
             this.deleteRoom(accessCode);
             this.logger.log(`Room ${accessCode} deleted.`);
         } else {
             this.logger.log(`organizerId: ${room.organizerId}, playerId: ${playerId}`);
             this.removePlayer(accessCode, playerId);
-            this.logger.log(`Player ${playerId} disconnected from room ${accessCode}.`);
+            this.logger.log(`PlayerStats ${playerId} disconnected from room ${accessCode}.`);
         }
         return room;
     }
@@ -102,7 +102,7 @@ export class RoomService {
         return this.gameRooms.get(accessCode) || null;
     }
 
-    shareCharacter(accessCode: string, player: Player): GameRoom | null {
+    shareCharacter(accessCode: string, player: PlayerStats): GameRoom | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found.`);
@@ -115,7 +115,7 @@ export class RoomService {
         }
 
         room.players.push(player);
-        this.logger.log(`Player ${player.id} joined room ${accessCode}`);
+        this.logger.log(`PlayerStats ${player.id} joined room ${accessCode}`);
 
         const maxPlayers = getLobbyLimit(room.mapSize);
         this.logger.log(`Room ${accessCode} has ${room.players.length} players. Max players allowed: ${maxPlayers}`);

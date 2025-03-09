@@ -60,26 +60,22 @@ export class TileApplicatorService {
 
     handleMouseMove(rect: DOMRect) {
         if (this.isTilesBeingApplied || this.isTilesBeingDeleted) {
-            this.updateIntermediateTiles(this.previousCoord, rect);
+            this.processLine(this.previousCoord, rect);
             this.previousCoord = this.currentCoord;
         }
     }
-    private updateIntermediateTiles(previousCoord: Vec2, rect: DOMRect) {
-        const startX = previousCoord.x;
-        const startY = previousCoord.y;
-        const endX = this.currentCoord.x;
-        const endY = this.currentCoord.y;
+    private processLine(previousCoord: { x: number; y: number }, rect: DOMRect): void {
+        const { x: startX, y: startY } = previousCoord;
+        const { x: endX, y: endY } = this.currentCoord;
 
+        let [x, y] = [startX, startY];
         const dx = Math.abs(endX - startX);
         const dy = Math.abs(endY - startY);
-        const sx = startX < endX ? 1 : -1;
-        const sy = startY < endY ? 1 : -1;
+        const sx = Math.sign(endX - startX);
+        const sy = Math.sign(endY - startY);
         let err = dx - dy;
 
-        const seen: Set<string> = new Set([JSON.stringify(this.screenToBoard(startX, startY, rect))]);
-
-        let x = startX;
-        let y = startY;
+        const seen: Set<string> = new Set();
 
         while (x !== endX || y !== endY) {
             if (!this.isOnBoard(x, y, rect)) {
@@ -88,12 +84,7 @@ export class TileApplicatorService {
                 break;
             }
 
-            const tileCoord = this.screenToBoard(x, y, rect);
-            const tileCoordKey = JSON.stringify(tileCoord);
-            if (!seen.has(tileCoordKey)) {
-                this.updateTile(tileCoord.x, tileCoord.y);
-                seen.add(tileCoordKey);
-            }
+            this.processTile(x, y, rect, seen);
 
             const e2 = 2 * err;
             if (e2 > -dy) {
@@ -107,12 +98,17 @@ export class TileApplicatorService {
         }
 
         if (this.isOnBoard(endX, endY, rect)) {
-            const tileCoord = this.screenToBoard(endX, endY, rect);
-            const tileCoordKey = JSON.stringify(tileCoord);
-            if (!seen.has(tileCoordKey)) {
-                this.updateTile(tileCoord.x, tileCoord.y);
-                seen.add(tileCoordKey);
-            }
+            this.processTile(endX, endY, rect, seen);
+        }
+    }
+
+    private processTile(x: number, y: number, rect: DOMRect, seen: Set<string>): void {
+        const tileCoord = this.screenToBoard(x, y, rect);
+        const tileCoordKey = JSON.stringify(tileCoord);
+
+        if (!seen.has(tileCoordKey)) {
+            this.updateTile(tileCoord.x, tileCoord.y);
+            seen.add(tileCoordKey);
         }
     }
 

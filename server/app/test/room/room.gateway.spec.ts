@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { RoomService } from '@app/services/room.service';
+import { PlayerStats } from '@common/player';
 import { Socket } from 'socket.io';
 
 describe('GameGateway', () => {
@@ -139,7 +140,7 @@ describe('GameGateway', () => {
             const roomEmitMock = jest.fn();
             (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
 
-            const updatedPayload = {
+            const updatedPayload: { accessCode: string; player: PlayerStats } = {
                 accessCode: payload.accessCode,
                 player: {
                     id: payload.player.id,
@@ -148,11 +149,12 @@ describe('GameGateway', () => {
                     life: 4,
                     attack: 4,
                     defense: 4,
-                    rapidity: 4,
-                    attackDice: '',
-                    defenseDice: '',
+                    speed: 4,
+                    attackDice: 'D4',
+                    defenseDice: 'D4',
                     movementPts: 4,
                     actions: 4,
+                    wins: 0,
                 },
             };
 
@@ -170,7 +172,7 @@ describe('GameGateway', () => {
             const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'Player One' } };
             (roomService.shareCharacter as jest.Mock).mockReturnValue(null);
 
-            const updatedPayload = {
+            const updatedPayload: { accessCode: string; player: PlayerStats } = {
                 accessCode: payload.accessCode,
                 player: {
                     id: payload.player.id,
@@ -179,11 +181,12 @@ describe('GameGateway', () => {
                     life: 4,
                     attack: 4,
                     defense: 4,
-                    rapidity: 4,
-                    attackDice: '',
-                    defenseDice: '',
+                    speed: 4,
+                    attackDice: 'D4',
+                    defenseDice: 'D4',
                     movementPts: 4,
                     actions: 4,
+                    wins: 0,
                 },
             };
 

@@ -116,7 +116,7 @@ describe('TileApplicatorService', () => {
         });
     });
 
-    describe('updateIntermediateTiles final coordinate branch', () => {
+    describe('processLine final coordinate branch', () => {
         it('should call updateTile for the final coordinate when starting point is off-board', () => {
             // Configuration pour simuler une trajectoire où previousCoord est hors du plateau
             // et currentCoord est dans le plateau.
@@ -166,11 +166,11 @@ describe('TileApplicatorService', () => {
             (service as any).previousCoord = { x: 30, y: 30 };
             currentCoordSubject.next({ x: 40, y: 40 });
 
-            const updateIntermediateTilesSpy = spyOn<any>(service, 'updateIntermediateTiles');
+            const processLineSpy = spyOn<any>(service, 'processLine');
 
             service.handleMouseMove(rect);
 
-            expect(updateIntermediateTilesSpy).toHaveBeenCalledWith({ x: 30, y: 30 }, rect);
+            expect(processLineSpy).toHaveBeenCalledWith({ x: 30, y: 30 }, rect);
             expect((service as any).previousCoord).toEqual({ x: 40, y: 40 });
         });
 
@@ -179,11 +179,11 @@ describe('TileApplicatorService', () => {
             (service as any).previousCoord = { x: 50, y: 50 };
             currentCoordSubject.next({ x: 60, y: 60 });
 
-            const updateIntermediateTilesSpy = spyOn<any>(service, 'updateIntermediateTiles');
+            const processLineSpy = spyOn<any>(service, 'processLine');
 
             service.handleMouseMove(rect);
 
-            expect(updateIntermediateTilesSpy).toHaveBeenCalledWith({ x: 50, y: 50 }, rect);
+            expect(processLineSpy).toHaveBeenCalledWith({ x: 50, y: 50 }, rect);
             expect((service as any).previousCoord).toEqual({ x: 60, y: 60 });
         });
 
@@ -191,15 +191,15 @@ describe('TileApplicatorService', () => {
             (service as any).isTilesBeingApplied = false;
             (service as any).isTilesBeingDeleted = false;
 
-            const updateIntermediateTilesSpy = spyOn<any>(service, 'updateIntermediateTiles');
+            const processLineSpy = spyOn<any>(service, 'processLine');
 
             service.handleMouseMove(rect);
 
-            expect(updateIntermediateTilesSpy).not.toHaveBeenCalled();
+            expect(processLineSpy).not.toHaveBeenCalled();
         });
     });
 
-    describe('updateIntermediateTiles', () => {
+    describe('processLine', () => {
         beforeEach(() => {
             spyOn<any>(service, 'isOnBoard').and.callFake((x: number, y: number, r: DOMRect) => {
                 return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
@@ -220,7 +220,7 @@ describe('TileApplicatorService', () => {
 
             const updateTileSpy = spyOn<any>(service, 'updateTile');
 
-            (service as any).updateIntermediateTiles(previousCoord, rect);
+            (service as any).processLine(previousCoord, rect);
 
             expect(updateTileSpy).toHaveBeenCalled();
             expect(updateTileSpy.calls.count()).toBeGreaterThan(0);
@@ -232,7 +232,7 @@ describe('TileApplicatorService', () => {
 
             const updateTileSpy = spyOn<any>(service, 'updateTile');
 
-            (service as any).updateIntermediateTiles(previousCoord, rect);
+            (service as any).processLine(previousCoord, rect);
 
             expect(updateTileSpy).toHaveBeenCalled();
             expect(updateTileSpy.calls.count()).toBeGreaterThan(0);
@@ -244,7 +244,7 @@ describe('TileApplicatorService', () => {
 
             const updateTileSpy = spyOn<any>(service, 'updateTile');
 
-            (service as any).updateIntermediateTiles(previousCoord, rect);
+            (service as any).processLine(previousCoord, rect);
 
             expect(updateTileSpy).toHaveBeenCalled();
             expect(updateTileSpy.calls.count()).toBeGreaterThan(0);
@@ -256,7 +256,7 @@ describe('TileApplicatorService', () => {
 
             const updateTileSpy = spyOn<any>(service, 'updateTile');
 
-            (service as any).updateIntermediateTiles(previousCoord, rect);
+            (service as any).processLine(previousCoord, rect);
 
             expect(updateTileSpy).toHaveBeenCalled();
             expect(updateTileSpy.calls.count()).toBeGreaterThan(0);
@@ -272,7 +272,7 @@ describe('TileApplicatorService', () => {
             const isOnBoardSpy = service['isOnBoard'] as jasmine.Spy;
             isOnBoardSpy.and.callFake((x: number, y: number) => x < 200 && y < 200);
 
-            (service as any).updateIntermediateTiles(previousCoord, rect);
+            (service as any).processLine(previousCoord, rect);
 
             expect((service as any).isTilesBeingApplied).toBeFalse();
             expect((service as any).isTilesBeingDeleted).toBeFalse();

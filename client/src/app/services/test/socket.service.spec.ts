@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { SocketService } from '@app/services/code/socket.service';
 import { Board } from '@common/board';
 import { GameRoom } from '@common/game-room';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 
 // FakeSocket qui enregistre les callbacks sur chaque événement.
 class FakeSocket {
@@ -77,7 +77,7 @@ describe('SocketService', () => {
 
     it('should update currentPlayerId and emit shareCharacter event', () => {
         const accessCode = 'XYZ';
-        const player: Player = { id: 'player1' } as Player;
+        const player: PlayerStats = { id: 'player1' } as PlayerStats;
         service.shareCharacter(accessCode, player);
         expect(service.getCurrentPlayerId()).toEqual(player.id);
         expect(fakeSocket.emit).toHaveBeenCalledWith('shareCharacter', { accessCode, player });
@@ -116,8 +116,8 @@ describe('SocketService', () => {
     });
 
     it('should emit players list on onPlayersList observable', (done) => {
-        const playersData: Player[] = [{ id: 'p1' }, { id: 'p2' }] as Player[];
-        service.onPlayersList().subscribe((players: Player[]) => {
+        const playersData: PlayerStats[] = [{ id: 'p1' }, { id: 'p2' }] as PlayerStats[];
+        service.onPlayersList().subscribe((players: PlayerStats[]) => {
             expect(players).toEqual(playersData);
             done();
         });
@@ -127,8 +127,8 @@ describe('SocketService', () => {
     });
 
     it('should emit players list on onPlayerRemoved observable', (done) => {
-        const playersData: Player[] = [{ id: 'p3' }] as Player[];
-        service.onPlayerRemoved().subscribe((players: Player[]) => {
+        const playersData: PlayerStats[] = [{ id: 'p3' }] as PlayerStats[];
+        service.onPlayerRemoved().subscribe((players: PlayerStats[]) => {
             expect(players).toEqual(playersData);
             done();
         });
@@ -138,8 +138,8 @@ describe('SocketService', () => {
     });
 
     it('should emit players list on onPlayerDisconnected observable', (done) => {
-        const playersData: Player[] = [{ id: 'p4' }] as Player[];
-        service.onPlayerDisconnected().subscribe((players: Player[]) => {
+        const playersData: PlayerStats[] = [{ id: 'p4' }] as PlayerStats[];
+        service.onPlayerDisconnected().subscribe((players: PlayerStats[]) => {
             expect(players).toEqual(playersData);
             done();
         });

@@ -5,7 +5,7 @@ import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { MAX_PLAYERS } from '@app/constants/playerConst';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { GameMapPlayerComponent } from './game-map-player.component';
 
@@ -14,13 +14,13 @@ describe('GameMapPlayerComponent', () => {
     let fixture: ComponentFixture<GameMapPlayerComponent>;
     let playerServiceMock: jasmine.SpyObj<PlayerService>;
     let gameServiceMock: jasmine.SpyObj<GameService>;
-    let playersSubject: BehaviorSubject<Player[]>;
+    let playersSubject: BehaviorSubject<PlayerStats[]>;
     let activePlayerSubject: BehaviorSubject<string>;
     let adminSubject: BehaviorSubject<string>;
     let playersWinsSubject: BehaviorSubject<Map<string, number>>;
     let playersInGameSubject: BehaviorSubject<Map<string, boolean>>;
 
-    const mockPlayers: Player[] = [
+    const mockPlayers: PlayerStats[] = [
         {
             id: '1',
             name: 'player1',
@@ -28,11 +28,12 @@ describe('GameMapPlayerComponent', () => {
             life: 100,
             attack: 10,
             defense: 10,
-            rapidity: 5,
-            attackDice: 'd6',
-            defenseDice: 'd4',
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
             movementPts: 5,
             actions: 2,
+            wins: 0,
         },
         {
             id: '2',
@@ -41,16 +42,17 @@ describe('GameMapPlayerComponent', () => {
             life: 90,
             attack: 12,
             defense: 8,
-            rapidity: 7,
-            attackDice: 'd8',
-            defenseDice: 'd6',
+            speed: 7,
+            attackDice: 'D4',
+            defenseDice: 'D6',
             movementPts: 4,
             actions: 2,
+            wins: 0,
         },
     ];
 
     beforeEach(async () => {
-        playersSubject = new BehaviorSubject<Player[]>([]);
+        playersSubject = new BehaviorSubject<PlayerStats[]>([]);
         activePlayerSubject = new BehaviorSubject<string>('');
         adminSubject = new BehaviorSubject<string>('');
         playersWinsSubject = new BehaviorSubject<Map<string, number>>(new Map());
@@ -165,11 +167,12 @@ describe('GameMapPlayerComponent', () => {
                 life: 100,
                 attack: 10,
                 defense: 10,
-                rapidity: 5,
-                attackDice: 'd6',
-                defenseDice: 'd4',
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
                 movementPts: 5,
                 actions: 2,
+                wins: 0,
             }));
 
         const emptySlots = component.rangeEmptyPlayerSlot();
@@ -179,7 +182,7 @@ describe('GameMapPlayerComponent', () => {
     });
 
     it('should handle undefined players array in players$ subscription', () => {
-        playersSubject.next(undefined as unknown as Player[]);
+        playersSubject.next(undefined as unknown as PlayerStats[]);
 
         expect(component.players).toEqual([]);
     });

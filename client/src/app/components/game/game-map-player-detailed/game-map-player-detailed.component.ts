@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
-import { HEALTH_HIGH_THRESHOLD, HEALTH_MEDIUM_THRESHOLD, HEALTH_MAX } from '@app/constants/health';
+import { HEALTH_HIGH_THRESHOLD, HEALTH_MAX, HEALTH_MEDIUM_THRESHOLD } from '@app/constants/health';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 
 @Component({
     selector: 'app-game-map-player-detailed',
@@ -17,12 +17,12 @@ export class GameMapPlayerDetailedComponent implements OnInit {
     readonly fileType: string = DEFAULT_FILE_TYPE;
 
     maxHealth: number;
-    player: Player;
+    player: PlayerStats;
 
     private playerService: PlayerService = inject(PlayerService);
 
     constructor() {
-        this.player = {} as Player;
+        this.player = {} as PlayerStats;
     }
 
     ngOnInit() {

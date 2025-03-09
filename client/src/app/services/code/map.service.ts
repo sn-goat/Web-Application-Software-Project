@@ -65,9 +65,9 @@ export class MapService {
         return { isValid: returnMessage === '', error: returnMessage };
     }
 
-    setMapData(data: Board): void {
-        this.firstBoardValue = data;
-        localStorage.setItem(this.storageKey, JSON.stringify(data));
+    setMapData(board: Board): void {
+        this.firstBoardValue = board;
+        localStorage.setItem(this.storageKey, JSON.stringify(board));
     }
 
     getBoardToSave(): BehaviorSubject<Board> {
@@ -120,7 +120,7 @@ export class MapService {
 
     setBoardToFirstValue() {
         // Créer une copie profonde de firstBoardValue
-        const data: Board = JSON.parse(JSON.stringify(this.firstBoardValue));
+        const savedBoard: Board = JSON.parse(JSON.stringify(this.firstBoardValue));
 
         const maxMapObject: number = BOARD_SIZE_MAPPING[this.firstBoardValue.size as Size];
 
@@ -129,10 +129,10 @@ export class MapService {
         this.nbrItemsToPlace.next(maxMapObject);
         this.setHasFlagOnBoard(false);
 
-        if (!Array.isArray(data.board) || data.board.length === 0) {
+        if (!Array.isArray(savedBoard.board) || savedBoard.board.length === 0) {
             this.generateBoard();
         } else {
-            this.boardToSave.next(data);
+            this.boardToSave.next(savedBoard);
             this.parseBoard(this.boardToSave.value);
         }
     }

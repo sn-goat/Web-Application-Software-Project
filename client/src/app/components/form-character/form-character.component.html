@@ -21,7 +21,7 @@
         <!-- Name Input -->
         <div class="name-container">
             <label for="player-name">Who are you ?</label>
-            <input type="text" id="player-name" [(ngModel)]="stats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
+            <input type="text" id="player-name" [(ngModel)]="playerStats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
         </div>
 
         <!-- Stat Selection -->
@@ -29,12 +29,12 @@
             <div class="stat-column">
                 <p class="stat-description">Attribuer un +2</p>
                 <div class="tooltip">
-                    <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ stats.life }}</button>
+                    <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ playerStats.life }}</button>
                     <span class="tooltiptext">le nombre de points de vie</span>
                 </div>
                 <div class="tooltip">
-                    <button class="stat-button" [class.selected]="rapiditySelected" (click)="selectStat('rapidity')">
-                        Rapidité: {{ stats.rapidity }}
+                    <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
+                        Rapidité: {{ playerStats.speed }}
                     </button>
                     <span class="tooltiptext">déterminer l’ordre des tours et points de mouvement par tour</span>
                 </div>
@@ -43,16 +43,16 @@
                 <p class="stat-description">Attribuer un D6</p>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
-                        Attaque: {{ stats.attack }} + @if(stats.attackDice) {
-                        <img [src]="stats.attackDice" alt="Attack Dice" class="dice-image" />
+                        Attaque: {{ playerStats.attack }} + @if(playerStats.attackDice) {
+                        <img [src]="diceToImageLink(playerStats.attackDice)" alt="Attack Dice" class="dice-image" />
                         }
                     </button>
                     <span class="tooltiptext">dégats d'une attaque</span>
                 </div>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
-                        Défense: {{ stats.defense }} + @if(stats.defenseDice) {
-                        <img [src]="stats.defenseDice" alt="Defense Dice" class="dice-image" />
+                        Défense: {{ playerStats.defense }} + @if(playerStats.defenseDice) {
+                        <img [src]="diceToImageLink(playerStats.defenseDice)" alt="Defense Dice" class="dice-image" />
                         }
                     </button>
                     <span class="tooltiptext">capacité à bloquer une attaque </span>

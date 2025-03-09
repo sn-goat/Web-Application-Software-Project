@@ -163,7 +163,7 @@ describe('MapListComponent', () => {
             { ...mockBoardGames[0], name: 'Game A' },
             { ...mockBoardGames[1], name: 'Game B' },
         ];
-        component.sortBy = 'unknown';
+        component.sortBy = 'updatedAt';
         const sortedItems = component.getFilteredAndSortedItems();
         expect(sortedItems[0].name).toBe('Game A');
         expect(sortedItems[1].name).toBe('Game B');

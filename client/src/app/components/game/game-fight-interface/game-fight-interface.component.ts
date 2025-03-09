@@ -1,10 +1,10 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE } from '@app/constants/path';
 import { PlayerService } from '@app/services/code/player.service';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -22,8 +22,8 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     diceD4: number = 0;
     diceD6: number = 0;
     currentTurn: string = '';
-    player1: Player | undefined;
-    player2: Player | undefined;
+    player1: PlayerStats | undefined;
+    player2: PlayerStats | undefined;
     fleeAttempt1: number = 2;
     fleeAttempt2: number = 2;
 

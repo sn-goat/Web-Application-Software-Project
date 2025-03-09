@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MAX_PLAYERS } from '@app/constants/playerConst';
-import { Player } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
@@ -9,12 +9,12 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class PlayerService {
     activePlayer$: Observable<string>;
     admin$: Observable<string>;
-    players$: Observable<Player[]>;
+    players$: Observable<PlayerStats[]>;
 
     private playerName: string;
     private activePlayer = new BehaviorSubject<string>('');
     private admin = new BehaviorSubject<string>('');
-    private players = new BehaviorSubject<Player[]>([]);
+    private players = new BehaviorSubject<PlayerStats[]>([]);
 
     constructor() {
         this.activePlayer$ = this.activePlayer.asObservable();
@@ -26,7 +26,7 @@ export class PlayerService {
         this.activePlayer.next(name);
     }
 
-    setPlayers(players: Player[]): void {
+    setPlayers(players: PlayerStats[]): void {
         if (players.length <= MAX_PLAYERS) {
             this.players.next(players);
             this.sortPlayers();
@@ -34,21 +34,21 @@ export class PlayerService {
     }
 
     sortPlayers(): void {
-        const sortedPlayers = this.players.value.sort((a, b) => a.rapidity - b.rapidity).reverse();
+        const sortedPlayers = this.players.value.sort((a, b) => a.speed - b.speed).reverse();
         this.players.next(sortedPlayers);
     }
 
-    getPlayer(name: string): Player | undefined {
+    getPlayer(name: string): PlayerStats | undefined {
         if (!name) {
             return undefined;
         }
         return this.players.value.find((player) => player.name === name);
     }
 
-    editPlayer(player: Player): void {
+    editPlayer(player: PlayerStats): void {
         if (!player) return;
 
-        const players: Player[] = this.players.value;
+        const players: PlayerStats[] = this.players.value;
         const playerToUpdate = this.getPlayer(player.name);
         if (!playerToUpdate || playerToUpdate.name !== this.playerName) {
             return;
@@ -82,7 +82,7 @@ export class PlayerService {
         this.admin.next(name);
     }
 
-    addPlayer(player: Player): void {
+    addPlayer(player: PlayerStats): void {
         if (!player) return;
 
         const players = this.players.value;
@@ -94,7 +94,7 @@ export class PlayerService {
         this.players.next([...players]);
     }
 
-    removePlayer(player: Player): void {
+    removePlayer(player: PlayerStats): void {
         if (!player) return;
 
         const players = this.players.value;
