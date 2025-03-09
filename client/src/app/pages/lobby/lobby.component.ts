@@ -2,10 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { GameService } from '@app/services/code/game.service';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { SocketService } from '@app/services/code/socket.service';
-import { getLobbyLimit } from '@common/lobby-limits';
+import { Room, Game } from '@common/game';
 import { PlayerStats } from '@common/player';
+import { getLobbyLimit } from '@common/lobby-limits';
+import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'app-lobby',
@@ -24,6 +27,7 @@ export class LobbyComponent implements OnInit {
     constructor(
         private socketService: SocketService,
         private router: Router,
+        private gameService: GameService,
     ) {}
 
     ngOnInit() {
@@ -34,12 +38,14 @@ export class LobbyComponent implements OnInit {
             this.accessCode = history.state.accessCode;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this.socketService.onPlayerJoined().subscribe((data: any) => {
-            this.players = data.room.players;
-            this.accessCode = data.room.accessCode;
-            this.checkIfAdmin();
-        });
+        this.socketService
+            .onPlayerJoined()
+            .pipe(map((response: { room: Room } | Room) => ('room' in response ? response.room : response)))
+            .subscribe((room: Room) => {
+                this.players = room.players;
+                this.accessCode = room.accessCode;
+                this.checkIfAdmin();
+            });
 
         this.socketService.onPlayersList().subscribe((players: PlayerStats[]) => {
             this.players = players;
@@ -74,6 +80,11 @@ export class LobbyComponent implements OnInit {
                 this.router.navigate(['/home']);
             }
         });
+
+        this.socketService.onBroadcastStartGame().subscribe((game: Game) => {
+            this.gameService.setGame(game);
+            this.router.navigate(['/game']);
+        });
     }
 
     checkIfAdmin() {
@@ -91,6 +102,10 @@ export class LobbyComponent implements OnInit {
             this.socketService.lockRoom(this.accessCode);
             this.isRoomLocked = true;
         }
+    }
+
+    configureGame() {
+        this.socketService.configureGame(this.accessCode, this.players);
     }
 
     removePlayer(playerId: string) {

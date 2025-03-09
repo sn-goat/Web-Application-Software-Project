@@ -200,7 +200,7 @@ $skill-color: #7ee0d0;
       color: color-mix(in srgb, $attribute-color, white 10%);
     }
     
-    .rapidity p, .attack p, .defense p {
+    .speed p, .attack p, .defense p {
       color: $attribute-color;
       text-shadow: 0 0 5px rgba($attribute-color, 0.5);
     }
@@ -233,7 +233,7 @@ $skill-color: #7ee0d0;
   }
   
 
-  .life-left, .max-life, .rapidity, .attack, .defense, 
+  .life-left, .max-life, .speed, .attack, .defense, 
   .attack-dice, .defense-dice, .mouvements, .actions {
     margin-left: 10px;
     padding: 3px 0;

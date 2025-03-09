@@ -14,11 +14,20 @@ export class JoinRoomComponent {
     @Input() accessCode: string = '';
     joinResult: string = '';
     showCharacterForm: boolean = false;
+    isValidCode: boolean = false;
 
-    constructor(private socketService: SocketService) {}
+    constructor(private readonly socketService: SocketService) {}
+
+    validateCode(): void {
+        const codePattern = /^\d{4}$/;
+        this.isValidCode = codePattern.test(this.accessCode);
+    }
 
     joinRoom() {
+        if (!this.isValidCode) return;
+
         this.socketService.joinRoom(this.accessCode);
+
         this.socketService.onPlayerJoined().subscribe(() => {
             this.joinResult = `Salle ${this.accessCode} rejointe`;
             this.showCharacterForm = true;

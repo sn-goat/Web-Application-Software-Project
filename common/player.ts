@@ -1,3 +1,5 @@
+import { Vec2 } from "./board";
+
 export interface PlayerInfo {
     id: string;
     name: string;
@@ -19,6 +21,8 @@ export interface GameStats {
     actions: number;
     wins: number;
     movementPts: number;
+    position: Vec2;
+    spawnPosition: Vec2;
 }
 
 export type PlayerStats = PlayerInfo & PlayerAttributes & GameStats;

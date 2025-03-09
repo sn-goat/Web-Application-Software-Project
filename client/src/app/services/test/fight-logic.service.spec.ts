@@ -129,6 +129,8 @@ describe('FightLogicService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
 
         const mockPlayer2: PlayerStats = {
@@ -144,6 +146,8 @@ describe('FightLogicService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
 
         playerServiceSpy.getPlayer.and.returnValues(mockPlayer1, mockPlayer2);

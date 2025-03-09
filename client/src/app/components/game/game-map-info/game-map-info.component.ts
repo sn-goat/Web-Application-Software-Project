@@ -1,7 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { PlayerService } from '@app/services/code/player.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GameService } from '@app/services/code/game.service';
+import { PlayerStats } from '@common/player';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-map-info',
@@ -9,34 +9,36 @@ import { GameService } from '@app/services/code/game.service';
     templateUrl: './game-map-info.component.html',
     styleUrl: './game-map-info.component.scss',
 })
-export class GameMapInfoComponent implements OnInit {
+export class GameMapInfoComponent implements OnInit, OnDestroy {
     mapSize: number;
-    activePlayer: string;
+    activePlayer: PlayerStats | null;
     playerCount: number;
 
-    private gameMapService: GameMapService = inject(GameMapService);
-    private playerService: PlayerService = inject(PlayerService);
-    private gameService: GameService = inject(GameService);
+    private playersSub: Subscription;
+    private activePlayerSub: Subscription;
+    private mapSub: Subscription;
 
-    constructor() {
+    constructor(private gameService: GameService) {
         this.mapSize = 0;
-        this.activePlayer = '';
         this.playerCount = 0;
+        this.activePlayer = null;
     }
 
     ngOnInit() {
-        this.mapSize = this.gameMapService.getGameMapSize();
-        this.playerService.activePlayer$.subscribe((player) => {
+        this.activePlayerSub = this.gameService.activePlayer$.subscribe((player: PlayerStats | null) => {
             this.activePlayer = player;
         });
-        this.gameService.playersInGameMap$.subscribe((players) => {
-            let count = 0;
-            players.forEach((value) => {
-                if (value) {
-                    count++;
-                }
-            });
-            this.playerCount = count;
+        this.playersSub = this.gameService.currentPlayers$.subscribe((players) => {
+            this.playerCount = players.length;
         });
+        this.mapSub = this.gameService.map$.subscribe((map) => {
+            this.mapSize = map.length;
+        });
+    }
+
+    ngOnDestroy() {
+        this.playersSub.unsubscribe();
+        this.activePlayerSub.unsubscribe();
+        this.mapSub.unsubscribe();
     }
 }

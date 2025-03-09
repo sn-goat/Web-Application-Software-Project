@@ -62,9 +62,9 @@
 
         <button class="close-popup-button" (click)="onClose()">Close</button>
         @if (canJoin()) { @if(isCreationPage) {
-        <button class="join-button" (click)="shareGameMap()" (click)="createGame()">Commencer partie</button>
+        <button class="join-button" (click)="createGame()">Commencer partie</button>
         } @else {
-        <button class="join-button" (click)="shareGameMap()" (click)="shareCharacter()" routerLink="/lobby" [disabled]="isCurrentAvatarTaken">
+        <button class="join-button" (click)="shareCharacter()" routerLink="/lobby" [disabled]="isCurrentAvatarTaken">
             Joindre
         </button>
         } }

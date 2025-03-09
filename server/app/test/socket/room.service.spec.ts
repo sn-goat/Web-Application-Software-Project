@@ -74,6 +74,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
 
@@ -115,6 +117,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
             const player2: PlayerStats = {
@@ -129,6 +133,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
 
@@ -158,6 +164,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
 
@@ -207,6 +215,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
             const player2: PlayerStats = {
@@ -221,6 +231,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
 
@@ -251,6 +263,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
             const player2: PlayerStats = {
@@ -265,6 +279,8 @@ describe('RoomService', () => {
                 defenseDice: 'D4',
                 movementPts: 4,
                 actions: 4,
+                position: undefined,
+                spawnPosition: undefined,
                 wins: 0,
             };
             service.shareCharacter(room.accessCode, player1);
@@ -334,6 +350,8 @@ describe('RoomService - non-existent room handling', () => {
             defenseDice: 'D4',
             movementPts: 4,
             actions: 4,
+            position: undefined,
+            spawnPosition: undefined,
             wins: 0,
         };
         const result = service.shareCharacter(accessCode, player);

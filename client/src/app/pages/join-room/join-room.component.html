@@ -1,10 +1,23 @@
 @if (!showCharacterForm)
 {
-    <h1>Rejoindre une salle de jeu</h1>
-    <label for="code">Code d'accès :</label>
-    <input id="code" [(ngModel)]="accessCode" placeholder="Entrez le code d'accès" />
-    <button (click)="joinRoom()">Rejoindre</button>
-    <p>{{ joinResult }}</p>
+    <div class="container">
+        <h1>Rejoindre une salle de jeu</h1>
+        <label for="code">Code d'accès :</label>
+        <input
+            id="code"
+            [(ngModel)]="accessCode"
+            placeholder="Entrez le code d'accès"
+            (input)="validateCode()"
+        />
+
+        @if(!isValidCode && accessCode.length > 0){<p class="error">
+            Le code doit contenir exactement 4 chiffres.
+        </p>}
+
+        <button (click)="joinRoom()" [disabled]="!isValidCode">Rejoindre</button>
+
+        <p>{{ joinResult }}</p>
+    </div>
 }
 @else {
     <app-form-character [accessCode]="accessCode" (closePopup)="closeCharacterForm()"></app-form-character>

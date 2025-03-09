@@ -75,6 +75,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
 
             // Add a player via shareCharacter (which also uses getLobbyLimit)
@@ -116,6 +118,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
             const player2: PlayerStats = {
                 id: 'player1',
@@ -130,6 +134,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
 
             service.shareCharacter(room.accessCode, player1);
@@ -159,6 +165,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
 
             service.shareCharacter(room.accessCode, player);
@@ -208,6 +216,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
             const player2: PlayerStats = {
                 id: 'player1',
@@ -222,6 +232,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
 
             service.shareCharacter(room.accessCode, player1);
@@ -252,6 +264,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
             const player2: PlayerStats = {
                 id: 'player1',
@@ -266,6 +280,8 @@ describe('RoomService', () => {
                 movementPts: 4,
                 actions: 4,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             };
             service.shareCharacter(room.accessCode, player1);
             const updatedRoom = service.shareCharacter(room.accessCode, player2);
@@ -335,6 +351,8 @@ describe('RoomService - non-existent room handling', () => {
             movementPts: 4,
             actions: 4,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
         const result = service.shareCharacter(accessCode, player);
         expect(result).toBeNull();

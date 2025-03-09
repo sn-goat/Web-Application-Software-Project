@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { HEALTH_HIGH_THRESHOLD, HEALTH_MAX, HEALTH_MEDIUM_THRESHOLD } from '@app/constants/health';
-import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
-import { PlayerService } from '@app/services/code/player.service';
-import { PlayerStats } from '@common/player';
+import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
+import { GameService } from '@app/services/code/game.service';
+import { PlayerStats, Dice } from '@common/player';
+import { Subscription } from 'rxjs';
+import { diceToImageLink } from '@app/constants/playerConst';
 
 @Component({
     selector: 'app-game-map-player-detailed',
@@ -15,35 +16,29 @@ export class GameMapPlayerDetailedComponent implements OnInit {
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly srcDice: string = DEFAULT_PATH_DICE;
     readonly fileType: string = DEFAULT_FILE_TYPE;
+    readonly diceToImageLink: (dice: Dice) => string = diceToImageLink;
 
-    maxHealth: number;
-    player: PlayerStats;
+    maxHealth: number = 0;
+    myPlayer: PlayerStats | undefined;
 
-    private playerService: PlayerService = inject(PlayerService);
-
-    constructor() {
-        this.player = {} as PlayerStats;
-    }
+    private gameService: GameService = inject(GameService);
+    private clientPlayerSub: Subscription;
 
     ngOnInit() {
-        this.maxHealth = this.playerService.getPlayer(this.playerService.getPlayerName())?.life || 0;
-        this.playerService.players$.subscribe(() => {
-            const player = this.playerService.getPlayer(this.playerService.getPlayerName());
-            if (player !== undefined) {
-                this.player = player;
+        this.clientPlayerSub = this.gameService.clientPlayer$.subscribe((player: PlayerStats | undefined) => {
+            this.myPlayer = player;
+            if (player) {
+                this.maxHealth = player.life;
             }
         });
     }
 
+    ngOndestroy() {
+        this.clientPlayerSub.unsubscribe();
+    }
+
     getHealthBar(): string {
-        const healthPercentage = this.roundHealth((this.player.life / this.maxHealth) * HEALTH_MAX);
-        if (healthPercentage > HEALTH_HIGH_THRESHOLD) {
-            return 'health-high';
-        } else if (healthPercentage > HEALTH_MEDIUM_THRESHOLD) {
-            return 'health-medium';
-        } else {
-            return 'health-low';
-        }
+        return 'health-hight';
     }
 
     roundHealth(health: number): number {

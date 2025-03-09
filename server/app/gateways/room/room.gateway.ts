@@ -1,5 +1,5 @@
 import { RoomService } from '@app/services/room.service';
-import { GameRoom } from '@common/game-room';
+import { Room } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
@@ -16,18 +16,18 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.CreateRoom)
     handleCreateRoom(client: Socket, payload: { organizerId: string; size: number }) {
-        const room: GameRoom = this.roomService.createRoom(payload.organizerId, payload.size);
+        const room: Room = this.roomService.createRoom(payload.organizerId, payload.size);
 
         client.join(room.accessCode);
         client.emit(RoomEvents.RoomCreated, room);
-        this.logger.log(`gameRoom created with room code ${room.accessCode}`);
+        this.logger.log(`Salle de jeu créée avec le code ${room.accessCode}`);
     }
 
     @SubscribeMessage(RoomEvents.JoinRoom)
     handleJoinRoom(client: Socket, payload: { accessCode: string }) {
         const room = this.roomService.joinRoom(payload.accessCode);
         if (!room) {
-            client.emit(RoomEvents.JoinError, { message: 'Unable to join room. It may be locked or does not exist.' });
+            client.emit(RoomEvents.JoinError, { message: "Impossible de rejoindre la salle. Elle est peut-être verrouillée ou n'existe pas." });
             return;
         }
         client.join(payload.accessCode);
@@ -38,7 +38,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleLockRoom(client: Socket, payload: { accessCode: string }) {
         const room = this.roomService.lockRoom(payload.accessCode);
         if (!room) {
-            client.emit(RoomEvents.LockError, { message: 'Unable to lock room.' });
+            client.emit(RoomEvents.LockError, { message: 'Impossible de verrouiller la salle.' });
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.RoomLocked, { room });
@@ -48,7 +48,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleUnlockRoom(client: Socket, payload: { accessCode: string }) {
         const room = this.roomService.unlockRoom(payload.accessCode);
         if (!room) {
-            client.emit(RoomEvents.UnlockError, { message: 'Unable to unlock room.' });
+            client.emit(RoomEvents.UnlockError, { message: 'Impossible de déverrouiller la salle.' });
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.RoomUnlocked, { room });
@@ -58,10 +58,9 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerStats }) {
         const room = this.roomService.shareCharacter(payload.accessCode, payload.player);
         if (!room) {
-            client.emit(RoomEvents.CharacterError, { message: 'Unable to share character.' });
+            client.emit(RoomEvents.CharacterError, { message: 'Impossible de partager le personnage.' });
             return;
         }
-
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, { room });
     }
 
@@ -69,7 +68,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleRemovePlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
         const room = this.roomService.removePlayer(payload.accessCode, payload.playerId);
         if (!room) {
-            client.emit(RoomEvents.RemoveError, { message: 'Unable to remove player.' });
+            client.emit(RoomEvents.RemoveError, { message: 'Impossible de supprimer le joueur.' });
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerRemoved, room.players);
@@ -79,7 +78,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
         const room = this.roomService.disconnectPlayer(payload.accessCode, payload.playerId);
         if (!room) {
-            client.emit(RoomEvents.DisconnectError, { message: 'Unable to disconnect player.' });
+            client.emit(RoomEvents.DisconnectError, { message: 'Impossible de déconnecter le joueur.' });
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerDisconnected, room.players);
@@ -89,22 +88,22 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleGetRoom(client: Socket, payload: { accessCode: string }) {
         const room = this.roomService.getRoom(payload.accessCode);
         if (!room) {
-            client.emit(RoomEvents.RoomError, { message: 'Room not found.' });
+            client.emit(RoomEvents.RoomError, { message: 'Salle introuvable.' });
             return;
         }
         client.emit(RoomEvents.RoomData, room);
     }
 
     afterInit(server: Server) {
-        this.logger.log('GameGateway Initialized' + server);
+        this.logger.log('RoomGateway initialisé' + server);
     }
 
     handleConnection(client: Socket) {
-        this.logger.log(`Client connected: ${client.id}`);
-        client.emit(RoomEvents.Welcome, { message: 'Welcome to the game server!' });
+        this.logger.log(`Client connecté : ${client.id}`);
+        client.emit(RoomEvents.Welcome, { message: 'Bienvenue sur le serveur de jeu !' });
     }
 
     handleDisconnect(client: Socket) {
-        this.logger.log(`Client disconnected: ${client.id}`);
+        this.logger.log(`Client déconnecté : ${client.id}`);
     }
 }

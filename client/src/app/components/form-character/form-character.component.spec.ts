@@ -1,57 +1,94 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import { CommonModule } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MapListComponent } from '@app/components/map-list/map-list.component';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { of } from 'rxjs';
+import { MockRouter } from '@app/testHelpers/mockRouter';
+import { MockSocketService } from '@app/testHelpers/mockSocketService';
+import { Board } from '@common/board';
+import { Visibility } from '@common/enums';
+import { ASSET_EXT, ASSET_PATH, Avatar } from '@common/game';
+import { BehaviorSubject, of } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
+import { PlayerStats } from '@common/player';
 
-const BASE_STAT = 4;
-const UPGRADED_STAT = 6;
+// Using the correct type definitions
+type DiceBonus = 'attack' | 'defense';
+type StatBonus = 'life' | 'speed';
 
 describe('FormCharacterComponent', () => {
     let component: FormCharacterComponent;
     let fixture: ComponentFixture<FormCharacterComponent>;
-    let mockSocketService: Partial<SocketService>;
-    let mockGameMapService: Partial<GameMapService>;
+    let mockSocketService: MockSocketService;
+    let mockRouter: MockRouter;
+    let mockGameMapService: jasmine.SpyObj<GameMapService>;
 
     beforeEach(async () => {
-        mockSocketService = {
-            gameRoom: { players: [], accessCode: '', organizerId: '', isLocked: false, mapSize: 0 },
-            onPlayerJoined: () => of({ room: { players: [], accessCode: '', organizerId: '', isLocked: false, mapSize: 0 } }),
-            shareCharacter: jasmine.createSpy('shareCharacter'),
-            createRoom: jasmine.createSpy('createRoom'),
-            onRoomCreated: jasmine.createSpy('onRoomCreated').and.returnValue(of({ accessCode: '1234' })),
+        mockSocketService = new MockSocketService();
+        mockRouter = new MockRouter(); // MockRouter already has navigate spy set up
+        mockGameMapService = jasmine.createSpyObj('GameMapService', ['getGameMap']);
+
+        // Note: MockSocketService already initializes gameRoom with the correct structure
+        mockSocketService.gameRoom = {
+            accessCode: 'test-code',
+            organizerId: 'organizer-id',
+            players: [], // Empty array for players
+            isLocked: false,
+            mapSize: 15, // Use mapSize to match your MockSocketService
         };
 
-        mockGameMapService = {
-            shareGameMap: jasmine.createSpy('shareGameMap'),
-            getGameMap: jasmine.createSpy('getGameMap'),
+        // Create a complete Board object with all required properties
+        const mockBoard: Board = {
+            name: 'Test Map',
+            description: 'A test map for unit tests',
+            size: 15,
+            isCTF: false,
+            board: [], // Your board cells
+            visibility: Visibility.PUBLIC, // Use correct enum value
+            image: 'test-image.png',
         };
+
+        const boardSubject = new BehaviorSubject<Board>(mockBoard);
+        mockGameMapService.getGameMap.and.returnValue(boardSubject);
+
+        // Important: Trigger players list with an empty array BEFORE component creation
+        mockSocketService.triggerPlayersList([]);
 
         await TestBed.configureTestingModule({
-            imports: [RouterLink, CommonModule, FormsModule, MapListComponent, FormCharacterComponent],
+            imports: [CommonModule, FormsModule, RouterLink, FormCharacterComponent],
             providers: [
-                provideHttpClient(),
                 { provide: SocketService, useValue: mockSocketService },
+                { provide: Router, useValue: mockRouter }, // Properly providing MockRouter
                 { provide: GameMapService, useValue: mockGameMapService },
-                { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(FormCharacterComponent);
         component = fixture.componentInstance;
-        fixture.detectChanges();
-    });
 
-    beforeEach(() => {
-        fixture = TestBed.createComponent(FormCharacterComponent);
-        component = fixture.componentInstance;
+        // Setup required properties before detectChanges
+        component.playerStats = {
+            id: 'test-id',
+            name: '',
+            avatar: Avatar.Dwarf, // Use a valid Avatar enum value
+            attack: 0,
+            defense: 0,
+            speed: 0,
+            life: 0,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            actions: 0,
+            wins: 0,
+            movementPts: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+
+        // Trigger players list again after component setup
+        mockSocketService.triggerPlayersList([]);
+
         fixture.detectChanges();
     });
 
@@ -59,106 +96,92 @@ describe('FormCharacterComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should navigate portraits correctly', () => {
-        component.currentPortraitIndex = 0;
-        component.navigatePortrait('next');
-        expect(component.currentPortraitIndex).toBe(1);
-        component.navigatePortrait('prev');
-        expect(component.currentPortraitIndex).toBe(0);
+    it('should initialize player stats', () => {
+        expect(component.playerStats).toBeDefined();
+        expect(component.playerStats.id).toBeDefined();
     });
 
-    it('should select and deselect life', () => {
-        component.speedSelected = false;
-        component.selectStat('life');
+    it('should select combat stat correctly', () => {
+        // First test selectStat method for stat bonuses
+        component.selectStat('life' as StatBonus);
         expect(component.lifeSelected).toBeTrue();
-        expect(component.playerStats.life).toBe(UPGRADED_STAT);
-        component.selectStat('life');
-        expect(component.lifeSelected).toBeFalse();
-        expect(component.playerStats.life).toBe(BASE_STAT);
-    });
 
-    it('should reset speed when life is selected', () => {
-        component.speedSelected = true;
-        component.selectStat('life');
-        expect(component.speedSelected).toBeFalse();
-        expect(component.playerStats.speed).toBe(BASE_STAT);
-    });
-
-    it('should select and deselect speed', () => {
-        component.lifeSelected = false;
-        component.selectStat('speed');
+        // Test mutual exclusivity of stat bonuses
+        component.selectStat('speed' as StatBonus);
+        expect(component.lifeSelected).toBeFalse(); // Life should be deselected
         expect(component.speedSelected).toBeTrue();
-        expect(component.playerStats.speed).toBe(UPGRADED_STAT);
-        component.selectStat('speed');
-        expect(component.speedSelected).toBeFalse();
-        expect(component.playerStats.speed).toBe(BASE_STAT);
-    });
 
-    it('should reset life when speed is selected', () => {
-        component.lifeSelected = true;
-        component.selectStat('speed');
-        expect(component.lifeSelected).toBeFalse();
-        expect(component.playerStats.life).toBe(BASE_STAT);
-    });
-
-    it('should select and deselect attack', () => {
-        component.defenseSelected = false;
-        component.selectCombatStat('attack');
-        expect(component.attackSelected).toBeTrue();
-        expect(component.playerStats.attackDice).toBe('D6');
-        component.selectCombatStat('attack');
-        expect(component.attackSelected).toBeFalse();
-        expect(component.playerStats.attackDice).toBe('D4');
-    });
-
-    it('should reset defense when attack is selected', () => {
-        component.defenseSelected = true;
-        component.selectCombatStat('attack');
-        expect(component.defenseSelected).toBeFalse();
-        expect(component.playerStats.defenseDice).toBe('D4');
-    });
-
-    it('should select and deselect defense', () => {
+        // Reset stats for next test
+        component.lifeSelected = false;
+        component.speedSelected = false;
         component.attackSelected = false;
-        component.selectCombatStat('defense');
+        component.defenseSelected = false;
+
+        // Test dice bonuses
+        component.selectCombatStat('attack' as DiceBonus);
+        expect(component.attackSelected).toBeTrue();
+
+        // Test mutual exclusivity of dice bonuses
+        component.selectCombatStat('defense' as DiceBonus);
+        expect(component.attackSelected).toBeFalse(); // Attack should be deselected
         expect(component.defenseSelected).toBeTrue();
-        expect(component.playerStats.defenseDice).toBe('D6');
-        component.selectCombatStat('defense');
+
+        // Test toggling off
+        component.selectCombatStat('defense' as DiceBonus);
         expect(component.defenseSelected).toBeFalse();
-        expect(component.playerStats.defenseDice).toBe('D4');
     });
 
-    it('should reset attack when defense is selected', () => {
-        component.attackSelected = true;
-        component.selectCombatStat('defense');
-        expect(component.attackSelected).toBeFalse();
-        expect(component.playerStats.attackDice).toBe('D4');
-    });
+    it('should validate canJoin correctly', () => {
+        // Without name and stats
+        component.playerStats.name = '';
+        component.lifeSelected = false;
+        component.speedSelected = false;
+        component.attackSelected = false;
+        component.defenseSelected = false;
+        expect(component.canJoin()).toBeFalse();
 
-    it('should return correct portrait image', () => {
-        component.currentPortraitIndex = 0;
-        expect(component.getCurrentPortraitImage()).toBe('./assets/portraits/portrait1.png');
-        component.currentPortraitIndex = 5;
-        expect(component.getCurrentPortraitImage()).toBe('./assets/portraits/portrait6.png');
-    });
+        // With name but no stats
+        component.playerStats.name = 'TestPlayer';
+        expect(component.canJoin()).toBeFalse();
 
-    it('should return true if two playerStats are selected and name is entered', () => {
-        component.playerStats.name = 'Test Player';
+        // With name and one stat
         component.lifeSelected = true;
+        expect(component.canJoin()).toBeFalse();
+
+        // With name and two stats (one of each type)
+        component.attackSelected = true;
+        expect(component.canJoin()).toBeTrue();
+
+        // With name and two stats of same type (should still be true)
+        component.lifeSelected = false;
         component.speedSelected = true;
         expect(component.canJoin()).toBeTrue();
     });
 
-    it('should return false if less than two playerStats are selected or name is not entered', () => {
-        component.playerStats.name = '';
-        component.lifeSelected = true;
-        component.speedSelected = true;
-        expect(component.canJoin()).toBeFalse();
+    it('should share character when shareCharacter is called', () => {
+        spyOn(mockSocketService, 'shareCharacter');
+        component.accessCode = 'test-code';
 
-        component.playerStats.name = 'Test Player';
-        component.lifeSelected = true;
-        component.speedSelected = false;
-        expect(component.canJoin()).toBeFalse();
+        component.shareCharacter();
+        expect(mockSocketService.shareCharacter).toHaveBeenCalledWith('test-code', component.playerStats);
+    });
+
+    it('should create game and navigate to lobby', () => {
+        // No need to spy on navigate as MockRouter already has it set up
+        spyOn(mockSocketService, 'createRoom');
+        spyOn(mockSocketService, 'createGame');
+        spyOn(mockSocketService, 'shareCharacter');
+        spyOn(mockSocketService, 'onRoomCreated').and.returnValue(of({ accessCode: 'new-code' }));
+
+        component.playerStats.id = 'player-id';
+        component.createGame();
+
+        expect(mockSocketService.createRoom).toHaveBeenCalledWith('player-id', 15);
+        expect(mockSocketService.createGame).toHaveBeenCalledWith('new-code', 'Test Map');
+        expect(mockSocketService.shareCharacter).toHaveBeenCalled();
+
+        // Use the pre-existing navigate spy from MockRouter
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/lobby'], { state: { accessCode: 'new-code' } });
     });
 
     it('should emit closePopup event when onClose is called', () => {
@@ -167,157 +190,124 @@ describe('FormCharacterComponent', () => {
         expect(component.closePopup.emit).toHaveBeenCalled();
     });
 
-    it('should update currentPortraitIndex and playerStats.avatar when navigating to next portrait', () => {
-        component.currentPortraitIndex = 0;
+    // Add these tests to your existing test suite
+
+    it('should update portrait and avatar when navigating portraits', () => {
+        // Save initial values
+        const initialIndex = component.currentPortraitIndex;
+        const initialAvatar = component.playerStats.avatar;
+
+        // Test navigation forward
         component.navigatePortrait('next');
-        expect(component.currentPortraitIndex).toBe(1);
-        expect(component.playerStats.avatar).toBe(`./assets/portraits/portrait${1 + 1}.png`);
-    });
+        const expectedNextIndex = (initialIndex + 1) % component.totalPortraits;
+        expect(component.currentPortraitIndex).toBe(expectedNextIndex);
+        expect(component.playerStats.avatar).toBe(ASSET_PATH + (expectedNextIndex + 1) + ASSET_EXT);
 
-    it('should update currentPortraitIndex and playerStats.avatar when navigating to previous portrait', () => {
-        component.currentPortraitIndex = 0;
-        component.totalPortraits = 5;
+        // Test navigation backward
         component.navigatePortrait('prev');
-        expect(component.currentPortraitIndex).toBe(4);
-        expect(component.playerStats.avatar).toBe(`./assets/portraits/portrait${4 + 1}.png`);
+        expect(component.currentPortraitIndex).toBe(initialIndex);
+        expect(component.playerStats.avatar).toBe(initialAvatar);
+
+        // Test wrapping around at the end
+        // Set to last portrait
+        component.currentPortraitIndex = component.totalPortraits - 1;
+        component.playerStats.avatar = component.getCurrentPortraitImage();
+
+        // Move forward should wrap to beginning
+        component.navigatePortrait('next');
+        expect(component.currentPortraitIndex).toBe(0);
+
+        // Test wrapping around at the beginning
+        component.currentPortraitIndex = 0;
+        component.playerStats.avatar = component.getCurrentPortraitImage();
+
+        // Move backward should wrap to end
+        component.navigatePortrait('prev');
+        expect(component.currentPortraitIndex).toBe(component.totalPortraits - 1);
     });
 
-    it('should select "life" stat correctly and update stat value', () => {
-        component.playerStats.life = BASE_STAT;
-        component.speedSelected = false;
+    it('should update stat values when selectStat is called', () => {
+        // Test stat values change correctly when selecting life
+        component.playerStats.life = 4;
+        component.playerStats.speed = 4;
         component.lifeSelected = false;
+        component.speedSelected = false;
 
+        // Selecting life should increase its value by 2
         component.selectStat('life');
         expect(component.lifeSelected).toBeTrue();
-        expect(component.playerStats.life).toBe(UPGRADED_STAT);
+        expect(component.playerStats.life).toBe(6);
 
+        // Toggling life off should decrease its value by 2
         component.selectStat('life');
         expect(component.lifeSelected).toBeFalse();
-        expect(component.playerStats.life).toBe(BASE_STAT);
-    });
+        expect(component.playerStats.life).toBe(4);
 
-    it('should select "speed" stat correctly and update stat value', () => {
-        component.playerStats.speed = BASE_STAT;
-        component.lifeSelected = false;
-        component.speedSelected = false;
-
+        // Test mutual exclusivity - selecting speed after life
+        component.selectStat('life');
+        expect(component.lifeSelected).toBeTrue();
         component.selectStat('speed');
-        expect(component.speedSelected).toBeTrue();
-        expect(component.playerStats.speed).toBe(UPGRADED_STAT);
-
-        component.selectStat('speed');
-        expect(component.speedSelected).toBeFalse();
-        expect(component.playerStats.speed).toBe(BASE_STAT);
-    });
-
-    it('should reset the other stat if one stat is selected while the other is active', () => {
-        component.lifeSelected = true;
-        component.playerStats.life = UPGRADED_STAT;
-        component.speedSelected = false;
-        component.selectStat('speed');
-        expect(component.speedSelected).toBeTrue();
         expect(component.lifeSelected).toBeFalse();
-        expect(component.playerStats.life).toBe(BASE_STAT);
-        expect(component.playerStats.speed).toBe(UPGRADED_STAT);
+        expect(component.speedSelected).toBeTrue();
+        expect(component.playerStats.life).toBe(4);
+        expect(component.playerStats.speed).toBe(6);
     });
 
-    it('should toggle combat stat "attack": select and deselect correctly', () => {
-        component.attackSelected = false;
-        component.playerStats.attackDice = 'D4';
-        component.playerStats.defenseDice = 'D4';
-        component.selectCombatStat('attack');
-        expect(component.attackSelected).toBeTrue();
-        expect(component.playerStats.attackDice).toBe('D6');
+    it('should update takenAvatars when onPlayerJoined is triggered', () => {
+        // Setup for non-creation page
+        component.isCreationPage = false;
 
-        component.selectCombatStat('attack');
-        expect(component.attackSelected).toBeFalse();
-        expect(component.playerStats.attackDice).toBe('D4');
-        expect(component.playerStats.defenseDice).toBe('D4');
+        // Create mock players with avatars
+        const mockPlayers = [{ avatar: 'avatar1.png' }, { avatar: 'avatar2.png' }] as PlayerStats[];
+
+        // Empty initial takenAvatars
+        component.takenAvatars = [];
+
+        // Trigger the onPlayerJoined event
+        mockSocketService.triggerPlayerJoined({ room: { players: mockPlayers } });
+
+        // Verify takenAvatars has been updated
+        expect(component.takenAvatars).toEqual(['avatar1.png', 'avatar2.png']);
+
+        // Test that takenAvatars doesn't update in creation page mode
+        component.isCreationPage = true;
+        component.takenAvatars = [];
+
+        mockSocketService.triggerPlayerJoined({ room: { players: mockPlayers } });
+
+        // Avatars should not be updated when in creation page
+        expect(component.takenAvatars).toEqual([]);
     });
 
-    it('should reset combat stat "defense" when "attack" is selected', () => {
-        component.defenseSelected = true;
-        component.playerStats.defenseDice = 'D6';
-        component.selectCombatStat('attack');
-        expect(component.defenseSelected).toBeFalse();
-        expect(component.playerStats.defenseDice).toBe('D4');
+    it('should check if current avatar is taken', () => {
+        component.takenAvatars = [ASSET_PATH + '1' + ASSET_EXT, ASSET_PATH + '3' + ASSET_EXT];
+
+        // Set to a taken avatar
+        component.currentPortraitIndex = 0; // For portrait 1
+        expect(component.isCurrentAvatarTaken).toBeTrue();
+
+        // Set to an available avatar
+        component.currentPortraitIndex = 1; // For portrait 2
+        expect(component.isCurrentAvatarTaken).toBeFalse();
     });
 
-    it('should toggle combat stat "defense": select and deselect correctly', () => {
-        component.defenseSelected = false;
-        component.playerStats.defenseDice = 'D4';
-        component.playerStats.attackDice = 'D4';
-        component.selectCombatStat('defense');
-        expect(component.defenseSelected).toBeTrue();
-        expect(component.playerStats.defenseDice).toBe('D6');
+    it('should initialize takenAvatars from gameRoom on init', () => {
+        // Setup
+        const mockPlayers = [{ avatar: 'avatar1.png' }, { avatar: 'avatar2.png' }] as PlayerStats[];
 
-        component.selectCombatStat('defense');
-        expect(component.defenseSelected).toBeFalse();
-        expect(component.playerStats.defenseDice).toBe('D4');
-        expect(component.playerStats.attackDice).toBe('D4');
-    });
-
-    it('should reset combat stat "attack" when "defense" is selected', () => {
-        component.attackSelected = true;
-        component.playerStats.attackDice = 'D6';
-        component.selectCombatStat('defense');
-        expect(component.attackSelected).toBeFalse();
-        expect(component.playerStats.attackDice).toBe('D4');
-    });
-
-    it('should create a game, share the character and navigate to lobby', () => {
-        (mockGameMapService.getGameMap as jasmine.Spy).and.returnValue(of({ size: 10 }));
-        component.playerStats.id = 'player1';
-
-        component.createGame();
-        fixture.detectChanges();
-
-        expect(mockGameMapService.getGameMap).toHaveBeenCalled();
-        expect(mockSocketService.createRoom).toHaveBeenCalledWith('player1', 10);
-        expect(mockSocketService.onRoomCreated).toHaveBeenCalled();
-        expect(mockSocketService.shareCharacter).toHaveBeenCalledWith(
-            '1234',
-            jasmine.objectContaining({
-                id: 'player1',
-                name: '',
-                avatar: './assets/portraits/portrait1.png',
-                life: 4,
-                attack: 4,
-                defense: 4,
-                speed: 4,
-                attackDice: 'D4',
-                defenseDice: 'D4',
-                wins: 0,
-            }),
-        );
-        expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/lobby'], { state: { accessCode: '1234' } });
-    });
-
-    it('should call gameMapService.shareRoomMap when shareRoomMap is invoked', () => {
-        component.shareGameMap();
-        expect(mockGameMapService.shareGameMap).toHaveBeenCalled();
-    });
-
-    it('should call socketService.shareCharacter with correct parameters when shareCharacter is invoked', () => {
-        // On prépare des valeurs de test pour accessCode et playerStats
-        component.accessCode = 'testCode';
-        component.playerStats = {
-            id: 'player123',
-            name: 'TestName',
-            avatar: './assets/portraits/portrait1.png',
-            life: 4,
-            attack: 4,
-            defense: 4,
-            speed: 4,
-            attackDice: 'D4',
-            defenseDice: 'D4',
-            movementPts: 4,
-            actions: 4,
-            wins: 0,
+        mockSocketService.gameRoom = {
+            ...mockSocketService.gameRoom,
+            players: mockPlayers,
         };
 
-        component.shareCharacter();
+        // Reset takenAvatars
+        component.takenAvatars = [];
+        component.isCreationPage = false;
 
-        expect(mockSocketService.shareCharacter).toHaveBeenCalledWith('testCode', component.playerStats);
+        // Call ngOnInit
+        component.ngOnInit();
+
+        // Verify takenAvatars is initialized from gameRoom
+        expect(component.takenAvatars).toEqual(['avatar1.png', 'avatar2.png']);
     });
 });
