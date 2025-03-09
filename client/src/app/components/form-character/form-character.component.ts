@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { SocketService } from '@app/services/code/socket.service';
+import { ASSET_EXT, ASSET_PATH } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { first } from 'rxjs/operators';
 
@@ -42,7 +43,9 @@ export class FormCharacterComponent implements OnInit {
         attackDice: 'D4',
         defenseDice: 'D4',
         movementPts: 0,
-        actions: 0,
+        actions: 1,
+        position: { x: 0, y: 0 },
+        spawnPosition: { x: 0, y: 0 },
         wins: 0,
     };
 
@@ -70,7 +73,7 @@ export class FormCharacterComponent implements OnInit {
     }
 
     getCurrentPortraitImage(): string {
-        return `./assets/portraits/portrait${this.currentPortraitIndex + 1}.png`;
+        return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
     }
 
     generateId(): string {
@@ -134,10 +137,6 @@ export class FormCharacterComponent implements OnInit {
         return this.playerStats.name.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
 
-    shareGameMap(): void {
-        this.gameMapService.shareGameMap();
-    }
-
     shareCharacter(): void {
         this.socketService.shareCharacter(this.accessCode, this.playerStats);
     }
@@ -151,6 +150,7 @@ export class FormCharacterComponent implements OnInit {
                 this.socketService.createRoom(this.playerStats.id, selectedMapSize);
                 this.socketService.onRoomCreated().subscribe((data: unknown) => {
                     this.accessCode = (data as { accessCode: string }).accessCode;
+                    this.socketService.createGame(this.accessCode, map.name);
                     this.socketService.shareCharacter(this.accessCode, this.playerStats);
                     this.router.navigate(['/lobby'], { state: { accessCode: this.accessCode } });
                 });

@@ -5,6 +5,7 @@ import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
 import { MapService } from '@app/services/code/map.service';
 import { Board, Validation } from '@common/board';
 import { Item, Size, Tile, Visibility } from '@common/enums';
+import { Avatar } from '@common/game';
 import { BehaviorSubject } from 'rxjs';
 
 describe('MapService', () => {
@@ -173,6 +174,8 @@ describe('MapService', () => {
                         tile: Tile.FLOOR,
                         item: Item.DEFAULT,
                         position: { x: colIndex, y: rowIndex },
+                        cost: 1,
+                        player: Avatar.Default,
                     })),
             );
         // On remet à jour boardToSave avec cette grille
@@ -192,6 +195,8 @@ describe('MapService', () => {
                         tile: Tile.FLOOR,
                         item: Item.DEFAULT,
                         position: { x: colIndex, y: rowIndex },
+                        cost: 1,
+                        player: Avatar.Default,
                     })),
             );
         service['boardToSave'].next(board);
@@ -208,7 +213,7 @@ describe('MapService', () => {
                 name: 'Original Board',
                 description: 'Original description',
                 size: 5,
-                board: [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 } }]],
+                board: [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default }]],
                 isCTF: false,
                 visibility: Visibility.PUBLIC,
                 image: '',
@@ -271,12 +276,12 @@ describe('MapService', () => {
                 board: [
                     // Garder une board 2x2 pour simplicité avec les mêmes items
                     [
-                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 } },
-                        { tile: Tile.FLOOR, item: Item.FLAG, position: { x: 1, y: 0 } },
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default },
+                        { tile: Tile.FLOOR, item: Item.FLAG, position: { x: 1, y: 0 }, cost: 1, player: Avatar.Default },
                     ],
                     [
-                        { tile: Tile.WALL, item: Item.BOW, position: { x: 0, y: 1 } },
-                        { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 } },
+                        { tile: Tile.WALL, item: Item.BOW, position: { x: 0, y: 1 }, cost: 1, player: Avatar.Default },
+                        { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: Avatar.Default },
                     ],
                 ],
                 isCTF: true,

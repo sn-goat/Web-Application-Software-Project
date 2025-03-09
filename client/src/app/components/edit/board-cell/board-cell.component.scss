@@ -13,7 +13,7 @@
     height: 100%;
 }
 
-.base-image, .image-stack {
+.base-image, .image-stack, .player-stack {
     position: absolute;
     top: 0;
     left: 0;
@@ -24,6 +24,10 @@
 
 .image-stack {
     z-index: 1;
+}
+
+.player-stack {
+    z-index: 2;
 }
 
 .base-image {

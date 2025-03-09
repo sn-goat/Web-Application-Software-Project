@@ -1,0 +1,88 @@
+$primary-bg: #1a1625;
+$primary-text: #7ee0d0;
+$glow-teal: rgba(126, 224, 208, 0.2);
+$glow-gold: rgba(255, 215, 0, 0.2);
+$rectangle-border: 1px solid $primary-text;
+
+:host {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: $primary-bg;
+    color: $primary-text;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 10px;
+    border: $rectangle-border;
+    box-shadow: 0 0 15px $glow-teal;
+}
+
+h1 {
+    font-size: 2rem;
+    text-align: center;
+}
+
+label {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+input {
+    padding: 10px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    width: 250px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: $primary-text;
+    border: $rectangle-border;
+    text-align: center;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease-in-out;
+
+    &:focus {
+        box-shadow: 0 0 10px $glow-gold;
+    }
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: $primary-text;
+    color: $primary-bg;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 10px $glow-teal;
+
+    &:hover {
+        background-color: darken($primary-text, 10%);
+        box-shadow: 0 0 15px $glow-gold;
+    }
+}
+
+p {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: $primary-text;
+}
+
+.error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+button:disabled {
+    background-color: rgba(126, 224, 208, 0.4);
+    cursor: not-allowed;
+    box-shadow: none;
+}

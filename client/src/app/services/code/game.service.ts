@@ -1,51 +1,59 @@
 import { Injectable, inject } from '@angular/core';
-import { PlayerService } from '@app/services/code/player.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 import { FightLogicService } from './fight-logic.service';
-// import { SocketService } from '@app/services/code/socket.service';
+import { Game } from '@common/game';
+import { PlayerStats } from '@common/player';
+import { Cell } from '@common/board';
+import { SocketService } from '@app/services/code/socket.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameService {
-    playersWinsMap$: Observable<Map<string, number>>;
-    playersInGameMap$: Observable<Map<string, boolean>>;
     showFightInterface$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    map$: BehaviorSubject<Cell[][]> = new BehaviorSubject<Cell[][]>([]);
+    currentPlayers$: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
+    activePlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    clientPlayer$: BehaviorSubject<PlayerStats | undefined> = new BehaviorSubject<PlayerStats | undefined>(undefined);
 
-    private playersWinsMap: BehaviorSubject<Map<string, number>> = new BehaviorSubject<Map<string, number>>(new Map());
-    private playersInGameMap: BehaviorSubject<Map<string, boolean>> = new BehaviorSubject<Map<string, boolean>>(new Map());
-    private playerService: PlayerService = inject(PlayerService);
+    private initialPlayers: PlayerStats[] = [];
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
+    private socketService = inject(SocketService);
 
     constructor() {
-        this.playersWinsMap$ = this.playersWinsMap.asObservable();
-        this.playersInGameMap$ = this.playersInGameMap.asObservable();
-
-        this.playerService.players$.subscribe((players) => {
-            const newMap = new Map(this.playersWinsMap.value);
-            const playersInGame = new Map<string, boolean>();
-            players.forEach((player) => {
-                if (!newMap.has(player.name)) {
-                    newMap.set(player.name, 0);
-                }
-                if (!playersInGame.has(player.name)) {
-                    playersInGame.set(player.name, true);
-                }
-            });
-            this.playersWinsMap.next(newMap);
-            this.playersInGameMap.next(playersInGame);
-        });
-
         this.fightLogicService.fightStarted$.subscribe((started) => {
             this.showFightInterface$.next(started);
         });
     }
 
-    getWinCount(name: string): number | undefined {
-        return this.playersWinsMap.value.get(name);
+    isPlayerInGame(player: PlayerStats): boolean {
+        return this.currentPlayers$.value.some((currentPlayer) => currentPlayer.id === player.id);
+    }
+
+    getInitialPlayers(): PlayerStats[] {
+        return this.initialPlayers;
+    }
+
+    removePlayerInGame(player: PlayerStats): void {
+        if (this.isPlayerInGame(player)) {
+            const updatePlayers = this.currentPlayers$.value.filter((currentPlayer) => currentPlayer.id !== player.id);
+            this.currentPlayers$.next(updatePlayers);
+        }
+    }
+
+    setActivePlayer(playerIndex: number): void {
+        this.activePlayer$.next(this.currentPlayers$.value[playerIndex]);
+    }
+
+    setGame(game: Game): void {
+        this.map$.next(game.map);
+        this.currentPlayers$.next(game.players);
+        this.activePlayer$.next(game.players[game.currentTurn]);
+        this.clientPlayer$.next(this.currentPlayers$.value.find((player) => player.id === this.socketService.getCurrentPlayerId()));
+        this.initialPlayers = game.players;
     }
 
     async confirmAndAbandonGame(name: string): Promise<boolean> {
@@ -62,38 +70,11 @@ export class GameService {
 
             dialogRef.afterClosed().subscribe((result) => {
                 if (result === true) {
-                    this.abandonGame(name);
                     resolve(true);
                 } else {
                     resolve(false);
                 }
             });
         });
-    }
-
-    abandonGame(name: string): void {
-        if (this.playersInGameMap.value.has(name)) {
-            const currentMap = this.playersInGameMap.value;
-
-            const isInGame = currentMap.get(name);
-
-            if (isInGame) {
-                // to be implemented with socket
-            }
-        }
-    }
-
-    incrementWinCount(name: string): void {
-        if (this.playersWinsMap.value.has(name)) {
-            const currentMap = this.playersWinsMap.value;
-            const newMap = new Map(currentMap);
-
-            const winCount = currentMap.get(name) ?? 0;
-
-            newMap.set(name, winCount + 1);
-            this.playersWinsMap.next(newMap);
-
-            // to be implemented with socket
-        }
     }
 }

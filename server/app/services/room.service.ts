@@ -1,18 +1,19 @@
-import { GameRoom } from '@common/game-room';
+import { Room } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
+
 const minNumber = 1000;
 const maxNumber = 9000;
 
 @Injectable()
 export class RoomService {
     private readonly logger = new Logger(RoomService.name);
-    private gameRooms: Map<string, GameRoom> = new Map();
+    private gameRooms: Map<string, Room> = new Map();
 
-    createRoom(organizerId: string, size: number): GameRoom {
+    createRoom(organizerId: string, size: number): Room {
         const accessCode = this.generateUniqueAccessCode();
-        const newRoom: GameRoom = {
+        const newRoom: Room = {
             accessCode,
             organizerId,
             players: [],
@@ -20,11 +21,11 @@ export class RoomService {
             mapSize: size,
         };
         this.gameRooms.set(accessCode, newRoom);
-        this.logger.log(`GameRoom created with access code: ${accessCode} by organizer: ${organizerId}`);
+        this.logger.log(`Room created with access code: ${accessCode} by organizer: ${organizerId}`);
         return newRoom;
     }
 
-    joinRoom(accessCode: string): GameRoom | null {
+    joinRoom(accessCode: string): Room | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found.`);
@@ -38,7 +39,7 @@ export class RoomService {
         return room;
     }
 
-    removePlayer(accessCode: string, playerId: string): GameRoom | null {
+    removePlayer(accessCode: string, playerId: string): Room | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for player removal.`);
@@ -54,7 +55,7 @@ export class RoomService {
         return room;
     }
 
-    disconnectPlayer(accessCode: string, playerId: string): GameRoom | null {
+    disconnectPlayer(accessCode: string, playerId: string): Room | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for player disconnection.`);
@@ -76,7 +77,7 @@ export class RoomService {
         return room;
     }
 
-    lockRoom(accessCode: string): GameRoom | null {
+    lockRoom(accessCode: string): Room | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for locking.`);
@@ -87,7 +88,7 @@ export class RoomService {
         return room;
     }
 
-    unlockRoom(accessCode: string): GameRoom | null {
+    unlockRoom(accessCode: string): Room | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for unlocking.`);
@@ -98,11 +99,11 @@ export class RoomService {
         return room;
     }
 
-    getRoom(accessCode: string): GameRoom | null {
+    getRoom(accessCode: string): Room | null {
         return this.gameRooms.get(accessCode) || null;
     }
 
-    shareCharacter(accessCode: string, player: PlayerStats): GameRoom | null {
+    shareCharacter(accessCode: string, player: PlayerStats): Room | null {
         const room = this.gameRooms.get(accessCode);
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found.`);

@@ -22,35 +22,40 @@ describe('GameFightInterfaceComponent', () => {
     let fleeAttempt1Subject: BehaviorSubject<number>;
     let fleeAttempt2Subject: BehaviorSubject<number>;
 
-    const mockPlayer1: PlayerStats = {
-        id: '1',
-        name: 'player1',
-        avatar: '1',
-        life: 100,
-        attack: 10,
-        defense: 10,
-        speed: 5,
-        attackDice: 'D6',
-        defenseDice: 'D4',
-        movementPts: 5,
-        actions: 2,
-        wins: 0,
-    };
-
-    const mockPlayer2: PlayerStats = {
-        id: '2',
-        name: 'player2',
-        avatar: '2',
-        life: 90,
-        attack: 12,
-        defense: 8,
-        speed: 7,
-        attackDice: 'D4',
-        defenseDice: 'D6',
-        movementPts: 4,
-        actions: 1,
-        wins: 0,
-    };
+    const mockPlayers: PlayerStats[] = [
+        {
+            id: '1',
+            name: 'player1',
+            avatar: '1',
+            life: 100,
+            attack: 10,
+            defense: 10,
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 5,
+            actions: 2,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        },
+        {
+            id: '2',
+            name: 'player2',
+            avatar: '2',
+            life: 90,
+            attack: 12,
+            defense: 8,
+            speed: 7,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 4,
+            actions: 1,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        },
+    ];
 
     beforeEach(async () => {
         timerSubject = new BehaviorSubject<string>('00:00');
@@ -75,9 +80,9 @@ describe('GameFightInterfaceComponent', () => {
         playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName']);
 
         playerServiceMock.getPlayerName.and.returnValue('player1'); // Current player is player1
-        playerServiceMock.getPlayer.and.callFake((name: string) => {
-            if (name === 'player1') return mockPlayer1;
-            if (name === 'player2') return mockPlayer2;
+        playerServiceMock.getPlayer.and.callFake((username: string) => {
+            if (username === 'player1') return mockPlayers[0];
+            if (username === 'player2') return mockPlayers[1];
             return undefined;
         });
 
@@ -117,8 +122,8 @@ describe('GameFightInterfaceComponent', () => {
         expect(fightLogicServiceMock.getName2).toHaveBeenCalled();
         expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('player1');
         expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('player2');
-        expect(component.player1).toEqual(mockPlayer1);
-        expect(component.player2).toEqual(mockPlayer2);
+        expect(component.player1).toEqual(mockPlayers[0]);
+        expect(component.player2).toEqual(mockPlayers[1]);
     });
 
     it('should update timer when timer$ emits', () => {
@@ -168,14 +173,14 @@ describe('GameFightInterfaceComponent', () => {
         expect(completeSpy).toHaveBeenCalled();
     });
 
-    it('should return true for isMyTurn when currentTurn matches player name', () => {
+    it('should return true for isMyTurn when currentTurn matches player username', () => {
         component.currentTurn = 'player1';
 
         expect(component.isMyTurn()).toBeTrue();
         expect(playerServiceMock.getPlayerName).toHaveBeenCalled();
     });
 
-    it('should return false for isMyTurn when currentTurn does not match player name', () => {
+    it('should return false for isMyTurn when currentTurn does not match player username', () => {
         component.currentTurn = 'player2';
 
         expect(component.isMyTurn()).toBeFalse();
@@ -215,20 +220,20 @@ describe('GameFightInterfaceComponent', () => {
     });
 
     it('should return correct flee attempts for player1', () => {
-        component.player1 = mockPlayer1;
+        component.player1 = mockPlayers[0];
         component.fleeAttempt1 = 1;
 
         expect(component.getFleeAttempts('player1')).toBe(1);
     });
 
     it('should return correct flee attempts for player2', () => {
-        component.player2 = mockPlayer2;
+        component.player2 = mockPlayers[1];
         component.fleeAttempt2 = 0;
 
         expect(component.getFleeAttempts('player2')).toBe(0);
     });
 
-    it('should return 0 for getFleeAttempts when name does not match either player', () => {
+    it('should return 0 for getFleeAttempts when username does not match either player', () => {
         expect(component.getFleeAttempts('unknown')).toBe(0);
     });
 

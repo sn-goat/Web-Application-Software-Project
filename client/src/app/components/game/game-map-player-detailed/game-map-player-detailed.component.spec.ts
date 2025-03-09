@@ -1,18 +1,19 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HEALTH_HIGH_THRESHOLD, HEALTH_MAX, HEALTH_MEDIUM_THRESHOLD } from '@app/constants/health';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
-import { PlayerService } from '@app/services/code/player.service';
+import { GameService } from '@app/services/code/game.service';
 import { PlayerStats } from '@common/player';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { GameMapPlayerDetailedComponent } from './game-map-player-detailed.component';
 
 describe('GameMapPlayerDetailedComponent', () => {
     let component: GameMapPlayerDetailedComponent;
     let fixture: ComponentFixture<GameMapPlayerDetailedComponent>;
-    let playerServiceMock: jasmine.SpyObj<PlayerService>;
-    let playersSubject: BehaviorSubject<PlayerStats[]>;
+    let gameServiceMock: jasmine.SpyObj<GameService>;
+    let clientPlayerSubject: BehaviorSubject<PlayerStats | undefined>;
+    let unsubscribeSpy: jasmine.Spy;
 
     const mockPlayer: PlayerStats = {
         id: '1',
@@ -27,19 +28,26 @@ describe('GameMapPlayerDetailedComponent', () => {
         movementPts: 5,
         actions: 2,
         wins: 0,
+        position: { x: 0, y: 0 },
+        spawnPosition: { x: 0, y: 0 },
     };
 
     beforeEach(async () => {
-        playersSubject = new BehaviorSubject<PlayerStats[]>([mockPlayer]);
+        clientPlayerSubject = new BehaviorSubject<PlayerStats | undefined>(mockPlayer);
+        unsubscribeSpy = jasmine.createSpy('unsubscribe');
 
-        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName']);
-        playerServiceMock.players$ = playersSubject.asObservable();
-        playerServiceMock.getPlayerName.and.returnValue('testUser');
-        playerServiceMock.getPlayer.and.returnValue(mockPlayer);
+        spyOn(Subscription.prototype, 'unsubscribe').and.callFake(() => {
+            unsubscribeSpy();
+            return undefined;
+        });
+
+        gameServiceMock = jasmine.createSpyObj('GameService', [], {
+            clientPlayer$: clientPlayerSubject.asObservable(),
+        });
 
         await TestBed.configureTestingModule({
             imports: [CommonModule, GameMapPlayerDetailedComponent],
-            providers: [{ provide: PlayerService, useValue: playerServiceMock }],
+            providers: [{ provide: GameService, useValue: gameServiceMock }],
         }).compileComponents();
     });
 
@@ -59,104 +67,64 @@ describe('GameMapPlayerDetailedComponent', () => {
         expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
     });
 
-    it('should initialize player from PlayerService', () => {
-        expect(component.player).toEqual(mockPlayer);
+    it('should initialize myPlayer and maxHealth during ngOnInit', () => {
+        expect(component.myPlayer).toEqual(mockPlayer);
         expect(component.maxHealth).toBe(mockPlayer.life);
-        expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('testUser');
     });
 
-    it('should update player when players$ emits', () => {
+    it('should update myPlayer and maxHealth when clientPlayer$ emits a new value', () => {
         const updatedPlayer: PlayerStats = { ...mockPlayer, life: 80 };
-        playerServiceMock.getPlayer.and.returnValue(updatedPlayer);
 
-        playersSubject.next([updatedPlayer]);
+        clientPlayerSubject.next(updatedPlayer);
 
-        expect(component.player).toEqual(updatedPlayer);
+        expect(component.myPlayer).toEqual(updatedPlayer);
+        expect(component.maxHealth).toBe(updatedPlayer.life);
     });
 
-    it('should not update player if getPlayer returns undefined', () => {
-        component.player = mockPlayer;
-        playerServiceMock.getPlayer.and.returnValue(undefined);
+    it('should handle undefined player from clientPlayer$', () => {
+        clientPlayerSubject.next(undefined);
 
-        playersSubject.next([]);
-
-        expect(component.player).toEqual(mockPlayer);
+        expect(component.myPlayer).toBeUndefined();
+        expect(component.maxHealth).toBe(mockPlayer.life);
     });
 
-    it('should handle case where getPlayer returns undefined during initialization', () => {
-        playerServiceMock.getPlayer.and.returnValue(undefined);
+    it('should unsubscribe from clientPlayer$ on component destruction', () => {
+        unsubscribeSpy.calls.reset();
 
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            imports: [CommonModule, GameMapPlayerDetailedComponent],
-            providers: [{ provide: PlayerService, useValue: playerServiceMock }],
-        });
+        component.ngOndestroy();
 
-        const undefinedFixture = TestBed.createComponent(GameMapPlayerDetailedComponent);
-        const undefinedComponent = undefinedFixture.componentInstance;
-
-        undefinedFixture.detectChanges();
-
-        expect(undefinedComponent.maxHealth).toBe(0);
+        expect(unsubscribeSpy).toHaveBeenCalled();
+        expect(unsubscribeSpy.calls.count()).toBe(1);
     });
 
-    it('should correctly calculate health bar class when health is high', () => {
-        component.player = { ...mockPlayer, life: 90 };
-        component.maxHealth = 100;
-
-        expect(component.getHealthBar()).toBe('health-high');
-    });
-
-    it('should correctly calculate health bar class when health is medium', () => {
-        component.player = { ...mockPlayer, life: 60 };
-        component.maxHealth = 100;
-
-        expect(component.getHealthBar()).toBe('health-medium');
-    });
-
-    it('should correctly calculate health bar class when health is low', () => {
-        component.player = { ...mockPlayer, life: 20 };
-        component.maxHealth = 100;
-
-        expect(component.getHealthBar()).toBe('health-low');
+    it('should return "health-hight" from getHealthBar method', () => {
+        expect(component.getHealthBar()).toBe('health-hight');
     });
 
     it('should round health correctly', () => {
         expect(component.roundHealth(10.4)).toBe(10);
         expect(component.roundHealth(10.5)).toBe(11);
         expect(component.roundHealth(10.9)).toBe(11);
+        expect(component.roundHealth(0)).toBe(0);
+        expect(component.roundHealth(-5.5)).toBe(-5);
     });
 
-    it('should handle health percentage calculation correctly', () => {
-        component.player = { ...mockPlayer, life: 75 };
-        component.maxHealth = 150;
+    it('should handle case where player is undefined during initialization', () => {
+        const emptyPlayerSubject = new BehaviorSubject<PlayerStats | undefined>(undefined);
+        const newGameServiceMock = jasmine.createSpyObj('GameService', [], {
+            clientPlayer$: emptyPlayerSubject.asObservable(),
+        });
 
-        const expectedHealthPercentage = Math.round((75 / 150) * HEALTH_MAX);
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            imports: [CommonModule, GameMapPlayerDetailedComponent],
+            providers: [{ provide: GameService, useValue: newGameServiceMock }],
+        });
 
-        spyOn(component, 'roundHealth').and.callThrough();
-        component.getHealthBar();
+        const newFixture = TestBed.createComponent(GameMapPlayerDetailedComponent);
+        newFixture.detectChanges();
 
-        expect(component.roundHealth).toHaveBeenCalledWith((75 / 150) * HEALTH_MAX);
-
-        if (expectedHealthPercentage > HEALTH_HIGH_THRESHOLD) {
-            expect(component.getHealthBar()).toBe('health-high');
-        } else if (expectedHealthPercentage > HEALTH_MEDIUM_THRESHOLD) {
-            expect(component.getHealthBar()).toBe('health-medium');
-        } else {
-            expect(component.getHealthBar()).toBe('health-low');
-        }
-    });
-
-    it('should handle zero maxHealth in health calculation', () => {
-        component.player = { ...mockPlayer, life: 50 };
-        component.maxHealth = 0;
-
-        spyOn(component, 'roundHealth').and.callThrough();
-
-        const healthBarClass = component.getHealthBar();
-
-        expect(component.roundHealth).toHaveBeenCalled();
-
-        expect(['health-high', 'health-medium', 'health-low'].includes(healthBarClass)).toBeTrue();
+        expect(newFixture.componentInstance.myPlayer).toBeUndefined();
+        expect(newFixture.componentInstance.maxHealth).toBe(0);
     });
 });

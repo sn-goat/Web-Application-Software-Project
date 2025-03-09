@@ -11,11 +11,11 @@
 
         <button (click)="disconnect()">Disconnect</button>
 
-        <!-- Nouveau bouton "Start Game" accessible uniquement à l'admin, activable si le lobby est verrouillé et qu'il y a au moins 2 joueurs -->
-        @if (isAdmin) {
-        <button [disabled]="players.length < 2 && players.length !== maxPlayers">Start Game</button>
-        }
-    </div>
+    <!-- Nouveau bouton "Start Game" accessible uniquement à l'admin, activable si le lobby est verrouillé et qu'il y a au moins 2 joueurs -->
+    @if (isAdmin) {
+      <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()"> Start Game </button>
+    }
+  </div>
 
     <!-- Liste des joueurs de la salle -->
     <div class="players-list">

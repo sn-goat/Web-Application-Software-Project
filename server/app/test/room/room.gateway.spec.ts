@@ -5,7 +5,7 @@ import { RoomService } from '@app/services/room.service';
 import { PlayerStats } from '@common/player';
 import { Socket } from 'socket.io';
 
-describe('GameGateway', () => {
+describe('RoomGateway', () => {
     let gateway: RoomGateway;
     let roomService: Partial<RoomService>;
     let client: Partial<Socket>;
@@ -78,7 +78,9 @@ describe('GameGateway', () => {
 
             gateway.handleJoinRoom(client as Socket, payload);
 
-            expect(client.emit).toHaveBeenCalledWith('joinError', { message: 'Unable to join room. It may be locked or does not exist.' });
+            expect(client.emit).toHaveBeenCalledWith('joinError', {
+                message: "Impossible de rejoindre la salle. Elle est peut-être verrouillée ou n'existe pas.",
+            });
         });
     });
 
@@ -103,7 +105,7 @@ describe('GameGateway', () => {
 
             gateway.handleLockRoom(client as Socket, payload);
 
-            expect(client.emit).toHaveBeenCalledWith('lockError', { message: 'Unable to lock room.' });
+            expect(client.emit).toHaveBeenCalledWith('lockError', { message: 'Impossible de verrouiller la salle.' });
         });
     });
 
@@ -128,13 +130,13 @@ describe('GameGateway', () => {
 
             gateway.handleUnlockRoom(client as Socket, payload);
 
-            expect(client.emit).toHaveBeenCalledWith('unlockError', { message: 'Unable to unlock room.' });
+            expect(client.emit).toHaveBeenCalledWith('unlockError', { message: 'Impossible de déverrouiller la salle.' });
         });
     });
 
     describe('handleShareCharacter', () => {
         it('should share character successfully and emit playerJoined', () => {
-            const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'Player One' } };
+            const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'PlayerStats One' } };
             const room = { accessCode: 'ROOM123' };
             (roomService.shareCharacter as jest.Mock).mockReturnValue(room);
             const roomEmitMock = jest.fn();
@@ -155,6 +157,8 @@ describe('GameGateway', () => {
                     movementPts: 4,
                     actions: 4,
                     wins: 0,
+                    position: { x: 0, y: 0 },
+                    spawnPosition: { x: 0, y: 0 },
                 },
             };
 
@@ -169,7 +173,7 @@ describe('GameGateway', () => {
         });
 
         it('should emit characterError when shareCharacter fails', () => {
-            const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'Player One' } };
+            const payload = { accessCode: 'ROOM123', player: { id: 'player1', name: 'PlayerStats One' } };
             (roomService.shareCharacter as jest.Mock).mockReturnValue(null);
 
             const updatedPayload: { accessCode: string; player: PlayerStats } = {
@@ -186,20 +190,22 @@ describe('GameGateway', () => {
                     defenseDice: 'D4',
                     movementPts: 4,
                     actions: 4,
+                    position: { x: 0, y: 0 },
+                    spawnPosition: { x: 0, y: 0 },
                     wins: 0,
                 },
             };
 
             gateway.handleShareCharacter(client as Socket, updatedPayload);
 
-            expect(client.emit).toHaveBeenCalledWith('characterError', { message: 'Unable to share character.' });
+            expect(client.emit).toHaveBeenCalledWith('characterError', { message: 'Impossible de partager le personnage.' });
         });
     });
 
     describe('handleRemovePlayer', () => {
         it('should remove player successfully and emit playerRemoved', () => {
             const payload = { accessCode: 'ROOM123', playerId: 'player1' };
-            const room = { players: [{ id: 'player1', name: 'Player One' }] };
+            const room = { players: [{ id: 'player1', name: 'PlayerStats One' }] };
             (roomService.removePlayer as jest.Mock).mockReturnValue(room);
             const roomEmitMock = jest.fn();
             (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
@@ -217,14 +223,14 @@ describe('GameGateway', () => {
 
             gateway.handleRemovePlayer(client as Socket, payload);
 
-            expect(client.emit).toHaveBeenCalledWith('removeError', { message: 'Unable to remove player.' });
+            expect(client.emit).toHaveBeenCalledWith('removeError', { message: 'Impossible de supprimer le joueur.' });
         });
     });
 
     describe('handleDisconnectPlayer', () => {
         it('should disconnect player successfully and emit playerDisconnected', () => {
             const payload = { accessCode: 'ROOM123', playerId: 'player1' };
-            const room = { players: [{ id: 'player1', name: 'Player One' }] };
+            const room = { players: [{ id: 'player1', name: 'PlayerStats One' }] };
             (roomService.disconnectPlayer as jest.Mock).mockReturnValue(room);
             const roomEmitMock = jest.fn();
             (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
@@ -242,7 +248,7 @@ describe('GameGateway', () => {
 
             gateway.handleDisconnectPlayer(client as Socket, payload);
 
-            expect(client.emit).toHaveBeenCalledWith('disconnectError', { message: 'Unable to disconnect player.' });
+            expect(client.emit).toHaveBeenCalledWith('disconnectError', { message: 'Impossible de déconnecter le joueur.' });
         });
     });
 
@@ -257,14 +263,14 @@ describe('GameGateway', () => {
         it('should emit welcome on connection', () => {
             const logSpy = jest.spyOn(gateway['logger'], 'log');
             gateway.handleConnection(client as Socket);
-            expect(logSpy).toHaveBeenCalledWith(`Client connected: ${client.id}`);
-            expect(client.emit).toHaveBeenCalledWith('welcome', { message: 'Welcome to the game server!' });
+            expect(logSpy).toHaveBeenCalledWith(`Client connecté : ${client.id}`);
+            expect(client.emit).toHaveBeenCalledWith('welcome', { message: 'Bienvenue sur le serveur de jeu !' });
         });
 
         it('should log on disconnect', () => {
             const logSpy = jest.spyOn(gateway['logger'], 'log');
             gateway.handleDisconnect(client as Socket);
-            expect(logSpy).toHaveBeenCalledWith(`Client disconnected: ${client.id}`);
+            expect(logSpy).toHaveBeenCalledWith(`Client déconnecté : ${client.id}`);
         });
     });
 });

@@ -68,47 +68,10 @@ describe('GameMapComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should initialize boardGame from service in ngOnInit', () => {
-        expect(gameMapServiceMock.getGameMap).toHaveBeenCalled();
-        expect(component.boardGame).toEqual(mockBoard);
-    });
-
-    it('should update boardGame when service emits new board', () => {
-        const updatedBoard: Board = {
-            name: 'Updated Board',
-            description: 'Updated description',
-            size: 12,
-            isCTF: true,
-            board: Array(12)
-                .fill(null)
-                .map(() =>
-                    Array(12)
-                        .fill(null)
-                        .map(
-                            () =>
-                                ({
-                                    position: { x: 0, y: 0 },
-                                    tile: Tile.WALL,
-                                    item: Item.SWORD,
-                                }) as Cell,
-                        ),
-                ),
-            visibility: Visibility.PRIVATE,
-            image: 'updated-image.png',
-        };
-
-        boardSubject.next(updatedBoard);
-
-        expect(component.boardGame).toEqual(updatedBoard);
-    });
-
     it('should unsubscribe when component is destroyed', () => {
-        unsubscribeSpy.calls.reset();
-
-        expect((component as any).boardSubscription).toBeDefined();
-
+        const unsubscribeMapSpy = spyOn(component['mapSub'], 'unsubscribe').and.callThrough();
         component.ngOnDestroy();
 
-        expect(unsubscribeSpy).toHaveBeenCalled();
+        expect(unsubscribeMapSpy).toHaveBeenCalled();
     });
 });

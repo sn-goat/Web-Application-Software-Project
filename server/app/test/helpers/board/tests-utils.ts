@@ -1,12 +1,15 @@
 import { Cell, Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Tile, Item } from '@common/enums';
+import { Avatar } from '@common/game';
 
 export function createBoard(size: number): Cell[][] {
     return Array.from({ length: size }, (_, i) =>
         Array.from({ length: size }, (unused, j) => ({
             position: { x: i, y: j },
-            item: null,
+            item: Item.DEFAULT,
             tile: Tile.FLOOR,
+            player: Avatar.Default,
+            cost: 1,
         })),
     );
 }

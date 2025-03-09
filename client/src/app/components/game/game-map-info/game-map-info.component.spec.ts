@@ -1,43 +1,34 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { BehaviorSubject } from 'rxjs';
 import { GameMapInfoComponent } from '@app/components/game/game-map-info/game-map-info.component';
+import { GameService } from '@app/services/code/game.service';
+import { PlayerStats } from '@common/player';
+import { BehaviorSubject } from 'rxjs';
 
 describe('GameMapInfoComponent', () => {
     let component: GameMapInfoComponent;
     let fixture: ComponentFixture<GameMapInfoComponent>;
-    let gameMapServiceMock: jasmine.SpyObj<GameMapService>;
-    let playerServiceMock: jasmine.SpyObj<PlayerService>;
     let gameServiceMock: jasmine.SpyObj<GameService>;
-    let activePlayerSubject: BehaviorSubject<string>;
-    let playersInGameSubject: BehaviorSubject<Map<string, boolean>>;
+
+    let activePlayerSubject: BehaviorSubject<PlayerStats | null>;
+    let currentPlayersSubject: BehaviorSubject<PlayerStats[]>;
+    let mapSubject: BehaviorSubject<{ length: number }>;
 
     beforeEach(async () => {
-        activePlayerSubject = new BehaviorSubject<string>('');
-        playersInGameSubject = new BehaviorSubject<Map<string, boolean>>(new Map());
-
-        gameMapServiceMock = jasmine.createSpyObj('GameMapService', ['getGameMapSize']);
-        gameMapServiceMock.getGameMapSize.and.returnValue(10);
-
-        playerServiceMock = jasmine.createSpyObj('PlayerService', [], {
-            activePlayer$: activePlayerSubject.asObservable(),
-        });
+        activePlayerSubject = new BehaviorSubject<PlayerStats | null>(null);
+        currentPlayersSubject = new BehaviorSubject<PlayerStats[]>([]);
+        mapSubject = new BehaviorSubject<{ length: number }>({ length: 10 });
 
         gameServiceMock = jasmine.createSpyObj('GameService', [], {
-            playersInGameMap$: playersInGameSubject.asObservable(),
+            activePlayer$: activePlayerSubject.asObservable(),
+            currentPlayers$: currentPlayersSubject.asObservable(),
+            map$: mapSubject.asObservable(),
         });
 
         await TestBed.configureTestingModule({
             imports: [CommonModule, GameMapInfoComponent],
-            providers: [
-                { provide: GameMapService, useValue: gameMapServiceMock },
-                { provide: PlayerService, useValue: playerServiceMock },
-                { provide: GameService, useValue: gameServiceMock },
-            ],
+            providers: [{ provide: GameService, useValue: gameServiceMock }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(GameMapInfoComponent);
@@ -45,101 +36,105 @@ describe('GameMapInfoComponent', () => {
         fixture.detectChanges();
     });
 
+    afterEach(() => {
+        fixture.destroy();
+    });
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should initialize with default values and get map size from service', () => {
+    it('should initialize with default values', () => {
         expect(component.mapSize).toBe(10);
-        expect(component.activePlayer).toBe('');
-        expect(component.playerCount).toBe(0);
-        expect(gameMapServiceMock.getGameMapSize).toHaveBeenCalled();
-    });
-
-    it('should update activePlayer when activePlayer$ emits', () => {
-        expect(component.activePlayer).toBe('');
-
-        activePlayerSubject.next('player1');
-        expect(component.activePlayer).toBe('player1');
-
-        activePlayerSubject.next('player2');
-        expect(component.activePlayer).toBe('player2');
-    });
-
-    it('should update playerCount when playersInGameMap$ emits an empty map', () => {
-        expect(component.playerCount).toBe(0);
-
-        playersInGameSubject.next(new Map());
+        expect(component.activePlayer).toBeNull();
         expect(component.playerCount).toBe(0);
     });
 
-    it('should update playerCount when playersInGameMap$ emits a map with some active players', () => {
-        const playersMap = new Map<string, boolean>([
-            ['player1', true],
-            ['player2', false],
-            ['player3', true],
-        ]);
+    it('should update map size when map$ emits a new value', () => {
+        mapSubject.next({ length: 15 });
+        fixture.detectChanges();
+        expect(component.mapSize).toBe(15);
+    });
 
-        playersInGameSubject.next(playersMap);
+    it('should update active player when activePlayer$ emits a new value', () => {
+        const testPlayer: PlayerStats = {
+            id: '1',
+            name: 'testUser',
+            avatar: '1',
+            life: 100,
+            attack: 10,
+            defense: 10,
+            speed: 5,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 5,
+            actions: 2,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+
+        activePlayerSubject.next(testPlayer);
+        fixture.detectChanges();
+        expect(component.activePlayer).toEqual(testPlayer);
+    });
+
+    it('should update player count when currentPlayers$ emits a new list', () => {
+        const players: PlayerStats[] = [
+            {
+                id: '1',
+                name: 'Player1',
+                avatar: '1',
+                life: 100,
+                attack: 10,
+                defense: 10,
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
+                movementPts: 5,
+                actions: 2,
+                wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
+            },
+            {
+                id: '2',
+                name: 'Player2',
+                avatar: '1',
+                life: 100,
+                attack: 10,
+                defense: 10,
+                speed: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
+                movementPts: 5,
+                actions: 2,
+                wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
+            },
+        ];
+
+        currentPlayersSubject.next(players);
+        fixture.detectChanges();
         expect(component.playerCount).toBe(2);
     });
 
-    it('should update playerCount when playersInGameMap$ emits a map with all active players', () => {
-        const playersMap = new Map<string, boolean>([
-            ['player1', true],
-            ['player2', true],
-            ['player3', true],
-        ]);
-
-        playersInGameSubject.next(playersMap);
-        expect(component.playerCount).toBe(3);
-    });
-
-    it('should update playerCount when playersInGameMap$ emits a map with no active players', () => {
-        const playersMap = new Map<string, boolean>([
-            ['player1', false],
-            ['player2', false],
-            ['player3', false],
-        ]);
-
-        playersInGameSubject.next(playersMap);
+    it('should update player count to zero when currentPlayers$ emits an empty list', () => {
+        currentPlayersSubject.next([]);
+        fixture.detectChanges();
         expect(component.playerCount).toBe(0);
     });
 
-    it('should handle multiple updates to activePlayer and playersInGameMap', () => {
-        activePlayerSubject.next('player1');
-        playersInGameSubject.next(new Map([['player1', true]]));
+    it('should clean up subscriptions on component destruction', () => {
+        spyOn(component['playersSub'], 'unsubscribe');
+        spyOn(component['activePlayerSub'], 'unsubscribe');
+        spyOn(component['mapSub'], 'unsubscribe');
 
-        expect(component.activePlayer).toBe('player1');
-        expect(component.playerCount).toBe(1);
+        fixture.destroy();
 
-        activePlayerSubject.next('player2');
-        const newMap = new Map<string, boolean>([
-            ['player1', true],
-            ['player2', true],
-        ]);
-        playersInGameSubject.next(newMap);
-
-        expect(component.activePlayer).toBe('player2');
-        expect(component.playerCount).toBe(2);
-    });
-
-    it('should test different map sizes', () => {
-        gameMapServiceMock.getGameMapSize.and.returnValue(20);
-
-        TestBed.resetTestingModule();
-        TestBed.configureTestingModule({
-            imports: [CommonModule, GameMapInfoComponent],
-            providers: [
-                { provide: GameMapService, useValue: gameMapServiceMock },
-                { provide: PlayerService, useValue: playerServiceMock },
-                { provide: GameService, useValue: gameServiceMock },
-            ],
-        });
-
-        const newFixture = TestBed.createComponent(GameMapInfoComponent);
-        newFixture.detectChanges();
-
-        expect(newFixture.componentInstance.mapSize).toBe(20);
+        expect(component['playersSub'].unsubscribe).toHaveBeenCalled();
+        expect(component['activePlayerSub'].unsubscribe).toHaveBeenCalled();
+        expect(component['mapSub'].unsubscribe).toHaveBeenCalled();
     });
 });

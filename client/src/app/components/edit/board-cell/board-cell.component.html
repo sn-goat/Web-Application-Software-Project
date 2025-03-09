@@ -18,9 +18,18 @@ class="cell"
             [src]="srcItem + cell.item + fileType"
             >
 
-            @if(showTooltip){<div class="tooltip">
-           {{ cell.item ? getItemDescription(cell.item) : '' }}
-    </div>}
+            @if(showTooltip){
+                <div class="tooltip">
+                    {{ cell.item ? getItemDescription(cell.item) : '' }}
+                </div>
+            }
+        }
+        @if (cell.player) {
+            <img
+            class="player-stack"
+            draggable="false"
+            [src]="cell.player"
+            >
         }
     </div>
 </div>

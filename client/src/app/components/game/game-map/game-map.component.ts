@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { Board } from '@common/board';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { Subscription } from 'rxjs';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Cell } from '@common/board';
 import { CommonModule } from '@angular/common';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
+import { GameService } from '@app/services/code/game.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-map',
@@ -12,18 +12,18 @@ import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.c
     styleUrl: './game-map.component.scss',
 })
 export class GameMapComponent implements OnInit, OnDestroy {
-    boardGame: Board;
-    private boardSubscription: Subscription;
+    boardGame: Cell[][];
 
-    private gameMapService: GameMapService = inject(GameMapService);
+    private gameService: GameService = inject(GameService);
+    private mapSub: Subscription;
 
     ngOnInit() {
-        this.boardSubscription = this.gameMapService.getGameMap().subscribe((board: Board) => {
-            this.boardGame = board;
+        this.mapSub = this.gameService.map$.pipe().subscribe((map: Cell[][]) => {
+            this.boardGame = map;
         });
     }
 
     ngOnDestroy() {
-        this.boardSubscription.unsubscribe();
+        this.mapSub.unsubscribe();
     }
 }

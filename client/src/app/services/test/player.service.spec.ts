@@ -23,6 +23,8 @@ describe('PlayerService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         },
         {
             id: '2',
@@ -37,6 +39,8 @@ describe('PlayerService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         },
         {
             id: '3',
@@ -51,6 +55,8 @@ describe('PlayerService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         },
     ];
 
@@ -105,6 +111,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '2',
@@ -119,6 +127,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -165,6 +175,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '2',
@@ -179,6 +191,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '3',
@@ -193,6 +207,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -221,6 +237,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '2',
@@ -235,6 +253,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -275,6 +295,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -323,6 +345,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -342,6 +366,8 @@ describe('PlayerService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
 
         service.editPlayer(nonExistentPlayer);
@@ -393,6 +419,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '2',
@@ -407,6 +435,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '3',
@@ -421,6 +451,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -462,6 +494,8 @@ describe('PlayerService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
 
         service.setPlayers([initialPlayer]);
@@ -479,6 +513,8 @@ describe('PlayerService', () => {
             movementPts: 4,
             actions: 3,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
 
         service.addPlayer(playerToAdd);
@@ -561,6 +597,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
             {
                 id: '2',
@@ -575,6 +613,8 @@ describe('PlayerService', () => {
                 movementPts: 5,
                 actions: 2,
                 wins: 0,
+                position: { x: 0, y: 0 },
+                spawnPosition: { x: 0, y: 0 },
             },
         ];
 
@@ -636,6 +676,8 @@ describe('PlayerService', () => {
             movementPts: 5,
             actions: 2,
             wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
         };
 
         service.removePlayer(nonExistentPlayer);

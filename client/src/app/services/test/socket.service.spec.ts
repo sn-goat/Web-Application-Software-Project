@@ -4,8 +4,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { SocketService } from '@app/services/code/socket.service';
-import { Board } from '@common/board';
-import { GameRoom } from '@common/game-room';
+import { Room } from '@common/game';
 import { PlayerStats } from '@common/player';
 
 // FakeSocket qui enregistre les callbacks sur chaque événement.
@@ -69,12 +68,6 @@ describe('SocketService', () => {
         expect(fakeSocket.emit).toHaveBeenCalledWith('joinRoom', { accessCode });
     });
 
-    it('should emit shareGameMap event with board', () => {
-        const board: Board = {} as Board;
-        service.shareGameMap(board);
-        expect(fakeSocket.emit).toHaveBeenCalledWith('shareGameMap', { board });
-    });
-
     it('should update currentPlayerId and emit shareCharacter event', () => {
         const accessCode = 'XYZ';
         const player: PlayerStats = { id: 'player1' } as PlayerStats;
@@ -84,8 +77,8 @@ describe('SocketService', () => {
     });
 
     it('should update gameRoom and emit value on onPlayerJoined observable', (done) => {
-        const room: GameRoom = {} as GameRoom;
-        service.onPlayerJoined().subscribe((data: { room: GameRoom }) => {
+        const room: Room = {} as Room;
+        service.onPlayerJoined().subscribe((data: { room: Room }) => {
             expect(data.room).toEqual(room);
             expect(service.gameRoom).toEqual(room);
             done();

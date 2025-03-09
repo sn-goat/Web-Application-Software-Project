@@ -6,87 +6,22 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { SocketService } from '@app/services/code/socket.service';
+import { MockRouter } from '@app/testHelpers/mockRouter';
+import { MockSocketService } from '@app/testHelpers/mockSocketService';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
-import { Subject } from 'rxjs';
 import { LobbyComponent } from './lobby.component';
-
-class FakeSocketService {
-    private playerJoinedSubject = new Subject<unknown>();
-    private playersListSubject = new Subject<PlayerStats[]>();
-    private playerRemovedSubject = new Subject<PlayerStats[]>();
-    private playerDisconnectedSubject = new Subject<PlayerStats[]>();
-    private roomLockedSubject = new Subject<unknown>();
-
-    getGameSize() {
-        return 15; // Retourne une taille numérique appropriée
-    }
-
-    getCurrentPlayerId(): string {
-        return 'current-player';
-    }
-
-    onPlayerJoined() {
-        return this.playerJoinedSubject.asObservable();
-    }
-
-    onPlayersList() {
-        return this.playersListSubject.asObservable();
-    }
-
-    onPlayerRemoved() {
-        return this.playerRemovedSubject.asObservable();
-    }
-
-    onPlayerDisconnected() {
-        return this.playerDisconnectedSubject.asObservable();
-    }
-
-    onRoomLocked() {
-        return this.roomLockedSubject.asObservable();
-    }
-
-    lockRoom(_accessCode: string): void {}
-    unlockRoom(_accessCode: string): void {}
-    removePlayer(_accessCode: string, _playerId: string): void {}
-    disconnect(_accessCode: string, _playerId: string): void {}
-
-    // Helpers to trigger events in tests
-    triggerPlayerJoined(data: unknown) {
-        this.playerJoinedSubject.next(data);
-    }
-
-    triggerPlayersList(players: PlayerStats[]) {
-        this.playersListSubject.next(players);
-    }
-
-    triggerPlayerRemoved(players: PlayerStats[]) {
-        this.playerRemovedSubject.next(players);
-    }
-
-    triggerPlayerDisconnected(players: PlayerStats[]) {
-        this.playerDisconnectedSubject.next(players);
-    }
-
-    triggerRoomLocked(data: unknown) {
-        this.roomLockedSubject.next(data);
-    }
-}
-
-class FakeRouter {
-    navigate = jasmine.createSpy('navigate').and.returnValue(Promise.resolve(true));
-}
 
 describe('LobbyComponent', () => {
     let component: LobbyComponent;
     let fixture: ComponentFixture<LobbyComponent>;
-    let socketService: FakeSocketService;
-    let router: FakeRouter;
+    let socketService: MockSocketService;
+    let router: MockRouter;
     let lobbyLimit: number;
 
     beforeEach(() => {
-        socketService = new FakeSocketService();
-        router = new FakeRouter();
+        socketService = new MockSocketService();
+        router = new MockRouter();
         lobbyLimit = getLobbyLimit(15);
 
         TestBed.configureTestingModule({
