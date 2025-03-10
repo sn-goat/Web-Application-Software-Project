@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
+
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
@@ -20,7 +21,7 @@ describe('GameService', () => {
             fightStarted$: new BehaviorSubject<boolean>(false).asObservable(),
         });
 
-        socketServiceMock = jasmine.createSpyObj('SocketService', ['getCurrentPlayerId']);
+        socketServiceMock = jasmine.createSpyObj('SocketService', ['getCurrentPlayer', 'getCurrentPlayerId']);
 
         dialogMock = jasmine.createSpyObj('MatDialog', ['open']);
 
@@ -90,6 +91,7 @@ describe('GameService', () => {
                 currentTurn: 0,
             } as Game;
             socketServiceMock.getCurrentPlayerId.and.returnValue('1');
+            socketServiceMock.getCurrentPlayer.and.returnValue({ id: '1', name: 'Player1' } as PlayerStats);
         });
 
         it('should set active player correctly', () => {
@@ -104,7 +106,7 @@ describe('GameService', () => {
             expect(service.map$.value).toBe(testGame.map);
             expect(service.currentPlayers$.value).toBe(testGame.players);
             expect(service.activePlayer$.value).toBe(testGame.players[0]);
-            expect(service.clientPlayer$.value).toBe(testPlayers[0]);
+            expect(service.clientPlayer$.value).toEqual(testPlayers[0]);
         });
     });
 

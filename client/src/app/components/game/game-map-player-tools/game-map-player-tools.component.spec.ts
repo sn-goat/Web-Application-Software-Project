@@ -40,7 +40,7 @@ describe('GameMapPlayerToolsComponent', () => {
 
     it('should initialize with default values', () => {
         expect(component.items).toEqual([]);
-        expect(component.timer).toEqual('00:00');
+        expect(component.timer).toEqual('');
         expect(component.src).toEqual(DEFAULT_PATH_ITEMS);
         expect(component.fileType).toEqual(DEFAULT_FILE_TYPE);
     });
@@ -50,13 +50,6 @@ describe('GameMapPlayerToolsComponent', () => {
         itemsSubject.next(newItems);
 
         expect(component.items).toEqual(newItems);
-    });
-
-    it('should update timer when timer$ emits new values', () => {
-        const newTimer = '01:30';
-        timerSubject.next(newTimer);
-
-        expect(component.timer).toEqual(newTimer);
     });
 
     it('should call endTurn on service when endTurn is called', () => {

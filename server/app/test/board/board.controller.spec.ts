@@ -80,14 +80,17 @@ describe('BoardController', () => {
     });
 
     it('oneBoard() should return NOT_FOUND if board does not exist', async () => {
-        boardService.getBoard.rejects();
+        boardService.getBoard.resolves(null);
 
         const res = {} as unknown as Response;
         res.status = (code) => {
             expect(code).toEqual(HttpStatus.NOT_FOUND);
             return res;
         };
-        res.send = () => res;
+        res.send = (msg) => {
+            expect(msg).toEqual('Board with name "Nonexistent Board" not found');
+            return res;
+        };
 
         await controller.oneBoard('Nonexistent Board', res);
     });

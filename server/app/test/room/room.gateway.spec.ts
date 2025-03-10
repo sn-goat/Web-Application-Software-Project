@@ -21,6 +21,7 @@ describe('RoomGateway', () => {
             shareCharacter: jest.fn(),
             removePlayer: jest.fn(),
             disconnectPlayer: jest.fn(),
+            getRoom: jest.fn(),
         };
 
         // Create a fake server that returns an object with an emit method.
@@ -53,6 +54,31 @@ describe('RoomGateway', () => {
             expect(roomService.createRoom).toHaveBeenCalledWith(payload.organizerId, payload.size);
             expect(client.join).toHaveBeenCalledWith(room.accessCode);
             expect(client.emit).toHaveBeenCalledWith('roomCreated', room);
+        });
+    });
+
+    describe('handleGetRoom', () => {
+        it('should emit RoomError when room is not found', () => {
+            const payload = { accessCode: 'NON_EXISTENT_ROOM' };
+            // Simulate that getRoom returns null (room not found)
+            (roomService.getRoom as jest.Mock).mockReturnValue(null);
+
+            gateway.handleGetRoom(client as Socket, payload);
+
+            // Expect the client to receive the error event with the correct message
+            expect(client.emit).toHaveBeenCalledWith('roomError', { message: 'Salle introuvable.' });
+        });
+
+        it('should emit RoomData when room is found', () => {
+            const payload = { accessCode: 'ROOM123' };
+            const room = { accessCode: 'ROOM123', name: 'Test Room' }; // sample room object
+            // Simulate that getRoom returns a valid room
+            (roomService.getRoom as jest.Mock).mockReturnValue(room);
+
+            gateway.handleGetRoom(client as Socket, payload);
+
+            // Expect the client to receive the room data event with the room object
+            expect(client.emit).toHaveBeenCalledWith('roomData', room);
         });
     });
 

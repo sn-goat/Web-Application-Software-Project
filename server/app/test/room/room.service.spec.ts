@@ -57,6 +57,23 @@ describe('RoomService', () => {
         });
     });
 
+    // test for getRoom
+    describe('getRoom', () => {
+        it('should return a room when it exists', () => {
+            const organizerId = 'org1';
+            const size = 10;
+            const room = service.createRoom(organizerId, size);
+
+            const found = service.getRoom(room.accessCode);
+            expect(found).toEqual(room);
+        });
+
+        it('should return null when room does not exist', () => {
+            const found = service.getRoom('nonexistent');
+            expect(found).toBeNull();
+        });
+    });
+
     describe('removePlayer', () => {
         it('should remove a player from a room', () => {
             const organizerId = 'org1';

@@ -1,16 +1,20 @@
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Game, Avatar } from '@common/game';
+import { Avatar, Game } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { BoardService } from './board/board.service';
+import { TimerService } from './timer/timer.service';
 
 @Injectable()
 export class GameService {
     private currentGames: Map<string, Game>;
     private logger: Logger = new Logger(GameService.name);
 
-    constructor(private boardService: BoardService) {
+    constructor(
+        private boardService: BoardService,
+        private timerService: TimerService,
+    ) {
         this.currentGames = new Map();
     }
 
@@ -36,11 +40,7 @@ export class GameService {
     // }
     changeDoorState(accessCode: string, position: Vec2) {
         const cell: Cell = this.getCellAt(accessCode, position);
-        if (cell.tile === Tile.CLOSED_DOOR) {
-            cell.tile = Tile.OPENED_DOOR;
-        } else if (cell.tile === Tile.OPENED_DOOR) {
-            cell.tile = Tile.CLOSED_DOOR;
-        }
+        cell.tile = cell.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
         return cell;
     }
 
@@ -62,13 +62,14 @@ export class GameService {
             this.logger.error('Board not found');
             throw new Error('Board not found');
         } else {
-            this.logger.log('Cell: ' + board.board[0][0].tile);
+            this.logger.log(`New game created, accessCode: ${accessCode} - organizerId: ${organizerId}`);
             this.currentGames.set(accessCode, {
                 organizerId,
                 players: [],
                 map: board.board,
                 currentTurn: 0,
                 isDebugMode: false,
+                accessCode,
             });
         }
     }
@@ -104,6 +105,19 @@ export class GameService {
         return this.currentGames.get(accessCode).map[position.y][position.x];
     }
 
+    startTurn(accessCode: string) {
+        this.timerService.startTimer(accessCode, 30, 'movement');
+    }
+
+    isGameAdmin(accessCode: string, playerId: string) {
+        return this.currentGames.get(accessCode).organizerId === playerId;
+    }
+
+    getPlayerTurn(accessCode: string): string {
+        const game = this.currentGames.get(accessCode);
+        return game ? game.players[game.currentTurn].id : undefined;
+    }
+
     private sortPlayersBySpeed(players: PlayerStats[]): PlayerStats[] {
         return players.sort((a, b) => b.speed - a.speed);
     }
@@ -119,7 +133,6 @@ export class GameService {
         });
         return spawnPoints;
     }
-
     private assignSpawnPoints(players: PlayerStats[], spawnPoints: Vec2[], map: Cell[][]): Vec2[] {
         // Mélanger les points de spawn
         const shuffledSpawnPoints = [...spawnPoints];

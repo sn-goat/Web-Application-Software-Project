@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE } from '@app/constants/path';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';

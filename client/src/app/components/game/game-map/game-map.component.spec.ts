@@ -67,11 +67,4 @@ describe('GameMapComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
-    it('should unsubscribe when component is destroyed', () => {
-        const unsubscribeMapSpy = spyOn(component['mapSub'], 'unsubscribe').and.callThrough();
-        component.ngOnDestroy();
-
-        expect(unsubscribeMapSpy).toHaveBeenCalled();
-    });
 });

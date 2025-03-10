@@ -36,6 +36,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private router = inject(Router);
+    private currentPlayerId: string | undefined;
 
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
@@ -47,11 +48,24 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     onPageShow(): void {
         this.router.navigate(['/home']).then(() => window.location.reload());
     }
+    // private currentPlayerTurnId: string | undefined;
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
             this.showFightInterface = show;
         });
+        this.gameService.clientPlayer$.subscribe((player) => {
+            this.currentPlayerId = player?.id;
+        });
+        // this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
+        //     this.currentPlayerTurnId = playerId.playerTurnId;
+        //     // eslint-disable-next-line no-console
+        //     // console.log(this.currentPlayerTurnId);
+        // });
+
+        if (this.currentPlayerId) {
+            this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
+        }
     }
 
     ngAfterViewInit(): void {
