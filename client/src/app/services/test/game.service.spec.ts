@@ -6,7 +6,7 @@ import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Cell } from '@common/board';
-import { Game } from '@common/game';
+import { Game, PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject, of } from 'rxjs';
 
@@ -95,8 +95,11 @@ describe('GameService', () => {
         });
 
         it('should set active player correctly', () => {
+            // On met à jour la liste des joueurs en simulant ceux présents dans la partie
             service.currentPlayers$.next(testPlayers);
-            service.setActivePlayer(1);
+            // On appelle updateTurn avec le joueur qu'on souhaite définir comme actif
+            // Ici, on fournit également un path vide puisque ce paramètre n'est pas utilisé pour la mise à jour de l'activePlayer
+            service.updateTurn(testPlayers[1], new Map<string, PathInfo>());
             expect(service.activePlayer$.value).toEqual(testPlayers[1]);
         });
 

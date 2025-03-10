@@ -20,7 +20,7 @@ export class GameService {
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
-    // private path: Map<string, PathInfo> = new Map();
+    private path: Map<string, PathInfo> = new Map();
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -56,12 +56,11 @@ export class GameService {
     }
 
     updateTurn(player: PlayerStats, path: Map<string, PathInfo>): void {
-        console.log('Update turn : ', player.id);
         this.activePlayer$.next(player);
+        this.path = path;
     }
 
     movePlayer(position: Vec2, direction: Vec2): void {
-        console.log('Move player : ', position, direction);
         const map: Cell[][] = this.map$.value;
         const player = this.activePlayer$.value;
         if (player) {
@@ -72,9 +71,11 @@ export class GameService {
             this.map$.next(map);
         }
     }
-    // setPath(path: Map<string, PathInfo>): void {
-    //     this.path = path;
-    // }
+
+    setPath(path: Map<string, PathInfo>): void {
+        this.path = path;
+        path = this.path;
+    }
 
     async confirmAndAbandonGame(name: string): Promise<boolean> {
         return new Promise((resolve) => {

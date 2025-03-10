@@ -3,7 +3,7 @@
 import { TestBed } from '@angular/core/testing';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { MockSocketService } from '@app/testHelpers/mockSocketService';
+import { MockSocketService } from '@app/helpers/mockSocketService';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { first } from 'rxjs/operators';
