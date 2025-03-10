@@ -106,7 +106,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Starting turn');
         const turn = this.gameService.configureTurn(accessCode);
         this.logger.log(`Next player turn id: ${turn.player.id}`);
-        this.server.to(accessCode).emit(TurnEvents.PlayerTurn, { turn });
+        this.server.to(accessCode).emit(TurnEvents.PlayerTurn, turn);
         setTimeout(() => {
             this.gameService.startTimer(accessCode);
         }, THREE_SECONDS_IN_MS);

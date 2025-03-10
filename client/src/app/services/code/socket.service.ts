@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
-import { Game, Room, TurnInfo } from '@common/game';
+import { Game, PathInfo, Room, TurnInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
@@ -158,7 +158,11 @@ export class SocketService {
 
     onTurnUpdate(): Observable<TurnInfo> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.PlayerTurn, (data: { turn: TurnInfo }) => observer.next(data.turn));
+            this.socket.on(TurnEvents.PlayerTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
+                const receivedMap = new Map(Object.entries(turn.path));
+                observer.next({ player: turn.player, path: receivedMap });
+                console.log(turn);
+            });
         });
     }
 

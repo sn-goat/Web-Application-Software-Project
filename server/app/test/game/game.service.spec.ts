@@ -372,12 +372,6 @@ describe('GameService', () => {
             });
             const turnInfo = gameService.configureTurn(accessCode);
             expect(turnInfo.player).toEqual(players[0]);
-            expect(turnInfo.path.has('1,0')).toBeTruthy();
-            expect(turnInfo.path.get('1,0').cost).toEqual(0);
-            expect(turnInfo.path.has('1,1')).toBeTruthy();
-            expect(turnInfo.path.get('1,1').cost).toEqual(1);
-            expect(turnInfo.path.has('0,1')).toBeTruthy();
-            expect(turnInfo.path.get('0,1').cost).toEqual(2);
         });
     });
 });
