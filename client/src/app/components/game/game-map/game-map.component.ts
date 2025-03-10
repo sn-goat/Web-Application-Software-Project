@@ -41,13 +41,13 @@ export class GameMapComponent implements OnInit, OnDestroy {
     onCellClicked(cell: Cell) {
         if (this.actionMode) {
             // eslint-disable-next-line no-console
-            console.log('Action mode active: Clicked cell', cell);
+            // console.log('Action mode active: Clicked cell', cell);
             this.selectedCell = cell;
             // Forward the cell to a service if needed.
             this.actionMode = false;
-        } else {
-            // eslint-disable-next-line no-console
-            console.log('Click ignored (not in Action mode).');
+            // } else {
+            //     // eslint-disable-next-line no-console
+            //     console.log('Click ignored (not in Action mode).');
         }
     }
 
