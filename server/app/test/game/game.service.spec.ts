@@ -4,7 +4,7 @@ import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Game, Avatar } from '@common/game';
+import { Game, Avatar, PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
@@ -305,4 +305,73 @@ describe('GameService', () => {
             expect(result.size).toBe(1);
         });
     });
+
+    describe('isGameAdmin', () => {
+        it('should return true if the player is the game admin', () => {
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players: [],
+                map: dummyMap,
+                currentTurn: 0,
+                isDebugMode: false,
+            });
+            expect(gameService.isGameAdmin(accessCode, 'org1')).toBe(true);
+        });
+
+        it('should return false if the player is not the game admin', () => {
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players: [],
+                map: dummyMap,
+                currentTurn: 0,
+                isDebugMode: false,
+            });
+            expect(gameService.isGameAdmin(accessCode, 'org2')).toBe(false);
+        });
+    });
+
+    describe('getPlayerTurn', () => {
+        it("should return the current player's turn", () => {
+            const players: PlayerStats[] = [
+                { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1' } as PlayerStats,
+                { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2' } as PlayerStats,
+            ];
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players,
+                map: dummyMap,
+                currentTurn: 1,
+                isDebugMode: false,
+            });
+            expect(gameService.getPlayerTurn(accessCode)).toEqual(players[1]);
+        });
+
+        it('should return undefined if no game exists for the given access code', () => {
+            expect(gameService.getPlayerTurn('INVALID_CODE')).toBeUndefined();
+        });
+    });
+
+    describe('configureTurn', () => {
+        it('should configure the turn and return the correct TurnInfo', () => {
+            const players: PlayerStats[] = [
+                { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1' } as PlayerStats,
+                { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2' } as PlayerStats,
+            ];
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players,
+                map: dummyMap,
+                currentTurn: 0,
+                isDebugMode: false,
+            });
+            const turnInfo = gameService.configureTurn(accessCode);
+            expect(turnInfo.player).toEqual(players[0]);
+            expect(turnInfo.path).toEqual(new Map<string, PathInfo>());
+        });
+    });
+
 });

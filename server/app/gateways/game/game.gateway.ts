@@ -30,7 +30,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TurnEvents.Move)
     handleBroadcastMove(payload: { accessCode: string; position: Vec2; direction: Vec2 }) {
-        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { position: payload.position, direction: payload.player });
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { position: payload.position, direction: payload.direction });
     }
 
     @SubscribeMessage(GameEvents.Create)
