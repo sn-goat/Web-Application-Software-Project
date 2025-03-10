@@ -40,6 +40,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastDoor, { position: payload.position, newState });
     }
 
+    @SubscribeMessage(GameEvents.Quit)
+    async handleGameQuit(client: Socket, payload: { accessCode: string; playerId: string }) {
+        const game = await this.gameService.quitGame(payload.accessCode, payload.playerId);
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game });
+    }
+
     // @SubscribeMessage(TurnEvents.Move)
     // handlePlayerMovement(client: Socket, payload: { accessCode: string; playerId: string; direction: Vec2 }) {
     //     this.gameService.movePlayer(payload.accessCode, payload.playerId, payload.direction);
@@ -59,7 +65,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     // handlePlayerAttack(client: Socket, payload: { accessCode: string; playerId: string }) {
     //     this.gameService.playerAttack(payload.accessCode, payload.playerId);
     // }
-
     afterInit(server: Server) {
         this.logger.log('GameGateway Initialized' + server);
     }

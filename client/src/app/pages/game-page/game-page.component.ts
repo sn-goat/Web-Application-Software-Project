@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild, inject, HostListener } from '@angular/core';
+import { Router } from '@angular/router';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 import { GameMapInfoComponent } from '@app/components/game/game-map-info/game-map-info.component';
@@ -9,6 +10,7 @@ import { GameMapPlayerComponent } from '@app/components/game/game-map-player/gam
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
+import { SocketService } from '@app/services/code/socket.service';
 
 @Component({
     selector: 'app-game-page',
@@ -32,6 +34,19 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     private gameService = inject(GameService);
     private playerService = inject(PlayerService);
+    private socketService = inject(SocketService);
+    private router = inject(Router);
+
+    @HostListener('window:beforeunload', ['$event'])
+    onBeforeUnload(): void {
+        this.socketService.disconnect(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
+        this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
+    }
+
+    @HostListener('window:pageshow', ['$event'])
+    onPageShow(): void {
+        this.router.navigate(['/home']).then(() => window.location.reload());
+    }
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
@@ -45,6 +60,8 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.headerBar.getBack = async () => {
             const confirmed = await this.gameService.confirmAndAbandonGame(this.playerService.getPlayerName());
             if (confirmed) {
+                this.socketService.disconnect(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
+                this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
                 return originalAbandonMethod.call(this.headerBar);
             }
         };

@@ -27,6 +27,11 @@ export class GameService {
         this.fightLogicService.fightStarted$.subscribe((started) => {
             this.showFightInterface$.next(started);
         });
+
+        this.socketService.onQuitGame().subscribe((game: Game) => {
+            this.currentPlayers$.next(game.players);
+            this.map$.next(game.map);
+        });
     }
 
     isPlayerInGame(player: PlayerStats): boolean {

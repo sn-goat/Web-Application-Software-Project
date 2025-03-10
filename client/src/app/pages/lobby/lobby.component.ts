@@ -66,7 +66,7 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     confirm("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
                 }
-                this.router.navigate(['/home']);
+                this.router.navigate(['/home']).then(() => window.location.reload());
             }
         });
 
@@ -76,7 +76,7 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     confirm("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                 }
-                this.router.navigate(['/home']);
+                this.router.navigate(['/home']).then(() => window.location.reload());
             }
         });
 

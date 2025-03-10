@@ -113,6 +113,10 @@ export class SocketService {
         this.socket.emit(TurnEvents.Move, { accessCode, playerId, direction });
     }
 
+    quitGame(accessCode: string, playerId: string) {
+        this.socket.emit(GameEvents.Quit, { accessCode, playerId });
+    }
+
     changeDoorState(accessCode: string, position: Vec2) {
         this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position });
     }
@@ -192,12 +196,22 @@ export class SocketService {
         });
     }
 
+    onQuitGame(): Observable<Game> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.BroadcastQuitGame, (game: { game: Game }) => observer.next(game.game));
+        });
+    }
+
     getCurrentPlayerId(): string {
         return this.currentPlayerId;
     }
 
     getGameSize(): number {
         return this.size;
+    }
+
+    getGameRoom(): Room {
+        return this.gameRoom;
     }
 
     disconnect(accessCode: string, playerId: string) {

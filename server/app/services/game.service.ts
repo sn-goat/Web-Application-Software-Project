@@ -73,6 +73,33 @@ export class GameService {
         }
     }
 
+    async quitGame(accessCode: string, playerId: string) {
+        const game = this.currentGames.get(accessCode);
+        if (game) {
+            const index = game.players.findIndex((player) => player.id === playerId);
+
+            if (index >= 0) {
+                const player = game.players[index];
+                if (player.id === game.organizerId) {
+                    for (let i = game.players.length - 1; i >= 0; i--) {
+                        const p = game.players[i];
+                        this.logger.log(`Player ${p.id} quit the game`);
+                        game.map[p.position.y][p.position.x].player = Avatar.Default;
+                        game.players.splice(i, 1);
+                    }
+                    this.currentGames.delete(accessCode);
+                    this.logger.log(`Game ${accessCode} deleted`);
+                } else {
+                    game.map[player.position.y][player.position.x].player = Avatar.Default;
+                    game.players.splice(index, 1);
+                    this.logger.log(`Player ${playerId} quit the game`);
+                }
+            }
+            return game;
+        }
+        return null;
+    }
+
     getCellAt(accessCode: string, position: Vec2): Cell {
         return this.currentGames.get(accessCode).map[position.y][position.x];
     }
