@@ -59,7 +59,7 @@ describe('SocketService', () => {
         const organizerId = fakeSocket.id;
         service.createRoom(size);
         expect(service.getGameSize()).toEqual(size);
-        expect(fakeSocket.emit).toHaveBeenCalledWith('createRoom', { organizerId , size });
+        expect(fakeSocket.emit).toHaveBeenCalledWith('createRoom', { organizerId, size });
     });
 
     it('should emit joinRoom event with accessCode', () => {

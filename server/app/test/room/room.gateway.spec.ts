@@ -26,7 +26,7 @@ describe('RoomGateway', () => {
             getRoom: jest.fn(),
         };
         eventEmitter = new EventEmitter2(); // Instantiate EventEmitter2
-        
+
         // Create a fake server that returns an object with an emit method.
         server = {
             to: jest.fn().mockReturnValue({

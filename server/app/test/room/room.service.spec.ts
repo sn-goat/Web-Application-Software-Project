@@ -14,7 +14,7 @@ describe('RoomService', () => {
     let service: RoomService;
 
     beforeEach(() => {
-        service = new RoomService(new EventEmitter2);
+        service = new RoomService(new EventEmitter2());
         jest.clearAllMocks();
     });
 
@@ -335,7 +335,7 @@ describe('RoomService - non-existent room handling', () => {
     let loggerErrorSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        service = new RoomService(new EventEmitter2);
+        service = new RoomService(new EventEmitter2());
         // Remplacer le logger par un spy en utilisant jest.spyOn
         loggerErrorSpy = jest.spyOn((service as any).logger, 'error');
     });
