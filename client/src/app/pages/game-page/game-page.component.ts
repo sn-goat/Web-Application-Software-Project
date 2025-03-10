@@ -69,17 +69,4 @@ export class GamePageComponent implements OnInit, AfterViewInit {
             }
         };
     }
-
-    movePlayer() {
-        const falseMovement = this.generateSamplePath();
-        this.socketService.movePlayer(this.gameService.getAccessCode(), falseMovement);
-    }
-
-    private generateSamplePath(): Vec2[] {
-        const path: Vec2[] = [];
-        for (let x = 0; x < 10; x++) {
-            path.push({ x, y: 0 });
-        }
-        return path;
-    }
 }
