@@ -109,14 +109,20 @@ export class RoomService {
             this.logger.error(`Room with access code ${accessCode} not found.`);
             return null;
         }
-        const sameNameCount = room.players.filter((p) => p.name === player.name || p.name.startsWith(`${player.name}-`)).length;
 
-        if (sameNameCount > 0) {
-            player.name = `${player.name}-${sameNameCount + 1}`;
+        const existingNames = room.players.map((p) => p.name);
+        let baseName = player.name;
+        let nameToAssign = baseName;
+        let suffix = 1;
+
+        while (existingNames.includes(nameToAssign)) {
+            suffix++;
+            nameToAssign = `${baseName}-${suffix}`;
         }
 
+        player.name = nameToAssign;
         room.players.push(player);
-        this.logger.log(`PlayerStats ${player.id} joined room ${accessCode}`);
+        this.logger.log(`PlayerStats ${player.id} joined room ${accessCode} with name ${player.name}`);
 
         const maxPlayers = getLobbyLimit(room.mapSize);
         this.logger.log(`Room ${accessCode} has ${room.players.length} players. Max players allowed: ${maxPlayers}`);
