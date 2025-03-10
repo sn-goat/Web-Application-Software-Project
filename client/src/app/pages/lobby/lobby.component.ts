@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { GameService } from '@app/services/code/game.service';
@@ -9,6 +9,10 @@ import { Room, Game } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { map } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Alert } from '@app/constants/enums';
 
 @Component({
     selector: 'app-lobby',
@@ -23,6 +27,8 @@ export class LobbyComponent implements OnInit {
     isAdmin: boolean = false;
     maxPlayers: number = 0;
     diceToImageLink = diceToImageLink;
+
+    private readonly dialog = inject(MatDialog);
 
     constructor(
         private socketService: SocketService,
@@ -60,21 +66,21 @@ export class LobbyComponent implements OnInit {
             this.isRoomLocked = true;
         });
 
-        this.socketService.onPlayerRemoved().subscribe((players: PlayerStats[]) => {
+        this.socketService.onPlayerRemoved().subscribe(async (players: PlayerStats[]) => {
             this.players = players;
             if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                 if (!this.isAdmin) {
-                    confirm("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
+                    await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
                 }
                 this.router.navigate(['/home']).then(() => window.location.reload());
             }
         });
 
-        this.socketService.onPlayerDisconnected().subscribe((players: PlayerStats[]) => {
+        this.socketService.onPlayerDisconnected().subscribe(async (players: PlayerStats[]) => {
             this.players = players;
             if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                 if (!this.isAdmin) {
-                    confirm("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
+                    await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                 }
                 this.router.navigate(['/home']).then(() => window.location.reload());
             }
@@ -123,5 +129,20 @@ export class LobbyComponent implements OnInit {
 
     getCurrentPlayerId(): string {
         return this.socketService.getCurrentPlayerId();
+    }
+
+    async warning(message: string): Promise<void> {
+        await this.openDialog(message, Alert.WARNING);
+    }
+
+    private async openDialog(message: string, type: Alert): Promise<boolean> {
+        const dialogRef = this.dialog.open(AlertComponent, {
+            data: { type, message },
+            disableClose: true,
+            hasBackdrop: true,
+            backdropClass: 'backdrop-block',
+            panelClass: 'alert-dialog',
+        });
+        return firstValueFrom(dialogRef.afterClosed());
     }
 }

@@ -63,7 +63,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage(GameEvents.Quit)
     async handleGameQuit(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game = await this.gameService.quitGame(payload.accessCode, payload.playerId);
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game });
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game: game.game, lastPlayer: game.lastPlayer });
     }
 
     // @SubscribeMessage(TurnEvents.Move)

@@ -29,9 +29,9 @@ export class GameService {
             this.showFightInterface$.next(started);
         });
 
-        this.socketService.onQuitGame().subscribe((game: Game) => {
-            this.currentPlayers$.next(game.players);
-            this.map$.next(game.map);
+        this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
+            this.currentPlayers$.next(game.game.players);
+            this.map$.next(game.game.map);
         });
     }
 

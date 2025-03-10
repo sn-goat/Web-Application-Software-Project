@@ -76,17 +76,16 @@ export class GameService {
 
     async quitGame(accessCode: string, playerId: string) {
         const game = this.currentGames.get(accessCode);
+        const lastPlayer: PlayerStats = game.players.filter((player) => player.id !== playerId)[0];
         if (game) {
-            const index = game.players.findIndex((player) => player.id === playerId);
-
+            const index = game.players.findIndex((playerFound: PlayerStats) => playerFound.id === playerId);
             if (index >= 0) {
                 const player = game.players[index];
-                if (player.id === game.organizerId) {
+                if (game.players.length === 2) {
                     for (let i = game.players.length - 1; i >= 0; i--) {
-                        const p = game.players[i];
-                        this.logger.log(`Player ${p.id} quit the game`);
-                        game.map[p.position.y][p.position.x].player = Avatar.Default;
+                        game.map[player.position.y][player.position.x].player = Avatar.Default;
                         game.players.splice(i, 1);
+                        this.logger.log(`Player ${playerId} quit the game`);
                     }
                     this.currentGames.delete(accessCode);
                     this.logger.log(`Game ${accessCode} deleted`);
@@ -96,7 +95,7 @@ export class GameService {
                     this.logger.log(`Player ${playerId} quit the game`);
                 }
             }
-            return game;
+            return { game, lastPlayer };
         }
         return null;
     }
@@ -115,7 +114,7 @@ export class GameService {
 
     getPlayerTurn(accessCode: string): string {
         const game = this.currentGames.get(accessCode);
-        return game ? game.players[game.currentTurn].id : undefined;
+        return game ? game.players[game.currentTurn].id : '';
     }
 
     private sortPlayersBySpeed(players: PlayerStats[]): PlayerStats[] {

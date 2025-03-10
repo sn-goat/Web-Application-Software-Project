@@ -11,6 +11,12 @@ import { GameMapComponent } from '@app/components/game/game-map/game-map.compone
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
+import { Game } from '@common/game';
+import { PlayerStats } from '@common/player';
+import { firstValueFrom } from 'rxjs';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { MatDialog } from '@angular/material/dialog';
+import { Alert } from '@app/constants/enums';
 
 @Component({
     selector: 'app-game-page',
@@ -36,19 +42,19 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private router = inject(Router);
+    private readonly dialog = inject(MatDialog);
     private currentPlayerId: string | undefined;
+    private currentPlayerTurnId: string | undefined;
 
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
-        this.socketService.disconnect(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
         this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
     }
 
     @HostListener('window:pageshow', ['$event'])
-    onPageShow(): void {
-        this.router.navigate(['/home']).then(() => window.location.reload());
+    async onPageShow(): Promise<void> {
+        await this.warning("Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.");
     }
-    // private currentPlayerTurnId: string | undefined;
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
@@ -57,15 +63,23 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
-        // this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
-        //     this.currentPlayerTurnId = playerId.playerTurnId;
-        //     // eslint-disable-next-line no-console
-        //     // console.log(this.currentPlayerTurnId);
-        // });
+        this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
+            this.currentPlayerTurnId = playerId.playerTurnId;
+            // eslint-disable-next-line no-console
+            console.log(this.currentPlayerTurnId);
+        });
 
         if (this.currentPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
         }
+
+        this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
+            this.socketService.onQuitRoomGame().subscribe(async (players: PlayerStats[]) => {
+                if (!game.game.players.length && !players.length && game.lastPlayer.id === this.currentPlayerId) {
+                    await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
+                }
+            });
+        });
     }
 
     ngAfterViewInit(): void {
@@ -74,10 +88,25 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.headerBar.getBack = async () => {
             const confirmed = await this.gameService.confirmAndAbandonGame(this.playerService.getPlayerName());
             if (confirmed) {
-                this.socketService.disconnect(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
                 this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
                 return originalAbandonMethod.call(this.headerBar);
             }
         };
+    }
+
+    async warning(message: string): Promise<void> {
+        await this.openDialog(message, Alert.WARNING);
+        this.router.navigate(['/home']).then(() => window.location.reload());
+    }
+
+    private async openDialog(message: string, type: Alert): Promise<boolean> {
+        const dialogRef = this.dialog.open(AlertComponent, {
+            data: { type, message },
+            disableClose: true,
+            hasBackdrop: true,
+            backdropClass: 'backdrop-block',
+            panelClass: 'alert-dialog',
+        });
+        return firstValueFrom(dialogRef.afterClosed());
     }
 }
