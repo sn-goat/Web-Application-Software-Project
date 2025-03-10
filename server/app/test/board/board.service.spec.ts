@@ -10,57 +10,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
 
-describe('BoardServicePopulate', () => {
-    let service: BoardService;
-    let boardModel: Model<BoardDocument>;
-
-    beforeEach(async () => {
-        // notice that only the functions we call from the model are mocked
-        // we can´t use sinon because mongoose Model is an interface
-        boardModel = {
-            countDocuments: jest.fn(),
-            insertMany: jest.fn(),
-            create: jest.fn(),
-            find: jest.fn(),
-            findOne: jest.fn(),
-            deleteOne: jest.fn(),
-            update: jest.fn(),
-            updateOne: jest.fn(),
-        } as unknown as Model<BoardDocument>;
-
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                BoardService,
-                Logger,
-                {
-                    provide: getModelToken(Board.name),
-                    useValue: boardModel,
-                },
-            ],
-        }).compile();
-
-        service = module.get<BoardService>(BoardService);
-    });
-
-    it('should be defined', () => {
-        expect(service).toBeDefined();
-    });
-
-    it('database should be populated when there is no data', async () => {
-        jest.spyOn(boardModel, 'countDocuments').mockResolvedValue(0);
-        const spyPopulateDB = jest.spyOn(service, 'populateDB');
-        await service.start();
-        expect(spyPopulateDB).toHaveBeenCalled();
-    });
-
-    it('database should not be populated when there is some data', async () => {
-        jest.spyOn(boardModel, 'countDocuments').mockResolvedValue(1);
-        const spyPopulateDB = jest.spyOn(service, 'populateDB');
-        await service.start();
-        expect(spyPopulateDB).not.toHaveBeenCalled();
-    });
-});
-
 describe('BoardService', () => {
     let boardModel: Model<BoardDocument>;
     let service: BoardService;
@@ -70,7 +19,6 @@ describe('BoardService', () => {
     const MOREHALFSIZE = 8;
 
     beforeAll(async () => {
-        const timeoutdelay = 200;
         mongoServer = await MongoMemoryServer.create();
 
         const module: TestingModule = await Test.createTestingModule({
@@ -88,13 +36,6 @@ describe('BoardService', () => {
         boardModel = module.get<Model<BoardDocument>>(getModelToken(Board.name));
         service = module.get<BoardService>(BoardService);
         connection = module.get<Connection>(getConnectionToken());
-
-        /* 
-           Delay here to ensure that our database is properly initialized,
-           as the start function is asynchronous but cannot be awaited since it's 
-           in the constructor. 
-        */
-        await new Promise((resolve) => setTimeout(resolve, timeoutdelay));
     });
 
     beforeEach(async () => {
@@ -111,13 +52,17 @@ describe('BoardService', () => {
     });
 
     it('getAllBoards() should return all boards', async () => {
-        await service.populateDB();
+        if ((await boardModel.countDocuments()) === 0) {
+            await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
+        }
         const boards = await service.getAllBoards();
         expect(boards.length).toEqual(MOCK_STORED_BOARD_ARRAY.length);
     });
 
     it('getBoard() should return a specific board', async () => {
-        await service.populateDB();
+        if ((await boardModel.countDocuments()) === 0) {
+            await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
+        }
         const board = await service.getBoard(MOCK_STORED_BOARD_ARRAY[0].name);
         expect(board).toMatchObject(MOCK_STORED_BOARD_ARRAY[0]);
     });
@@ -238,7 +183,9 @@ describe('BoardService', () => {
     });
 
     it('deleteBoardByName() should delete a specific board', async () => {
-        await service.populateDB();
+        if ((await boardModel.countDocuments()) === 0) {
+            await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
+        }
         await service.deleteBoardByName(MOCK_STORED_BOARD_ARRAY[0].name);
         const boards = await boardModel.find({});
         expect(boards.length).toBe(MOCK_STORED_BOARD_ARRAY.length - 1);
@@ -249,7 +196,7 @@ describe('BoardService', () => {
     });
 
     it('deleteAllBoards should delete all boards', async () => {
-        await service.populateDB();
+        await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
         await service.deleteAllBoards();
         const boards = await service.getAllBoards();
         expect(boards.length).toEqual(0);

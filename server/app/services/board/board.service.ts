@@ -1,7 +1,6 @@
 import { Board, BoardDocument } from '@app/model/database/board';
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
 import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
-import { MOCK_STORED_BOARD_ARRAY } from '@app/test/helpers/board/stored-board.mock';
 import { Cell, Vec2 } from '@common/board';
 import { Tile, Visibility } from '@common/enums';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
@@ -14,26 +13,12 @@ export class BoardService {
         private logger: Logger,
     ) {}
 
-    async start() {
-        if ((await this.boardModel.countDocuments()) === 0) {
-            await this.populateDB();
-        }
-    }
-
     async getAllBoards(): Promise<Board[]> {
         return this.boardModel.find({});
     }
 
     async getBoard(boardName: string): Promise<Required<Board>> {
         return this.boardModel.findOne({ name: boardName });
-    }
-
-    async populateDB(): Promise<void> {
-        try {
-            await this.boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
-        } catch (error) {
-            return Promise.reject(`Error while trying to populate: ${error}`);
-        }
     }
 
     async addBoard(board: CreateBoardDto): Promise<void> {
