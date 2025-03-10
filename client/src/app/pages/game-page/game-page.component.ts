@@ -10,6 +10,8 @@ import { GameMapComponent } from '@app/components/game/game-map/game-map.compone
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { PlayerService } from '@app/services/code/player.service';
+// import { TurnInfo } from '@common/game';
+import { Vec2 } from '@common/board';
 import { TurnInfo } from '@common/game';
 
 @Component({
@@ -36,7 +38,6 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private currentPlayerId: string | undefined;
-    private currentPlayerTurnId: string | undefined;
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
@@ -45,17 +46,17 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
-        this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
-            this.currentPlayerTurnId = playerId.playerTurnId;
-            console.log(this.currentPlayerTurnId);
+
+        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
+            this.gameService.updateTurn(turn.player, turn.path);
         });
 
         if (this.currentPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
         }
 
-        this.socketService.onStartTurn().subscribe((turn: TurnInfo) => {
-            this.gameService.setTurn(turn);
+        this.socketService.onBroadcastMove().subscribe((payload: { position: Vec2; direction: Vec2 }) => {
+            this.gameService.movePlayer(payload.position, payload.direction);
         });
     }
 
@@ -68,5 +69,18 @@ export class GamePageComponent implements OnInit, AfterViewInit {
                 return originalAbandonMethod.call(this.headerBar);
             }
         };
+    }
+
+    movePlayer() {
+        const falseMovement = this.generateSamplePath();
+        this.socketService.movePlayer(this.gameService.getAccessCode(), falseMovement);
+    }
+
+    private generateSamplePath(): Vec2[] {
+        const path: Vec2[] = [];
+        for (let x = 0; x < 10; x++) {
+            path.push({ x, y: 0 });
+        }
+        return path;
     }
 }

@@ -45,10 +45,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Game configured');
         this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, { game });
         this.logger.log('Game started');
-        this.logger.log('Turn Configuration');
-        const turnInfo = this.gameService.configureTurn(payload.accessCode);
-        this.server.to(payload.accessCode).emit(TurnEvents.Start, { turnInfo });
-        this.logger.log('Turn Configured');
     }
 
     @SubscribeMessage(GameEvents.Debug)
@@ -72,6 +68,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(TurnEvents.Move)
     handlePlayerMovement(client: Socket, payload: { accessCode: string; path: Vec2[] }) {
+        this.logger.log('Player movement');
         this.gameService.processPath(payload.accessCode, payload.path);
     }
 
@@ -104,6 +101,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     private startTurn(payload: { accessCode: string; playerId: string }) {
+        this.logger.log('Starting turn');
         const turn = this.gameService.configureTurn(payload.accessCode);
         this.logger.log(`Next player turn id: ${turn.player.id}`);
         this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { turn });

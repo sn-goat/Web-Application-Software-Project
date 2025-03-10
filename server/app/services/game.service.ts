@@ -87,13 +87,20 @@ export class GameService {
 
     processPath(accessCode: string, path: Vec2[]) {
         const game = this.currentGames.get(accessCode);
-        if (!game) {
+        if (game) {
             const activePlayer = this.getPlayerTurn(accessCode);
             if (activePlayer) {
-                path.forEach((position) => {
-                    this.movePlayer(accessCode, game.map, activePlayer.position, position);
-                    activePlayer.position = position;
-                });
+                this.logger.log(`Processing path for player ${activePlayer.id}`);
+                let index = 0;
+                const interval = setInterval(() => {
+                    if (index < path.length) {
+                        this.movePlayer(accessCode, game.map, activePlayer.position, path[index]);
+                        activePlayer.position = path[index];
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, MOVEMENT_TIMEOUT_IN_MS);
             }
         }
     }
@@ -247,14 +254,10 @@ export class GameService {
         return cell.cost;
     }
 
-    /**
-     * Find all reachable positions within given movement points.
-     */
     private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
-        setTimeout(() => {
-            this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
-            map[position.y][position.x].player = Avatar.Default;
-            map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
-        }, MOVEMENT_TIMEOUT_IN_MS);
+        this.logger.log(`Player moved from ${position.x},${position.y} to ${direction.x},${direction.y}`);
+        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
+        map[position.y][position.x].player = Avatar.Default;
+        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
     }
 }
