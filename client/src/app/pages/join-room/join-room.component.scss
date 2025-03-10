@@ -1,3 +1,4 @@
+@use 'sass:color';
 $primary-bg: #1a1625;
 $primary-text: #7ee0d0;
 $glow-teal: rgba(126, 224, 208, 0.2);
@@ -64,7 +65,7 @@ button {
     box-shadow: 0 0 10px $glow-teal;
 
     &:hover {
-        background-color: darken($primary-text, 10%);
+        background-color: color.adjust($primary-text, $lightness: -10%);
         box-shadow: 0 0 15px $glow-gold;
     }
 }

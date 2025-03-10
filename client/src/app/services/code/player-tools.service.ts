@@ -11,16 +11,21 @@ import { PlayerService } from './player.service';
 export class PlayerToolsService {
     items$: Observable<Item[]>;
     timer$: Observable<string>;
+    // New observable for action mode.
+    actionMode$: Observable<boolean>;
 
     private player: PlayerStats;
     private playerService: PlayerService = inject(PlayerService);
     private items = new BehaviorSubject<Item[]>([]);
     private timer: BehaviorSubject<string> = new BehaviorSubject<string>('00:00');
+    // Maintain action mode state (true if Action is toggled on, false otherwise)
+    private actionMode = new BehaviorSubject<boolean>(false);
 
     constructor() {
         this.player = {} as PlayerStats;
         this.items$ = this.items.asObservable();
         this.timer$ = this.timer.asObservable();
+        this.actionMode$ = this.actionMode.asObservable();
         this.setPlayer();
     }
 
@@ -42,27 +47,32 @@ export class PlayerToolsService {
         if (item !== Item.DEFAULT) {
             if (items.length < 2) {
                 items.push(item);
-                this.items.next(items);
             } else {
                 items.pop();
                 items.push(item);
-                this.items.next(items);
             }
+            this.items.next(items);
         }
     }
 
+    // When a player ends their turn, we want to disable action mode.
     endTurn(): void {
         if (this.player) {
-            // to be implemented with socket
+            // Implementation with socket can go here
         }
-        // to be implemented
+        // Reset action mode
+        this.actionMode.next(false);
+        // Additional endTurn logic here
     }
 
+    // When a player clicks the Action button, enable action mode.
     performAction(): void {
         if (this.player) {
-            // to be implemented with socket
+            // Implementation with socket can go here
         }
-        // to be implemented
+        // Set action mode to true
+        this.actionMode.next(true);
+        // Additional performAction logic here
     }
 
     removeItem(item: Item): void {
