@@ -1,13 +1,13 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
+import { TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BoardService } from './board/board.service';
 import { TimerService } from './timer/timer.service';
-import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
-import { TurnEvents } from '@common/game.gateway.events';
 
 @Injectable()
 export class GameService {

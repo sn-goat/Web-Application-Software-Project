@@ -24,9 +24,6 @@ export class UpdateBoardDto {
     @ApiProperty({ description: 'Whether the board is available to everyone', required: false })
     visibility: Visibility;
 
-    @ApiProperty({ description: 'Miniature image of the board' })
-    image: string;
-
     @ApiProperty({ description: 'Date when board last updated' })
     updatedAt: Date;
 

@@ -44,7 +44,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         };
 
         service.setGameMap(testBoard);
@@ -66,7 +65,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         };
 
         service.setGameMap(testBoard);
@@ -84,7 +82,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         } as unknown as Board;
 
         service.setGameMap(incompleteBoard);
@@ -102,7 +99,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         };
 
         service.setGameMap(testBoard);

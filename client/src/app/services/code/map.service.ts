@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { Board, Validation, TILE_COST } from '@common/board';
+import { Board, TILE_COST, Validation } from '@common/board';
 import { Item, Size, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -147,7 +147,6 @@ export class MapService {
             visibility: Visibility.PRIVATE,
             board: [],
             updatedAt: new Date(),
-            image: '',
         } as Partial<Board> as Board);
     }
 

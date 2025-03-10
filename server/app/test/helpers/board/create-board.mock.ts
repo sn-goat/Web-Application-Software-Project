@@ -8,7 +8,6 @@ export const EMPTY_BOARD: CreateBoardDto = {
     isCTF: false,
     board: [],
     visibility: Visibility.PUBLIC,
-    image: 'random/url/',
 };
 
 export const VALID_BOARD: CreateBoardDto = {
@@ -18,7 +17,6 @@ export const VALID_BOARD: CreateBoardDto = {
     isCTF: false,
     board: [[]],
     visibility: Visibility.PUBLIC,
-    image: 'random/url/',
 };
 
 export const PRIVATE_BOARD: CreateBoardDto = {
@@ -28,7 +26,6 @@ export const PRIVATE_BOARD: CreateBoardDto = {
     isCTF: true,
     board: [],
     visibility: Visibility.PRIVATE,
-    image: 'random/url/',
 };
 
 export const INVALID_BOARD2: CreateBoardDto = {
@@ -38,7 +35,6 @@ export const INVALID_BOARD2: CreateBoardDto = {
     isCTF: true,
     board: [[]],
     visibility: Visibility.PUBLIC,
-    image: 'random/url/',
 };
 
 export const MOCK_BOARD_ARRAY: CreateBoardDto[] = [EMPTY_BOARD, VALID_BOARD, PRIVATE_BOARD, INVALID_BOARD2];

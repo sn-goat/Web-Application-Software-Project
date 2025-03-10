@@ -47,7 +47,6 @@ describe('FormCharacterComponent', () => {
             isCTF: false,
             board: [], // Your board cells
             visibility: Visibility.PUBLIC, // Use correct enum value
-            image: 'test-image.png',
         };
 
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
