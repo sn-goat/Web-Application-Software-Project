@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
-import { SocketService } from '@app/services/code/socket.service';
-import { Cell } from '@common/board';
-import { Game } from '@common/game';
-import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FightLogicService } from './fight-logic.service';
+import { Game, PathInfo, TurnInfo } from '@common/game';
+import { PlayerStats } from '@common/player';
+import { Cell, Vec2 } from '@common/board';
+import { SocketService } from '@app/services/code/socket.service';
 
 @Injectable({
     providedIn: 'root',
@@ -20,6 +20,7 @@ export class GameService {
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
+    private path: Map<Vec2, PathInfo> = new Map();
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -56,6 +57,17 @@ export class GameService {
         this.clientPlayer$.next(this.socketService.getCurrentPlayer());
         this.initialPlayers = game.players;
         this.accessCode = game.accessCode;
+    }
+
+    setTurn(turn: TurnInfo): void {
+        this.activePlayer$.next(turn.player);
+        if (turn.player.id === this.clientPlayer$.value?.id) {
+            this.path = turn.path;
+        }
+    }
+
+    getPath(path: Map<Vec2, PathInfo>): void {
+        this.path = path;
     }
 
     async confirmAndAbandonGame(name: string): Promise<boolean> {

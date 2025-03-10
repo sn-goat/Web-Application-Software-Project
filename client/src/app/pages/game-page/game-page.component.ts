@@ -8,8 +8,10 @@ import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-playe
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
+import { PlayerService } from '@app/services/code/player.service';
+import { TurnInfo } from '@common/game';
+
 @Component({
     selector: 'app-game-page',
     imports: [
@@ -51,6 +53,10 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         if (this.currentPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
         }
+
+        this.socketService.onStartTurn().subscribe((turn: TurnInfo) => {
+            this.gameService.setTurn(turn);
+        });
     }
 
     ngAfterViewInit(): void {

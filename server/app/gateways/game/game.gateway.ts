@@ -36,9 +36,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage(GameEvents.Configure)
     async handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
         const game = await this.gameService.configureGame(payload.accessCode, payload.players);
-        this.logger.log('Game configured: ' + game);
+        this.logger.log('Game configured');
         this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, { game });
         this.logger.log('Game started');
+        this.logger.log('Turn Configuration');
+        const turnInfo = this.gameService.configureTurn(payload.accessCode);
+        this.server.to(payload.accessCode).emit(TurnEvents.Start, { turnInfo });
+        this.logger.log('Turn Configured');
     }
 
     @SubscribeMessage(GameEvents.Debug)
@@ -60,10 +64,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastDoor, { position: payload.position, newState });
     }
 
-    // @SubscribeMessage(TurnEvents.Move)
-    // handlePlayerMovement(client: Socket, payload: { accessCode: string; playerId: string; direction: Vec2 }) {
-    //     this.gameService.movePlayer(payload.accessCode, payload.playerId, payload.direction);
-    // }
+    @SubscribeMessage(TurnEvents.Move)
+    handlePlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2 }) {
+        this.gameService.movePlayer(payload.accessCode, payload.direction);
+    }
 
     // @SubscribeMessage(FightEvents.Init)
     // handleFightInit(client: Socket, payload: { accessCode: string; playerId: string; enemyPosition: Vec2 }) {

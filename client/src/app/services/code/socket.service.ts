@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
-import { Game, Room } from '@common/game';
+import { Game, Room, TurnInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
@@ -150,7 +150,7 @@ export class SocketService {
         });
     }
 
-    onStartTurn(): Observable<unknown> {
+    onStartTurn(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.Start, (data) => observer.next(data));
         });
