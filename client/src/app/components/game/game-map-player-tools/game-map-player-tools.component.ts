@@ -1,13 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Item } from '@common/enums';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
-import { DEFAULT_PATH_ITEMS, DEFAULT_FILE_TYPE } from '@app/constants/path';
+import { Item } from '@common/enums';
 
 @Component({
     selector: 'app-game-map-player-tools',
-    imports: [],
     templateUrl: './game-map-player-tools.component.html',
-    styleUrl: './game-map-player-tools.component.scss',
+    styleUrls: ['./game-map-player-tools.component.scss'],
 })
 export class GameMapPlayerToolsComponent implements OnInit {
     items: Item[];
@@ -33,10 +32,12 @@ export class GameMapPlayerToolsComponent implements OnInit {
     }
 
     endTurn(): void {
+        // This should also disable action mode in the service.
         this.playerToolsService.endTurn();
     }
 
     performAction(): void {
+        // This should enable action mode in the service.
         this.playerToolsService.performAction();
     }
 }
