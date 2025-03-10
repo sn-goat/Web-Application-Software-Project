@@ -15,6 +15,7 @@ export class SocketService {
     gameRoom: Room;
     private socket: Socket;
     private readonly url: string = environment.serverUrl;
+    private currenPlayer: PlayerStats;
     private size: number = 0;
 
     constructor() {
@@ -41,6 +42,7 @@ export class SocketService {
 
     shareCharacter(accessCode: string, player: PlayerStats) {
         player.id = this.socket.id as string;
+        this.currenPlayer = player;
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
 
@@ -99,12 +101,16 @@ export class SocketService {
 
     // Game events
     // Send
-    createGame(accessCode: string, mapName: string) {
-        this.socket.emit(GameEvents.Create, { accessCode, mapName });
+    createGame(accessCode: string, mapName: string, organizerId: string) {
+        this.socket.emit(GameEvents.Create, { accessCode, mapName, organizerId });
     }
 
     configureGame(accessCode: string, players: PlayerStats[]) {
         this.socket.emit(GameEvents.Configure, { accessCode, players });
+    }
+
+    readyUp(accessCode: string, playerId: string) {
+        this.socket.emit(GameEvents.Ready, { accessCode, playerId });
     }
 
     movePlayer(accessCode: string, playerId: string, direction: Vec2) {
@@ -145,6 +151,20 @@ export class SocketService {
     onStartTurn(): Observable<unknown> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.Start, (data) => observer.next(data));
+        });
+    }
+
+    onTimerUpdate(): Observable<{ remainingTime: number }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.UpdateTimer, (data: { remainingTime: number }) => {
+                observer.next(data);
+            });
+        });
+    }
+
+    onTurnUpdate(): Observable<{ playerTurnId: string }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.PlayerTurn, (data: { playerTurnId: string }) => observer.next(data));
         });
     }
 
@@ -192,6 +212,10 @@ export class SocketService {
 
     getCurrentPlayerId(): string {
         return this.socket.id as string;
+    }
+
+    getCurrentPlayer(): PlayerStats {
+        return this.currenPlayer;
     }
 
     getGameSize(): number {

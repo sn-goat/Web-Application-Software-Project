@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Logger } from '@nestjs/common';
-import { Server, Socket } from 'socket.io';
 import { GameGateway } from '@app/gateways/game/game.gateway';
 import { GameService } from '@app/services/game.service';
-import { TurnEvents, GameEvents } from '@common/game.gateway.events';
 import { Vec2 } from '@common/board';
+import { GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
+import { Logger } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
 
 describe('GameGateway', () => {
     let gateway: GameGateway;
@@ -46,7 +46,7 @@ describe('GameGateway', () => {
         it('should log game creation and call gameService.createGame with payload', () => {
             const payload = { accessCode: 'GAME123', organizerId: 'org1', mapName: 'Test Map' };
             gateway.handleGameCreation(client as Socket, payload);
-            expect(logger.log).toHaveBeenCalledWith('Creating game with payload: ' + payload.mapName);
+            expect(logger.log).toHaveBeenCalledWith('Creating game with payload: ' + payload.organizerId);
             expect(gameService.createGame).toHaveBeenCalledWith(payload.accessCode, payload.organizerId, payload.mapName);
         });
     });

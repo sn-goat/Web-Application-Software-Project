@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { DEFAULT_PATH_AVATARS, DEFAULT_FILE_TYPE, DEFAULT_PATH_DICE } from '@app/constants/path';
-import { GameService } from '@app/services/code/game.service';
-import { PlayerStats, Dice } from '@common/player';
-import { Subscription } from 'rxjs';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
+import { GameService } from '@app/services/code/game.service';
+import { Dice, PlayerStats } from '@common/player';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-map-player-detailed',
@@ -19,13 +19,13 @@ export class GameMapPlayerDetailedComponent implements OnInit {
     readonly diceToImageLink: (dice: Dice) => string = diceToImageLink;
 
     maxHealth: number = 0;
-    myPlayer: PlayerStats | undefined;
+    myPlayer: PlayerStats | null;
 
     private gameService: GameService = inject(GameService);
     private clientPlayerSub: Subscription;
 
     ngOnInit() {
-        this.clientPlayerSub = this.gameService.clientPlayer$.subscribe((player: PlayerStats | undefined) => {
+        this.clientPlayerSub = this.gameService.clientPlayer$.subscribe((player: PlayerStats | null) => {
             this.myPlayer = player;
             if (player) {
                 this.maxHealth = player.life;

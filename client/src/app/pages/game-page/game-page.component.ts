@@ -9,7 +9,7 @@ import { GameMapPlayerComponent } from '@app/components/game/game-map-player/gam
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
-
+import { SocketService } from '@app/services/code/socket.service';
 @Component({
     selector: 'app-game-page',
     imports: [
@@ -32,11 +32,25 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     private gameService = inject(GameService);
     private playerService = inject(PlayerService);
+    private socketService = inject(SocketService);
+    private currentPlayerId: string | undefined;
+    private currentPlayerTurnId: string | undefined;
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
             this.showFightInterface = show;
         });
+        this.gameService.clientPlayer$.subscribe((player) => {
+            this.currentPlayerId = player?.id;
+        });
+        this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
+            this.currentPlayerTurnId = playerId.playerTurnId;
+            console.log(this.currentPlayerTurnId);
+        });
+
+        if (this.currentPlayerId) {
+            this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
+        }
     }
 
     ngAfterViewInit(): void {

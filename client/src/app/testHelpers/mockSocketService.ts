@@ -115,7 +115,7 @@ export class MockSocketService {
     unlockRoom(_accessCode: string): void {}
     removePlayer(_accessCode: string, _playerId: string): void {}
     disconnect(_accessCode: string, _playerId: string): void {}
-    createGame(_accessCode: string, _mapName: string): void {}
+    createGame(_accessCode: string, _mapName: string, _playerId: string): void {}
     configureGame(_accessCode: string, _players: PlayerStats[]): void {}
     movePlayer(_accessCode: string, _playerId: string, _direction: Vec2): void {}
     changeDoorState(_accessCode: string, _position: Vec2): void {}

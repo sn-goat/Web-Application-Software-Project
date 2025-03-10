@@ -177,7 +177,7 @@ describe('FormCharacterComponent', () => {
         component.createGame();
 
         expect(mockSocketService.createRoom).toHaveBeenCalledWith(15);
-        expect(mockSocketService.createGame).toHaveBeenCalledWith('new-code', 'Test Map');
+        expect(mockSocketService.createGame).toHaveBeenCalledWith('new-code', 'Test Map', 'player-id');
         expect(mockSocketService.shareCharacter).toHaveBeenCalled();
 
         // Use the pre-existing navigate spy from MockRouter

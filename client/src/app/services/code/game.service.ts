@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
-import { FightLogicService } from './fight-logic.service';
+import { SocketService } from '@app/services/code/socket.service';
+import { Cell } from '@common/board';
 import { Game } from '@common/game';
 import { PlayerStats } from '@common/player';
-import { Cell } from '@common/board';
-import { SocketService } from '@app/services/code/socket.service';
+import { BehaviorSubject } from 'rxjs';
+import { FightLogicService } from './fight-logic.service';
 
 @Injectable({
     providedIn: 'root',
@@ -16,9 +16,10 @@ export class GameService {
     map$: BehaviorSubject<Cell[][]> = new BehaviorSubject<Cell[][]>([]);
     currentPlayers$: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
     activePlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
-    clientPlayer$: BehaviorSubject<PlayerStats | undefined> = new BehaviorSubject<PlayerStats | undefined>(undefined);
+    clientPlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
 
     private initialPlayers: PlayerStats[] = [];
+    private accessCode: string;
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -52,8 +53,9 @@ export class GameService {
         this.map$.next(game.map);
         this.currentPlayers$.next(game.players);
         this.activePlayer$.next(game.players[game.currentTurn]);
-        this.clientPlayer$.next(this.currentPlayers$.value.find((player) => player.id === this.socketService.getCurrentPlayerId()));
+        this.clientPlayer$.next(this.socketService.getCurrentPlayer());
         this.initialPlayers = game.players;
+        this.accessCode = game.accessCode;
     }
 
     async confirmAndAbandonGame(name: string): Promise<boolean> {
@@ -76,5 +78,9 @@ export class GameService {
                 }
             });
         });
+    }
+
+    getAccessCode(): string {
+        return this.accessCode;
     }
 }

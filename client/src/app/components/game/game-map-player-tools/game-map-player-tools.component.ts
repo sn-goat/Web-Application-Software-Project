@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Item } from '@common/enums';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
-import { DEFAULT_PATH_ITEMS, DEFAULT_FILE_TYPE } from '@app/constants/path';
+import { SocketService } from '@app/services/code/socket.service';
+import { Item } from '@common/enums';
 
 @Component({
     selector: 'app-game-map-player-tools',
@@ -17,6 +18,7 @@ export class GameMapPlayerToolsComponent implements OnInit {
     readonly fileType = DEFAULT_FILE_TYPE;
 
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
+    private socketService: SocketService = inject(SocketService);
 
     constructor() {
         this.items = [];
@@ -27,8 +29,8 @@ export class GameMapPlayerToolsComponent implements OnInit {
         this.playerToolsService.items$.subscribe((items) => {
             this.items = items;
         });
-        this.playerToolsService.timer$.subscribe((timer) => {
-            this.timer = timer;
+        this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
+            this.timer = time.remainingTime.toString();
         });
     }
 
