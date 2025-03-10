@@ -35,6 +35,12 @@ export class GameService {
         return this.currentPlayers$.value.some((currentPlayer) => currentPlayer.id === player.id);
     }
 
+    isPlayerTurn(): boolean {
+        const player = this.activePlayer$.value;
+        const clientPlayer = this.clientPlayer$.value;
+        return (player && clientPlayer && player.id === clientPlayer.id) as boolean;
+    }
+
     getInitialPlayers(): PlayerStats[] {
         return this.initialPlayers;
     }
@@ -76,6 +82,10 @@ export class GameService {
     setPath(path: Map<string, PathInfo>): void {
         this.path = path;
         path = this.path;
+    }
+
+    endTurn(): void {
+        this.socketService.endTurn(this.accessCode);
     }
 
     async confirmAndAbandonGame(name: string): Promise<boolean> {

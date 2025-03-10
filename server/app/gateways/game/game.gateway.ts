@@ -1,6 +1,6 @@
 import { GameService } from '@app/services/game.service';
 import { Vec2 } from '@common/board';
-import { GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { GameEvents, TimerEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -16,18 +16,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     constructor(private readonly gameService: GameService) {}
 
-    @OnEvent('timerUpdate')
+    @OnEvent(TimerEvents.Update)
     handleTimerUpdate(payload: { roomId: string; remainingTime: number }) {
         this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
         this.server.to(payload.roomId).emit(TurnEvents.UpdateTimer, { remainingTime: payload.remainingTime });
     }
 
-    @OnEvent('timerEnded')
+    @OnEvent(TimerEvents.End)
     handleTimerEnd(accessCode: string) {
         this.logger.log(`Timer ended in room: ${accessCode}`);
-        this.server.to(accessCode).emit(TurnEvents.End);
-        this.gameService.switchTurn(accessCode);
-        this.startTurn(accessCode);
+        this.endTurn(accessCode);
     }
 
     @OnEvent(TurnEvents.Move)
@@ -74,6 +72,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.gameService.processPath(payload.accessCode, payload.path);
     }
 
+    @SubscribeMessage(TurnEvents.End)
+    handlePlayerEnd(client: Socket, payload: { accessCode: string }) {
+        this.endTurn(payload.accessCode);
+    }
+
     // @SubscribeMessage(FightEvents.Init)
     // handleFightInit(client: Socket, payload: { accessCode: string; playerId: string; enemyPosition: Vec2 }) {
     //     this.gameService.initFight(payload.accessCode, payload.playerId, payload.enemyPosition);
@@ -100,6 +103,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     handleDisconnect(client: Socket) {
         this.logger.log(`Client déconnecté : ${client.id}`);
+    }
+    private endTurn(accessCode: string) {
+        this.logger.log('Ending turn');
+        this.server.to(accessCode).emit(TurnEvents.BroadcastEnd);
+        this.gameService.switchTurn(accessCode);
+        this.gameService.configureTurn(accessCode);
+        this.startTurn(accessCode);
     }
 
     private startTurn(accessCode: string) {

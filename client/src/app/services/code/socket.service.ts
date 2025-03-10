@@ -135,6 +135,10 @@ export class SocketService {
         this.socket.emit(FightEvents.Attack, { accessCode, playerId });
     }
 
+    endTurn(accessCode: string) {
+        this.socket.emit(TurnEvents.End, accessCode);
+    }
+
     // Receive
     onBroadcastStartGame(): Observable<Game> {
         return new Observable((observer) => {
@@ -166,15 +170,15 @@ export class SocketService {
         });
     }
 
-    onEndTurn(): Observable<unknown> {
-        return new Observable((observer) => {
-            this.socket.on(TurnEvents.End, (data) => observer.next(data));
-        });
-    }
-
     onFullInventory(): Observable<unknown> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.FullInventory, (data) => observer.next(data));
+        });
+    }
+
+    onBroadcastEnd(): Observable<TurnEvents> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.BroadcastEnd, (data) => observer.next(data));
         });
     }
 

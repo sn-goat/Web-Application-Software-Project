@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { GameService } from '@app/services/code/game.service';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Item } from '@common/enums';
@@ -18,6 +19,7 @@ export class GameMapPlayerToolsComponent implements OnInit {
 
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
     private socketService: SocketService = inject(SocketService);
+    private gameService: GameService = inject(GameService);
 
     constructor() {
         this.items = [];
@@ -34,12 +36,10 @@ export class GameMapPlayerToolsComponent implements OnInit {
     }
 
     endTurn(): void {
-        // This should also disable action mode in the service.
-        this.playerToolsService.endTurn();
+        this.gameService.endTurn();
     }
 
     performAction(): void {
-        // This should enable action mode in the service.
         this.playerToolsService.performAction();
     }
 }
