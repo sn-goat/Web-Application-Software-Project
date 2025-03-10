@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GameService } from '@app/services/game.service';
 import { BoardService } from '@app/services/board/board.service';
+import { GameService } from '@app/services/game.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Game } from '@common/game';
@@ -10,6 +11,7 @@ import { Logger } from '@nestjs/common';
 describe('GameService', () => {
     let gameService: GameService;
     let boardService: Partial<BoardService>;
+    let timerService: Partial<TimerService>;
     let dummyBoard: any;
     let dummyMap: Cell[][];
     const accessCode = 'GAME123';
@@ -31,7 +33,7 @@ describe('GameService', () => {
             getBoard: jest.fn().mockResolvedValue(dummyBoard),
         };
 
-        gameService = new GameService(boardService as BoardService);
+        gameService = new GameService(boardService as BoardService, timerService as TimerService);
 
         jest.spyOn(Logger.prototype, 'log').mockImplementation();
         jest.spyOn(Logger.prototype, 'error').mockImplementation();
@@ -41,6 +43,7 @@ describe('GameService', () => {
         it('should toggle debug mode and return the new state', () => {
             gameService['currentGames'].set(accessCode, {
                 organizerId: 'org1',
+                accessCode: '4009',
                 players: [],
                 map: dummyMap,
                 currentTurn: 0,
@@ -67,6 +70,7 @@ describe('GameService', () => {
             ];
             gameService['currentGames'].set(accessCode, {
                 organizerId: 'org1',
+                accessCode: '4009',
                 players: [],
                 map: mapCopy,
                 currentTurn: 0,
@@ -102,6 +106,7 @@ describe('GameService', () => {
             ];
             const game: Game = {
                 organizerId: 'org1',
+                accessCode: '4009',
                 players: [],
                 map: gameMap,
                 currentTurn: 0,
@@ -154,6 +159,7 @@ describe('GameService', () => {
             ];
             const game: Game = {
                 organizerId: 'org1',
+                accessCode: '4009',
                 players: [],
                 map: gameMap,
                 currentTurn: 0,
@@ -208,6 +214,7 @@ describe('GameService', () => {
             ];
             gameService['currentGames'].set(accessCode, {
                 organizerId: 'org1',
+                accessCode: '4009',
                 players: [],
                 map: customMap,
                 currentTurn: 0,
