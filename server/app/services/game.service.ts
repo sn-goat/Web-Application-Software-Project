@@ -1,8 +1,11 @@
+import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game } from '@common/game';
+import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
+import { TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BoardService } from './board/board.service';
 import { TimerService } from './timer/timer.service';
 
@@ -14,6 +17,7 @@ export class GameService {
     constructor(
         private boardService: BoardService,
         private timerService: TimerService,
+        private eventEmitter: EventEmitter2,
     ) {
         this.currentGames = new Map();
     }
@@ -50,10 +54,19 @@ export class GameService {
             game.players = this.sortPlayersBySpeed(players);
             const usedSpawnPoints = this.assignSpawnPoints(game.players, this.getAllSpawnPoints(game.map), game.map);
             this.removeUnusedSpawnPoints(game.map, usedSpawnPoints);
-
             return game;
         }
         return null;
+    }
+
+    configureTurn(accessCode: string): TurnInfo {
+        const playerTurn = this.getPlayerTurn(accessCode);
+        playerTurn.movementPts = playerTurn.speed;
+        playerTurn.actions = 1;
+        return {
+            player: playerTurn,
+            path: this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts),
+        };
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -74,25 +87,98 @@ export class GameService {
         }
     }
 
+    processPath(accessCode: string, path: Vec2[]) {
+        const game = this.currentGames.get(accessCode);
+        if (game) {
+            const activePlayer = this.getPlayerTurn(accessCode);
+            if (activePlayer) {
+                this.logger.log(`Processing path for player ${activePlayer.id}`);
+                let index = 0;
+                const interval = setInterval(() => {
+                    if (index < path.length) {
+                        this.movePlayer(accessCode, game.map, activePlayer.position, path[index]);
+                        activePlayer.position = path[index];
+                        index++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, MOVEMENT_TIMEOUT_IN_MS);
+            }
+        }
+    }
+
     getCellAt(accessCode: string, position: Vec2): Cell {
         return this.currentGames.get(accessCode).map[position.y][position.x];
     }
 
-    startTurn(accessCode: string) {
-        this.timerService.startTimer(accessCode, 30, 'movement');
+    startTimer(accessCode: string) {
+        this.timerService.startTimer(accessCode, TURN_DURATION_IN_S, 'movement');
     }
 
-    isGameAdmin(accessCode: string, playerId: string) {
-        return this.currentGames.get(accessCode).organizerId === playerId;
+    isActivePlayerReady(accessCode: string, playerId: string) {
+        return this.getPlayerTurn(accessCode).id === playerId;
     }
 
-    getPlayerTurn(accessCode: string): string {
+    getPlayerTurn(accessCode: string): PlayerStats {
         const game = this.currentGames.get(accessCode);
-        return game ? game.players[game.currentTurn].id : undefined;
+        return game ? game.players[game.currentTurn] : undefined;
+    }
+
+    switchTurn(accessCode: string) {
+        const game = this.currentGames.get(accessCode);
+        if (game) {
+            game.currentTurn = (game.currentTurn + 1) % game.players.length;
+            this.logger.log(`Switching turn to player ${game.players[game.currentTurn].id}`);
+        }
+    }
+
+    private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
+        const directions: Vec2[] = [
+            { x: 0, y: 1 }, // Down
+            { x: 1, y: 0 }, // Right
+            { x: 0, y: -1 }, // Up
+            { x: -1, y: 0 }, // Left
+        ];
+
+        const queue: { position: Vec2; path: Vec2[]; remainingPoints: number }[] = [
+            { position: playerPosition, path: [playerPosition], remainingPoints: movementPoints },
+        ];
+        const visited = new Map<string, PathInfo>();
+
+        while (queue.length > 0) {
+            const { position, path, remainingPoints } = queue.shift();
+            const key = this.vec2Key(position);
+
+            if (!visited.has(key) || visited.get(key).path.length > path.length) {
+                visited.set(key, { path, cost: movementPoints - remainingPoints });
+
+                for (const dir of directions) {
+                    const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+
+                    if (this.isValidPosition(game.length, newPos)) {
+                        const moveCost = this.getTileCost(game[newPos.x][newPos.y]);
+
+                        if (remainingPoints >= moveCost && moveCost !== Infinity) {
+                            queue.push({
+                                position: newPos,
+                                path: [...path, newPos],
+                                remainingPoints: remainingPoints - moveCost,
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return visited;
     }
 
     private sortPlayersBySpeed(players: PlayerStats[]): PlayerStats[] {
-        return players.sort((a, b) => b.speed - a.speed);
+        return players.sort((a, b) => {
+            if (a.speed === b.speed) {
+                return Math.random() - RANDOM_SORT_OFFSET;
+            }
+            return b.speed - a.speed;
+        });
     }
 
     private getAllSpawnPoints(map: Cell[][]): Vec2[] {
@@ -106,6 +192,7 @@ export class GameService {
         });
         return spawnPoints;
     }
+
     private assignSpawnPoints(players: PlayerStats[], spawnPoints: Vec2[], map: Cell[][]): Vec2[] {
         // Mélanger les points de spawn
         const shuffledSpawnPoints = [...spawnPoints];
@@ -146,5 +233,47 @@ export class GameService {
                 }
             });
         });
+    }
+
+    /**
+     * Convert a Vec2 to a string key for use in maps.
+     */
+    private vec2Key(vec: Vec2): string {
+        return `${vec.x},${vec.y}`;
+    }
+
+    /**
+     * Check if a position is within the grid bounds.
+     */
+    private isValidPosition(size: number, position: Vec2): boolean {
+        return position.y >= 0 && position.y < size && position.x >= 0 && position.x < size;
+    }
+
+    /**
+     * Check if a position is occupied by another player.
+     */
+    private isOccupiedByPlayer(cell: Cell): boolean {
+        if (!cell) {
+            return false;
+        }
+        return cell.player !== Avatar.Default;
+    }
+
+    /**
+     * Get the movement cost for a tile at a given position.
+     */
+    private getTileCost(cell: Cell): number {
+        if (!cell) {
+            return Infinity;
+        }
+        if (this.isOccupiedByPlayer(cell)) return Infinity;
+        return cell.cost;
+    }
+
+    private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
+        this.logger.log(`Player moved from ${position.x},${position.y} to ${direction.x},${direction.y}`);
+        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
+        map[position.y][position.x].player = Avatar.Default;
+        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
     }
 }

@@ -2,8 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 import { SocketService } from '@app/services/code/socket.service';
-import { Cell } from '@common/board';
-import { Game } from '@common/game';
+import { Cell, Vec2 } from '@common/board';
+import { Avatar, Game, PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FightLogicService } from './fight-logic.service';
@@ -20,6 +20,7 @@ export class GameService {
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
+    private path: Map<string, PathInfo> = new Map();
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -45,10 +46,6 @@ export class GameService {
         }
     }
 
-    setActivePlayer(playerIndex: number): void {
-        this.activePlayer$.next(this.currentPlayers$.value[playerIndex]);
-    }
-
     setGame(game: Game): void {
         this.map$.next(game.map);
         this.currentPlayers$.next(game.players);
@@ -56,6 +53,28 @@ export class GameService {
         this.clientPlayer$.next(this.socketService.getCurrentPlayer());
         this.initialPlayers = game.players;
         this.accessCode = game.accessCode;
+    }
+
+    updateTurn(player: PlayerStats, path: Map<string, PathInfo>): void {
+        this.activePlayer$.next(player);
+        this.path = path;
+    }
+
+    movePlayer(position: Vec2, direction: Vec2): void {
+        const map: Cell[][] = this.map$.value;
+        const player = this.activePlayer$.value;
+        if (player) {
+            map[position.y][position.x].player = Avatar.Default;
+            map[direction.y][direction.x].player = player.avatar as Avatar;
+            player.position = position;
+            this.activePlayer$.next(player);
+            this.map$.next(map);
+        }
+    }
+
+    setPath(path: Map<string, PathInfo>): void {
+        this.path = path;
+        path = this.path;
     }
 
     async confirmAndAbandonGame(name: string): Promise<boolean> {

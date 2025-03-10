@@ -8,8 +8,11 @@ import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-playe
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
+import { PlayerService } from '@app/services/code/player.service';
+import { Vec2 } from '@common/board';
+import { TurnInfo } from '@common/game';
+
 @Component({
     selector: 'app-game-page',
     imports: [
@@ -34,7 +37,6 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private currentPlayerId: string | undefined;
-    // private currentPlayerTurnId: string | undefined;
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
@@ -43,15 +45,18 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
-        // this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
-        //     this.currentPlayerTurnId = playerId.playerTurnId;
-        //     // eslint-disable-next-line no-console
-        //     // console.log(this.currentPlayerTurnId);
-        // });
+
+        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
+            this.gameService.updateTurn(turn.player, turn.path);
+        });
 
         if (this.currentPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
         }
+
+        this.socketService.onBroadcastMove().subscribe((payload: { position: Vec2; direction: Vec2 }) => {
+            this.gameService.movePlayer(payload.position, payload.direction);
+        });
     }
 
     ngAfterViewInit(): void {

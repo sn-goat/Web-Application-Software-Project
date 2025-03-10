@@ -46,7 +46,6 @@ describe('MapListComponent', () => {
             updatedAt: new Date(),
             createdAt: new Date(),
             isCTF: false,
-            image: '',
         },
         {
             _id: '2',
@@ -57,7 +56,6 @@ describe('MapListComponent', () => {
             isCTF: false,
             visibility: Visibility.PRIVATE,
             createdAt: new Date(),
-            image: '',
             updatedAt: new Date(),
         },
     ];
@@ -103,7 +101,6 @@ describe('MapListComponent', () => {
             board: [],
             isCTF: false,
             visibility: Visibility.PUBLIC,
-            image: '',
             updatedAt: new Date(),
         };
 
@@ -244,7 +241,6 @@ describe('MapListComponent', () => {
             board: [],
             updatedAt: new Date(),
             isCTF: false,
-            image: '',
         };
         const serverMap: Board = {
             _id: '1',
@@ -255,7 +251,6 @@ describe('MapListComponent', () => {
             board: [],
             updatedAt: new Date(),
             isCTF: false,
-            image: '',
         };
 
         expect(component.areMapsEqual(localMap, serverMap)).toBeTrue();
