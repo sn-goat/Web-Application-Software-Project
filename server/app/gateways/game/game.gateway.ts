@@ -6,6 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { THREE_SECONDS_IN_MS } from './game.gateway.constants';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -25,6 +26,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleTimerEnd(payload: { roomId: string }) {
         this.logger.log(`Timer ended in room: ${payload.roomId}`);
         this.server.to(payload.roomId).emit(TurnEvents.End);
+    }
+
+    @OnEvent(TurnEvents.Move)
+    handleBroadcastMove(payload: { accessCode: string; position: Vec2; direction: Vec2 }) {
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { position: payload.position, direction: payload.player });
     }
 
     @SubscribeMessage(GameEvents.Create)
@@ -65,8 +71,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(TurnEvents.Move)
-    handlePlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2 }) {
-        this.gameService.movePlayer(payload.accessCode, payload.direction);
+    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: Vec2[] }) {
+        this.gameService.processPath(payload.accessCode, payload.path);
     }
 
     // @SubscribeMessage(FightEvents.Init)
@@ -98,11 +104,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     private startTurn(payload: { accessCode: string; playerId: string }) {
-        const playerTurnId = this.gameService.getPlayerTurn(payload.accessCode);
-        this.logger.log(`Next player turn id: ${playerTurnId}`);
-        this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { playerTurnId });
+        const turn = this.gameService.configureTurn(payload.accessCode);
+        this.logger.log(`Next player turn id: ${turn.player.id}`);
+        this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { turn });
         setTimeout(() => {
-            this.gameService.startTurn(payload.accessCode);
-        }, 3000);
+            this.gameService.startTimer(payload.accessCode);
+        }, THREE_SECONDS_IN_MS);
     }
 }

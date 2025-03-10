@@ -20,7 +20,7 @@ export class GameService {
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
-    private path: Map<Vec2, PathInfo> = new Map();
+    private path: Map<string, PathInfo> = new Map();
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -66,7 +66,7 @@ export class GameService {
         }
     }
 
-    getPath(path: Map<Vec2, PathInfo>): void {
+    setPath(path: Map<string, PathInfo>): void {
         this.path = path;
     }
 

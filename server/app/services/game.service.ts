@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
@@ -5,6 +6,8 @@ import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { BoardService } from './board/board.service';
 import { TimerService } from './timer/timer.service';
+import { MOVEMENT_TIMEOUT_IN_MS, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { TurnEvents } from '@common/game.gateway.events';
 
 @Injectable()
 export class GameService {
@@ -14,6 +17,7 @@ export class GameService {
     constructor(
         private boardService: BoardService,
         private timerService: TimerService,
+        private eventEmitter: EventEmitter2,
     ) {
         this.currentGames = new Map();
     }
@@ -59,7 +63,7 @@ export class GameService {
         const playerTurn = this.getPlayerTurn(accessCode);
         return {
             player: playerTurn,
-            path: pathInfo,
+            path: new Map<string, PathInfo>(), // this.findPossiblePaths(playerTurn, this.currentGames.get(accessCode).map),
         };
     }
 
@@ -81,11 +85,16 @@ export class GameService {
         }
     }
 
-    movePlayer(accessCode: string, direction: Vec2) {
-        const game: Game = this.currentGames.get(accessCode);
-        if (game) {
-            const player = game.players.find((p) => p.id === playerId);
-            if (player) {}
+    processPath(accessCode: string, path: Vec2[]) {
+        const game = this.currentGames.get(accessCode);
+        if (!game) {
+            const activePlayer = this.getPlayerTurn(accessCode);
+            if (activePlayer) {
+                path.forEach((position) => {
+                    this.movePlayer(accessCode, game.map, activePlayer.position, position);
+                    activePlayer.position = position;
+                });
+            }
         }
     }
 
@@ -93,17 +102,17 @@ export class GameService {
         return this.currentGames.get(accessCode).map[position.y][position.x];
     }
 
-    startTurn(accessCode: string) {
-        this.timerService.startTimer(accessCode, 30, 'movement');
+    startTimer(accessCode: string) {
+        this.timerService.startTimer(accessCode, TURN_DURATION_IN_S, 'movement');
     }
 
     isGameAdmin(accessCode: string, playerId: string) {
         return this.currentGames.get(accessCode).organizerId === playerId;
     }
 
-    getPlayerTurn(accessCode: string): string {
+    getPlayerTurn(accessCode: string): PlayerStats {
         const game = this.currentGames.get(accessCode);
-        return game ? game.players[game.currentTurn].id : undefined;
+        return game ? game.players[game.currentTurn] : undefined;
     }
 
     findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, { position: Vec2; path: Vec2[] }> {
@@ -235,4 +244,11 @@ export class GameService {
     /**
      * Find all reachable positions within given movement points.
      */
+    private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
+        setTimeout(() => {
+            this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
+            map[position.y][position.x].player = Avatar.Default;
+            map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
+        }, MOVEMENT_TIMEOUT_IN_MS);
+    }
 }

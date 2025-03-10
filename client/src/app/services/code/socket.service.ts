@@ -164,9 +164,9 @@ export class SocketService {
         });
     }
 
-    onTurnUpdate(): Observable<{ playerTurnId: string }> {
+    onTurnUpdate(): Observable<TurnInfo> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.PlayerTurn, (data: { playerTurnId: string }) => observer.next(data));
+            this.socket.on(TurnEvents.PlayerTurn, (turnInfo) => observer.next(turnInfo));
         });
     }
 

@@ -38,8 +38,8 @@ export enum Avatar {
 };
 
 export interface TurnInfo {
-    player: string;
-    path: Map<Vec2, PathInfo>;
+    player: PlayerStats;
+    path: Map<string, PathInfo>;
 } 
 
 export interface PathInfo {
