@@ -115,7 +115,7 @@ export class GameService {
         return game ? game.players[game.currentTurn] : undefined;
     }
 
-    findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, { position: Vec2; path: Vec2[] }> {
+    private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
         const directions: Vec2[] = [
             { x: 0, y: 1 }, // Down
             { x: 1, y: 0 }, // Right
@@ -126,14 +126,14 @@ export class GameService {
         const queue: { position: Vec2; path: Vec2[]; remainingPoints: number }[] = [
             { position: playerPosition, path: [playerPosition], remainingPoints: movementPoints },
         ];
-        const visited = new Map<string, { position: Vec2; path: Vec2[] }>();
+        const visited = new Map<string, PathInfo>();
 
         while (queue.length > 0) {
             const { position, path, remainingPoints } = queue.shift();
             const key = this.vec2Key(position);
 
             if (!visited.has(key) || visited.get(key).path.length > path.length) {
-                visited.set(key, { position, path });
+                visited.set(key, { path, cost: movementPoints - remainingPoints });
 
                 for (const dir of directions) {
                     const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
@@ -230,6 +230,9 @@ export class GameService {
      * Check if a position is occupied by another player.
      */
     private isOccupiedByPlayer(cell: Cell): boolean {
+        if (!cell) {
+            return false;
+        }
         return cell.player !== Avatar.Default;
     }
 
@@ -237,6 +240,9 @@ export class GameService {
      * Get the movement cost for a tile at a given position.
      */
     private getTileCost(cell: Cell): number {
+        if (!cell) {
+            return Infinity;
+        }
         if (this.isOccupiedByPlayer(cell)) return Infinity;
         return cell.cost;
     }
