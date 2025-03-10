@@ -64,7 +64,7 @@ button {
     box-shadow: 0 0 10px $glow-teal;
 
     &:hover {
-        background-color: darken($primary-text, 10%);
+        background-color: color.adjust($primary-text, $lightness: -10%);
         box-shadow: 0 0 15px $glow-gold;
     }
 }
