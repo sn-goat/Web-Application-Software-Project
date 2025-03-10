@@ -45,6 +45,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         });
         this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
             this.currentPlayerTurnId = playerId.playerTurnId;
+            // eslint-disable-next-line no-console
             console.log(this.currentPlayerTurnId);
         });
 

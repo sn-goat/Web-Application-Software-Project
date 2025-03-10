@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
@@ -41,11 +40,13 @@ export class GameMapComponent implements OnInit, OnDestroy {
     // This method is triggered when the directive emits a cell click.
     onCellClicked(cell: Cell) {
         if (this.actionMode) {
+            // eslint-disable-next-line no-console
             console.log('Action mode active: Clicked cell', cell);
             this.selectedCell = cell;
             // Forward the cell to a service if needed.
             this.actionMode = false;
         } else {
+            // eslint-disable-next-line no-console
             console.log('Click ignored (not in Action mode).');
         }
     }

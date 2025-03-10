@@ -14,5 +14,7 @@ export class MouseHandlerDirective {
     onClick(event: MouseEvent): void {
         // Emit the cell without logging—let the component decide what to do.
         this.cellClicked.emit(this.cell);
+        // eslint-disable-next-line no-console
+        console.log('Cell clicked:', this.cell, event);
     }
 }
