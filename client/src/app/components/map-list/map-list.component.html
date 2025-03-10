@@ -10,6 +10,7 @@
     </div>
     } @if(mapsLoaded) {
     <div class="search-bar">
+        <app-header-bar></app-header-bar>
         <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
         <div class="filter-sort">
             <select [(ngModel)]="sortBy" class="sort-select">

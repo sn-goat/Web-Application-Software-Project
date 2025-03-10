@@ -11,6 +11,7 @@ import { GameMapService } from '@app/services/code/game-map.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
+import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 
 type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
 
@@ -20,7 +21,7 @@ type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule, MapCardComponent],
+    imports: [CommonModule, FormsModule, MapCardComponent, HeaderBarComponent],
 })
 export class MapListComponent implements OnInit {
     @Input() items: Board[] = [];

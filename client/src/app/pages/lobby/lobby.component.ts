@@ -71,7 +71,6 @@ export class LobbyComponent implements OnInit {
         });
 
         this.socketService.onPlayerDisconnected().subscribe((players: PlayerStats[]) => {
-            // Mise à jour de la liste des joueurs
             this.players = players;
             if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                 if (!this.isAdmin) {
