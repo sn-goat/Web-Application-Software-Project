@@ -15,7 +15,6 @@ export class SocketService {
     gameRoom: Room;
     private socket: Socket;
     private readonly url: string = environment.serverUrl;
-    private currentPlayerId: string = '';
     private currenPlayer: PlayerStats;
     private size: number = 0;
 
@@ -32,10 +31,9 @@ export class SocketService {
         });
     }
 
-    createRoom(organizerId: string, size: number) {
-        this.currentPlayerId = organizerId;
+    createRoom(size: number) {
         this.size = size;
-        this.socket.emit(RoomEvents.CreateRoom, { organizerId, size });
+        this.socket.emit(RoomEvents.CreateRoom, { organizerId: this.socket.id, size });
     }
 
     joinRoom(accessCode: string) {
@@ -43,7 +41,7 @@ export class SocketService {
     }
 
     shareCharacter(accessCode: string, player: PlayerStats) {
-        this.currentPlayerId = player.id;
+        player.id = this.socket.id as string;
         this.currenPlayer = player;
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
@@ -71,7 +69,7 @@ export class SocketService {
 
     onPlayersList(): Observable<PlayerStats[]> {
         return new Observable((observer) => {
-            this.socket.on('playersList', (players: PlayerStats[]) => observer.next(players));
+            this.socket.on(RoomEvents.PlayerList, (players: PlayerStats[]) => observer.next(players));
         });
     }
 
@@ -213,7 +211,7 @@ export class SocketService {
     }
 
     getCurrentPlayerId(): string {
-        return this.currentPlayerId;
+        return this.socket.id as string;
     }
 
     getCurrentPlayer(): PlayerStats {
