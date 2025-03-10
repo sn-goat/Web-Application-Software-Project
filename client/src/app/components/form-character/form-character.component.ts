@@ -150,7 +150,7 @@ export class FormCharacterComponent implements OnInit {
                 this.socketService.createRoom(this.playerStats.id, selectedMapSize);
                 this.socketService.onRoomCreated().subscribe((data: unknown) => {
                     this.accessCode = (data as { accessCode: string }).accessCode;
-                    this.socketService.createGame(this.accessCode, map.name);
+                    this.socketService.createGame(this.accessCode, map.name, this.playerStats.id);
                     this.socketService.shareCharacter(this.accessCode, this.playerStats);
                     this.router.navigate(['/lobby'], { state: { accessCode: this.accessCode } });
                 });
