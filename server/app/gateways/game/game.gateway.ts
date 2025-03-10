@@ -23,12 +23,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @OnEvent('timerEnded')
-    handleTimerEnd(payload: { roomId: string }) {
-        this.logger.log(`Timer ended in room: ${payload.roomId}`);
-        this.server.to(payload.roomId).emit(TurnEvents.End);
-        this.gameService.switchTurn(payload.roomId);
-        const turn = this.gameService.configureTurn(payload.roomId);
-        this.server.to(payload.roomId).emit(TurnEvents.PlayerTurn, { turn });
+    handleTimerEnd(accessCode: string) {
+        this.logger.log(`Timer ended in room: ${accessCode}`);
+        this.server.to(accessCode).emit(TurnEvents.End);
+        this.gameService.switchTurn(accessCode);
+        this.startTurn(accessCode);
     }
 
     @OnEvent(TurnEvents.Move)
@@ -58,8 +57,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
-        if (this.gameService.isGameAdmin(payload.accessCode, payload.playerId)) {
-            this.startTurn(payload);
+        if (this.gameService.isActivePlayerReady(payload.accessCode, payload.playerId)) {
+            this.startTurn(payload.accessCode);
         }
     }
 
@@ -103,13 +102,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log(`Client déconnecté : ${client.id}`);
     }
 
-    private startTurn(payload: { accessCode: string; playerId: string }) {
+    private startTurn(accessCode: string) {
         this.logger.log('Starting turn');
-        const turn = this.gameService.configureTurn(payload.accessCode);
+        const turn = this.gameService.configureTurn(accessCode);
         this.logger.log(`Next player turn id: ${turn.player.id}`);
-        this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { turn });
+        this.server.to(accessCode).emit(TurnEvents.PlayerTurn, { turn });
         setTimeout(() => {
-            this.gameService.startTimer(payload.accessCode);
+            this.gameService.startTimer(accessCode);
         }, THREE_SECONDS_IN_MS);
     }
 }

@@ -115,8 +115,8 @@ export class GameService {
         this.timerService.startTimer(accessCode, TURN_DURATION_IN_S, 'movement');
     }
 
-    isGameAdmin(accessCode: string, playerId: string) {
-        return this.currentGames.get(accessCode).organizerId === playerId;
+    isActivePlayerReady(accessCode: string, playerId: string) {
+        return this.getPlayerTurn(accessCode).id === playerId;
     }
 
     getPlayerTurn(accessCode: string): PlayerStats {
