@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
 import { GameService } from '@app/services/game.service';
 import { Vec2 } from '@common/board';
-import { TurnEvents, GameEvents } from '@common/game.gateway.events';
+import { GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
+import { Injectable, Logger } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -14,9 +15,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     constructor(private readonly gameService: GameService) {}
 
+    @OnEvent('timerUpdate')
+    handleTimerUpdate(payload: { roomId: string; remainingTime: number }) {
+        this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
+        this.server.to(payload.roomId).emit(TurnEvents.UpdateTimer, { remainingTime: payload.remainingTime });
+    }
+
+    @OnEvent('timerEnded')
+    handleTimerEnd(payload: { roomId: string }) {
+        this.logger.log(`Timer ended in room: ${payload.roomId}`);
+        this.server.to(payload.roomId).emit(TurnEvents.End);
+    }
+
     @SubscribeMessage(GameEvents.Create)
-    handleGameCreation(client: Socket, payload: { accessCode: string; organizerId: string; mapName: string }) {
-        this.logger.log('Creating game with payload: ' + payload.mapName);
+    handleGameCreation(client: Socket, payload: { accessCode: string; mapName: string; organizerId: string }) {
+        this.logger.log('Creating game with payload: ' + payload.organizerId);
         this.gameService.createGame(payload.accessCode, payload.organizerId, payload.mapName);
     }
 
@@ -32,6 +45,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleDebug(client: Socket, payload: { accessCode: string }) {
         const isDebugMode = this.gameService.changeDebugState(payload.accessCode);
         this.server.to(payload.accessCode).emit(GameEvents.BroadcastDebugState, { isDebugMode });
+    }
+
+    @SubscribeMessage(GameEvents.Ready)
+    handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
+        if (this.gameService.isGameAdmin(payload.accessCode, payload.playerId)) {
+            this.startTurn(payload);
+        }
     }
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
@@ -71,5 +91,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     handleDisconnect(client: Socket) {
         this.logger.log(`Client déconnecté : ${client.id}`);
+    }
+
+    private startTurn(payload: { accessCode: string; playerId: string }) {
+        const playerTurnId = this.gameService.getPlayerTurn(payload.accessCode);
+        this.logger.log(`Next player turn id: ${playerTurnId}`);
+        this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { playerTurnId });
+        setTimeout(() => {
+            this.gameService.startTurn(payload.accessCode);
+        }, 3000);
     }
 }

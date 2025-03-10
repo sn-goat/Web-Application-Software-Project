@@ -1,13 +1,16 @@
-export enum GameEvents{
+export enum GameEvents {
     Create = 'createGame', // Client envoi la map
     Configure = 'configureGame', // Client qui envoi l'état du jeu
+    Ready = 'readyForStart', // Client
     Debug = 'debugGame', // Client
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debugState', // Serveur
 }
 export enum TurnEvents {
     Start = 'startTurn', // Serveur
+    UpdateTimer = 'timeUpdate', // Server
     End = 'endTurn', // Serveur (timer / plus déplacement et action inutile / plus de déplacement et plus d'action )
+    PlayerTurn = 'nextPlayerTurn', // Serveur
     FullInventory = 'fullInventoryAck', // Serveur (pop généré, et attend choix user ne met pas en pause le Timer)
     Move = 'moveAck', // Client (return New Path)
     ChangeDoorState = 'changeDoorState', // Client
