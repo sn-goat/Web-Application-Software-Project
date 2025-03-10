@@ -3,6 +3,7 @@ import { Room } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
@@ -12,7 +13,14 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger(RoomGateway.name);
 
-    constructor(private readonly roomService: RoomService) {}
+    constructor(
+        private readonly roomService: RoomService,
+        private readonly eventEmitter: EventEmitter2
+    ) {
+        this.eventEmitter.on('room.deleted', (accessCode: string) => {
+            this.handleRoomDeletion(accessCode);
+        });
+    }
 
     @SubscribeMessage(RoomEvents.CreateRoom)
     handleCreateRoom(client: Socket, payload: { organizerId: string; size: number }) {
@@ -109,5 +117,27 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     handleDisconnect(client: Socket) {
         this.logger.log(`Client déconnecté : ${client.id}`);
+    }
+
+    private handleRoomDeletion(accessCode: string): void {
+        this.logger.log(`Deleting sockets from room: ${accessCode}`);
+        const roomSocket = this.server.sockets.adapter.rooms.get(accessCode);
+    
+        if (!roomSocket) {
+            this.logger.warn(`Room ${accessCode} not found.`);
+            return;
+        }
+    
+        for (const clientId of roomSocket) {
+            const clientSocket = this.server.sockets.sockets.get(clientId);
+            if (clientSocket) {
+                clientSocket.leave(accessCode);
+                this.logger.log(`Client ${clientSocket.id} left room ${accessCode}`);
+    
+                // Déconnecter complètement le client
+                clientSocket.disconnect(true);
+                this.logger.log(`Client ${clientSocket.id} disconnected`);
+            }
+        }
     }
 }

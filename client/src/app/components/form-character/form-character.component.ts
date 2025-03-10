@@ -33,7 +33,7 @@ export class FormCharacterComponent implements OnInit {
     defenseSelected: boolean = false;
 
     playerStats: PlayerStats = {
-        id: this.generateId(),
+        id: ' ',
         name: '',
         avatar: this.getCurrentPortraitImage(),
         life: 4,
@@ -74,12 +74,6 @@ export class FormCharacterComponent implements OnInit {
 
     getCurrentPortraitImage(): string {
         return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
-    }
-
-    generateId(): string {
-        const base = 36;
-        const limit = 9;
-        return Math.random().toString(base).substring(2, limit);
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -147,7 +141,7 @@ export class FormCharacterComponent implements OnInit {
             .pipe(first())
             .subscribe((map) => {
                 const selectedMapSize = map.size;
-                this.socketService.createRoom(this.playerStats.id, selectedMapSize);
+                this.socketService.createRoom(selectedMapSize);
                 this.socketService.onRoomCreated().subscribe((data: unknown) => {
                     this.accessCode = (data as { accessCode: string }).accessCode;
                     this.socketService.createGame(this.accessCode, map.name);

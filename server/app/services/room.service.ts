@@ -2,6 +2,7 @@ import { Room } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const minNumber = 1000;
 const maxNumber = 9000;
@@ -10,6 +11,8 @@ const maxNumber = 9000;
 export class RoomService {
     private readonly logger = new Logger(RoomService.name);
     private gameRooms: Map<string, Room> = new Map();
+
+    constructor(private readonly eventEmitter: EventEmitter2) {}
 
     createRoom(organizerId: string, size: number): Room {
         const accessCode = this.generateUniqueAccessCode();
@@ -139,6 +142,7 @@ export class RoomService {
         if (this.gameRooms.has(accessCode)) {
             this.gameRooms.delete(accessCode);
             this.logger.log(`Room with access code ${accessCode} has been deleted.`);
+            this.eventEmitter.emit('room.deleted', accessCode);
         } else {
             this.logger.error(`Room with access code ${accessCode} not found for deletion.`);
         }

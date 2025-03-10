@@ -15,7 +15,6 @@ export class SocketService {
     gameRoom: Room;
     private socket: Socket;
     private readonly url: string = environment.serverUrl;
-    private currentPlayerId: string = '';
     private size: number = 0;
 
     constructor() {
@@ -31,10 +30,9 @@ export class SocketService {
         });
     }
 
-    createRoom(organizerId: string, size: number) {
-        this.currentPlayerId = organizerId;
+    createRoom(size: number) {
         this.size = size;
-        this.socket.emit(RoomEvents.CreateRoom, { organizerId, size });
+        this.socket.emit(RoomEvents.CreateRoom, { organizerId: this.socket.id, size });
     }
 
     joinRoom(accessCode: string) {
@@ -42,7 +40,7 @@ export class SocketService {
     }
 
     shareCharacter(accessCode: string, player: PlayerStats) {
-        this.currentPlayerId = player.id;
+        player.id = this.socket.id!;
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
 
@@ -193,7 +191,7 @@ export class SocketService {
     }
 
     getCurrentPlayerId(): string {
-        return this.currentPlayerId;
+        return this.socket.id!;
     }
 
     getGameSize(): number {
