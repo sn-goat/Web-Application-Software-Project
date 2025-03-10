@@ -9,12 +9,16 @@
             "path": "common"
         },
         {
-            "name": "app",
+            "name": "Client App",
             "path": "client/src/app"
         },
         {
-            "name": "server",
-            "path": "server"
+            "name": "Server App",
+            "path": "server/app"
+        },
+        {
+            "name": "Server Test",
+            "path": "server/app/test"
         }
     ]
 }
