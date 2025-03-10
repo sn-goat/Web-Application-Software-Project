@@ -154,10 +154,8 @@ export class GameService {
 
                 for (const dir of directions) {
                     const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-
                     if (this.isValidPosition(game.length, newPos)) {
                         const moveCost = this.getTileCost(game[newPos.x][newPos.y]);
-
                         if (remainingPoints >= moveCost && moveCost !== Infinity) {
                             queue.push({
                                 position: newPos,
@@ -256,7 +254,7 @@ export class GameService {
         if (!cell) {
             return false;
         }
-        return cell.player !== Avatar.Default;
+        return cell.player !== Avatar.Default && cell.player !== null;
     }
 
     /**
@@ -266,7 +264,9 @@ export class GameService {
         if (!cell) {
             return Infinity;
         }
-        if (this.isOccupiedByPlayer(cell)) return Infinity;
+        if (this.isOccupiedByPlayer(cell)) {
+            return Infinity;
+        }
         return cell.cost;
     }
 

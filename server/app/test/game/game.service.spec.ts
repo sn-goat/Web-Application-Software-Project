@@ -21,7 +21,7 @@ describe('GameService', () => {
     beforeEach(() => {
         dummyMap = [
             [
-                { tile: Tile.CLOSED_DOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
+                { tile: Tile.CLOSED_DOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: Infinity, player: null },
                 { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 1, y: 0 }, cost: 1, player: null },
             ],
             [
@@ -245,8 +245,9 @@ describe('GameService', () => {
 
         it('should not move through walls', () => {
             const grid: Cell[][] = [
-                [{ tile: Tile.WALL, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: Infinity, player: null }],
-                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 1, player: null }],
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }],
+                [{ tile: Tile.WALL, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: Infinity, player: null }],
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 2, y: 0 }, cost: 1, player: null }],
             ];
             const startPosition: Vec2 = { x: 0, y: 0 };
             const movementPoints = 2;
@@ -254,6 +255,7 @@ describe('GameService', () => {
             const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
 
             expect(result.has('1,0')).toBeFalsy();
+            expect(result.has('2,0')).toBeFalsy();
         });
 
         it('should respect movement points and stop if out of energy', () => {
@@ -358,7 +360,7 @@ describe('GameService', () => {
         it('should configure the turn and return the correct TurnInfo', () => {
             const players: PlayerStats[] = [
                 { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1', position: { x: 1, y: 0 } } as PlayerStats,
-                { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2', position: { x: 1, y: 1 } } as PlayerStats,
+                { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2', position: { x: 0, y: 1 } } as PlayerStats,
             ];
             gameService['currentGames'].set(accessCode, {
                 organizerId: 'org1',
@@ -370,7 +372,12 @@ describe('GameService', () => {
             });
             const turnInfo = gameService.configureTurn(accessCode);
             expect(turnInfo.player).toEqual(players[0]);
-            // expect(turnInfo.path).toEqual(new Map<string, PathInfo>());
+            expect(turnInfo.path.has('1,0')).toBeTruthy();
+            expect(turnInfo.path.get('1,0').cost).toEqual(0);
+            expect(turnInfo.path.has('1,1')).toBeTruthy();
+            expect(turnInfo.path.get('1,1').cost).toEqual(1);
+            expect(turnInfo.path.has('0,1')).toBeTruthy();
+            expect(turnInfo.path.get('0,1').cost).toEqual(2);
         });
     });
 });
