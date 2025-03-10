@@ -26,6 +26,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleTimerEnd(payload: { roomId: string }) {
         this.logger.log(`Timer ended in room: ${payload.roomId}`);
         this.server.to(payload.roomId).emit(TurnEvents.End);
+        this.gameService.switchTurn(payload.roomId);
+        const turn = this.gameService.configureTurn(payload.roomId);
+        this.server.to(payload.roomId).emit(TurnEvents.PlayerTurn, { turn });
     }
 
     @OnEvent(TurnEvents.Move)

@@ -6,7 +6,7 @@ import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { BoardService } from './board/board.service';
 import { TimerService } from './timer/timer.service';
-import { MOVEMENT_TIMEOUT_IN_MS, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { TurnEvents } from '@common/game.gateway.events';
 
 @Injectable()
@@ -61,9 +61,11 @@ export class GameService {
 
     configureTurn(accessCode: string): TurnInfo {
         const playerTurn = this.getPlayerTurn(accessCode);
+        playerTurn.movementPts = playerTurn.speed;
+        playerTurn.actions = 1;
         return {
             player: playerTurn,
-            path: new Map<string, PathInfo>(), // this.findPossiblePaths(playerTurn, this.currentGames.get(accessCode).map),
+            path: this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts),
         };
     }
 
@@ -122,6 +124,14 @@ export class GameService {
         return game ? game.players[game.currentTurn] : undefined;
     }
 
+    switchTurn(accessCode: string) {
+        const game = this.currentGames.get(accessCode);
+        if (game) {
+            game.currentTurn = (game.currentTurn + 1) % game.players.length;
+            this.logger.log(`Switching turn to player ${game.players[game.currentTurn].id}`);
+        }
+    }
+
     private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
         const directions: Vec2[] = [
             { x: 0, y: 1 }, // Down
@@ -163,7 +173,12 @@ export class GameService {
     }
 
     private sortPlayersBySpeed(players: PlayerStats[]): PlayerStats[] {
-        return players.sort((a, b) => b.speed - a.speed);
+        return players.sort((a, b) => {
+            if (a.speed === b.speed) {
+                return Math.random() - RANDOM_SORT_OFFSET;
+            }
+            return b.speed - a.speed;
+        });
     }
 
     private getAllSpawnPoints(map: Cell[][]): Vec2[] {
@@ -177,6 +192,7 @@ export class GameService {
         });
         return spawnPoints;
     }
+
     private assignSpawnPoints(players: PlayerStats[], spawnPoints: Vec2[], map: Cell[][]): Vec2[] {
         // Mélanger les points de spawn
         const shuffledSpawnPoints = [...spawnPoints];

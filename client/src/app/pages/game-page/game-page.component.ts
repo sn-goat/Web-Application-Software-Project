@@ -10,7 +10,6 @@ import { GameMapComponent } from '@app/components/game/game-map/game-map.compone
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { PlayerService } from '@app/services/code/player.service';
-// import { TurnInfo } from '@common/game';
 import { Vec2 } from '@common/board';
 import { TurnInfo } from '@common/game';
 
