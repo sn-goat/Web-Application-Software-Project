@@ -5,8 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { MockRouter } from '@app/testHelpers/mockRouter';
-import { MockSocketService } from '@app/testHelpers/mockSocketService';
+import { MockRouter } from '@app/helpers/mockRouter';
+import { MockSocketService } from '@app/helpers/mockSocketService';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { ASSET_EXT, ASSET_PATH, Avatar } from '@common/game';
@@ -47,7 +47,6 @@ describe('FormCharacterComponent', () => {
             isCTF: false,
             board: [], // Your board cells
             visibility: Visibility.PUBLIC, // Use correct enum value
-            image: 'test-image.png',
         };
 
         const boardSubject = new BehaviorSubject<Board>(mockBoard);

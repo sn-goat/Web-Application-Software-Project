@@ -59,7 +59,8 @@ describe('GameGateway', () => {
             expect(toMock).toHaveBeenCalledWith(payload.accessCode);
             const toReturn = toMock.mock.results[0].value;
             expect(toReturn.emit).toHaveBeenCalledWith(GameEvents.BroadcastStartGame, { game: 'configuredGame' });
-            expect(logger.log).toHaveBeenCalledWith('Game configured: ' + 'configuredGame');
+            expect(logger.log).toHaveBeenCalledWith('Creating game with payload: org1');
+            expect(logger.log).toHaveBeenCalledWith('Game configured');
             expect(logger.log).toHaveBeenCalledWith('Game started');
         });
     });

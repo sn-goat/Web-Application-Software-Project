@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
-import { Game, Room } from '@common/game';
+import { Game, Room, TurnInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
@@ -113,8 +113,8 @@ export class SocketService {
         this.socket.emit(GameEvents.Ready, { accessCode, playerId });
     }
 
-    movePlayer(accessCode: string, playerId: string, direction: Vec2) {
-        this.socket.emit(TurnEvents.Move, { accessCode, playerId, direction });
+    movePlayer(accessCode: string, path: Vec2[]) {
+        this.socket.emit(TurnEvents.Move, { accessCode, path });
     }
 
     changeDoorState(accessCode: string, position: Vec2) {
@@ -138,19 +138,13 @@ export class SocketService {
     // Receive
     onBroadcastStartGame(): Observable<Game> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.BroadcastStartGame, (game: { game: Game }) => observer.next(game.game));
+            this.socket.on(GameEvents.BroadcastStartGame, (data: { game: Game }) => observer.next(data.game));
         });
     }
 
     onBroadcastDebugState(): Observable<unknown> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.BroadcastDebugState, (data) => observer.next(data));
-        });
-    }
-
-    onStartTurn(): Observable<unknown> {
-        return new Observable((observer) => {
-            this.socket.on(TurnEvents.Start, (data) => observer.next(data));
         });
     }
 
@@ -162,9 +156,9 @@ export class SocketService {
         });
     }
 
-    onTurnUpdate(): Observable<{ playerTurnId: string }> {
+    onTurnUpdate(): Observable<TurnInfo> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.PlayerTurn, (data: { playerTurnId: string }) => observer.next(data));
+            this.socket.on(TurnEvents.PlayerTurn, (data: { turn: TurnInfo }) => observer.next(data.turn));
         });
     }
 
@@ -180,9 +174,9 @@ export class SocketService {
         });
     }
 
-    onBroadcastMove(): Observable<unknown> {
+    onBroadcastMove(): Observable<{ position: Vec2; direction: Vec2 }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.BroadcastMove, (data) => observer.next(data));
+            this.socket.on(TurnEvents.BroadcastMove, (movement: { position: Vec2; direction: Vec2 }) => observer.next(movement));
         });
     }
 
