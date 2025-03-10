@@ -34,7 +34,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private currentPlayerId: string | undefined;
-    private currentPlayerTurnId: string | undefined;
+    // private currentPlayerTurnId: string | undefined;
 
     ngOnInit(): void {
         this.gameService.showFightInterface$.subscribe((show) => {
@@ -43,10 +43,11 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
-        this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
-            this.currentPlayerTurnId = playerId.playerTurnId;
-            console.log(this.currentPlayerTurnId);
-        });
+        // this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
+        //     this.currentPlayerTurnId = playerId.playerTurnId;
+        //     // eslint-disable-next-line no-console
+        //     // console.log(this.currentPlayerTurnId);
+        // });
 
         if (this.currentPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
