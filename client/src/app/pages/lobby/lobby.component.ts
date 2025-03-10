@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { GameService } from '@app/services/code/game.service';
 import { diceToImageLink } from '@app/constants/playerConst';
+import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { Room, Game } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { Game, Room } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
+import { PlayerStats } from '@common/player';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -49,10 +49,12 @@ export class LobbyComponent implements OnInit {
 
         this.socketService.onPlayersList().subscribe((players: PlayerStats[]) => {
             this.players = players;
-            this.checkIfAdmin();
             if (this.players.length === this.maxPlayers && !this.isRoomLocked) {
                 this.socketService.lockRoom(this.accessCode);
                 this.isRoomLocked = true;
+            } else if (this.players.length < this.maxPlayers && this.isRoomLocked) {
+                this.socketService.unlockRoom(this.accessCode);
+                this.isRoomLocked = false;
             }
         });
 

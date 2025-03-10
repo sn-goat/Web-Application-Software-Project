@@ -23,12 +23,10 @@
         <ul>
             @for (player of players; track player.id) {
             <li>
+                <img class="avatar-image" [src]="player.avatar" alt="Avatar" />
                 <span [ngStyle]="{ color: players[0].id === player.id ? 'yellow' : 'inherit' }">
                     <strong>{{ player.name }}</strong>
                 </span>
-                - Vie: {{ player.life }}, Attaque: {{ player.attack }}, Défense: {{ player.defense }}, Rapidité: {{ player.speed }}, attackDice:
-                <img [src]="diceToImageLink(player.attackDice)" alt="attack Dice" class="dice-image" /> defenseDice:
-                <img [src]="diceToImageLink(player.defenseDice)" alt="Defense Dice" class="dice-image" />
 
                 @if (isAdmin && player.id !== getCurrentPlayerId()) {
                 <button (click)="removePlayer(player.id)">Bannir</button>

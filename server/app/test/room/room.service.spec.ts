@@ -3,6 +3,7 @@
 import { RoomService } from '@app/services/room.service';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // Mock the getLobbyLimit dependency so we can control its return value in tests.
 jest.mock('@common/lobby-limits', () => ({
@@ -13,7 +14,7 @@ describe('RoomService', () => {
     let service: RoomService;
 
     beforeEach(() => {
-        service = new RoomService();
+        service = new RoomService(new EventEmitter2());
         jest.clearAllMocks();
     });
 
@@ -334,7 +335,7 @@ describe('RoomService - non-existent room handling', () => {
     let loggerErrorSpy: jest.SpyInstance;
 
     beforeEach(() => {
-        service = new RoomService();
+        service = new RoomService(new EventEmitter2());
         // Remplacer le logger par un spy en utilisant jest.spyOn
         loggerErrorSpy = jest.spyOn((service as any).logger, 'error');
     });

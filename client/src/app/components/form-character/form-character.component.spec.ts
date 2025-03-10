@@ -176,7 +176,7 @@ describe('FormCharacterComponent', () => {
         component.playerStats.id = 'player-id';
         component.createGame();
 
-        expect(mockSocketService.createRoom).toHaveBeenCalledWith('player-id', 15);
+        expect(mockSocketService.createRoom).toHaveBeenCalledWith(15);
         expect(mockSocketService.createGame).toHaveBeenCalledWith('new-code', 'Test Map', 'player-id');
         expect(mockSocketService.shareCharacter).toHaveBeenCalled();
 
