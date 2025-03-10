@@ -49,8 +49,9 @@ body {
     background-color: $primary-bg;
     color: $primary-text;
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
     box-shadow: 0 0 5px $glow-teal;
 }
 
@@ -99,6 +100,12 @@ body {
     padding: 8px;
     border: 1px solid $primary-text;
     border-radius: 5px;
-    //   background-color: lighten($primary-bg, 5%);
     color: $primary-text;
+}
+
+.avatar-image {
+    width: 50px; // Taille raisonnable
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
 }
