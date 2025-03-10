@@ -110,7 +110,7 @@ export class MockSocketService {
         return this.endFightSubject.asObservable();
     }
 
-    createRoom(_organizerId: string, _size: number): void {}
+    createRoom(_size: number): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
     removePlayer(_accessCode: string, _playerId: string): void {}

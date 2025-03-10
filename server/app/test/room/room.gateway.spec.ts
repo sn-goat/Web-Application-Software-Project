@@ -3,6 +3,7 @@
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { RoomService } from '@app/services/room.service';
 import { PlayerStats } from '@common/player';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Socket } from 'socket.io';
 
 describe('RoomGateway', () => {
@@ -10,6 +11,7 @@ describe('RoomGateway', () => {
     let roomService: Partial<RoomService>;
     let client: Partial<Socket>;
     let server: any; // mock server
+    let eventEmitter: EventEmitter2;
 
     beforeEach(() => {
         // Create a mock game service with jest.fn() for each method.
@@ -23,7 +25,8 @@ describe('RoomGateway', () => {
             disconnectPlayer: jest.fn(),
             getRoom: jest.fn(),
         };
-
+        eventEmitter = new EventEmitter2(); // Instantiate EventEmitter2
+        
         // Create a fake server that returns an object with an emit method.
         server = {
             to: jest.fn().mockReturnValue({
@@ -32,7 +35,7 @@ describe('RoomGateway', () => {
         };
 
         // Instantiate the gateway and inject the mocked service.
-        gateway = new RoomGateway(roomService as RoomService);
+        gateway = new RoomGateway(roomService as RoomService, eventEmitter);
         gateway.server = server;
 
         // Create a fake client socket.

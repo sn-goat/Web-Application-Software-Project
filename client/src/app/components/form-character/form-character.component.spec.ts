@@ -10,9 +10,9 @@ import { MockSocketService } from '@app/testHelpers/mockSocketService';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { ASSET_EXT, ASSET_PATH, Avatar } from '@common/game';
+import { PlayerStats } from '@common/player';
 import { BehaviorSubject, of } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
-import { PlayerStats } from '@common/player';
 
 // Using the correct type definitions
 type DiceBonus = 'attack' | 'defense';
@@ -176,7 +176,7 @@ describe('FormCharacterComponent', () => {
         component.playerStats.id = 'player-id';
         component.createGame();
 
-        expect(mockSocketService.createRoom).toHaveBeenCalledWith('player-id', 15);
+        expect(mockSocketService.createRoom).toHaveBeenCalledWith(15);
         expect(mockSocketService.createGame).toHaveBeenCalledWith('new-code', 'Test Map');
         expect(mockSocketService.shareCharacter).toHaveBeenCalled();
 

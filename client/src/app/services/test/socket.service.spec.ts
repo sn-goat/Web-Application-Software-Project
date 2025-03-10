@@ -11,6 +11,7 @@ import { PlayerStats } from '@common/player';
 class FakeSocket {
     callbacks: { [event: string]: Function } = {};
     emit = jasmine.createSpy('emit');
+    id = 'fakeSocketId';
 
     on(event: string, callback: Function) {
         this.callbacks[event] = callback;
@@ -54,12 +55,11 @@ describe('SocketService', () => {
     });
 
     it('should emit createRoom event with correct parameters', () => {
-        const organizerId = 'organizer1';
         const size = 8;
-        service.createRoom(organizerId, size);
-        expect(service.getCurrentPlayerId()).toEqual(organizerId);
+        const organizerId = fakeSocket.id;
+        service.createRoom(size);
         expect(service.getGameSize()).toEqual(size);
-        expect(fakeSocket.emit).toHaveBeenCalledWith('createRoom', { organizerId, size });
+        expect(fakeSocket.emit).toHaveBeenCalledWith('createRoom', { organizerId , size });
     });
 
     it('should emit joinRoom event with accessCode', () => {

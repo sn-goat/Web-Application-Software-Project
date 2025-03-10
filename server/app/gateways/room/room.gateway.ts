@@ -15,7 +15,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     constructor(
         private readonly roomService: RoomService,
-        private readonly eventEmitter: EventEmitter2
+        private readonly eventEmitter: EventEmitter2,
     ) {
         this.eventEmitter.on('room.deleted', (accessCode: string) => {
             this.handleRoomDeletion(accessCode);
@@ -122,18 +122,18 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private handleRoomDeletion(accessCode: string): void {
         this.logger.log(`Deleting sockets from room: ${accessCode}`);
         const roomSocket = this.server.sockets.adapter.rooms.get(accessCode);
-    
+
         if (!roomSocket) {
             this.logger.warn(`Room ${accessCode} not found.`);
             return;
         }
-    
+
         for (const clientId of roomSocket) {
             const clientSocket = this.server.sockets.sockets.get(clientId);
             if (clientSocket) {
                 clientSocket.leave(accessCode);
                 this.logger.log(`Client ${clientSocket.id} left room ${accessCode}`);
-    
+
                 // Déconnecter complètement le client
                 clientSocket.disconnect(true);
                 this.logger.log(`Client ${clientSocket.id} disconnected`);

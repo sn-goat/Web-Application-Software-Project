@@ -114,7 +114,7 @@ export class RoomService {
         }
 
         const existingNames = room.players.map((p) => p.name);
-        let baseName = player.name;
+        const baseName = player.name;
         let nameToAssign = baseName;
         let suffix = 1;
 

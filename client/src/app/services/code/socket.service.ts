@@ -40,7 +40,7 @@ export class SocketService {
     }
 
     shareCharacter(accessCode: string, player: PlayerStats) {
-        player.id = this.socket.id!;
+        player.id = this.socket.id as string;
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
 
@@ -191,7 +191,7 @@ export class SocketService {
     }
 
     getCurrentPlayerId(): string {
-        return this.socket.id!;
+        return this.socket.id as string;
     }
 
     getGameSize(): number {
