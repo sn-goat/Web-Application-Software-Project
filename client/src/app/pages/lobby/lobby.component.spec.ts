@@ -6,8 +6,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { SocketService } from '@app/services/code/socket.service';
-import { MockRouter } from '@app/testHelpers/mockRouter';
-import { MockSocketService } from '@app/testHelpers/mockSocketService';
+import { MockRouter } from '@app/helpers/mockRouter';
+import { MockSocketService } from '@app/helpers/mockSocketService';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { LobbyComponent } from './lobby.component';

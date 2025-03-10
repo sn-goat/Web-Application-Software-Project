@@ -17,7 +17,6 @@ export interface Board {
     isCTF: boolean;
     board: Cell[][];
     visibility: Visibility;
-    image: string;
     updatedAt?: Date;
     createdAt?: Date;
 }
@@ -40,4 +39,3 @@ export const TILE_COST = new Map<Tile, number>([
     [Tile.CLOSED_DOOR, Infinity],
     [Tile.OPENED_DOOR, 1],
 ]);
-

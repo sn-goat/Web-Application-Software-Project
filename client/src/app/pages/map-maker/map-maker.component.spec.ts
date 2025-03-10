@@ -26,7 +26,6 @@ describe('MapMakerComponent', () => {
         isCTF: false,
         size: 10,
         board: [],
-        image: '',
         visibility: Visibility.PUBLIC,
         updatedAt: new Date(),
     };
@@ -166,7 +165,6 @@ describe('MapMakerComponent', () => {
             isCTF: false,
             size: 10,
             board: [],
-            image: '',
             visibility: Visibility.PUBLIC,
             updatedAt: new Date(),
         };
@@ -176,7 +174,7 @@ describe('MapMakerComponent', () => {
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(of(successResponse));
         const result = await component.saveBoard();
         fixture.detectChanges();
-        expect(addBoardSpy).toHaveBeenCalledWith({ ...boardWithoutId, image: '' });
+        expect(addBoardSpy).toHaveBeenCalledWith(boardWithoutId);
         expect(result).toEqual('Success Response');
     });
 
@@ -187,7 +185,6 @@ describe('MapMakerComponent', () => {
             isCTF: false,
             size: 10,
             board: [],
-            image: '',
             visibility: Visibility.PUBLIC,
             updatedAt: new Date(),
         };
@@ -197,7 +194,7 @@ describe('MapMakerComponent', () => {
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorResponse));
         await expectAsync(component.saveBoard()).toBeRejected();
         fixture.detectChanges();
-        expect(addBoardSpy).toHaveBeenCalledWith({ ...boardWithoutId, image: '' });
+        expect(addBoardSpy).toHaveBeenCalledWith(boardWithoutId);
     });
 
     it('should update board when board has _id', async () => {
@@ -206,7 +203,6 @@ describe('MapMakerComponent', () => {
             name: 'Existing Board',
             description: 'New board description',
             board: [],
-            image: '',
             visibility: Visibility.PUBLIC,
             isCTF: false,
             size: 10,
@@ -218,7 +214,7 @@ describe('MapMakerComponent', () => {
         const updateBoardSpy = spyOn(component['boardService'], 'updateBoard').and.returnValue(of(successResponse));
         const result = await component.saveBoard();
         fixture.detectChanges();
-        expect(updateBoardSpy).toHaveBeenCalledWith({ ...mockBoardWithId, image: '' });
+        expect(updateBoardSpy).toHaveBeenCalledWith(mockBoardWithId);
         expect(result).toEqual('Update Success');
     });
 
@@ -227,7 +223,6 @@ describe('MapMakerComponent', () => {
             name: 'New Board',
             description: 'New board description',
             board: [],
-            image: '',
             visibility: Visibility.PUBLIC,
             isCTF: false,
             size: 10,
@@ -239,7 +234,6 @@ describe('MapMakerComponent', () => {
         const addBoardSpy = spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => errorObj));
         await expectAsync(component.saveBoard()).toBeRejectedWith('Custom error message');
         fixture.detectChanges();
-        expect(addBoardSpy).toHaveBeenCalledWith(jasmine.objectContaining({ image: '' }));
         const boardArg = addBoardSpy.calls.mostRecent().args[0];
         expect(boardArg._id).toBeUndefined();
     });
@@ -252,7 +246,6 @@ describe('MapMakerComponent', () => {
             isCTF: false,
             size: 10,
             board: [],
-            image: '',
             visibility: Visibility.PUBLIC,
             updatedAt: new Date(),
         };

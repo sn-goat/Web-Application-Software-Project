@@ -4,14 +4,16 @@ import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Game } from '@common/game';
+import { Avatar, Game } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { Logger } from '@nestjs/common';
+import { EventEmitter2 } from 'eventemitter2';
 
 describe('GameService', () => {
     let gameService: GameService;
     let boardService: Partial<BoardService>;
     let timerService: Partial<TimerService>;
+    let eventEmitter: EventEmitter2;
     let dummyBoard: any;
     let dummyMap: Cell[][];
     const accessCode = 'GAME123';
@@ -24,7 +26,7 @@ describe('GameService', () => {
             ],
             [
                 { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 1 }, cost: 1, player: null },
-                { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
+                { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: null },
             ],
         ];
 
@@ -33,7 +35,7 @@ describe('GameService', () => {
             getBoard: jest.fn().mockResolvedValue(dummyBoard),
         };
 
-        gameService = new GameService(boardService as BoardService, timerService as TimerService);
+        gameService = new GameService(boardService as BoardService, timerService as TimerService, eventEmitter);
 
         jest.spyOn(Logger.prototype, 'log').mockImplementation();
         jest.spyOn(Logger.prototype, 'error').mockImplementation();
@@ -223,6 +225,152 @@ describe('GameService', () => {
             const pos: Vec2 = { x: 1, y: 0 };
             const cell = gameService.getCellAt(accessCode, pos);
             expect(cell).toEqual(customMap[0][1]);
+        });
+    });
+
+    describe('findPossiblePaths', () => {
+        it('should find all possible paths with normal terrain', () => {
+            const grid: Cell[][] = [
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }],
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 1, player: null }],
+            ];
+            const startPosition: Vec2 = { x: 0, y: 0 };
+            const movementPoints = 2;
+
+            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
+
+            expect(result.size).toBeGreaterThan(0);
+            expect(result.has('0,0')).toBeTruthy();
+        });
+
+        it('should not move through walls', () => {
+            const grid: Cell[][] = [
+                [{ tile: Tile.WALL, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: Infinity, player: null }],
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 1, player: null }],
+            ];
+            const startPosition: Vec2 = { x: 0, y: 0 };
+            const movementPoints = 2;
+
+            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
+
+            expect(result.has('1,0')).toBeFalsy();
+        });
+
+        it('should respect movement points and stop if out of energy', () => {
+            const grid: Cell[][] = [
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }],
+                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 2, player: null }],
+            ];
+            const startPosition: Vec2 = { x: 0, y: 0 };
+            const movementPoints = 1;
+
+            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
+
+            expect(result.has('1,0')).toBeFalsy();
+        });
+
+        it('should not go out of bounds', () => {
+            const grid: Cell[][] = [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }]];
+            const startPosition: Vec2 = { x: 0, y: 0 };
+            const movementPoints = 2;
+
+            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
+
+            expect(result.has('-1,0')).toBeFalsy();
+            expect(result.has('0,-1')).toBeFalsy();
+        });
+
+        it('should not move onto a tile occupied by another player', () => {
+            const grid: Cell[][] = [
+                [
+                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
+                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 1, player: Avatar.Cleric },
+                ],
+            ];
+            const startPosition: Vec2 = { x: 0, y: 0 };
+            const movementPoints = 2;
+
+            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
+
+            expect(result.has('1,0')).toBeFalsy();
+        });
+
+        it('should return only the start position if movement points are 0', () => {
+            const grid: Cell[][] = [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }]];
+            const startPosition: Vec2 = { x: 0, y: 0 };
+            const movementPoints = 0;
+
+            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
+
+            expect(result.size).toBe(1);
+        });
+    });
+
+    describe('isActivePlayerReady', () => {
+        it('should return true if it is the player turn', () => {
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players: [{ id: 'org1' } as PlayerStats],
+                map: dummyMap,
+                currentTurn: 0,
+                isDebugMode: false,
+            });
+            expect(gameService.isActivePlayerReady(accessCode, 'org1')).toBe(true);
+        });
+
+        it('should return false if it is not the player turn', () => {
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players: [{ id: 'org1' } as PlayerStats, { id: 'org2' } as PlayerStats],
+                map: dummyMap,
+                currentTurn: 0,
+                isDebugMode: false,
+            });
+            expect(gameService.isActivePlayerReady(accessCode, 'org2')).toBe(false);
+        });
+    });
+
+    describe('getPlayerTurn', () => {
+        it("should return the current player's turn", () => {
+            const players: PlayerStats[] = [
+                { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1' } as PlayerStats,
+                { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2' } as PlayerStats,
+            ];
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players,
+                map: dummyMap,
+                currentTurn: 1,
+                isDebugMode: false,
+            });
+            expect(gameService.getPlayerTurn(accessCode)).toEqual(players[1]);
+        });
+
+        it('should return undefined if no game exists for the given access code', () => {
+            expect(gameService.getPlayerTurn('INVALID_CODE')).toBeUndefined();
+        });
+    });
+
+    describe('configureTurn', () => {
+        it('should configure the turn and return the correct TurnInfo', () => {
+            const players: PlayerStats[] = [
+                { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1', position: { x: 1, y: 0 } } as PlayerStats,
+                { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2', position: { x: 1, y: 1 } } as PlayerStats,
+            ];
+            gameService['currentGames'].set(accessCode, {
+                organizerId: 'org1',
+                accessCode,
+                players,
+                map: dummyMap,
+                currentTurn: 0,
+                isDebugMode: false,
+            });
+            const turnInfo = gameService.configureTurn(accessCode);
+            expect(turnInfo.player).toEqual(players[0]);
+            // expect(turnInfo.path).toEqual(new Map<string, PathInfo>());
         });
     });
 });

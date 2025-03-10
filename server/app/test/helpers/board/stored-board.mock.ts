@@ -9,7 +9,6 @@ export const EMPTY_BOARD: Board = {
     isCTF: false,
     board: [[]],
     visibility: Visibility.PUBLIC,
-    image: 'random/url/',
     updatedAt: new Date(),
     createdAt: new Date('2023, 02, 02'),
 };
@@ -21,7 +20,6 @@ export const VALID_BOARD: Board = {
     isCTF: false,
     board: [],
     visibility: Visibility.PUBLIC,
-    image: 'another/random/url',
     updatedAt: new Date('2025,01,15'),
     createdAt: new Date('2024, 02, 02'),
 };
@@ -33,7 +31,6 @@ export const PRIVATE_BOARD: Board = {
     isCTF: true,
     board: [[]],
     visibility: Visibility.PRIVATE,
-    image: 'random/url/',
     updatedAt: new Date(),
     createdAt: new Date('2022, 02, 02'),
 };
@@ -45,7 +42,6 @@ export const INVALID_BOARD2: Board = {
     isCTF: true,
     board: [[]],
     visibility: Visibility.PUBLIC,
-    image: 'url',
     updatedAt: new Date(),
     createdAt: new Date('2023, 02, 10'),
 };
@@ -58,7 +54,6 @@ export const UPDATE_BOARD: UpdateBoardDto = {
     isCTF: false,
     board: [],
     visibility: Visibility.PUBLIC,
-    image: 'another/random/url',
     updatedAt: new Date('2025,01,15'),
     createdAt: new Date('2024, 02, 02'),
 };

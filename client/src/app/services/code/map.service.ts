@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { Board, Validation } from '@common/board';
+import { Board, TILE_COST, Validation } from '@common/board';
 import { Item, Size, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -109,6 +109,7 @@ export class MapService {
     setCellTile(col: number, row: number, newTile: Tile) {
         const currentBoard = this.boardToSave.value;
         currentBoard.board[row][col].tile = newTile;
+        currentBoard.board[row][col].cost = TILE_COST.get(newTile) as number;
         this.boardToSave.next(currentBoard);
     }
 
@@ -146,7 +147,6 @@ export class MapService {
             visibility: Visibility.PRIVATE,
             board: [],
             updatedAt: new Date(),
-            image: '',
         } as Partial<Board> as Board);
     }
 

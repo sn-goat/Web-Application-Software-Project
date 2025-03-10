@@ -127,11 +127,11 @@ export class MapMakerComponent implements OnInit {
         let response;
         try {
             if (mapData._id) {
-                response = await firstValueFrom(this.boardService.updateBoard({ ...mapData, image: '' }));
+                response = await firstValueFrom(this.boardService.updateBoard(mapData));
             } else {
                 const mapDataCreation = Object.assign({}, mapData);
                 delete mapDataCreation._id;
-                response = await firstValueFrom(this.boardService.addBoard({ ...mapDataCreation, image: '' }));
+                response = await firstValueFrom(this.boardService.addBoard(mapDataCreation));
             }
             return response.body as string;
         } catch (error) {
