@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
 import { Subscription } from 'rxjs';
+import { MouseHandlerDirective } from './mouse-handler.directive';
 
 @Component({
     selector: 'app-game-map',
-    imports: [CommonModule, BoardCellComponent],
+    imports: [CommonModule, BoardCellComponent, MouseHandlerDirective],
     templateUrl: './game-map.component.html',
     styleUrl: './game-map.component.scss',
 })
