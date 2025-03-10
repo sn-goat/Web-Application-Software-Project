@@ -32,6 +32,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
         client.join(payload.accessCode);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, { room });
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.LockRoom)
@@ -62,6 +63,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, { room });
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.RemovePlayer)
@@ -72,6 +74,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerRemoved, room.players);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.DisconnectPlayer)
@@ -82,6 +85,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             return;
         }
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerDisconnected, room.players);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.GetRoom)

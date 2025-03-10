@@ -69,7 +69,7 @@ export class SocketService {
 
     onPlayersList(): Observable<PlayerStats[]> {
         return new Observable((observer) => {
-            this.socket.on('playersList', (players: PlayerStats[]) => observer.next(players));
+            this.socket.on(RoomEvents.PlayerList, (players: PlayerStats[]) => observer.next(players));
         });
     }
 
