@@ -28,8 +28,14 @@
         </div>
 
         <div class="buttons">
-            <button class="button" (click)="endTurn()">Terminer le tour</button>
-            <button class="button" (click)="performAction()">Action</button>
+            <button 
+            class="button"
+            [disabled]="!isPlayerTurn"
+            (click)="gameService.endTurn()">Terminer le tour</button>
+            <button
+            class="button"
+            [disabled]="!isPlayerTurn"
+            (click)="performAction()">Action</button>
         </div>
     </div>
 </div>

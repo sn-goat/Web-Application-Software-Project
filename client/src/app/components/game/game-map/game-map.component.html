@@ -6,7 +6,7 @@
             class="cell" 
             [cell]="cell" 
             [appMouseHandler]="cell"
-            [disable]="isPlayerTurn"
+            [disable]="!isPlayerTurn"
             [isInGameView]="true"
             (cellClicked)="onCellClicked($event)">
         </app-board-cell>

@@ -7,8 +7,6 @@ export enum GameEvents {
     BroadcastDebugState = 'debugState', // Serveur
 }
 
-export enum TimerEvents {Update = 'timerUpdate', End = 'timerEnded'}
-
 export enum TurnEvents {
     Start = 'startTurn', // Serveur
     UpdateTimer = 'timeUpdate', // Server

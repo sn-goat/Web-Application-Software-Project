@@ -13,13 +13,14 @@ import { Item } from '@common/enums';
 export class GameMapPlayerToolsComponent implements OnInit {
     items: Item[];
     timer: string;
+    isPlayerTurn: boolean;
 
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
 
+    gameService: GameService = inject(GameService);
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
     private socketService: SocketService = inject(SocketService);
-    private gameService: GameService = inject(GameService);
 
     constructor() {
         this.items = [];
@@ -30,8 +31,13 @@ export class GameMapPlayerToolsComponent implements OnInit {
         this.playerToolsService.items$.subscribe((items) => {
             this.items = items;
         });
+
         this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
             this.timer = time.remainingTime.toString();
+        });
+
+        this.gameService.isPlayerTurn$.subscribe((isPlayerTurn) => {
+            this.isPlayerTurn = isPlayerTurn;
         });
     }
 

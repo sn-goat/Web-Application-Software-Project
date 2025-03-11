@@ -60,7 +60,14 @@ export class GameService {
     }
 
     configureTurn(accessCode: string): { player: PlayerStats; path: Record<string, PathInfo> } {
+        this.logger.log(`Configuring turn for game ${accessCode}`);
         const playerTurn = this.getPlayerTurn(accessCode);
+        this.logger.log(`Configuring turn for game ${playerTurn.id}`);
+        this.logger.log(`Configuring turn for game ${playerTurn.speed}`);
+
+        if (!playerTurn) {
+            this.logger.log('No player turn found');
+        }
         playerTurn.movementPts = playerTurn.speed;
         playerTurn.actions = 1;
         const path = this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts);
@@ -122,6 +129,7 @@ export class GameService {
 
     getPlayerTurn(accessCode: string): PlayerStats {
         const game = this.currentGames.get(accessCode);
+        this.logger.log(`Current players: ${game.players}`);
         return game ? game.players[game.currentTurn] : undefined;
     }
 
@@ -158,9 +166,9 @@ export class GameService {
                     const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
                     if (this.isValidPosition(game.length, newPos)) {
                         const moveCost = this.getTileCost(game[newPos.x][newPos.y]);
-                        this.logger.log(`Tile cost: ${moveCost}`);
+                        // this.logger.log(`Tile cost: ${moveCost}`);
                         if (remainingPoints >= moveCost && moveCost !== Infinity) {
-                            this.logger.log('Pat    h found:');
+                            // this.logger.log('Pat    h found:');
                             queue.push({
                                 position: newPos,
                                 path: [...path, newPos],

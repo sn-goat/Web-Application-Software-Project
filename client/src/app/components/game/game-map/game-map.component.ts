@@ -24,26 +24,25 @@ export class GameMapComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        // Subscribe to the game map observable.
         this.subscriptions.push(
             this.gameService.map$.subscribe((map: Cell[][]) => {
                 this.boardGame = map;
             }),
         );
-        // Subscribe to the action mode flag from the PlayerToolsService.
         this.subscriptions.push(
             this.playerToolsService.actionMode$.subscribe((mode: boolean) => {
                 this.actionMode = mode;
             }),
         );
         this.subscriptions.push(
-            this.gameService.activePlayer$.subscribe(() => {
-                this.isPlayerTurn = this.gameService.isPlayerTurn();
+            this.gameService.isPlayerTurn$.subscribe((isPlayerTurn) => {
+                this.isPlayerTurn = isPlayerTurn;
             }),
         );
     }
 
     onCellClicked(cell: Cell) {
+        console.log('Clicked cell', cell);
         if (this.actionMode) {
             console.log('Action mode active: Clicked cell', cell);
             this.selectedCell = cell;

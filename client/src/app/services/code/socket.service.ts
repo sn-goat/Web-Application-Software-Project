@@ -142,7 +142,7 @@ export class SocketService {
     // Receive
     onBroadcastStartGame(): Observable<Game> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.BroadcastStartGame, (data: { game: Game }) => observer.next(data.game));
+            this.socket.on(GameEvents.BroadcastStartGame, (game: Game) => observer.next(game));
         });
     }
 
@@ -165,7 +165,6 @@ export class SocketService {
             this.socket.on(TurnEvents.PlayerTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
                 const receivedMap = new Map(Object.entries(turn.path));
                 observer.next({ player: turn.player, path: receivedMap });
-                console.log(turn);
             });
             this.socket.on(TurnEvents.PlayerTurn, (data: { turn: TurnInfo }) => observer.next(data.turn));
         });

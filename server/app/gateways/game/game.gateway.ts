@@ -1,12 +1,12 @@
 import { GameService } from '@app/services/game.service';
 import { Vec2 } from '@common/board';
-import { GameEvents, TimerEvents, TurnEvents } from '@common/game.gateway.events';
+import { GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { TimerEvents, THREE_SECONDS_IN_MS } from '@app/gateways/game/game.gateway.constants';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { THREE_SECONDS_IN_MS } from './game.gateway.constants';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -18,7 +18,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TimerEvents.Update)
     handleTimerUpdate(payload: { roomId: string; remainingTime: number }) {
-        this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
+        // this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
         this.server.to(payload.roomId).emit(TurnEvents.UpdateTimer, { remainingTime: payload.remainingTime });
     }
 
@@ -43,7 +43,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
         const game = await this.gameService.configureGame(payload.accessCode, payload.players);
         this.logger.log('Game configured');
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, { game });
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, game);
         this.logger.log('Game started');
     }
 
@@ -73,8 +73,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(TurnEvents.End)
-    handlePlayerEnd(client: Socket, payload: { accessCode: string }) {
-        this.endTurn(payload.accessCode);
+    handlePlayerEnd(client: Socket, accessCode: string) {
+        this.endTurn(accessCode);
     }
 
     // @SubscribeMessage(FightEvents.Init)
