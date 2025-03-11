@@ -2,11 +2,10 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
-import { Cell } from '@common/board';
+import { Cell, Vec2 } from '@common/board';
+import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
-import { PathLike } from 'fs';
-import { PathInfo } from '@common/game';
 
 @Component({
     selector: 'app-game-map',
@@ -20,6 +19,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     selectedCell: Cell | null = null;
     actionMode = false;
     isPlayerTurn = false;
+    path: Map<Vec2, PathInfo> | null = new Map<Vec2, PathInfo>();
 
     private gameService: GameService = inject(GameService);
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
@@ -38,9 +38,26 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.actionMode = mode;
             }),
         );
+
         this.subscriptions.push(
-            this.gameService.activePlayer$.subscribe(() => {
-                this.isPlayerTurn = this.gameService.isPlayerTurn();
+            this.gameService.isPlayerTurn$.subscribe((isPlayerTurn: boolean) => {
+                this.isPlayerTurn = isPlayerTurn;
+            }),
+        );
+
+        this.subscriptions.push(
+            this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
+                if (!path) {
+                    this.path = null;
+                    return;
+                }
+
+                this.path = new Map<Vec2, PathInfo>(
+                    [...path.entries()].map(([key, value]) => {
+                        const [x, y] = key.split(',').map(Number);
+                        return [{ x, y }, value];
+                    }),
+                );
             }),
         );
     }
@@ -51,6 +68,11 @@ export class GameMapComponent implements OnInit, OnDestroy {
             this.selectedCell = cell;
             this.actionMode = false;
         }
+    }
+
+    isPathCell(cell: Cell): boolean {
+        if (!this.path) return false;
+        return this.path.has(cell.position);
     }
 
     ngOnDestroy() {
