@@ -16,8 +16,7 @@ describe('JoinRoomComponent', () => {
         socketServiceMock.onJoinError.and.returnValue(new Subject());
 
         await TestBed.configureTestingModule({
-            declarations: [JoinRoomComponent],
-            imports: [FormsModule],
+            imports: [FormsModule, JoinRoomComponent],
             providers: [{ provide: SocketService, useValue: socketServiceMock }],
         }).compileComponents();
     });
