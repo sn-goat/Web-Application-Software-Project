@@ -1,7 +1,7 @@
 import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, PathInfo } from '@common/game';
+import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -273,9 +273,7 @@ export class GameService {
         if (!cell) {
             return Infinity;
         }
-        if (this.isOccupiedByPlayer(cell)) {
-            return Infinity;
-        }
+        if (this.isOccupiedByPlayer(cell)) return Infinity;
         return cell.cost;
     }
 

@@ -8,8 +8,8 @@ import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-playe
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
+import { PlayerService } from '@app/services/code/player.service';
 import { Vec2 } from '@common/board';
 import { TurnInfo } from '@common/game';
 

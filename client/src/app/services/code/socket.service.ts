@@ -167,6 +167,13 @@ export class SocketService {
                 observer.next({ player: turn.player, path: receivedMap });
                 console.log(turn);
             });
+            this.socket.on(TurnEvents.PlayerTurn, (data: { turn: TurnInfo }) => observer.next(data.turn));
+        });
+    }
+
+    onEndTurn(): Observable<unknown> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.End, (data) => observer.next(data));
         });
     }
 
