@@ -5,6 +5,8 @@ import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
+import { PathLike } from 'fs';
+import { PathInfo } from '@common/game';
 
 @Component({
     selector: 'app-game-map',

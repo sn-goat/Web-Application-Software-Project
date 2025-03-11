@@ -17,10 +17,11 @@ export class GameService {
     currentPlayers$: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
     activePlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     clientPlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    path$: BehaviorSubject<Map<string, PathInfo> | null> = new BehaviorSubject<Map<string, PathInfo> | null>(null);
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
-    private path: Map<string, PathInfo> = new Map();
+    // private path: Map<string, PathInfo> = new Map();
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -63,7 +64,7 @@ export class GameService {
 
     updateTurn(player: PlayerStats, path: Map<string, PathInfo>): void {
         this.activePlayer$.next(player);
-        this.path = path;
+        this.path$.next(path);
         console.log(path);
     }
 
@@ -79,10 +80,10 @@ export class GameService {
         }
     }
 
-    setPath(path: Map<string, PathInfo>): void {
-        this.path = path;
-        path = this.path;
-    }
+    // setPath(path: Map<string, PathInfo>): void {
+    //     this.path = path;
+    //     path = this.path;
+    // }
 
     endTurn(): void {
         this.socketService.endTurn(this.accessCode);
