@@ -1,7 +1,7 @@
 import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
+import { Avatar, Game, PathInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -59,13 +59,14 @@ export class GameService {
         return null;
     }
 
-    configureTurn(accessCode: string): TurnInfo {
+    configureTurn(accessCode: string): { player: PlayerStats; path: Record<string, PathInfo> } {
         const playerTurn = this.getPlayerTurn(accessCode);
         playerTurn.movementPts = playerTurn.speed;
         playerTurn.actions = 1;
+        const path = this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts);
         return {
             player: playerTurn,
-            path: this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts),
+            path: Object.fromEntries(path),
         };
     }
 
@@ -139,6 +140,7 @@ export class GameService {
             { x: 0, y: -1 }, // Up
             { x: -1, y: 0 }, // Left
         ];
+        this.logger.log(`player info: ${playerPosition}, ${movementPoints}`);
 
         const queue: { position: Vec2; path: Vec2[]; remainingPoints: number }[] = [
             { position: playerPosition, path: [playerPosition], remainingPoints: movementPoints },
@@ -154,11 +156,11 @@ export class GameService {
 
                 for (const dir of directions) {
                     const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-
                     if (this.isValidPosition(game.length, newPos)) {
                         const moveCost = this.getTileCost(game[newPos.x][newPos.y]);
-
+                        this.logger.log(`Tile cost: ${moveCost}`);
                         if (remainingPoints >= moveCost && moveCost !== Infinity) {
+                            this.logger.log('Pat    h found:');
                             queue.push({
                                 position: newPos,
                                 path: [...path, newPos],
@@ -197,7 +199,7 @@ export class GameService {
         // Mélanger les points de spawn
         const shuffledSpawnPoints = [...spawnPoints];
         for (let i = shuffledSpawnPoints.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = Math.floor(Math.random() * i);
             [shuffledSpawnPoints[i], shuffledSpawnPoints[j]] = [shuffledSpawnPoints[j], shuffledSpawnPoints[i]];
         }
 
@@ -256,7 +258,12 @@ export class GameService {
         if (!cell) {
             return false;
         }
-        return cell.player !== Avatar.Default;
+
+        if (!cell.player) {
+            return false;
+        }
+
+        return cell.player !== null;
     }
 
     /**
@@ -266,7 +273,9 @@ export class GameService {
         if (!cell) {
             return Infinity;
         }
-        if (this.isOccupiedByPlayer(cell)) return Infinity;
+        if (this.isOccupiedByPlayer(cell)) {
+            return Infinity;
+        }
         return cell.cost;
     }
 

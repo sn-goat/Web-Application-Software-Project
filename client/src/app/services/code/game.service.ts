@@ -58,6 +58,7 @@ export class GameService {
     updateTurn(player: PlayerStats, path: Map<string, PathInfo>): void {
         this.activePlayer$.next(player);
         this.path = path;
+        console.log(path);
     }
 
     movePlayer(position: Vec2, direction: Vec2): void {

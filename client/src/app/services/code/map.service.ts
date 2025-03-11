@@ -156,7 +156,7 @@ export class MapService {
         for (let i = 0; i < this.firstBoardValue.size; i++) {
             const row = [];
             for (let j = 0; j < this.firstBoardValue.size; j++) {
-                row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
+                row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i }, cost: TILE_COST.get(Tile.FLOOR) as number });
             }
             boardGame.push(row);
         }
