@@ -18,7 +18,7 @@ export class GameService {
     activePlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     clientPlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     path$: BehaviorSubject<Map<string, PathInfo> | null> = new BehaviorSubject<Map<string, PathInfo> | null>(null);
-
+    isPlayerTurn$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
     // private path: Map<string, PathInfo> = new Map();
@@ -36,10 +36,14 @@ export class GameService {
         return this.currentPlayers$.value.some((currentPlayer) => currentPlayer.id === player.id);
     }
 
-    isPlayerTurn(): boolean {
+    isPlayerTurn(): void {
         const player = this.activePlayer$.value;
         const clientPlayer = this.clientPlayer$.value;
-        return (player && clientPlayer && player.id === clientPlayer.id) as boolean;
+        if (player && clientPlayer && player.id === clientPlayer.id) {
+            this.isPlayerTurn$.next(true);
+        } else {
+            this.isPlayerTurn$.next(false);
+        }
     }
 
     getInitialPlayers(): PlayerStats[] {
@@ -64,6 +68,7 @@ export class GameService {
 
     updateTurn(player: PlayerStats, path: Map<string, PathInfo>): void {
         this.activePlayer$.next(player);
+        this.isPlayerTurn();
         this.path$.next(path);
         console.log(path);
     }
