@@ -5,16 +5,16 @@ import { Cell } from '@common/board';
     selector: '[appMouseHandler]',
 })
 export class MouseHandlerDirective {
-    // Pass the cell object into the directive via the attribute binding.
     @Input('appMouseHandler') cell: Cell;
-    // Emit the cell when clicked.
+    @Input() disable: boolean = false;
     @Output() cellClicked = new EventEmitter<Cell>();
 
     @HostListener('click', ['$event'])
     onClick(): void {
-        // Emit the cell without logging—let the component decide what to do.
+        console.log('Cell clicked:', this.disable);
+        if (this.disable) {
+            return;
+        }
         this.cellClicked.emit(this.cell);
-        // eslint-disable-next-line no-console
-        // console.log('Cell clicked:', this.cell, event);
     }
 }

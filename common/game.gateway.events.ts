@@ -6,10 +6,14 @@ export enum GameEvents {
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debugState', // Serveur
 }
+
+export enum TimerEvents {Update = 'timerUpdate', End = 'timerEnded'}
+
 export enum TurnEvents {
     Start = 'startTurn', // Serveur
     UpdateTimer = 'timeUpdate', // Server
     End = 'endTurn', // Serveur (timer / plus déplacement et action inutile / plus de déplacement et plus d'action )
+    BroadcastEnd = 'endPlayerTurn', // Serveur
     PlayerTurn = 'nextPlayerTurn', // Serveur
     FullInventory = 'fullInventoryAck', // Serveur (pop généré, et attend choix user ne met pas en pause le Timer)
     Move = 'moveAck', // Client (return New Path)
