@@ -42,11 +42,12 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     onCellClicked(cell: Cell) {
-        console.log('Clicked cell', cell);
         if (this.actionMode) {
             console.log('Action mode active: Clicked cell', cell);
             this.selectedCell = cell;
             this.actionMode = false;
+        } else {
+            this.gameService.movePlayer(cell.position);
         }
     }
 

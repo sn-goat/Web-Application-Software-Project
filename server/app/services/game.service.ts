@@ -1,7 +1,7 @@
 import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
+import { Avatar, Game, PathInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -43,7 +43,7 @@ export class GameService {
     //     throw new Error('Method not implemented.');
     // }
     changeDoorState(accessCode: string, position: Vec2) {
-        const cell: Cell = this.getCellAt(accessCode, position);
+        const cell: Cell = this.getMap(accessCode)[position.y][position.x];
         cell.tile = cell.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
         return cell;
     }
@@ -95,13 +95,13 @@ export class GameService {
         }
     }
 
-    processPath(accessCode: string, path: Vec2[]) {
+    processPath(accessCode: string, pathInfo: PathInfo) {
         const game = this.currentGames.get(accessCode);
         if (game) {
             const activePlayer = this.getPlayerTurn(accessCode);
             if (activePlayer) {
-                this.logger.log(`Processing path for player ${activePlayer.id}`);
                 let index = 0;
+                const path = pathInfo.path;
                 const interval = setInterval(() => {
                     if (index < path.length) {
                         this.movePlayer(accessCode, game.map, activePlayer.position, path[index]);
@@ -109,14 +109,14 @@ export class GameService {
                         index++;
                     } else {
                         clearInterval(interval);
+                        activePlayer.movementPts -= pathInfo.cost;
+                        if (this.isPlayerTurnEnded(accessCode, activePlayer)) {
+                            this.eventEmitter.emit(TurnEvents.End, accessCode);
+                        }
                     }
                 }, MOVEMENT_TIMEOUT_IN_MS);
             }
         }
-    }
-
-    getCellAt(accessCode: string, position: Vec2): Cell {
-        return this.currentGames.get(accessCode).map[position.y][position.x];
     }
 
     startTimer(accessCode: string) {
@@ -129,16 +129,58 @@ export class GameService {
 
     getPlayerTurn(accessCode: string): PlayerStats {
         const game = this.currentGames.get(accessCode);
-        this.logger.log(`Current players: ${game.players}`);
         return game ? game.players[game.currentTurn] : undefined;
+    }
+
+    getMap(accessCode: string): Cell[][] {
+        return this.currentGames.get(accessCode).map;
     }
 
     switchTurn(accessCode: string) {
         const game = this.currentGames.get(accessCode);
         if (game) {
             game.currentTurn = (game.currentTurn + 1) % game.players.length;
-            this.logger.log(`Switching turn to player ${game.players[game.currentTurn].id}`);
         }
+    }
+
+    private isPlayerTurnEnded(accessCode: string, player: PlayerStats) {
+        const map = this.getMap(accessCode);
+        if (map) {
+            if (player.movementPts > 0) {
+                const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
+                this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+                return false;
+            } else if (player.actions > 0) {
+                return !this.isPlayerCanMakeAction(map, player.position);
+            }
+            return true;
+        }
+    }
+
+    private isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
+        const directions: Vec2[] = [
+            { x: 0, y: 1 }, // Down
+            { x: 1, y: 0 }, // Right
+            { x: 0, y: -1 }, // Up
+            { x: -1, y: 0 }, // Left
+            { x: 1, y: 1 }, // Down Right
+            { x: 1, y: -1 }, // Up Right
+            { x: -1, y: 1 }, // Down Left
+            { x: -1, y: -1 }, // Up Left
+        ];
+        for (const dir of directions) {
+            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
+                if (this.isValidCellForAction(map[newPos.y][newPos.x])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private isValidCellForAction(cell: Cell): boolean {
+        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
     }
 
     private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
@@ -148,7 +190,6 @@ export class GameService {
             { x: 0, y: -1 }, // Up
             { x: -1, y: 0 }, // Left
         ];
-        this.logger.log(`player info: ${playerPosition}, ${movementPoints}`);
 
         const queue: { position: Vec2; path: Vec2[]; remainingPoints: number }[] = [
             { position: playerPosition, path: [playerPosition], remainingPoints: movementPoints },
@@ -263,15 +304,7 @@ export class GameService {
      * Check if a position is occupied by another player.
      */
     private isOccupiedByPlayer(cell: Cell): boolean {
-        if (!cell) {
-            return false;
-        }
-
-        if (!cell.player) {
-            return false;
-        }
-
-        return cell.player !== null;
+        return cell && cell.player !== undefined && cell.player !== Avatar.Default;
     }
 
     /**
@@ -287,8 +320,8 @@ export class GameService {
 
     private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
         this.logger.log(`Player moved from ${position.x},${position.y} to ${direction.x},${direction.y}`);
-        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
         map[position.y][position.x].player = Avatar.Default;
         map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
+        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
     }
 }

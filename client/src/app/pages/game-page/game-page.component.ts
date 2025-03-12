@@ -46,7 +46,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
             this.currentPlayerId = player?.id;
         });
 
-        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
+        this.socketService.onTurnSwitch().subscribe((turn: TurnInfo) => {
             this.gameService.updateTurn(turn.player, turn.path);
         });
 
@@ -55,7 +55,11 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         }
 
         this.socketService.onBroadcastMove().subscribe((payload: { position: Vec2; direction: Vec2 }) => {
-            this.gameService.movePlayer(payload.position, payload.direction);
+            this.gameService.onMove(payload.position, payload.direction);
+        });
+
+        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
+            this.gameService.updateTurn(turn.player, turn.path);
         });
     }
 

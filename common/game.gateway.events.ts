@@ -10,6 +10,7 @@ export enum GameEvents {
 export enum TurnEvents {
     Start = 'startTurn', // Serveur
     UpdateTimer = 'timeUpdate', // Server
+    UpdateTurn = 'updateTurn', // Server
     End = 'endTurn', // Serveur (timer / plus déplacement et action inutile / plus de déplacement et plus d'action )
     BroadcastEnd = 'endPlayerTurn', // Serveur
     PlayerTurn = 'nextPlayerTurn', // Serveur

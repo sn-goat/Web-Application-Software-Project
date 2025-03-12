@@ -11,7 +11,6 @@ export class MouseHandlerDirective {
 
     @HostListener('click', ['$event'])
     onClick(): void {
-        console.log('Cell clicked:', this.disable);
         if (this.disable) {
             return;
         }

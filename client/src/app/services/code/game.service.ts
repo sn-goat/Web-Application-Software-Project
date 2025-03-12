@@ -65,10 +65,17 @@ export class GameService {
         this.activePlayer$.next(player);
         this.isPlayerTurn$.next(this.isPlayerTurn(player));
         this.path = path;
-        console.log(path);
     }
 
-    movePlayer(position: Vec2, direction: Vec2): void {
+    movePlayer(position: Vec2): void {
+        const keyPos = `${position.x},${position.y}`;
+        const selectedPath = this.path.get(keyPos);
+        if (selectedPath) {
+            this.isPlayerTurn$.next(false);
+            this.socketService.movePlayer(this.accessCode, selectedPath);
+        }
+    }
+    onMove(position: Vec2, direction: Vec2): void {
         const map: Cell[][] = this.map$.value;
         const player = this.activePlayer$.value;
         if (player) {
@@ -86,7 +93,6 @@ export class GameService {
     }
 
     endTurn(): void {
-        console.log('Ending turn');
         this.socketService.endTurn(this.accessCode);
     }
 
