@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
-import { Cell, Vec2 } from '@common/board';
+import { Cell } from '@common/board';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
@@ -15,15 +15,16 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
 })
 export class GameMapComponent implements OnInit, OnDestroy {
     boardGame: Cell[][] = [];
-    // Store the last clicked cell when in Action mode.
     selectedCell: Cell | null = null;
     actionMode = false;
     isPlayerTurn = false;
-    path: Map<Vec2, PathInfo> | null = new Map<Vec2, PathInfo>();
+    path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
+    pathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
     private subscriptions: Subscription[] = [];
+    constructor(private readonly cdr: ChangeDetectorRef) {}
 
     ngOnInit() {
         // Subscribe to the game map observable.
@@ -32,7 +33,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.boardGame = map;
             }),
         );
-        // Subscribe to the action mode flag from the PlayerToolsService.
         this.subscriptions.push(
             this.playerToolsService.actionMode$.subscribe((mode: boolean) => {
                 this.actionMode = mode;
@@ -49,15 +49,14 @@ export class GameMapComponent implements OnInit, OnDestroy {
             this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
                 if (!path) {
                     this.path = null;
+                    this.pathCells = new Set(); // Empty Set
                     return;
                 }
 
-                this.path = new Map<Vec2, PathInfo>(
-                    [...path.entries()].map(([key, value]) => {
-                        const [x, y] = key.split(',').map(Number);
-                        return [{ x, y }, value];
-                    }),
-                );
+                this.path = new Map(path);
+                this.pathCells = new Set([...path.keys()]);
+
+                this.cdr.detectChanges();
             }),
         );
     }
@@ -71,8 +70,8 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     isPathCell(cell: Cell): boolean {
-        if (!this.path) return false;
-        return this.path.has(cell.position);
+        if (!this.pathCells) return false;
+        return this.pathCells.has(`${cell.position.x},${cell.position.y}`);
     }
 
     ngOnDestroy() {
