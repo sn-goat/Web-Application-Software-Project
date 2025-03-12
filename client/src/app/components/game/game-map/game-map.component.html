@@ -8,6 +8,7 @@
             [appMouseHandler]="cell"
             [disable]="isPlayerTurn"
             [isInGameView]="true"
+            [class.path-cell]="isPathCell(cell)&&isPlayerTurn"
             (cellClicked)="onCellClicked($event)">
         </app-board-cell>
         }
