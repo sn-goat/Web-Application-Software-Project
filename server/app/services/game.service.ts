@@ -1,5 +1,5 @@
 import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
-import { Cell, Vec2 } from '@common/board';
+import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Game, PathInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
@@ -156,7 +156,7 @@ export class GameService {
 
     endTurnRequested(accessCode: string) {
         // If movement is in progress, flag that we should end the turn when movement finishes.
-        if (this.movementInProgress) {
+        if (this.movementInProgress.get(accessCode)) {
             this.pendingEndTurn.set(accessCode, true);
         } else {
             // Otherwise, end turn immediately.
@@ -212,35 +212,48 @@ export class GameService {
             { x: -1, y: 0 }, // Left
         ];
 
-        const queue: { position: Vec2; path: Vec2[]; remainingPoints: number }[] = [
-            { position: playerPosition, path: [playerPosition], remainingPoints: movementPoints },
-        ];
+        // Pour Dijkstra, on utilise un tableau trié par coût croissant
+        const priorityQueue: { position: Vec2; path: Vec2[]; cost: number }[] = [{ position: playerPosition, path: [playerPosition], cost: 0 }];
+
         const visited = new Map<string, PathInfo>();
 
-        while (queue.length > 0) {
-            const { position, path, remainingPoints } = queue.shift();
+        while (priorityQueue.length > 0) {
+            // Sélectionner le chemin avec le coût le plus faible
+            priorityQueue.sort((a, b) => a.cost - b.cost);
+            const { position, path, cost } = priorityQueue.shift();
+
+            // Si le coût dépasse les points de mouvement, on ignore ce chemin
+            if (cost > movementPoints) {
+                continue;
+            }
+
             const key = this.vec2Key(position);
 
-            if (!visited.has(key) || visited.get(key).path.length > path.length) {
-                visited.set(key, { path, cost: movementPoints - remainingPoints });
+            // Si cette case n'a pas encore été visitée ou si on a trouvé un chemin plus court
+            if (!visited.has(key) || visited.get(key).cost > cost) {
+                visited.set(key, { path, cost });
 
+                // Explorer les directions adjacentes
                 for (const dir of directions) {
                     const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+
+                    // Vérifier si la position est valide
                     if (this.isValidPosition(game.length, newPos)) {
-                        const moveCost = this.getTileCost(game[newPos.x][newPos.y]);
-                        // this.logger.log(`Tile cost: ${moveCost}`);
-                        if (remainingPoints >= moveCost && moveCost !== Infinity) {
-                            // this.logger.log('Pat    h found:');
-                            queue.push({
+                        const tileCost = this.getTileCost(game[newPos.y][newPos.x]);
+
+                        // Si le coût n'est pas infini et n'excède pas les points de mouvement restants
+                        if (tileCost !== Infinity && cost + tileCost <= movementPoints) {
+                            priorityQueue.push({
                                 position: newPos,
                                 path: [...path, newPos],
-                                remainingPoints: remainingPoints - moveCost,
+                                cost: cost + tileCost,
                             });
                         }
                     }
                 }
             }
         }
+
         return visited;
     }
 
@@ -332,11 +345,20 @@ export class GameService {
      * Get the movement cost for a tile at a given position.
      */
     private getTileCost(cell: Cell): number {
+        // Si la cellule n'existe pas, retourner un coût infini
         if (!cell) {
             return Infinity;
         }
-        if (this.isOccupiedByPlayer(cell)) return Infinity;
-        return cell.cost;
+        // Si la cellule est occupée par un joueur, elle est infranchissable
+        if (this.isOccupiedByPlayer(cell)) {
+            return Infinity;
+        }
+
+        // Utiliser la valeur de la constante TILE_COST pour le type de tuile
+        const cost = TILE_COST.get(cell.tile);
+
+        // Si le coût n'est pas défini pour cette tuile, utiliser le coût par défaut de la cellule
+        return cost !== undefined ? cost : cell.cost;
     }
 
     private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
