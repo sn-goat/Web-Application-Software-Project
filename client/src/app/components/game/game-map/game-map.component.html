@@ -8,7 +8,10 @@
             [appMouseHandler]="cell"
             [disable]="isPlayerTurn"
             [isInGameView]="true"
-            [class.path-cell]="isPathCell(cell)&&isPlayerTurn"
+            [class.path-cell]="isPathCell(cell) && isPlayerTurn"
+            [class.path-highlight]="isHighlightedPathCell(cell) && isPlayerTurn"
+            (mouseenter)="onCellHovered(cell)"
+            (mouseleave)="onCellUnhovered()"
             (cellClicked)="onCellClicked($event)">
         </app-board-cell>
         }

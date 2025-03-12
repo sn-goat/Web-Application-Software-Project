@@ -20,6 +20,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     isPlayerTurn = false;
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     pathCells: Set<string> = new Set();
+    highlightedPathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
@@ -49,13 +50,13 @@ export class GameMapComponent implements OnInit, OnDestroy {
             this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
                 if (!path) {
                     this.path = null;
-                    this.pathCells = new Set(); // Empty Set
+                    this.pathCells = new Set();
+                    this.highlightedPathCells.clear();
                     return;
                 }
 
                 this.path = new Map(path);
                 this.pathCells = new Set([...path.keys()]);
-
                 this.cdr.detectChanges();
             }),
         );
@@ -70,8 +71,27 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     isPathCell(cell: Cell): boolean {
-        if (!this.pathCells) return false;
         return this.pathCells.has(`${cell.position.x},${cell.position.y}`);
+    }
+
+    isHighlightedPathCell(cell: Cell): boolean {
+        return this.highlightedPathCells.has(`${cell.position.x},${cell.position.y}`);
+    }
+
+    onCellHovered(cell: Cell) {
+        if (!this.path || !this.isPlayerTurn) return;
+
+        const key = `${cell.position.x},${cell.position.y}`;
+        if (!this.path.has(key)) {
+            this.highlightedPathCells.clear();
+            return;
+        }
+
+        this.highlightedPathCells = new Set(this.path.get(key)!.path.map((vec) => `${vec.x},${vec.y}`));
+    }
+
+    onCellUnhovered() {
+        this.highlightedPathCells.clear();
     }
 
     ngOnDestroy() {
