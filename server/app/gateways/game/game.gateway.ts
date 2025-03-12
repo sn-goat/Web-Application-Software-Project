@@ -29,8 +29,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TimerEvents.End)
     handleTimerEnd(accessCode: string) {
-        this.logger.log(`Timer ended in room: ${accessCode}`);
-        this.endTurn(accessCode);
+        this.gameService.endTurnRequested(accessCode);
     }
 
     @OnEvent(TurnEvents.Move)

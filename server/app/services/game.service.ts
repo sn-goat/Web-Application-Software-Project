@@ -14,6 +14,9 @@ export class GameService {
     private currentGames: Map<string, Game>;
     private logger: Logger = new Logger(GameService.name);
 
+    private movementInProgress: Map<string, boolean> = new Map();
+    private pendingEndTurn: Map<string, boolean> = new Map();
+
     constructor(
         private boardService: BoardService,
         private timerService: TimerService,
@@ -100,6 +103,12 @@ export class GameService {
         if (game) {
             const activePlayer = this.getPlayerTurn(accessCode);
             if (activePlayer) {
+                this.movementInProgress.set(accessCode, true);
+
+                if (!this.pendingEndTurn.has(accessCode)) {
+                    this.pendingEndTurn.set(accessCode, false);
+                }
+
                 let index = 0;
                 const path = pathInfo.path;
                 const interval = setInterval(() => {
@@ -109,9 +118,11 @@ export class GameService {
                         index++;
                     } else {
                         clearInterval(interval);
+                        this.movementInProgress.set(accessCode, false);
                         activePlayer.movementPts -= pathInfo.cost;
-                        if (this.isPlayerTurnEnded(accessCode, activePlayer)) {
+                        if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
                             this.eventEmitter.emit(TurnEvents.End, accessCode);
+                            this.pendingEndTurn.set(accessCode, false);
                         }
                     }
                 }, MOVEMENT_TIMEOUT_IN_MS);
@@ -140,6 +151,16 @@ export class GameService {
         const game = this.currentGames.get(accessCode);
         if (game) {
             game.currentTurn = (game.currentTurn + 1) % game.players.length;
+        }
+    }
+
+    endTurnRequested(accessCode: string) {
+        // If movement is in progress, flag that we should end the turn when movement finishes.
+        if (this.movementInProgress) {
+            this.pendingEndTurn.set(accessCode, true);
+        } else {
+            // Otherwise, end turn immediately.
+            this.eventEmitter.emit(TurnEvents.End, accessCode);
         }
     }
 
