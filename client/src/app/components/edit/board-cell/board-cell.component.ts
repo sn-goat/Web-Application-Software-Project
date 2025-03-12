@@ -34,6 +34,12 @@ export class BoardCellComponent {
         event.preventDefault();
     }
 
+    onDragStart(event: DragEvent) {
+        if (this.isInGameView) {
+            event.preventDefault();
+        }
+    }
+
     getItemDescription(type: Item): string | undefined {
         return ASSETS_DESCRIPTION.get(type);
     }
