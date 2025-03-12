@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
@@ -11,6 +11,7 @@ import { Item } from '@common/enums';
     templateUrl: './board-cell.component.html',
     styleUrls: ['./board-cell.component.scss'],
     imports: [CommonModule],
+    encapsulation: ViewEncapsulation.None,
 })
 export class BoardCellComponent {
     @Input() cell!: Cell;
