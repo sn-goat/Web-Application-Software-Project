@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
 import { Game, PathInfo, Room, TurnInfo } from '@common/game';
@@ -130,8 +131,9 @@ export class SocketService {
     }
 
     // Faudrait créer une room spécifique pour gérer les events du fight elle sera supprimée à la fin du fight
-    initFight(accessCode: string, playerId: string, enemyPosition: Vec2) {
-        this.socket.emit(FightEvents.Init, { accessCode, playerId, enemyPosition });
+    initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
+        console.log(player1, player2);
+        this.socket.emit(FightEvents.Init, { accessCode, player1, player2 });
     }
 
     // Assembler les deux fonctions suivantes en une seule en donnant un  type d'action de combat qui sera géré back

@@ -1,14 +1,14 @@
+import { THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
 import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
-import { GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { TimerEvents, THREE_SECONDS_IN_MS } from '@app/gateways/game/game.gateway.constants';
+import { PathInfo, TurnInfo } from '@common/game';
+import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { PathInfo, TurnInfo } from '@common/game';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -100,20 +100,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.endTurn(accessCode);
     }
 
-    // @SubscribeMessage(FightEvents.Init)
-    // handleFightInit(client: Socket, payload: { accessCode: string; playerId: string; enemyPosition: Vec2 }) {
-    //     this.gameService.initFight(payload.accessCode, payload.playerId, payload.enemyPosition);
-    // }
+    @SubscribeMessage(FightEvents.Init)
+    handleFightInit(client: Socket, payload: { accessCode: string; player1: PlayerStats; player2: PlayerStats }) {
+        this.logger.log('Initiating fight between ' + payload.player1.name + ' and ' + payload.player2.name);
+        this.logger.log('Access code: ' + payload.accessCode);
+        this.gameService.initFight(payload.accessCode, payload.player1, payload.player2);
+    }
 
-    // @SubscribeMessage(FightEvents.Flee)
-    // handlePlayerFlee(client: Socket, payload: { accessCode: string; playerId: string }) {
-    //     this.gameService.playerFlee(payload.accessCode, payload.playerId);
-    // }
+    @SubscribeMessage(FightEvents.Flee)
+    handlePlayerFlee(client: Socket, payload: { accessCode: string; playerId: string }) {
+        this.gameService.playerFlee(payload.accessCode, payload.playerId);
+    }
 
-    // @SubscribeMessage(FightEvents.Attack)
-    // handlePlayerAttack(client: Socket, payload: { accessCode: string; playerId: string }) {
-    //     this.gameService.playerAttack(payload.accessCode, payload.playerId);
-    // }
+    @SubscribeMessage(FightEvents.Attack)
+    handlePlayerAttack(client: Socket, payload: { accessCode: string; playerId: string }) {
+        this.gameService.playerAttack(payload.accessCode, payload.playerId);
+    }
 
     afterInit(server: Server) {
         this.logger.log('GameGateway Initialized' + server);

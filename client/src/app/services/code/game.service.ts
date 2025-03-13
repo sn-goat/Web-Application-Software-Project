@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
@@ -33,6 +34,13 @@ export class GameService {
         this.fightLogicService.fightStarted$.subscribe((started) => {
             this.showFightInterface$.next(started);
         });
+    }
+
+    initFight(avatar: Avatar): void {
+        const findDefender: PlayerStats | null = this.currentPlayers$.value.find((player) => player.avatar === avatar) ?? null;
+        if (findDefender && this.activePlayer$.value) {
+            this.socketService.initFight(this.accessCode, this.activePlayer$.value, findDefender);
+        }
     }
 
     toggleActionMode(): void {
