@@ -268,6 +268,7 @@ export class GameService {
             }
         }
 
+        visited.delete(this.vec2Key(playerPosition));
         return visited;
     }
 
