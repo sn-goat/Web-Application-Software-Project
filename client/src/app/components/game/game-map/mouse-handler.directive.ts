@@ -6,14 +6,20 @@ import { Cell } from '@common/board';
 })
 export class MouseHandlerDirective {
     @Input('appMouseHandler') cell: Cell;
-    @Input() disable: boolean = false;
-    @Output() cellClicked = new EventEmitter<Cell>();
+    @Output() leftClicked = new EventEmitter<Cell>();
+    @Output() rightClicked = new EventEmitter<Cell>();
 
-    @HostListener('click', ['$event'])
-    onClick(): void {
-        if (this.disable) {
-            return;
+    @HostListener('mousedown', ['$event'])
+    onClick(event: MouseEvent): void {
+        if (event.button === 0) {
+            this.leftClicked.emit(this.cell);
+        } else if (event.button === 2) {
+            this.rightClicked.emit(this.cell);
         }
-        this.cellClicked.emit(this.cell);
+    }
+
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent): void {
+        event.preventDefault();
     }
 }

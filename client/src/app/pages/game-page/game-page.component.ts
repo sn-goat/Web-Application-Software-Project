@@ -42,6 +42,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.showFightInterface$.subscribe((show) => {
             this.showFightInterface = show;
         });
+
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
@@ -60,6 +61,10 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
         this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
             this.gameService.updateTurn(turn.player, turn.path);
+        });
+
+        this.socketService.onBroadcastDebugState().subscribe(() => {
+            this.gameService.onDebugStateChange();
         });
     }
 

@@ -25,8 +25,11 @@ export class GameService {
         this.currentGames = new Map();
     }
 
-    changeDebugState(accessCode: string) {
+    toggleDebugState(accessCode: string) {
         this.currentGames.get(accessCode).isDebugMode = !this.currentGames.get(accessCode).isDebugMode;
+    }
+
+    isGameDebugMode(accessCode: string): boolean {
         return this.currentGames.get(accessCode).isDebugMode;
     }
 
@@ -80,6 +83,13 @@ export class GameService {
         };
     }
 
+    updatePlayerPathTurn(accessCode: string) {
+        const player = this.getPlayerTurn(accessCode);
+        const map = this.getMap(accessCode);
+        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+    }
+
     async createGame(accessCode: string, organizerId: string, map: string) {
         const board = await this.boardService.getBoard(map);
         if (!board) {
@@ -99,35 +109,42 @@ export class GameService {
     }
 
     processPath(accessCode: string, pathInfo: PathInfo) {
-        const game = this.currentGames.get(accessCode);
-        if (game) {
-            const activePlayer = this.getPlayerTurn(accessCode);
-            if (activePlayer) {
-                this.movementInProgress.set(accessCode, true);
+        const activePlayer = this.getPlayerTurn(accessCode);
+        if (activePlayer) {
+            this.movementInProgress.set(accessCode, true);
 
-                if (!this.pendingEndTurn.has(accessCode)) {
-                    this.pendingEndTurn.set(accessCode, false);
-                }
-
-                let index = 0;
-                const path = pathInfo.path;
-                const interval = setInterval(() => {
-                    if (index < path.length) {
-                        this.movePlayer(accessCode, game.map, activePlayer.position, path[index]);
-                        activePlayer.position = path[index];
-                        index++;
-                    } else {
-                        clearInterval(interval);
-                        this.movementInProgress.set(accessCode, false);
-                        activePlayer.movementPts -= pathInfo.cost;
-                        if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
-                            this.eventEmitter.emit(TurnEvents.End, accessCode);
-                            this.pendingEndTurn.set(accessCode, false);
-                        }
-                    }
-                }, MOVEMENT_TIMEOUT_IN_MS);
+            if (!this.pendingEndTurn.has(accessCode)) {
+                this.pendingEndTurn.set(accessCode, false);
             }
+
+            let index = 0;
+            const path = pathInfo.path;
+            const interval = setInterval(() => {
+                if (index < path.length) {
+                    this.movePlayer(accessCode, path[index]);
+                    activePlayer.position = path[index];
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    this.movementInProgress.set(accessCode, false);
+                    activePlayer.movementPts -= pathInfo.cost;
+                    if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
+                        this.eventEmitter.emit(TurnEvents.End, accessCode);
+                        this.pendingEndTurn.set(accessCode, false);
+                    }
+                }
+            }, MOVEMENT_TIMEOUT_IN_MS);
         }
+    }
+
+    movePlayer(accessCode: string, direction: Vec2): void {
+        const map = this.getMap(accessCode);
+        const activePlayer = this.getPlayerTurn(accessCode);
+        const previousPosition = activePlayer.position;
+        map[previousPosition.y][previousPosition.x].player = Avatar.Default;
+        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
+        activePlayer.position = direction;
+        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position: previousPosition, direction });
     }
 
     startTimer(accessCode: string) {
@@ -167,12 +184,9 @@ export class GameService {
     private isPlayerTurnEnded(accessCode: string, player: PlayerStats) {
         const map = this.getMap(accessCode);
         if (map) {
-            if (player.movementPts > 0) {
-                const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
-                this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+            if (player.movementPts > 0 || (player.actions > 0 && this.isPlayerCanMakeAction(map, player.position))) {
+                this.updatePlayerPathTurn(accessCode);
                 return false;
-            } else if (player.actions > 0) {
-                return !this.isPlayerCanMakeAction(map, player.position);
             }
             return true;
         }
@@ -359,12 +373,5 @@ export class GameService {
 
         // Si le coût n'est pas défini pour cette tuile, utiliser le coût par défaut de la cellule
         return cost !== undefined ? cost : cell.cost;
-    }
-
-    private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
-        this.logger.log(`Player moved from ${position.x},${position.y} to ${direction.x},${direction.y}`);
-        map[position.y][position.x].player = Avatar.Default;
-        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
-        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
     }
 }

@@ -19,9 +19,11 @@ export class GameService {
     clientPlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     path$: BehaviorSubject<Map<string, PathInfo> | null> = new BehaviorSubject<Map<string, PathInfo> | null>(null);
     isPlayerTurn$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    isDebugMode$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
     private initialPlayers: PlayerStats[] = [];
+    private organizerId: string = '';
     private accessCode: string;
-    // private path: Map<string, PathInfo> = new Map();
     private dialog = inject(MatDialog);
     private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
@@ -36,10 +38,15 @@ export class GameService {
         return this.currentPlayers$.value.some((currentPlayer) => currentPlayer.id === player.id);
     }
 
+    isPlayerAdminOfGame(): boolean {
+        return this.organizerId === this.clientPlayer$.value?.id;
+    }
+
     isPlayerTurn(player: PlayerStats): void {
         const clientPlayer = this.clientPlayer$.value;
         if (player && clientPlayer && player.id === clientPlayer.id) {
             this.isPlayerTurn$.next(true);
+            this.clientPlayer$.next(player);
         } else {
             this.isPlayerTurn$.next(false);
         }
@@ -47,6 +54,10 @@ export class GameService {
 
     getInitialPlayers(): PlayerStats[] {
         return this.initialPlayers;
+    }
+
+    getOrganizerId(): string {
+        return this.organizerId;
     }
 
     removePlayerInGame(player: PlayerStats): void {
@@ -63,12 +74,17 @@ export class GameService {
         this.clientPlayer$.next(this.socketService.getCurrentPlayer());
         this.initialPlayers = game.players;
         this.accessCode = game.accessCode;
+        this.organizerId = game.organizerId;
     }
 
     updateTurn(player: PlayerStats, path: Map<string, PathInfo>): void {
         this.activePlayer$.next(player);
         this.isPlayerTurn(player);
         this.path$.next(path);
+    }
+
+    debugMovePlayer(position: Vec2): void {
+        this.socketService.debugMove(this.accessCode, position);
     }
 
     movePlayer(position: Vec2): void {
@@ -79,7 +95,19 @@ export class GameService {
             this.socketService.movePlayer(this.accessCode, selectedPath);
         }
     }
+
+    toggleDebugMode(): void {
+        if (this.isPlayerAdminOfGame()) {
+            this.socketService.toggleDebugMode(this.accessCode);
+        }
+    }
+
+    onDebugStateChange(): void {
+        this.isDebugMode$.next(!this.isDebugMode$.value);
+    }
+
     onMove(position: Vec2, direction: Vec2): void {
+        // console.log(`Moving player to ${direction.x},${direction.y}`);
         const map: Cell[][] = this.map$.value;
         const player = this.activePlayer$.value;
         if (player) {

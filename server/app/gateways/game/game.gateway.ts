@@ -34,6 +34,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TurnEvents.Move)
     handleBroadcastMove(payload: { accessCode: string; position: Vec2; direction: Vec2 }) {
+        this.logger.log('Moving player to: ' + payload.position);
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { position: payload.position, direction: payload.direction });
     }
 
@@ -51,7 +52,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(GameEvents.Create)
     handleGameCreation(client: Socket, payload: { accessCode: string; mapName: string; organizerId: string }) {
-        this.logger.log('Creating game with payload: ' + payload.organizerId);
         this.gameService.createGame(payload.accessCode, payload.organizerId, payload.mapName);
     }
 
@@ -64,9 +64,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(GameEvents.Debug)
-    handleDebug(client: Socket, payload: { accessCode: string }) {
-        const isDebugMode = this.gameService.changeDebugState(payload.accessCode);
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastDebugState, { isDebugMode });
+    handleDebug(client: Socket, accessCode: string) {
+        this.logger.log('Toggling debug mode');
+        this.gameService.toggleDebugState(accessCode);
+        this.server.to(accessCode).emit(GameEvents.BroadcastDebugState);
     }
 
     @SubscribeMessage(GameEvents.Ready)
@@ -86,6 +87,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo }) {
         this.logger.log('Player movement');
         this.gameService.processPath(payload.accessCode, payload.path);
+    }
+
+    @SubscribeMessage(TurnEvents.DebugMove)
+    debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2 }) {
+        this.gameService.movePlayer(payload.accessCode, payload.direction);
+        this.gameService.updatePlayerPathTurn(payload.accessCode);
     }
 
     @SubscribeMessage(TurnEvents.End)

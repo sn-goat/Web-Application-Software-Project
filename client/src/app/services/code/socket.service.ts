@@ -101,8 +101,8 @@ export class SocketService {
 
     // Game events
     // Send
-    createGame(accessCode: string, mapName: string, organizerId: string) {
-        this.socket.emit(GameEvents.Create, { accessCode, mapName, organizerId });
+    createGame(accessCode: string, mapName: string) {
+        this.socket.emit(GameEvents.Create, { accessCode, mapName, organizerId: this.socket.id });
     }
 
     configureGame(accessCode: string, players: PlayerStats[]) {
@@ -115,6 +115,14 @@ export class SocketService {
 
     movePlayer(accessCode: string, path: PathInfo) {
         this.socket.emit(TurnEvents.Move, { accessCode, path });
+    }
+
+    debugMove(accessCode: string, direction: Vec2) {
+        this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
+    }
+
+    toggleDebugMode(accessCode: string) {
+        this.socket.emit(GameEvents.Debug, accessCode);
     }
 
     changeDoorState(accessCode: string, position: Vec2) {
@@ -146,7 +154,7 @@ export class SocketService {
         });
     }
 
-    onBroadcastDebugState(): Observable<unknown> {
+    onBroadcastDebugState(): Observable<void> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.BroadcastDebugState, (data) => observer.next(data));
         });

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
@@ -16,8 +16,11 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
 export class GameMapComponent implements OnInit, OnDestroy {
     boardGame: Cell[][] = [];
     selectedCell: Cell | null = null;
+
     actionMode = false;
     isPlayerTurn = false;
+    isDebugMode = false;
+
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     pathCells: Set<string> = new Set();
     highlightedPathCells: Set<string> = new Set();
@@ -27,25 +30,28 @@ export class GameMapComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription[] = [];
     constructor(private readonly cdr: ChangeDetectorRef) {}
 
+    @HostListener('window:keydown', ['$event'])
+    handleKeyboardEvent(event: KeyboardEvent): void {
+        if (event.key.toLowerCase() === 'd') {
+            event.preventDefault();
+            this.gameService.toggleDebugMode();
+        }
+    }
+
     ngOnInit() {
         this.subscriptions.push(
             this.gameService.map$.subscribe((map: Cell[][]) => {
                 this.boardGame = map;
             }),
-        );
-        this.subscriptions.push(
+
             this.playerToolsService.actionMode$.subscribe((mode: boolean) => {
                 this.actionMode = mode;
             }),
-        );
 
-        this.subscriptions.push(
             this.gameService.isPlayerTurn$.subscribe((isPlayerTurn: boolean) => {
                 this.isPlayerTurn = isPlayerTurn;
             }),
-        );
 
-        this.subscriptions.push(
             this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
                 if (!path) {
                     this.path = null;
@@ -58,15 +64,29 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.pathCells = new Set([...path.keys()]);
                 this.cdr.detectChanges();
             }),
+
+            this.gameService.isDebugMode$.subscribe((isDebugMode) => {
+                this.isDebugMode = isDebugMode;
+            }),
         );
     }
 
-    onCellClicked(cell: Cell) {
-        if (this.actionMode) {
-            this.selectedCell = cell;
-            this.actionMode = false;
+    onLeftClicked(cell: Cell) {
+        if (this.isPlayerTurn) {
+            if (this.actionMode) {
+                this.selectedCell = cell;
+                this.actionMode = false;
+            } else {
+                this.gameService.movePlayer(cell.position);
+            }
+        }
+    }
+
+    onRightClicked(cell: Cell) {
+        if (this.isDebugMode && this.isPlayerTurn) {
+            this.gameService.debugMovePlayer(cell.position);
         } else {
-            this.gameService.movePlayer(cell.position);
+            console.log('Right clicked on cell', cell);
         }
     }
 
