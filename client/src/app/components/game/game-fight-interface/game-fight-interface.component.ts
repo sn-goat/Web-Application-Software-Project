@@ -3,6 +3,7 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
+import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { PlayerStats } from '@common/player';
 import { Subject, takeUntil } from 'rxjs';
@@ -22,14 +23,15 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     diceD4: number = 0;
     diceD6: number = 0;
     currentTurn: string = '';
-    player1: PlayerStats | undefined;
-    player2: PlayerStats | undefined;
+    player1: PlayerStats | null;
+    player2: PlayerStats | null;
     fleeAttempt1: number = 2;
     fleeAttempt2: number = 2;
 
     private destroy$ = new Subject<void>();
     private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
+    private gameService = inject(GameService);
 
     ngOnInit(): void {
         this.fightLogicService.timer$.pipe(takeUntil(this.destroy$)).subscribe((time) => (this.timer = time));
@@ -39,15 +41,17 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
 
         this.fightLogicService.turn$.pipe(takeUntil(this.destroy$)).subscribe((name) => {
             this.currentTurn = name;
-            this.player1 = this.playerService.getPlayer(this.fightLogicService.getName1());
-            this.player2 = this.playerService.getPlayer(this.fightLogicService.getName2());
         });
 
         this.fightLogicService.fleeAttempt1$.pipe(takeUntil(this.destroy$)).subscribe((attempts) => (this.fleeAttempt1 = attempts));
         this.fightLogicService.fleeAttempt2$.pipe(takeUntil(this.destroy$)).subscribe((attempts) => (this.fleeAttempt2 = attempts));
 
-        this.player1 = this.playerService.getPlayer(this.fightLogicService.getName1());
-        this.player2 = this.playerService.getPlayer(this.fightLogicService.getName2());
+        this.gameService.activePlayer$.subscribe((player) => {
+            this.player1 = player;
+        });
+        this.gameService.defender$.subscribe((player) => {
+            this.player2 = player;
+        });
     }
 
     ngOnDestroy(): void {

@@ -22,6 +22,7 @@ export class GameService {
     isPlayerTurn$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isDebugMode$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionMode$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    defender$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
 
     private initialPlayers: PlayerStats[] = [];
     private organizerId: string = '';
@@ -37,10 +38,15 @@ export class GameService {
     }
 
     initFight(avatar: Avatar): void {
-        const findDefender: PlayerStats | null = this.currentPlayers$.value.find((player) => player.avatar === avatar) ?? null;
+        const findDefender: PlayerStats | null = this.findDefender(avatar);
+        this.defender$.next(findDefender);
         if (findDefender && this.activePlayer$.value) {
             this.socketService.initFight(this.accessCode, this.activePlayer$.value, findDefender);
         }
+    }
+
+    findDefender(avatar: Avatar): PlayerStats | null {
+        return this.currentPlayers$.value.find((player) => player.avatar === avatar) ?? null;
     }
 
     toggleActionMode(): void {

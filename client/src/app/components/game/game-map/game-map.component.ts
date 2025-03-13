@@ -74,7 +74,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
         if (this.isPlayerTurn && this.isActionMode) {
             this.selectedCell = cell;
             if (this.gameService.isAttackProvocation(cell)) {
-                console.log('Attack provocation');
                 this.gameService.initFight(cell.player);
                 this.gameService.showFightInterface$.next(true);
             }
