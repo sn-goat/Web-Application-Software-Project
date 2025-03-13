@@ -18,7 +18,7 @@ export class GameMapPlayerToolsComponent implements OnInit {
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
 
-    gameService: GameService = inject(GameService);
+    private gameService: GameService = inject(GameService);
     private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
     private socketService: SocketService = inject(SocketService);
 
@@ -46,6 +46,6 @@ export class GameMapPlayerToolsComponent implements OnInit {
     }
 
     performAction(): void {
-        this.playerToolsService.performAction();
+        this.gameService.toggleActionMode();
     }
 }

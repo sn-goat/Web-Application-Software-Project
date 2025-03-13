@@ -1,7 +1,7 @@
+/* eslint-disable no-console */
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
-import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
@@ -17,7 +17,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     boardGame: Cell[][] = [];
     selectedCell: Cell | null = null;
 
-    actionMode = false;
+    isActionMode = false;
     isPlayerTurn = false;
     isDebugMode = false;
 
@@ -26,7 +26,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
     highlightedPathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
-    private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
     private subscriptions: Subscription[] = [];
     constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -42,10 +41,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
         this.subscriptions.push(
             this.gameService.map$.subscribe((map: Cell[][]) => {
                 this.boardGame = map;
-            }),
-
-            this.playerToolsService.actionMode$.subscribe((mode: boolean) => {
-                this.actionMode = mode;
             }),
 
             this.gameService.isPlayerTurn$.subscribe((isPlayerTurn: boolean) => {
@@ -65,6 +60,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
             }),
 
+            this.gameService.isActionMode$.subscribe((isActionMode) => {
+                this.isActionMode = isActionMode;
+            }),
+
             this.gameService.isDebugMode$.subscribe((isDebugMode) => {
                 this.isDebugMode = isDebugMode;
             }),
@@ -72,13 +71,13 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     onLeftClicked(cell: Cell) {
-        if (this.isPlayerTurn) {
-            if (this.actionMode) {
-                this.selectedCell = cell;
-                this.actionMode = false;
-            } else {
-                this.gameService.movePlayer(cell.position);
+        if (this.isPlayerTurn && this.isActionMode) {
+            this.selectedCell = cell;
+            if (this.gameService.isAttackProvocation(cell)) {
+                console.log('Attack provocation');
+                this.gameService.showFightInterface$.next(true);
             }
+            this.gameService.movePlayer(cell.position);
         }
     }
 

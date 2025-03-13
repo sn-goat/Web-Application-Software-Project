@@ -20,6 +20,7 @@ export class GameService {
     path$: BehaviorSubject<Map<string, PathInfo> | null> = new BehaviorSubject<Map<string, PathInfo> | null>(null);
     isPlayerTurn$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isDebugMode$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    isActionMode$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     private initialPlayers: PlayerStats[] = [];
     private organizerId: string = '';
@@ -32,6 +33,32 @@ export class GameService {
         this.fightLogicService.fightStarted$.subscribe((started) => {
             this.showFightInterface$.next(started);
         });
+    }
+
+    toggleActionMode(): void {
+        this.isActionMode$.next(!this.isActionMode$.value);
+    }
+
+    isAttackProvocation(cell: Cell): boolean {
+        return cell?.player !== null && this.isWithinAttackRange(cell);
+    }
+
+    isWithinAttackRange(cell: Cell): boolean {
+        const attackerpos = this.activePlayer$.value?.position;
+        const defenderpos = cell.position;
+        if (attackerpos && defenderpos) {
+            const abovepos = { x: attackerpos.x, y: attackerpos.y - 1 };
+            const belowpos = { x: attackerpos.x, y: attackerpos.y + 1 };
+            const leftpos = { x: attackerpos.x - 1, y: attackerpos.y };
+            const rightpos = { x: attackerpos.x + 1, y: attackerpos.y };
+            return (
+                (abovepos.x === defenderpos.x && abovepos.y === defenderpos.y) ||
+                (belowpos.x === defenderpos.x && belowpos.y === defenderpos.y) ||
+                (leftpos.x === defenderpos.x && leftpos.y === defenderpos.y) ||
+                (rightpos.x === defenderpos.x && rightpos.y === defenderpos.y)
+            );
+        }
+        return false;
     }
 
     isPlayerInGame(player: PlayerStats): boolean {
@@ -125,6 +152,7 @@ export class GameService {
     // }
 
     endTurn(): void {
+        this.toggleActionMode();
         this.socketService.endTurn(this.accessCode);
     }
 
