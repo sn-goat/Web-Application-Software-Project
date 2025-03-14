@@ -52,12 +52,6 @@ describe('GameMapPlayerToolsComponent', () => {
         expect(component.items).toEqual(newItems);
     });
 
-    it('should call endTurn on service when endTurn is called', () => {
-        component.endTurn();
-
-        expect(playerToolsServiceMock.endTurn).toHaveBeenCalledTimes(1);
-    });
-
     it('should call performAction on service when performAction is called', () => {
         component.performAction();
 

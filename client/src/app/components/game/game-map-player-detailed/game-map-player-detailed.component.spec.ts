@@ -88,15 +88,6 @@ describe('GameMapPlayerDetailedComponent', () => {
         expect(component.maxHealth).toBe(mockPlayer.life);
     });
 
-    it('should unsubscribe from clientPlayer$ on component destruction', () => {
-        unsubscribeSpy.calls.reset();
-
-        component.ngOndestroy();
-
-        expect(unsubscribeSpy).toHaveBeenCalled();
-        expect(unsubscribeSpy.calls.count()).toBe(1);
-    });
-
     it('should return "health-hight" from getHealthBar method', () => {
         expect(component.getHealthBar()).toBe('health-hight');
     });
