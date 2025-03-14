@@ -5,6 +5,7 @@ import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
+import { SocketService } from '@app/services/code/socket.service';
 import { PlayerStats } from '@common/player';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -32,9 +33,13 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
     private gameService = inject(GameService);
+    private socketService = inject(SocketService);
 
     ngOnInit(): void {
-        this.fightLogicService.timer$.pipe(takeUntil(this.destroy$)).subscribe((time) => (this.timer = time));
+        // this.fightLogicService.timer$.pipe(takeUntil(this.destroy$)).subscribe((time) => (this.timer = time));
+        this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
+            this.timer = time.remainingTime.toString();
+        });
 
         this.fightLogicService.d4$.pipe(takeUntil(this.destroy$)).subscribe((value) => (this.diceD4 = value));
         this.fightLogicService.d6$.pipe(takeUntil(this.destroy$)).subscribe((value) => (this.diceD6 = value));

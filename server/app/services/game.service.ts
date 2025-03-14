@@ -68,6 +68,7 @@ export class GameService {
             return;
         }
         this.logger.log(`Init fight between ${p1.id} and ${p2.id}`);
+        this.timerService.startTimer(accessCode, TURN_DURATION_IN_S, 'combat');
         this.activeFights.set(accessCode, { player1: p1, player2: p2 });
     }
 
