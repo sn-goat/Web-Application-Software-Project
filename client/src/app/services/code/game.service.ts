@@ -35,6 +35,12 @@ export class GameService {
         this.fightLogicService.fightStarted$.subscribe((started) => {
             this.showFightInterface$.next(started);
         });
+
+        this.socketService.onFightInit().subscribe((data) => {
+            this.defender$.next(data.player2);
+            this.activePlayer$.next(data.player1);
+            this.showFightInterface$.next(true);
+        });
     }
 
     initFight(avatar: Avatar): void {

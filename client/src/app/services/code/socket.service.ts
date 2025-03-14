@@ -18,6 +18,7 @@ export class SocketService {
     private readonly url: string = environment.serverUrl;
     private currenPlayer: PlayerStats;
     private size: number = 0;
+    // private readonly gameService = inject(GameService);
 
     constructor() {
         this.socket = io(this.url);
@@ -133,6 +134,14 @@ export class SocketService {
     // Faudrait créer une room spécifique pour gérer les events du fight elle sera supprimée à la fin du fight
     initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
         this.socket.emit(FightEvents.Init, { accessCode, player1, player2 });
+    }
+
+    onFightInit(): Observable<{ player1: PlayerStats; player2: PlayerStats }> {
+        return new Observable((observer) => {
+            this.socket.on(FightEvents.Init, (data) => {
+                observer.next(data);
+            });
+        });
     }
 
     // Assembler les deux fonctions suivantes en une seule en donnant un  type d'action de combat qui sera géré back

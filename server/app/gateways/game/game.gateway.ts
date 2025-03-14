@@ -105,6 +105,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Initiating fight between ' + payload.player1.name + ' and ' + payload.player2.name);
         this.logger.log('Access code: ' + payload.accessCode);
         this.gameService.initFight(payload.accessCode, payload.player1, payload.player2);
+        // switch the positions for the defender render
+        this.server.to(payload.player2.id).emit(FightEvents.Init, { player1: payload.player1, player2: payload.player2 });
     }
 
     @SubscribeMessage(FightEvents.Flee)
