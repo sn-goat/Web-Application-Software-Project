@@ -7,6 +7,7 @@ import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-pl
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
+import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
@@ -34,12 +35,13 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     showFightInterface: boolean = false;
 
     private gameService = inject(GameService);
+    private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private currentPlayerId: string | undefined;
 
     ngOnInit(): void {
-        this.gameService.showFightInterface$.subscribe((show) => {
+        this.fightLogicService.fightStarted.subscribe((show) => {
             this.showFightInterface = show;
         });
 

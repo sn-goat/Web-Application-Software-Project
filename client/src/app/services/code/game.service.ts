@@ -7,7 +7,6 @@ import { Cell, Vec2 } from '@common/board';
 import { Avatar, Game, PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { FightLogicService } from './fight-logic.service';
 import { Tile } from '@common/enums';
 
 @Injectable({
@@ -19,6 +18,7 @@ export class GameService {
     currentPlayers$: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
     activePlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     clientPlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    activeFighter$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     path$: BehaviorSubject<Map<string, PathInfo> | null> = new BehaviorSubject<Map<string, PathInfo> | null>(null);
     isPlayerTurn$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isDebugMode$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -29,26 +29,13 @@ export class GameService {
     private organizerId: string = '';
     private accessCode: string;
     private dialog = inject(MatDialog);
-    private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
-
-    constructor() {
-        this.fightLogicService.fightStarted$.subscribe((started) => {
-            this.showFightInterface$.next(started);
-        });
-
-        this.socketService.onFightInit().subscribe((data) => {
-            this.defender$.next(data.player2);
-            this.activePlayer$.next(data.player1);
-            this.showFightInterface$.next(true);
-        });
-    }
 
     initFight(avatar: Avatar): void {
         const findDefender: PlayerStats | null = this.findDefender(avatar);
         this.defender$.next(findDefender);
-        if (findDefender && this.activePlayer$.value) {
-            this.socketService.initFight(this.accessCode, this.activePlayer$.value, findDefender);
+        if (findDefender && this.clientPlayer$.value) {
+            this.socketService.initFight(this.accessCode, this.clientPlayer$.value, findDefender);
         }
     }
 
@@ -60,16 +47,12 @@ export class GameService {
         this.isActionMode$.next(!this.isActionMode$.value);
     }
 
-    isAttackProvocation(cell: Cell): boolean {
-        return cell.player !== undefined && cell.player !== Avatar.Default && this.isWithinAttackRange(cell);
-    }
-
-    isWithinAttackRange(cell: Cell): boolean {
-        const attackerPos = this.activePlayer$.value?.position;
-        if (!attackerPos) return false;
-        const defenderPos = cell.position;
-        const dx = Math.abs(attackerPos.x - defenderPos.x);
-        const dy = Math.abs(attackerPos.y - defenderPos.y);
+    isWithinActionRange(cell: Cell): boolean {
+        const playerPos = this.activePlayer$.value?.position;
+        if (!playerPos) return false;
+        const actionPos = cell.position;
+        const dx = Math.abs(playerPos.x - actionPos.x);
+        const dy = Math.abs(playerPos.y - actionPos.y);
         return dx + dy === 1;
     }
 
@@ -201,5 +184,9 @@ export class GameService {
 
     getAccessCode(): string {
         return this.accessCode;
+    }
+
+    getClientId(): string {
+        return this.clientPlayer$.value?.id ?? '';
     }
 }

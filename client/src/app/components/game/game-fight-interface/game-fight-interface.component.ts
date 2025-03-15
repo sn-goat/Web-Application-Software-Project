@@ -3,11 +3,10 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { PlayerStats } from '@common/player';
-import { Subject, takeUntil } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-fight-interface',
@@ -27,41 +26,30 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     player1: PlayerStats | null;
     player2: PlayerStats | null;
     fleeAttempt1: number = 2;
-    fleeAttempt2: number = 2;
+    fleeAttempt2: number = 1;
 
-    private destroy$ = new Subject<void>();
+    private subscriptions: Subscription[] = [];
+
     private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
-    private gameService = inject(GameService);
     private socketService = inject(SocketService);
 
     ngOnInit(): void {
-        // this.fightLogicService.timer$.pipe(takeUntil(this.destroy$)).subscribe((time) => (this.timer = time));
-        this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
-            this.timer = time.remainingTime.toString();
-        });
+        this.subscriptions.push(
+            this.fightLogicService.fight.subscribe((fight) => {
+                this.player1 = fight.player1;
+                this.player2 = fight.player2;
+                this.currentTurn = fight.currentPlayer.name;
+            }),
 
-        this.fightLogicService.d4$.pipe(takeUntil(this.destroy$)).subscribe((value) => (this.diceD4 = value));
-        this.fightLogicService.d6$.pipe(takeUntil(this.destroy$)).subscribe((value) => (this.diceD6 = value));
-
-        this.fightLogicService.turn$.pipe(takeUntil(this.destroy$)).subscribe((name) => {
-            this.currentTurn = name;
-        });
-
-        this.fightLogicService.fleeAttempt1$.pipe(takeUntil(this.destroy$)).subscribe((attempts) => (this.fleeAttempt1 = attempts));
-        this.fightLogicService.fleeAttempt2$.pipe(takeUntil(this.destroy$)).subscribe((attempts) => (this.fleeAttempt2 = attempts));
-
-        this.gameService.activePlayer$.subscribe((player) => {
-            this.player1 = player;
-        });
-        this.gameService.defender$.subscribe((player) => {
-            this.player2 = player;
-        });
+            this.socketService.onFightTimerUpdate().subscribe((remainingTime) => {
+                this.timer = remainingTime.toString();
+            }),
+        );
     }
 
     ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
     }
 
     isMyTurn(): boolean {
@@ -69,15 +57,11 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     }
 
     flee(): void {
-        if (this.isMyTurn()) {
-            this.fightLogicService.flee(this.playerService.getPlayerName());
-        }
+        // TODO: Implement flee
     }
 
     attack(): void {
-        if (this.isMyTurn()) {
-            this.fightLogicService.attack(this.playerService.getPlayerName());
-        }
+        // TODO: Implement attack
     }
 
     getFleeAttempts(name: string): number {

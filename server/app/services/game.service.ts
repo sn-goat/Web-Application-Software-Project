@@ -2,9 +2,9 @@
 import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, PathInfo } from '@common/game';
+import { Avatar, Fight, Game, PathInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
-import { Dice, PlayerStats } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BoardService } from './board/board.service';
@@ -14,7 +14,7 @@ import { TimerService } from './timer/timer.service';
 export class GameService {
     private currentGames: Map<string, Game>;
     private logger: Logger = new Logger(GameService.name);
-    private activeFights: Map<string, { player1: PlayerStats; player2: PlayerStats }> = new Map();
+    private activeFights: Map<string, Fight> = new Map();
     private movementInProgress: Map<string, boolean> = new Map();
     private pendingEndTurn: Map<string, boolean> = new Map();
 
@@ -34,84 +34,10 @@ export class GameService {
         return this.currentGames.get(accessCode).isDebugMode;
     }
 
-    playerFlee(accessCode: string, playerId: string) {
-        const fight = this.activeFights.get(accessCode);
-        if (!fight) {
-            this.logger.error(`Aucun combat actif pour accessCode ${accessCode}`);
-            return;
-        }
-        if (fight.player1.id !== playerId && fight.player2.id !== playerId) {
-            this.logger.error(`Le joueur ${playerId} n'est pas participant dans le combat pour accessCode ${accessCode}`);
-            return;
-        }
-        const fleeThreshold = 0.3;
-        const fleeSuccess = Math.random() < fleeThreshold;
-        if (fleeSuccess) {
-            this.logger.log(`Player ${playerId} a réussi à fuir le combat pour accessCode ${accessCode}`);
-            this.activeFights.delete(accessCode);
-        } else {
-            this.logger.log(`Le joueur ${playerId} a échoué à fuir le combat pour accessCode ${accessCode}`);
-        }
+    hasActiveFight(accessCode: string): boolean {
+        return this.activeFights.has(accessCode);
     }
 
-    initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
-        this.logger.log(`Init fight between ${player1.id} and ${player2.id}`);
-        const game: Game = this.currentGames.get(accessCode);
-        if (!game) {
-            this.logger.error(`Game not found for accessCode ${accessCode}`);
-            return;
-        }
-        const p1 = game.players.find((p) => p.id === player1.id);
-        const p2 = game.players.find((p) => p.id === player2.id);
-        if (!p1 || !p2) {
-            this.logger.error('One or both players not found in game.players');
-            return;
-        }
-        this.logger.log(`Init fight between ${p1.id} and ${p2.id}`);
-        this.timerService.startTimer(accessCode, TURN_DURATION_IN_S, 'combat');
-        this.activeFights.set(accessCode, { player1: p1, player2: p2 });
-    }
-
-    playerAttack(accessCode: string, playerId: string) {
-        const fight = this.activeFights.get(accessCode);
-        if (!fight) {
-            this.logger.error(`Aucun combat actif pour accessCode ${accessCode}`);
-            return;
-        }
-
-        let attacker: PlayerStats;
-        let defender: PlayerStats;
-        if (fight.player1.id === playerId) {
-            attacker = fight.player1;
-            defender = fight.player2;
-        } else if (fight.player2.id === playerId) {
-            attacker = fight.player2;
-            defender = fight.player1;
-        } else {
-            this.logger.error(`Le joueur ${playerId} n'est pas participant dans le combat pour accessCode ${accessCode}`);
-            return;
-        }
-
-        const attackDiceValue = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
-        const defenseDiceValue = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
-
-        let damage = attacker.attack + attackDiceValue - (defender.defense + defenseDiceValue);
-        if (damage < 0) {
-            damage = 0;
-        }
-
-        defender.life = Math.max((defender.life || 0) - damage, 0);
-        this.logger.log(`Player ${attacker.id} attaque ${defender.id} et inflige ${damage} points de dégâts (vie restante: ${defender.life}).`);
-
-        if (defender.life === 0) {
-            this.logger.log(`Player ${defender.id} est mort.`);
-            this.activeFights.delete(accessCode);
-        }
-    }
-
-    // movePlayer(accessCode: string, playerId: string, direction: Vec2) {
-    //     throw new Error('Method not implemented.');
-    // }
     changeDoorState(accessCode: string, position: Vec2) {
         const cell: Cell = this.getMap(accessCode)[position.y][position.x];
         cell.tile = cell.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
@@ -436,18 +362,5 @@ export class GameService {
 
         // Si le coût n'est pas défini pour cette tuile, utiliser le coût par défaut de la cellule
         return cost !== undefined ? cost : cell.cost;
-    }
-
-    private diceToNumber(dice: Dice): number {
-        const die4 = 4;
-        const die6 = 6;
-        switch (dice) {
-            case 'D6':
-                return die6;
-            case 'D4':
-                return die4;
-            default:
-                return 0;
-        }
     }
 }

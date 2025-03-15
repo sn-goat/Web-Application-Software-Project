@@ -6,6 +6,7 @@ import { Cell } from '@common/board';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
+import { FightLogicService } from '@app/services/code/fight-logic.service';
 
 @Component({
     selector: 'app-game-map',
@@ -26,6 +27,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     highlightedPathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
+    private fightLogicService = inject(FightLogicService);
     private subscriptions: Subscription[] = [];
     constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -73,9 +75,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
     onLeftClicked(cell: Cell) {
         if (this.isPlayerTurn) {
             this.selectedCell = cell;
-            if (this.isActionMode && this.gameService.isAttackProvocation(cell)) {
-                this.gameService.initFight(cell.player);
-                this.gameService.showFightInterface$.next(true);
+            if (this.isActionMode && this.gameService.isWithinActionRange(cell)) {
+                if (this.fightLogicService.isAttackProvocation(cell)) {
+                    this.gameService.initFight(cell.player);
+                }
             } else {
                 this.gameService.movePlayer(cell.position);
             }

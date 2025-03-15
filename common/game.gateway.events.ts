@@ -29,4 +29,5 @@ export enum FightEvents {
     End = 'endFight', // Server (fuite réussite/mort ennemie)
     Flee = 'fleeAck', // Client
     Attack = 'attackAck', // Client
+    UpdateTimer = 'fightTimeUpdate', // Server
 }

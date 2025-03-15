@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
-import { Game, PathInfo, Room, TurnInfo } from '@common/game';
+import { Fight, Game, PathInfo, Room, TurnInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
@@ -136,7 +136,7 @@ export class SocketService {
         this.socket.emit(FightEvents.Init, { accessCode, player1, player2 });
     }
 
-    onFightInit(): Observable<{ player1: PlayerStats; player2: PlayerStats }> {
+    onFightInit(): Observable<Fight> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Init, (data) => {
                 observer.next(data);
@@ -173,10 +173,21 @@ export class SocketService {
     onTimerUpdate(): Observable<{ remainingTime: number }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.UpdateTimer, (data: { remainingTime: number }) => {
+                console.log('Timer update', data);
                 observer.next(data);
             });
         });
     }
+
+    onFightTimerUpdate(): Observable<number> {
+        return new Observable((observer) => {
+            this.socket.on(FightEvents.UpdateTimer, (remainingTime) => {
+                console.log('Timer update', remainingTime);
+                observer.next(remainingTime);
+            });
+        });
+    }
+
     onTurnUpdate(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.UpdateTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
@@ -230,7 +241,7 @@ export class SocketService {
         });
     }
 
-    onSwitchTurn(): Observable<unknown> {
+    onSwitchTurn(): Observable<PlayerStats> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.SwitchTurn, (data) => observer.next(data));
         });
