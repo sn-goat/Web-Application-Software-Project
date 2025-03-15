@@ -71,13 +71,14 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     onLeftClicked(cell: Cell) {
-        if (this.isPlayerTurn && this.isActionMode) {
+        if (this.isPlayerTurn) {
             this.selectedCell = cell;
-            if (this.gameService.isAttackProvocation(cell)) {
+            if (this.isActionMode && this.gameService.isAttackProvocation(cell)) {
                 this.gameService.initFight(cell.player);
                 this.gameService.showFightInterface$.next(true);
+            } else {
+                this.gameService.movePlayer(cell.position);
             }
-            this.gameService.movePlayer(cell.position);
         }
     }
 

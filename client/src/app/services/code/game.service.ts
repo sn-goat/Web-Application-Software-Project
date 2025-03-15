@@ -61,25 +61,16 @@ export class GameService {
     }
 
     isAttackProvocation(cell: Cell): boolean {
-        return cell?.player !== null && this.isWithinAttackRange(cell);
+        return cell.player !== undefined && cell.player !== Avatar.Default && this.isWithinAttackRange(cell);
     }
 
     isWithinAttackRange(cell: Cell): boolean {
-        const attackerpos = this.activePlayer$.value?.position;
-        const defenderpos = cell.position;
-        if (attackerpos && defenderpos) {
-            const abovepos = { x: attackerpos.x, y: attackerpos.y - 1 };
-            const belowpos = { x: attackerpos.x, y: attackerpos.y + 1 };
-            const leftpos = { x: attackerpos.x - 1, y: attackerpos.y };
-            const rightpos = { x: attackerpos.x + 1, y: attackerpos.y };
-            return (
-                (abovepos.x === defenderpos.x && abovepos.y === defenderpos.y) ||
-                (belowpos.x === defenderpos.x && belowpos.y === defenderpos.y) ||
-                (leftpos.x === defenderpos.x && leftpos.y === defenderpos.y) ||
-                (rightpos.x === defenderpos.x && rightpos.y === defenderpos.y)
-            );
-        }
-        return false;
+        const attackerPos = this.activePlayer$.value?.position;
+        if (!attackerPos) return false;
+        const defenderPos = cell.position;
+        const dx = Math.abs(attackerPos.x - defenderPos.x);
+        const dy = Math.abs(attackerPos.y - defenderPos.y);
+        return dx + dy === 1;
     }
 
     isPlayerInGame(player: PlayerStats): boolean {
