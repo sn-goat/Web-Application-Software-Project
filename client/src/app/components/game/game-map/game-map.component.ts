@@ -83,9 +83,9 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     onRightClicked(cell: Cell) {
         if (this.isDebugMode && this.isPlayerTurn) {
-            this.gameService.debugMovePlayer(cell.position);
+            this.gameService.debugMovePlayer(cell);
         } else {
-            console.log('Right clicked on cell', cell);
+            // console.log('Right clicked on cell', cell);
         }
     }
 

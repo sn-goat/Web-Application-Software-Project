@@ -8,6 +8,7 @@ import { Avatar, Game, PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FightLogicService } from './fight-logic.service';
+import { Tile } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -119,6 +120,10 @@ export class GameService {
         this.currentPlayers$.next(game.players);
         this.activePlayer$.next(game.players[game.currentTurn]);
         this.clientPlayer$.next(this.socketService.getCurrentPlayer());
+
+        this.isDebugMode$.next(false);
+        this.showFightInterface$.next(false);
+
         this.initialPlayers = game.players;
         this.accessCode = game.accessCode;
         this.organizerId = game.organizerId;
@@ -130,10 +135,20 @@ export class GameService {
         this.path$.next(path);
     }
 
-    debugMovePlayer(position: Vec2): void {
-        this.socketService.debugMove(this.accessCode, position);
+    debugMovePlayer(cell: Cell): void {
+        if (this.canTeleport(cell)) {
+            this.socketService.debugMove(this.accessCode, cell.position);
+        }
     }
 
+    canTeleport(cell: Cell): boolean {
+        return (
+            (cell.player === undefined || cell.player === Avatar.Default) &&
+            cell.tile !== Tile.WALL &&
+            cell.tile !== Tile.CLOSED_DOOR &&
+            cell.tile !== Tile.OPENED_DOOR
+        );
+    }
     movePlayer(position: Vec2): void {
         const keyPos = `${position.x},${position.y}`;
         const selectedPath = this.path$.value?.get(keyPos);
@@ -165,11 +180,6 @@ export class GameService {
             this.map$.next(map);
         }
     }
-
-    // setPath(path: Map<string, PathInfo>): void {
-    //     this.path = path;
-    //     path = this.path;
-    // }
 
     endTurn(): void {
         this.toggleActionMode();

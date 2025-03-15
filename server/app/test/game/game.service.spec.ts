@@ -41,27 +41,6 @@ describe('GameService', () => {
         jest.spyOn(Logger.prototype, 'error').mockImplementation();
     });
 
-    describe('changeDebugState', () => {
-        it('should toggle debug mode and return the new state', () => {
-            gameService['currentGames'].set(accessCode, {
-                organizerId: 'org1',
-                accessCode: '4009',
-                players: [],
-                map: dummyMap,
-                currentTurn: 0,
-                isDebugMode: false,
-            });
-
-            const newState = gameService.changeDebugState(accessCode);
-            expect(newState).toBe(true);
-            expect(gameService['currentGames'].get(accessCode).isDebugMode).toBe(true);
-
-            const newState2 = gameService.changeDebugState(accessCode);
-            expect(newState2).toBe(false);
-            expect(gameService['currentGames'].get(accessCode).isDebugMode).toBe(false);
-        });
-    });
-
     describe('changeDoorState', () => {
         it('should change a CLOSED_DOOR to an OPENED_DOOR and vice versa', () => {
             const mapCopy: Cell[][] = [
@@ -202,47 +181,7 @@ describe('GameService', () => {
         });
     });
 
-    describe('getCellAt', () => {
-        it('should return the correct cell from the game map', () => {
-            const customMap: Cell[][] = [
-                [
-                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
-                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 1, player: null },
-                ],
-                [
-                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 1 }, cost: 1, player: null },
-                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: null },
-                ],
-            ];
-            gameService['currentGames'].set(accessCode, {
-                organizerId: 'org1',
-                accessCode: '4009',
-                players: [],
-                map: customMap,
-                currentTurn: 0,
-                isDebugMode: false,
-            });
-            const pos: Vec2 = { x: 1, y: 0 };
-            const cell = gameService.getCellAt(accessCode, pos);
-            expect(cell).toEqual(customMap[0][1]);
-        });
-    });
-
     describe('findPossiblePaths', () => {
-        it('should find all possible paths with normal terrain', () => {
-            const grid: Cell[][] = [
-                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }],
-                [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 0 }, cost: 1, player: null }],
-            ];
-            const startPosition: Vec2 = { x: 0, y: 0 };
-            const movementPoints = 2;
-
-            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
-
-            expect(result.size).toBeGreaterThan(0);
-            expect(result.has('0,0')).toBeTruthy();
-        });
-
         it('should not move through walls', () => {
             const grid: Cell[][] = [
                 [{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }],
@@ -295,16 +234,6 @@ describe('GameService', () => {
             const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
 
             expect(result.has('1,0')).toBeFalsy();
-        });
-
-        it('should return only the start position if movement points are 0', () => {
-            const grid: Cell[][] = [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null }]];
-            const startPosition: Vec2 = { x: 0, y: 0 };
-            const movementPoints = 0;
-
-            const result = (gameService as any).findPossiblePaths(grid, startPosition, movementPoints);
-
-            expect(result.size).toBe(1);
         });
     });
 

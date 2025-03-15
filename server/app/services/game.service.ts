@@ -290,48 +290,58 @@ export class GameService {
             { x: -1, y: 0 }, // Left
         ];
 
-        // Pour Dijkstra, on utilise un tableau trié par coût croissant
-        const priorityQueue: { position: Vec2; path: Vec2[]; cost: number }[] = [{ position: playerPosition, path: [playerPosition], cost: 0 }];
-
         const visited = new Map<string, PathInfo>();
+        // La file initiale contient l'état de départ avec un chemin vide et un coût nul.
+        const queue: { position: Vec2; path: Vec2[]; cost: number }[] = [{ position: playerPosition, path: [], cost: 0 }];
 
-        while (priorityQueue.length > 0) {
-            // Sélectionner le chemin avec le coût le plus faible
-            priorityQueue.sort((a, b) => a.cost - b.cost);
-            const { position, path, cost } = priorityQueue.shift();
-
-            // Si le coût dépasse les points de mouvement, on ignore ce chemin
-            if (cost > movementPoints) {
-                continue;
-            }
-
+        while (queue.length > 0) {
+            const { position, path, cost } = queue.shift();
+            // Si le coût dépasse, ne plus explorer.
+            if (cost > movementPoints) continue;
             const key = this.vec2Key(position);
 
-            // Si cette case n'a pas encore été visitée ou si on a trouvé un chemin plus court
-            if (!visited.has(key) || visited.get(key).cost > cost) {
+            // On stocke ou met à jour le chemin pour cette position si nous avons trouvé un meilleur moyen.
+            if (!visited.has(key) || visited.get(key).cost > cost || (visited.get(key).cost === cost && visited.get(key).path.length > path.length)) {
                 visited.set(key, { path, cost });
+            }
 
-                // Explorer les directions adjacentes
-                for (const dir of directions) {
-                    const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            // Explorer les positions adjacentes
+            for (const dir of directions) {
+                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
 
-                    // Vérifier si la position est valide
-                    if (this.isValidPosition(game.length, newPos)) {
-                        const tileCost = this.getTileCost(game[newPos.y][newPos.x]);
+                if (!this.isValidPosition(game.length, newPos)) {
+                    continue;
+                }
 
-                        // Si le coût n'est pas infini et n'excède pas les points de mouvement restants
-                        if (tileCost !== Infinity && cost + tileCost <= movementPoints) {
-                            priorityQueue.push({
-                                position: newPos,
-                                path: [...path, newPos],
-                                cost: cost + tileCost,
-                            });
-                        }
-                    }
+                const tileCost = this.getTileCost(game[newPos.y][newPos.x]);
+                if (tileCost === Infinity) {
+                    continue;
+                }
+
+                const newCost = cost + tileCost;
+                if (newCost > movementPoints) {
+                    continue;
+                }
+
+                const newKey = this.vec2Key(newPos);
+                const newPath = [...path, newPos];
+
+                // N'ajouter dans la queue que si ce chemin améliore celui trouvé pour newPos
+                if (
+                    !visited.has(newKey) ||
+                    visited.get(newKey).cost > newCost ||
+                    (visited.get(newKey).cost === newCost && visited.get(newKey).path.length > newPath.length)
+                ) {
+                    queue.push({
+                        position: newPos,
+                        path: newPath,
+                        cost: newCost,
+                    });
                 }
             }
         }
 
+        // Optionnel : retirer la position de départ des résultats (on considère qu'on ne se déplace pas si aucun mouvement n'est réalisé)
         visited.delete(this.vec2Key(playerPosition));
         return visited;
     }
