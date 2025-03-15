@@ -1,10 +1,9 @@
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
-import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
-import { Avatar, PathInfo } from '@common/game';
+import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
 
@@ -110,10 +109,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     getTooltipContent(cell: Cell): string {
-        if (cell.player !== Avatar.Default) {
-            return 'Joueur: ' + 'sammysoup' + 'Personnage: ';
-        }
-        return 'Tuile: ' + ASSETS_DESCRIPTION.get(cell.tile) + ', Effet: ' + ASSETS_DESCRIPTION.get(cell.item);
+        return this.gameService.getItemDescription(cell.item);
     }
 
     getCellTooltip(cell: Cell): string | null {
