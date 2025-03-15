@@ -7,6 +7,7 @@
             [cell]="cell"
             [appMouseHandler]="cell"
             [isInGameView]="true"
+            [tooltipContent]="toolTipContent"
             [class.path-cell]="isPathCell(cell) && isPlayerTurn"
             [class.path-highlight]="isHighlightedPathCell(cell) && isPlayerTurn"
             (mouseenter)="onCellHovered(cell)"
