@@ -16,7 +16,8 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
 export class GameMapComponent implements OnInit, OnDestroy {
     toolTipContent: string | null = null;
     boardGame: Cell[][] = [];
-    selectedCell: Cell | null = null;
+    leftSelectedCell: Cell | null = null;
+    rightSelectedCell: Cell | null = null;
 
     actionMode = false;
     isPlayerTurn = false;
@@ -75,10 +76,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
     onLeftClicked(cell: Cell) {
         if (this.isPlayerTurn) {
             if (this.actionMode) {
-                this.selectedCell = cell;
+                this.leftSelectedCell = cell;
                 this.actionMode = false;
             } else {
-                this.selectedCell = null;
+                this.leftSelectedCell = null;
                 this.gameService.movePlayer(cell.position);
             }
         }
@@ -88,15 +89,27 @@ export class GameMapComponent implements OnInit, OnDestroy {
         if (this.isDebugMode && this.isPlayerTurn) {
             this.gameService.debugMovePlayer(cell);
         } else {
+            this.rightSelectedCell = cell;
             this.toolTipContent = this.getTooltipContent(cell);
         }
     }
 
     getTooltipContent(cell: Cell): string {
         if (cell.player !== Avatar.Default) {
-            return 'joueur: ' + cell.player + 'personnage: ';
+            return 'Joueur: ' + cell.player + 'Personnage: ';
         }
         return 'Tuile: ' + cell.tile + ', Effet: ' + cell.item;
+    }
+
+    getCellTooltip(cell: Cell): string | null {
+        if (
+            this.rightSelectedCell &&
+            cell.position.x === this.rightSelectedCell.position.x &&
+            cell.position.y === this.rightSelectedCell.position.y
+        ) {
+            return this.toolTipContent;
+        }
+        return null;
     }
 
     isPathCell(cell: Cell): boolean {

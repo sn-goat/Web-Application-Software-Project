@@ -7,13 +7,14 @@
             [cell]="cell"
             [appMouseHandler]="cell"
             [isInGameView]="true"
-            [tooltipContent]="toolTipContent"
+            [tooltipContent]="getCellTooltip(cell)"
             [class.path-cell]="isPathCell(cell) && isPlayerTurn"
             [class.path-highlight]="isHighlightedPathCell(cell) && isPlayerTurn"
             (mouseenter)="onCellHovered(cell)"
             (mouseleave)="onCellUnhovered()"
             (leftClicked)="onLeftClicked($event)"
-            (rightClicked)="onRightClicked($event)">
+            (rightClicked)="onRightClicked($event)"
+        >
         </app-board-cell>
         }
     </div>
