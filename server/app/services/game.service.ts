@@ -1,7 +1,7 @@
 import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
-import { Cell, Vec2 } from '@common/board';
+import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, PathInfo, TurnInfo } from '@common/game';
+import { Avatar, Game, PathInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -14,6 +14,9 @@ export class GameService {
     private currentGames: Map<string, Game>;
     private logger: Logger = new Logger(GameService.name);
 
+    private movementInProgress: Map<string, boolean> = new Map();
+    private pendingEndTurn: Map<string, boolean> = new Map();
+
     constructor(
         private boardService: BoardService,
         private timerService: TimerService,
@@ -22,8 +25,11 @@ export class GameService {
         this.currentGames = new Map();
     }
 
-    changeDebugState(accessCode: string) {
+    toggleDebugState(accessCode: string) {
         this.currentGames.get(accessCode).isDebugMode = !this.currentGames.get(accessCode).isDebugMode;
+    }
+
+    isGameDebugMode(accessCode: string): boolean {
         return this.currentGames.get(accessCode).isDebugMode;
     }
 
@@ -43,7 +49,7 @@ export class GameService {
     //     throw new Error('Method not implemented.');
     // }
     changeDoorState(accessCode: string, position: Vec2) {
-        const cell: Cell = this.getCellAt(accessCode, position);
+        const cell: Cell = this.getMap(accessCode)[position.y][position.x];
         cell.tile = cell.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
         return cell;
     }
@@ -59,14 +65,29 @@ export class GameService {
         return null;
     }
 
-    configureTurn(accessCode: string): TurnInfo {
+    configureTurn(accessCode: string): { player: PlayerStats; path: Record<string, PathInfo> } {
+        this.logger.log(`Configuring turn for game ${accessCode}`);
         const playerTurn = this.getPlayerTurn(accessCode);
+        this.logger.log(`Configuring turn for game ${playerTurn.id}`);
+        this.logger.log(`Configuring turn for game ${playerTurn.speed}`);
+
+        if (!playerTurn) {
+            this.logger.log('No player turn found');
+        }
         playerTurn.movementPts = playerTurn.speed;
         playerTurn.actions = 1;
+        const path = this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts);
         return {
             player: playerTurn,
-            path: this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts),
+            path: Object.fromEntries(path),
         };
+    }
+
+    updatePlayerPathTurn(accessCode: string) {
+        const player = this.getPlayerTurn(accessCode);
+        const map = this.getMap(accessCode);
+        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -87,28 +108,43 @@ export class GameService {
         }
     }
 
-    processPath(accessCode: string, path: Vec2[]) {
-        const game = this.currentGames.get(accessCode);
-        if (game) {
-            const activePlayer = this.getPlayerTurn(accessCode);
-            if (activePlayer) {
-                this.logger.log(`Processing path for player ${activePlayer.id}`);
-                let index = 0;
-                const interval = setInterval(() => {
-                    if (index < path.length) {
-                        this.movePlayer(accessCode, game.map, activePlayer.position, path[index]);
-                        activePlayer.position = path[index];
-                        index++;
-                    } else {
-                        clearInterval(interval);
-                    }
-                }, MOVEMENT_TIMEOUT_IN_MS);
+    processPath(accessCode: string, pathInfo: PathInfo) {
+        const activePlayer = this.getPlayerTurn(accessCode);
+        if (activePlayer) {
+            this.movementInProgress.set(accessCode, true);
+
+            if (!this.pendingEndTurn.has(accessCode)) {
+                this.pendingEndTurn.set(accessCode, false);
             }
+
+            let index = 0;
+            const path = pathInfo.path;
+            const interval = setInterval(() => {
+                if (index < path.length) {
+                    this.movePlayer(accessCode, path[index]);
+                    activePlayer.position = path[index];
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    this.movementInProgress.set(accessCode, false);
+                    activePlayer.movementPts -= pathInfo.cost;
+                    if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
+                        this.eventEmitter.emit(TurnEvents.End, accessCode);
+                        this.pendingEndTurn.set(accessCode, false);
+                    }
+                }
+            }, MOVEMENT_TIMEOUT_IN_MS);
         }
     }
 
-    getCellAt(accessCode: string, position: Vec2): Cell {
-        return this.currentGames.get(accessCode).map[position.y][position.x];
+    movePlayer(accessCode: string, direction: Vec2): void {
+        const map = this.getMap(accessCode);
+        const activePlayer = this.getPlayerTurn(accessCode);
+        const previousPosition = activePlayer.position;
+        map[previousPosition.y][previousPosition.x].player = Avatar.Default;
+        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
+        activePlayer.position = direction;
+        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position: previousPosition, direction });
     }
 
     startTimer(accessCode: string) {
@@ -124,12 +160,62 @@ export class GameService {
         return game ? game.players[game.currentTurn] : undefined;
     }
 
+    getMap(accessCode: string): Cell[][] {
+        return this.currentGames.get(accessCode).map;
+    }
+
     switchTurn(accessCode: string) {
         const game = this.currentGames.get(accessCode);
         if (game) {
             game.currentTurn = (game.currentTurn + 1) % game.players.length;
-            this.logger.log(`Switching turn to player ${game.players[game.currentTurn].id}`);
         }
+    }
+
+    endTurnRequested(accessCode: string) {
+        // If movement is in progress, flag that we should end the turn when movement finishes.
+        if (this.movementInProgress.get(accessCode)) {
+            this.pendingEndTurn.set(accessCode, true);
+        } else {
+            // Otherwise, end turn immediately.
+            this.eventEmitter.emit(TurnEvents.End, accessCode);
+        }
+    }
+
+    private isPlayerTurnEnded(accessCode: string, player: PlayerStats) {
+        const map = this.getMap(accessCode);
+        if (map) {
+            if (player.movementPts > 0 || (player.actions > 0 && this.isPlayerCanMakeAction(map, player.position))) {
+                this.updatePlayerPathTurn(accessCode);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
+        const directions: Vec2[] = [
+            { x: 0, y: 1 }, // Down
+            { x: 1, y: 0 }, // Right
+            { x: 0, y: -1 }, // Up
+            { x: -1, y: 0 }, // Left
+            { x: 1, y: 1 }, // Down Right
+            { x: 1, y: -1 }, // Up Right
+            { x: -1, y: 1 }, // Down Left
+            { x: -1, y: -1 }, // Up Left
+        ];
+        for (const dir of directions) {
+            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
+                if (this.isValidCellForAction(map[newPos.y][newPos.x])) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private isValidCellForAction(cell: Cell): boolean {
+        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
     }
 
     private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
@@ -140,35 +226,59 @@ export class GameService {
             { x: -1, y: 0 }, // Left
         ];
 
-        const queue: { position: Vec2; path: Vec2[]; remainingPoints: number }[] = [
-            { position: playerPosition, path: [playerPosition], remainingPoints: movementPoints },
-        ];
         const visited = new Map<string, PathInfo>();
+        // La file initiale contient l'état de départ avec un chemin vide et un coût nul.
+        const queue: { position: Vec2; path: Vec2[]; cost: number }[] = [{ position: playerPosition, path: [], cost: 0 }];
 
         while (queue.length > 0) {
-            const { position, path, remainingPoints } = queue.shift();
+            const { position, path, cost } = queue.shift();
+            // Si le coût dépasse, ne plus explorer.
+            if (cost > movementPoints) continue;
             const key = this.vec2Key(position);
 
-            if (!visited.has(key) || visited.get(key).path.length > path.length) {
-                visited.set(key, { path, cost: movementPoints - remainingPoints });
+            // On stocke ou met à jour le chemin pour cette position si nous avons trouvé un meilleur moyen.
+            if (!visited.has(key) || visited.get(key).cost > cost || (visited.get(key).cost === cost && visited.get(key).path.length > path.length)) {
+                visited.set(key, { path, cost });
+            }
 
-                for (const dir of directions) {
-                    const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            // Explorer les positions adjacentes
+            for (const dir of directions) {
+                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
 
-                    if (this.isValidPosition(game.length, newPos)) {
-                        const moveCost = this.getTileCost(game[newPos.x][newPos.y]);
+                if (!this.isValidPosition(game.length, newPos)) {
+                    continue;
+                }
 
-                        if (remainingPoints >= moveCost && moveCost !== Infinity) {
-                            queue.push({
-                                position: newPos,
-                                path: [...path, newPos],
-                                remainingPoints: remainingPoints - moveCost,
-                            });
-                        }
-                    }
+                const tileCost = this.getTileCost(game[newPos.y][newPos.x]);
+                if (tileCost === Infinity) {
+                    continue;
+                }
+
+                const newCost = cost + tileCost;
+                if (newCost > movementPoints) {
+                    continue;
+                }
+
+                const newKey = this.vec2Key(newPos);
+                const newPath = [...path, newPos];
+
+                // N'ajouter dans la queue que si ce chemin améliore celui trouvé pour newPos
+                if (
+                    !visited.has(newKey) ||
+                    visited.get(newKey).cost > newCost ||
+                    (visited.get(newKey).cost === newCost && visited.get(newKey).path.length > newPath.length)
+                ) {
+                    queue.push({
+                        position: newPos,
+                        path: newPath,
+                        cost: newCost,
+                    });
                 }
             }
         }
+
+        // Optionnel : retirer la position de départ des résultats (on considère qu'on ne se déplace pas si aucun mouvement n'est réalisé)
+        visited.delete(this.vec2Key(playerPosition));
         return visited;
     }
 
@@ -197,7 +307,7 @@ export class GameService {
         // Mélanger les points de spawn
         const shuffledSpawnPoints = [...spawnPoints];
         for (let i = shuffledSpawnPoints.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
+            const j = Math.floor(Math.random() * i);
             [shuffledSpawnPoints[i], shuffledSpawnPoints[j]] = [shuffledSpawnPoints[j], shuffledSpawnPoints[i]];
         }
 
@@ -253,27 +363,26 @@ export class GameService {
      * Check if a position is occupied by another player.
      */
     private isOccupiedByPlayer(cell: Cell): boolean {
-        if (!cell) {
-            return false;
-        }
-        return cell.player !== Avatar.Default;
+        return cell && cell.player !== undefined && cell.player !== Avatar.Default;
     }
 
     /**
      * Get the movement cost for a tile at a given position.
      */
     private getTileCost(cell: Cell): number {
+        // Si la cellule n'existe pas, retourner un coût infini
         if (!cell) {
             return Infinity;
         }
-        if (this.isOccupiedByPlayer(cell)) return Infinity;
-        return cell.cost;
-    }
+        // Si la cellule est occupée par un joueur, elle est infranchissable
+        if (this.isOccupiedByPlayer(cell)) {
+            return Infinity;
+        }
 
-    private movePlayer(accessCode: string, map: Cell[][], position: Vec2, direction: Vec2): void {
-        this.logger.log(`Player moved from ${position.x},${position.y} to ${direction.x},${direction.y}`);
-        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position, direction });
-        map[position.y][position.x].player = Avatar.Default;
-        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
+        // Utiliser la valeur de la constante TILE_COST pour le type de tuile
+        const cost = TILE_COST.get(cell.tile);
+
+        // Si le coût n'est pas défini pour cette tuile, utiliser le coût par défaut de la cellule
+        return cost !== undefined ? cost : cell.cost;
     }
 }

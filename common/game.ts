@@ -34,7 +34,7 @@ export enum Avatar {
     Cleric = ASSET_PATH + "10" + ASSET_EXT,
     Farmer = ASSET_PATH + "11" + ASSET_EXT,
     Hermit = ASSET_PATH + "12" + ASSET_EXT,
-    Default = ''
+    Default = ""
 };
 
 export interface TurnInfo {

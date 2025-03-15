@@ -13,8 +13,9 @@ class="cell"
         @if (cell.item) {
             <img
             class="image-stack"
-            draggable="true"
-            (drag) ="onDrag()"
+            [draggable]="!isInGameView"
+            (dragstart)="onDragStart($event)"
+            (drag)="onDrag()"
             [src]="srcItem + cell.item + fileType"
             >
 

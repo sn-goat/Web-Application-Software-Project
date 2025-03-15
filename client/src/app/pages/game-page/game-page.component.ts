@@ -8,8 +8,8 @@ import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-playe
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { GameService } from '@app/services/code/game.service';
-import { SocketService } from '@app/services/code/socket.service';
 import { PlayerService } from '@app/services/code/player.service';
+import { SocketService } from '@app/services/code/socket.service';
 import { Vec2 } from '@common/board';
 import { TurnInfo } from '@common/game';
 
@@ -42,11 +42,12 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.showFightInterface$.subscribe((show) => {
             this.showFightInterface = show;
         });
+
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
 
-        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
+        this.socketService.onTurnSwitch().subscribe((turn: TurnInfo) => {
             this.gameService.updateTurn(turn.player, turn.path);
         });
 
@@ -55,7 +56,15 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         }
 
         this.socketService.onBroadcastMove().subscribe((payload: { position: Vec2; direction: Vec2 }) => {
-            this.gameService.movePlayer(payload.position, payload.direction);
+            this.gameService.onMove(payload.position, payload.direction);
+        });
+
+        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
+            this.gameService.updateTurn(turn.player, turn.path);
+        });
+
+        this.socketService.onBroadcastDebugState().subscribe(() => {
+            this.gameService.onDebugStateChange();
         });
     }
 

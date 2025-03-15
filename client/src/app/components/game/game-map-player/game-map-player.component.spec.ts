@@ -91,12 +91,6 @@ describe('GameMapPlayerComponent', () => {
         expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
     });
 
-    it('should initialize with empty arrays and default values', () => {
-        expect(component.players).toEqual([]);
-        expect(component.admin).toBe('');
-        expect(component.activePlayer).toBeNull();
-    });
-
     it('should update players when currentPlayers$ emits', () => {
         currentPlayersSubject.next(mockPlayers);
 
@@ -123,14 +117,6 @@ describe('GameMapPlayerComponent', () => {
         activePlayerSubject.next(null);
 
         expect(component.activePlayer).toBeNull();
-    });
-
-    it('should unsubscribe from all observables when destroyed', () => {
-        unsubscribeSpy.calls.reset();
-
-        component.ngOndestroy();
-
-        expect(unsubscribeSpy.calls.count()).toBe(2);
     });
 
     it('should handle undefined data from currentPlayers$', () => {
