@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
 import { Avatar, PathInfo } from '@common/game';
@@ -55,10 +56,15 @@ export class GameMapComponent implements OnInit, OnDestroy {
             }),
 
             this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
+                this.rightSelectedCell = null;
+                this.toolTipContent = null;
+
                 if (!path) {
                     this.path = null;
                     this.pathCells = new Set();
                     this.highlightedPathCells.clear();
+                    this.rightSelectedCell = null;
+                    this.toolTipContent = null;
                     return;
                 }
 
@@ -89,16 +95,25 @@ export class GameMapComponent implements OnInit, OnDestroy {
         if (this.isDebugMode && this.isPlayerTurn) {
             this.gameService.debugMovePlayer(cell);
         } else {
-            this.rightSelectedCell = cell;
-            this.toolTipContent = this.getTooltipContent(cell);
+            if (
+                this.rightSelectedCell &&
+                cell.position.x === this.rightSelectedCell.position.x &&
+                cell.position.y === this.rightSelectedCell.position.y
+            ) {
+                this.rightSelectedCell = null;
+                this.toolTipContent = null;
+            } else {
+                this.rightSelectedCell = cell;
+                this.toolTipContent = this.getTooltipContent(cell);
+            }
         }
     }
 
     getTooltipContent(cell: Cell): string {
         if (cell.player !== Avatar.Default) {
-            return 'Joueur: ' + cell.player + 'Personnage: ';
+            return 'Joueur: ' + 'sammysoup' + 'Personnage: ';
         }
-        return 'Tuile: ' + cell.tile + ', Effet: ' + cell.item;
+        return 'Tuile: ' + ASSETS_DESCRIPTION.get(cell.tile) + ', Effet: ' + ASSETS_DESCRIPTION.get(cell.item);
     }
 
     getCellTooltip(cell: Cell): string | null {
