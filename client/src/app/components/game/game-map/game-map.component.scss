@@ -9,11 +9,12 @@
 
 .row {
     display: flex;
-    height: 100%;
+    flex-wrap: nowrap;
 }
 
 .row > * {
     flex-grow: 1;
     aspect-ratio: 1/1;
     justify-self: center;
+    width: auto;
 }

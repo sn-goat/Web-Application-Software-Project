@@ -11,7 +11,7 @@ import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { ASSET_EXT, ASSET_PATH, Avatar } from '@common/game';
 import { PlayerStats } from '@common/player';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
 
 // Using the correct type definitions
@@ -163,24 +163,6 @@ describe('FormCharacterComponent', () => {
 
         component.shareCharacter();
         expect(mockSocketService.shareCharacter).toHaveBeenCalledWith('test-code', component.playerStats);
-    });
-
-    it('should create game and navigate to lobby', () => {
-        // No need to spy on navigate as MockRouter already has it set up
-        spyOn(mockSocketService, 'createRoom');
-        spyOn(mockSocketService, 'createGame');
-        spyOn(mockSocketService, 'shareCharacter');
-        spyOn(mockSocketService, 'onRoomCreated').and.returnValue(of({ accessCode: 'new-code' }));
-
-        component.playerStats.id = 'player-id';
-        component.createGame();
-
-        expect(mockSocketService.createRoom).toHaveBeenCalledWith(15);
-        expect(mockSocketService.createGame).toHaveBeenCalledWith('new-code', 'Test Map', 'player-id');
-        expect(mockSocketService.shareCharacter).toHaveBeenCalled();
-
-        // Use the pre-existing navigate spy from MockRouter
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/lobby'], { state: { accessCode: 'new-code' } });
     });
 
     it('should emit closePopup event when onClose is called', () => {

@@ -1,12 +1,14 @@
 import { GameService } from '@app/services/game.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { TimerEvents, THREE_SECONDS_IN_MS } from '@app/gateways/game/game.gateway.constants';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { THREE_SECONDS_IN_MS } from './game.gateway.constants';
+import { PathInfo, TurnInfo } from '@common/game';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -14,30 +16,42 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger(GameGateway.name);
 
-    constructor(private readonly gameService: GameService) {}
+    constructor(
+        private readonly gameService: GameService,
+        private readonly timerService: TimerService,
+    ) {}
 
-    @OnEvent('timerUpdate')
+    @OnEvent(TimerEvents.Update)
     handleTimerUpdate(payload: { roomId: string; remainingTime: number }) {
-        this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
+        // this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
         this.server.to(payload.roomId).emit(TurnEvents.UpdateTimer, { remainingTime: payload.remainingTime });
     }
 
-    @OnEvent('timerEnded')
+    @OnEvent(TimerEvents.End)
     handleTimerEnd(accessCode: string) {
-        this.logger.log(`Timer ended in room: ${accessCode}`);
-        this.server.to(accessCode).emit(TurnEvents.End);
-        this.gameService.switchTurn(accessCode);
-        this.startTurn(accessCode);
+        this.gameService.endTurnRequested(accessCode);
     }
 
     @OnEvent(TurnEvents.Move)
     handleBroadcastMove(payload: { accessCode: string; position: Vec2; direction: Vec2 }) {
+        this.logger.log('Moving player to: ' + payload.position);
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { position: payload.position, direction: payload.direction });
+    }
+
+    @OnEvent(TurnEvents.UpdateTurn)
+    handleUpdateTurn(turn: TurnInfo) {
+        this.logger.log('Updating turn for player: ' + turn.player.id);
+        this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
+    }
+
+    @OnEvent(TurnEvents.End)
+    handleEndTurn(accessCode: string) {
+        this.logger.log('Ending turn early');
+        this.endTurn(accessCode);
     }
 
     @SubscribeMessage(GameEvents.Create)
     handleGameCreation(client: Socket, payload: { accessCode: string; mapName: string; organizerId: string }) {
-        this.logger.log('Creating game with payload: ' + payload.organizerId);
         this.gameService.createGame(payload.accessCode, payload.organizerId, payload.mapName);
     }
 
@@ -45,14 +59,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     async handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
         const game = await this.gameService.configureGame(payload.accessCode, payload.players);
         this.logger.log('Game configured');
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, { game });
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, game);
         this.logger.log('Game started');
     }
 
     @SubscribeMessage(GameEvents.Debug)
-    handleDebug(client: Socket, payload: { accessCode: string }) {
-        const isDebugMode = this.gameService.changeDebugState(payload.accessCode);
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastDebugState, { isDebugMode });
+    handleDebug(client: Socket, accessCode: string) {
+        this.logger.log('Toggling debug mode');
+        this.gameService.toggleDebugState(accessCode);
+        this.server.to(accessCode).emit(GameEvents.BroadcastDebugState);
     }
 
     @SubscribeMessage(GameEvents.Ready)
@@ -69,9 +84,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(TurnEvents.Move)
-    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: Vec2[] }) {
+    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo }) {
         this.logger.log('Player movement');
         this.gameService.processPath(payload.accessCode, payload.path);
+    }
+
+    @SubscribeMessage(TurnEvents.DebugMove)
+    debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2 }) {
+        this.gameService.movePlayer(payload.accessCode, payload.direction);
+        this.gameService.updatePlayerPathTurn(payload.accessCode);
+    }
+
+    @SubscribeMessage(TurnEvents.End)
+    handlePlayerEnd(client: Socket, accessCode: string) {
+        this.endTurn(accessCode);
     }
 
     // @SubscribeMessage(FightEvents.Init)
@@ -101,12 +127,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleDisconnect(client: Socket) {
         this.logger.log(`Client déconnecté : ${client.id}`);
     }
+    private endTurn(accessCode: string) {
+        this.logger.log('Ending turn');
+        this.timerService.stopTimer(accessCode);
+        this.server.to(accessCode).emit(TurnEvents.UpdateTimer, { remainingTime: 0 });
+        this.server.to(accessCode).emit(TurnEvents.BroadcastEnd);
+        this.gameService.switchTurn(accessCode);
+        this.gameService.configureTurn(accessCode);
+        this.startTurn(accessCode);
+    }
 
     private startTurn(accessCode: string) {
         this.logger.log('Starting turn');
         const turn = this.gameService.configureTurn(accessCode);
         this.logger.log(`Next player turn id: ${turn.player.id}`);
-        this.server.to(accessCode).emit(TurnEvents.PlayerTurn, { turn });
+        this.server.to(accessCode).emit(TurnEvents.PlayerTurn, turn);
         setTimeout(() => {
             this.gameService.startTimer(accessCode);
         }, THREE_SECONDS_IN_MS);

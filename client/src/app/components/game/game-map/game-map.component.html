@@ -2,7 +2,18 @@
     @for (row of boardGame; track row) {
     <div class="row" draggable="false">
         @for (cell of row; track cell) {
-        <app-board-cell class="cell" [cell]="cell" [appMouseHandler]="cell" [isInGameView]="true" (cellClicked)="onCellClicked($event)"></app-board-cell>
+        <app-board-cell
+            class="cell"
+            [cell]="cell"
+            [appMouseHandler]="cell"
+            [isInGameView]="true"
+            [class.path-cell]="isPathCell(cell) && isPlayerTurn"
+            [class.path-highlight]="isHighlightedPathCell(cell) && isPlayerTurn"
+            (mouseenter)="onCellHovered(cell)"
+            (mouseleave)="onCellUnhovered()"
+            (leftClicked)="onLeftClicked($event)"
+            (rightClicked)="onRightClicked($event)">
+        </app-board-cell>
         }
     </div>
     }

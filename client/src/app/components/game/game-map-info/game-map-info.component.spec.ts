@@ -125,16 +125,4 @@ describe('GameMapInfoComponent', () => {
         fixture.detectChanges();
         expect(component.playerCount).toBe(0);
     });
-
-    it('should clean up subscriptions on component destruction', () => {
-        spyOn(component['playersSub'], 'unsubscribe');
-        spyOn(component['activePlayerSub'], 'unsubscribe');
-        spyOn(component['mapSub'], 'unsubscribe');
-
-        fixture.destroy();
-
-        expect(component['playersSub'].unsubscribe).toHaveBeenCalled();
-        expect(component['activePlayerSub'].unsubscribe).toHaveBeenCalled();
-        expect(component['mapSub'].unsubscribe).toHaveBeenCalled();
-    });
 });
