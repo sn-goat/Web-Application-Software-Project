@@ -3,7 +3,7 @@ import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.c
 import { GameService } from '@app/services/code/game.service';
 import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
-import { PathInfo } from '@common/game';
+import { Avatar, PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
 
@@ -14,6 +14,7 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
     imports: [BoardCellComponent, MouseHandlerDirective],
 })
 export class GameMapComponent implements OnInit, OnDestroy {
+    toolTipContent: string | null = null;
     boardGame: Cell[][] = [];
     selectedCell: Cell | null = null;
 
@@ -77,6 +78,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.selectedCell = cell;
                 this.actionMode = false;
             } else {
+                this.selectedCell = null;
                 this.gameService.movePlayer(cell.position);
             }
         }
@@ -86,8 +88,15 @@ export class GameMapComponent implements OnInit, OnDestroy {
         if (this.isDebugMode && this.isPlayerTurn) {
             this.gameService.debugMovePlayer(cell);
         } else {
-            // console.log('Right clicked on cell', cell);
+            this.toolTipContent = this.getTooltipContent(cell);
         }
+    }
+
+    getTooltipContent(cell: Cell): string {
+        if (cell.player !== Avatar.Default) {
+            return 'joueur: ' + cell.player + 'personnage: ';
+        }
+        return 'Tuile: ' + cell.tile + ', Effet: ' + cell.item;
     }
 
     isPathCell(cell: Cell): boolean {
