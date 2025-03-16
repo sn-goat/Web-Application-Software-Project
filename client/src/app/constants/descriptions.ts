@@ -15,7 +15,7 @@ Cette tuile bloque le joueur dans ses déplacements. Il ne peut pas la traverser
     [
         Tile.CLOSED_DOOR,
         `Porte :
-Cette tuile est accessible si elle est ouverte. 
+Cette tuile est accessible si elle est ouverte.
 Pour changer son état, utilisez cet outil et clique droit sur une tuile porte.`,
     ],
     [
@@ -25,7 +25,11 @@ C'est une tuile de terrain qui peut être parcourue par le joueur.
 Le coût pour la traverser s'élève à 2 pts`,
     ],
     [Tile.OPENED_DOOR, ''],
-    [Tile.FLOOR, ''],
+    [
+        Tile.FLOOR,
+        `Sol :
+C'est une tuile de terrain qui peut être parcourue par le joueur. Le coût pour la traverser s'élève à 1 pt.`,
+    ],
 
     // Descriptions for items
     [Item.BOW, 'Arc : Une arme à distance utilisée pour attaquer les ennemis de loin.'],
