@@ -5,7 +5,7 @@ import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { SocketService } from '@app/services/code/socket.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, PathInfo } from '@common/game';
+import { Avatar, Game, PathInfo, getAvatarName } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FightLogicService } from './fight-logic.service';
@@ -169,7 +169,7 @@ export class GameService {
             const currentPlayers = this.currentPlayers$.value;
             const playerInfo = currentPlayers.find((player) => player.avatar === cell.player) || { name: 'Unknown' };
 
-            return 'Joueur: ' + playerInfo.name + ' Avatar: ' + this.getAvatarName(cell.player);
+            return 'Joueur: ' + playerInfo.name + ' Avatar: ' + getAvatarName(cell.player);
         }
         const tileDesc = this.getTileDescription(cell.tile);
         let desc = tileDesc;
@@ -177,7 +177,6 @@ export class GameService {
             const itemDesc = this.getItemDescription(cell.item);
             desc += ', ' + itemDesc;
         }
-        console.log(desc);
         return desc;
     }
 
@@ -187,36 +186,5 @@ export class GameService {
 
     getItemDescription(item: Item): string {
         return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
-    }
-
-    getAvatarName(avatar: Avatar): string {
-        switch (avatar) {
-            case Avatar.Dwarf:
-                return 'Dwarf';
-            case Avatar.Elf:
-                return 'Elf';
-            case Avatar.Rogue:
-                return 'Rogue';
-            case Avatar.Knight:
-                return 'Knight';
-            case Avatar.Lancer:
-                return 'Lancer';
-            case Avatar.Warlock:
-                return 'Warlock';
-            case Avatar.Wizard:
-                return 'Wizard';
-            case Avatar.Paladin:
-                return 'Paladin';
-            case Avatar.Berserker:
-                return 'Berserker';
-            case Avatar.Cleric:
-                return 'Cleric';
-            case Avatar.Farmer:
-                return 'Farmer';
-            case Avatar.Hermit:
-                return 'Hermit';
-            default:
-                return 'Unknown';
-        }
     }
 }
