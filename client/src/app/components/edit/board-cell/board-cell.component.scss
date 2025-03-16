@@ -13,10 +13,9 @@ $glow-gold: rgba(255, 215, 0, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #000;
+    border: #1a1625 thin solid;
     position: relative;
     box-sizing: border-box;
-    overflow: hidden;
     flex-shrink: 0;
 }
 

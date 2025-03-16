@@ -99,6 +99,8 @@ export class SocketService {
         });
     }
 
+    // Game events
+    // Send
     createGame(accessCode: string, mapName: string) {
         this.socket.emit(GameEvents.Create, { accessCode, mapName, organizerId: this.socket.id });
     }
@@ -115,12 +117,12 @@ export class SocketService {
         this.socket.emit(TurnEvents.Move, { accessCode, path });
     }
 
-    debugMove(accessCode: string, direction: Vec2) {
-        this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
-    }
-
     toggleDebugMode(accessCode: string) {
         this.socket.emit(GameEvents.Debug, accessCode);
+    }
+
+    debugMove(accessCode: string, direction: Vec2) {
+        this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
     }
 
     changeDoorState(accessCode: string, position: Vec2) {
@@ -143,8 +145,10 @@ export class SocketService {
         this.socket.emit(TurnEvents.End, accessCode);
     }
 
+    // Receive
     onBroadcastStartGame(): Observable<Game> {
         return new Observable((observer) => {
+            this.socket.on(GameEvents.BroadcastStartGame, (game: Game) => observer.next(game));
             this.socket.on(GameEvents.BroadcastStartGame, (game: Game) => observer.next(game));
         });
     }
@@ -173,6 +177,10 @@ export class SocketService {
     onTurnSwitch(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.PlayerTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
+                const receivedMap = new Map(Object.entries(turn.path));
+                observer.next({ player: turn.player, path: receivedMap });
+            });
+            this.socket.on(TurnEvents.UpdateTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
                 const receivedMap = new Map(Object.entries(turn.path));
                 observer.next({ player: turn.player, path: receivedMap });
             });
