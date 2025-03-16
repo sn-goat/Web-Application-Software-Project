@@ -50,6 +50,7 @@ export class FormCharacterComponent implements OnInit {
     };
 
     takenAvatars: string[] = [];
+    isRoomLocked: boolean = false;
 
     private readonly gameMapService = inject(GameMapService);
     private readonly socketService = inject(SocketService);
@@ -69,6 +70,10 @@ export class FormCharacterComponent implements OnInit {
             if (!this.isCreationPage) {
                 this.takenAvatars = data.room.players.map((player) => player.avatar);
             }
+        });
+
+        this.socketService.onRoomLocked().subscribe(() => {
+            this.isRoomLocked = true;
         });
     }
 
