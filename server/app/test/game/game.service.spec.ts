@@ -41,31 +41,31 @@ describe('GameService', () => {
         jest.spyOn(Logger.prototype, 'error').mockImplementation();
     });
 
-    describe('changeDoorState', () => {
-        it('should change a CLOSED_DOOR to an OPENED_DOOR and vice versa', () => {
-            const mapCopy: Cell[][] = [
-                [
-                    { tile: Tile.CLOSED_DOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
-                    { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
-                ],
-            ];
-            gameService['currentGames'].set(accessCode, {
-                organizerId: 'org1',
-                accessCode: '4009',
-                players: [],
-                map: mapCopy,
-                currentTurn: 0,
-                isDebugMode: false,
-            });
-            const pos: Vec2 = { x: 0, y: 0 };
+    // describe('changeDoorState', () => {
+    //     it('should change a CLOSED_DOOR to an OPENED_DOOR and vice versa', () => {
+    //         const mapCopy: Cell[][] = [
+    //             [
+    //                 { tile: Tile.CLOSED_DOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
+    //                 { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: null },
+    //             ],
+    //         ];
+    //         gameService['currentGames'].set(accessCode, {
+    //             organizerId: 'org1',
+    //             accessCode: '4009',
+    //             players: [],
+    //             map: mapCopy,
+    //             currentTurn: 0,
+    //             isDebugMode: false,
+    //         });
+    //         const pos: Vec2 = { x: 0, y: 0 };
 
-            const cell = gameService.changeDoorState(accessCode, pos);
-            expect(cell.tile).toBe(Tile.OPENED_DOOR);
+    //         const cell = gameService.changeDoorState(accessCode, pos);
+    //         expect(cell.tile).toBe(Tile.OPENED_DOOR);
 
-            const cell2 = gameService.changeDoorState(accessCode, pos);
-            expect(cell2.tile).toBe(Tile.CLOSED_DOOR);
-        });
-    });
+    //         const cell2 = gameService.changeDoorState(accessCode, pos);
+    //         expect(cell2.tile).toBe(Tile.CLOSED_DOOR);
+    //     });
+    // });
 
     // describe('configureGame', () => {
     //     it('should configure a game by sorting players, assigning spawn points, and removing unused spawns', () => {

@@ -131,10 +131,6 @@ export class SocketService {
         this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
     }
 
-    toggleDebugMode(accessCode: string) {
-        this.socket.emit(GameEvents.Debug, accessCode);
-    }
-
     changeDoorState(accessCode: string, position: Vec2, player: PlayerStats) {
         this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position, player });
     }
