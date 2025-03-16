@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
 import { Fight, Game, PathInfo, Room, TurnInfo } from '@common/game';
@@ -16,10 +15,8 @@ export class SocketService {
     gameRoom: Room;
     private socket: Socket;
     private readonly url: string = environment.serverUrl;
-    private currenPlayer: PlayerStats;
+    private currentPlayer: PlayerStats;
     private size: number = 0;
-    // private readonly gameService = inject(GameService);
-
     constructor() {
         this.socket = io(this.url);
     }
@@ -27,7 +24,7 @@ export class SocketService {
     onRoomCreated(): Observable<unknown> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.RoomCreated, (data) => {
-                this.gameRoom = data as Room; // Mettre à jour les données de la partie
+                this.gameRoom = data as Room;
                 observer.next(data);
             });
         });
@@ -40,11 +37,11 @@ export class SocketService {
 
     joinRoom(accessCode: string) {
         this.socket.emit(RoomEvents.JoinRoom, { accessCode });
+        this.socket.emit(RoomEvents.GetRoom, { accessCode });
     }
 
     shareCharacter(accessCode: string, player: PlayerStats) {
         player.id = this.socket.id as string;
-        this.currenPlayer = player;
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode, player });
     }
 
@@ -101,6 +98,12 @@ export class SocketService {
         });
     }
 
+    onRoomData(): Observable<Room> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.RoomData, (data) => observer.next(data));
+        });
+    }
+
     // Game events
     // Send
     createGame(accessCode: string, mapName: string) {
@@ -115,8 +118,8 @@ export class SocketService {
         this.socket.emit(GameEvents.Ready, { accessCode, playerId });
     }
 
-    movePlayer(accessCode: string, path: PathInfo) {
-        this.socket.emit(TurnEvents.Move, { accessCode, path });
+    movePlayer(accessCode: string, path: PathInfo, player: PlayerStats) {
+        this.socket.emit(TurnEvents.Move, { accessCode, path, player });
     }
 
     debugMove(accessCode: string, direction: Vec2) {
@@ -144,13 +147,12 @@ export class SocketService {
         });
     }
 
-    // Assembler les deux fonctions suivantes en une seule en donnant un  type d'action de combat qui sera géré back
-    playerFlee(accessCode: string, playerId: string) {
-        this.socket.emit(FightEvents.Flee, { accessCode, playerId });
+    playerFlee(accessCode: string) {
+        this.socket.emit(FightEvents.Flee, accessCode);
     }
 
-    playerAttack(accessCode: string, playerId: string) {
-        this.socket.emit(FightEvents.Attack, { accessCode, playerId });
+    playerAttack(accessCode: string) {
+        this.socket.emit(FightEvents.Attack, accessCode);
     }
 
     endTurn(accessCode: string) {
@@ -173,8 +175,15 @@ export class SocketService {
     onTimerUpdate(): Observable<{ remainingTime: number }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.UpdateTimer, (data: { remainingTime: number }) => {
-                console.log('Timer update', data);
                 observer.next(data);
+            });
+        });
+    }
+
+    onAssignSpawn(): Observable<Vec2> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.AssignSpawn, (position) => {
+                observer.next(position);
             });
         });
     }
@@ -182,7 +191,6 @@ export class SocketService {
     onFightTimerUpdate(): Observable<number> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.UpdateTimer, (remainingTime) => {
-                console.log('Timer update', remainingTime);
                 observer.next(remainingTime);
             });
         });
@@ -196,6 +204,7 @@ export class SocketService {
             });
         });
     }
+
     onTurnSwitch(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.PlayerTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
@@ -223,9 +232,9 @@ export class SocketService {
         });
     }
 
-    onBroadcastMove(): Observable<{ position: Vec2; direction: Vec2 }> {
+    onBroadcastMove(): Observable<{ previousPosition: Vec2; player: PlayerStats }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.BroadcastMove, (movement: { position: Vec2; direction: Vec2 }) => observer.next(movement));
+            this.socket.on(TurnEvents.BroadcastMove, (movement: { previousPosition: Vec2; player: PlayerStats }) => observer.next(movement));
         });
     }
 
@@ -241,15 +250,27 @@ export class SocketService {
         });
     }
 
-    onSwitchTurn(): Observable<PlayerStats> {
+    onSwitchTurn(): Observable<Fight> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.SwitchTurn, (data) => observer.next(data));
         });
     }
 
-    onEndFight(): Observable<unknown> {
+    onEndFight(): Observable<PlayerStats | null> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.End, (data) => observer.next(data));
+        });
+    }
+
+    onWinner(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(FightEvents.Winner, (data) => observer.next(data));
+        });
+    }
+
+    onLoser(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(FightEvents.Loser, (data) => observer.next(data));
         });
     }
 
@@ -258,7 +279,7 @@ export class SocketService {
     }
 
     getCurrentPlayer(): PlayerStats {
-        return this.currenPlayer;
+        return this.currentPlayer;
     }
 
     getGameSize(): number {

@@ -3,7 +3,7 @@ import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
-import { TurnEvents } from '@common/game.gateway.events';
+import { GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -59,7 +59,6 @@ export class GameService {
         this.logger.log(`Configuring turn for game ${accessCode}`);
         const playerTurn = this.getPlayerTurn(accessCode);
         this.logger.log(`Configuring turn for game ${playerTurn.id}`);
-        this.logger.log(`Configuring turn for game ${playerTurn.speed}`);
 
         if (!playerTurn) {
             this.logger.log('No player turn found');
@@ -73,8 +72,8 @@ export class GameService {
         };
     }
 
-    updatePlayerPathTurn(accessCode: string) {
-        const player = this.getPlayerTurn(accessCode);
+    updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats) {
+        const player = playerToUpdate === undefined ? this.getPlayerTurn(accessCode) : playerToUpdate;
         const map = this.getMap(accessCode);
         const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
         this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
@@ -98,8 +97,8 @@ export class GameService {
         }
     }
 
-    processPath(accessCode: string, pathInfo: PathInfo) {
-        const activePlayer = this.getPlayerTurn(accessCode);
+    processPath(accessCode: string, pathInfo: PathInfo, player: PlayerStats) {
+        const activePlayer = this.getPlayer(accessCode, player.id);
         if (activePlayer) {
             this.movementInProgress.set(accessCode, true);
 
@@ -111,7 +110,7 @@ export class GameService {
             const path = pathInfo.path;
             const interval = setInterval(() => {
                 if (index < path.length) {
-                    this.movePlayer(accessCode, path[index]);
+                    this.movePlayer(accessCode, path[index], activePlayer);
                     activePlayer.position = path[index];
                     index++;
                 } else {
@@ -127,14 +126,18 @@ export class GameService {
         }
     }
 
-    movePlayer(accessCode: string, direction: Vec2): void {
+    movePlayer(accessCode: string, direction: Vec2, player: PlayerStats): void {
+        const movingPlayer = this.getPlayer(accessCode, player.id);
         const map = this.getMap(accessCode);
-        const activePlayer = this.getPlayerTurn(accessCode);
-        const previousPosition = activePlayer.position;
+        const previousPosition = movingPlayer.position;
         map[previousPosition.y][previousPosition.x].player = Avatar.Default;
-        map[direction.y][direction.x].player = this.getPlayerTurn(accessCode).avatar as Avatar;
-        activePlayer.position = direction;
-        this.eventEmitter.emit(TurnEvents.Move, { accessCode, position: previousPosition, direction });
+        map[direction.y][direction.x].player = movingPlayer.avatar as Avatar;
+        movingPlayer.position = direction;
+        this.eventEmitter.emit(TurnEvents.Move, { accessCode, previousPosition, player: movingPlayer });
+    }
+
+    getPlayer(accessCode: string, playerId: string): PlayerStats {
+        return this.currentGames.get(accessCode).players.find((player) => player.id === playerId);
     }
 
     startTimer(accessCode: string) {
@@ -175,7 +178,7 @@ export class GameService {
         const map = this.getMap(accessCode);
         if (map) {
             if (player.movementPts > 0 || (player.actions > 0 && this.isPlayerCanMakeAction(map, player.position))) {
-                this.updatePlayerPathTurn(accessCode);
+                this.updatePlayerPathTurn(accessCode, player);
                 return false;
             }
             return true;
@@ -305,6 +308,7 @@ export class GameService {
         const usedSpawnPoints: Vec2[] = [];
         players.forEach((player, index) => {
             if (index < shuffledSpawnPoints.length) {
+                this.eventEmitter.emit(GameEvents.AssignSpawn, { playerId: player.id, position: shuffledSpawnPoints[index] });
                 player.spawnPosition = shuffledSpawnPoints[index];
                 player.position = shuffledSpawnPoints[index];
 

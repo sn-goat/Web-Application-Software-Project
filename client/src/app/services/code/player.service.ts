@@ -1,114 +1,87 @@
-import { Injectable } from '@angular/core';
-import { MAX_PLAYERS } from '@app/constants/playerConst';
+import { Injectable, inject } from '@angular/core';
 import { PlayerStats } from '@common/player';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { SocketService } from '@app/services/code/socket.service';
+import { PathInfo } from '@common/game';
+import { Vec2 } from '@common/board';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PlayerService {
-    activePlayer$: Observable<string>;
-    admin$: Observable<string>;
-    players$: Observable<PlayerStats[]>;
+    myPlayer: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    isActivePlayer: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    path: BehaviorSubject<Map<string, PathInfo>> = new BehaviorSubject<Map<string, PathInfo>>(new Map());
+    private isAdmin: boolean = false;
+    private accessCode: string = '';
 
-    private playerName: string;
-    private activePlayer = new BehaviorSubject<string>('');
-    private admin = new BehaviorSubject<string>('');
-    private players = new BehaviorSubject<PlayerStats[]>([]);
+    private readonly socketService = inject(SocketService);
 
     constructor() {
-        this.activePlayer$ = this.activePlayer.asObservable();
-        this.players$ = this.players.asObservable();
-        this.admin$ = this.admin.asObservable();
+        this.socketService.onTurnSwitch().subscribe((data) => {
+            if (data.player.id === this.getPlayer().id) {
+                this.setPlayerActive(true);
+                this.setPath(data.path);
+            } else {
+                this.setPlayerActive(false);
+                this.setPath(new Map());
+            }
+        });
+
+        this.socketService.onTurnUpdate().subscribe((data) => {
+            this.setPlayer(data.player);
+            this.setPath(data.path);
+            this.setPlayerActive(true);
+        });
+
+        this.socketService.onAssignSpawn().subscribe((data) => {
+            this.getPlayer().spawnPosition = data;
+            this.getPlayer().position = data;
+        });
     }
 
-    setActivePlayer(name: string): void {
-        this.activePlayer.next(name);
+    setPlayer(player: PlayerStats): void {
+        this.myPlayer.next(player);
     }
 
-    setPlayers(players: PlayerStats[]): void {
-        if (players.length <= MAX_PLAYERS) {
-            this.players.next(players);
-            this.sortPlayers();
+    setPath(path: Map<string, PathInfo>): void {
+        this.path.next(path);
+    }
+
+    setAdmin(isAdmin: boolean): void {
+        this.isAdmin = isAdmin;
+    }
+
+    isPlayerAdmin(): boolean {
+        return this.isAdmin;
+    }
+
+    isActive(): boolean {
+        return this.isActivePlayer.value;
+    }
+
+    setPlayerActive(isActive: boolean): void {
+        this.isActivePlayer.next(isActive);
+    }
+
+    getPlayer(): PlayerStats {
+        return this.myPlayer.value ?? ({} as PlayerStats);
+    }
+
+    setAccessCode(accessCode: string): void {
+        this.accessCode = accessCode;
+    }
+
+    getAccessCode(): string {
+        return this.accessCode;
+    }
+
+    sendMove(position: Vec2): void {
+        const keyPos = `${position.x},${position.y}`;
+        const selectedPath = this.path.value?.get(keyPos);
+        if (selectedPath) {
+            this.isActivePlayer.next(false);
+            this.socketService.movePlayer(this.getAccessCode(), selectedPath, this.getPlayer());
         }
-    }
-
-    sortPlayers(): void {
-        const sortedPlayers = this.players.value.sort((a, b) => a.speed - b.speed).reverse();
-        this.players.next(sortedPlayers);
-    }
-
-    getPlayer(name: string): PlayerStats | undefined {
-        if (!name) {
-            return undefined;
-        }
-        return this.players.value.find((player) => player.name === name);
-    }
-
-    editPlayer(player: PlayerStats): void {
-        if (!player) return;
-
-        const players: PlayerStats[] = this.players.value;
-        const playerToUpdate = this.getPlayer(player.name);
-        if (!playerToUpdate || playerToUpdate.name !== this.playerName) {
-            return;
-        }
-
-        const index = players.findIndex((p) => p.name === player.name);
-        if (index >= 0) {
-            players[index] = player;
-            this.players.next(players);
-        }
-    }
-
-    removePlayerByName(name: string): boolean {
-        const player = this.getPlayer(name);
-        if (player) {
-            this.removePlayer(player);
-            return true;
-        }
-        return false;
-    }
-
-    setPlayerName(name: string): void {
-        this.playerName = name;
-    }
-
-    getPlayerName(): string {
-        return this.playerName;
-    }
-
-    setAdmin(name: string): void {
-        this.admin.next(name);
-    }
-
-    addPlayer(player: PlayerStats): void {
-        if (!player) return;
-
-        const players = this.players.value;
-        const playerExists = players.find((p) => p.name === player.name);
-        if (!playerExists || players.length >= MAX_PLAYERS) {
-            return;
-        }
-        players.push(player);
-        this.players.next([...players]);
-    }
-
-    removePlayer(player: PlayerStats): void {
-        if (!player) return;
-
-        const players = this.players.value;
-        if (!players.length) return;
-
-        const playerExists = players.find((p) => p.name === player.name);
-        if (!playerExists) return;
-
-        const index = players.findIndex((p) => p.name === player.name);
-        players.splice(index, 1);
-        this.players.next(players);
-    }
-
-    removeAllPlayers(): void {
-        this.players.next([]);
     }
 }

@@ -3,7 +3,7 @@ import { FightService } from '@app/services/fight.service';
 import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
-import { PathInfo, TurnInfo, Fight } from '@common/game';
+import { PathInfo, Fight } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -27,7 +27,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleTimerUpdate(payload: { roomId: string; remainingTime: number }) {
         const fight = this.fightService.getFight(payload.roomId);
         if (fight) {
-            this.logger.log('Timer Update for fight: ' + payload.remainingTime);
             this.server.to(fight.player1.id).emit(FightEvents.UpdateTimer, payload.remainingTime);
             this.server.to(fight.player2.id).emit(FightEvents.UpdateTimer, payload.remainingTime);
         } else {
@@ -46,14 +45,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
+    @OnEvent(GameEvents.AssignSpawn)
+    handleAssignSpawn(payload: { playerId: string; position: Vec2 }) {
+        this.server.to(payload.playerId).emit(GameEvents.AssignSpawn, payload.position);
+    }
+
     @OnEvent(TurnEvents.Move)
-    handleBroadcastMove(payload: { accessCode: string; position: Vec2; direction: Vec2 }) {
-        this.logger.log('Moving player to: ' + payload.position);
-        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { position: payload.position, direction: payload.direction });
+    handleBroadcastMove(payload: { accessCode: string; previousPosition: Vec2; player: PlayerStats }) {
+        this.logger.log('Moving player' + payload.player.name + 'to: ' + payload.previousPosition);
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { previousPosition: payload.previousPosition, player: payload.player });
     }
 
     @OnEvent(TurnEvents.UpdateTurn)
-    handleUpdateTurn(turn: TurnInfo) {
+    handleUpdateTurn(turn: { player: PlayerStats; path: Record<string, PathInfo> }) {
         this.logger.log('Updating turn for player: ' + turn.player.id);
         this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
     }
@@ -72,16 +76,35 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @OnEvent(FightEvents.SwitchTurn)
-    sendFightSwitchTurn(payload: { accessCode: string; currentPlayer: PlayerStats }) {
+    sendFightSwitchTurn(accessCode: string) {
+        const fight = this.fightService.getFight(accessCode);
+        if (!fight) {
+            this.logger.error('No active fight found for access code: ' + accessCode);
+            return;
+        } else {
+            this.logger.log('Switching turn to player: ' + fight.currentPlayer.name);
+            this.server.to(fight.player1.id).emit(FightEvents.SwitchTurn, fight);
+            this.server.to(fight.player2.id).emit(FightEvents.SwitchTurn, fight);
+        }
+    }
+
+    @OnEvent(FightEvents.End)
+    sendFightEnd(payload: { accessCode: string; winner?: PlayerStats; loser?: PlayerStats }) {
         const fight = this.fightService.getFight(payload.accessCode);
         if (!fight) {
             this.logger.error('No active fight found for access code: ' + payload.accessCode);
             return;
-        } else {
-            this.logger.log('Switching turn to player: ' + payload.currentPlayer.id);
-            this.server.to(fight.player1.id).emit(FightEvents.SwitchTurn, payload.currentPlayer);
-            this.server.to(fight.player2.id).emit(FightEvents.SwitchTurn, payload.currentPlayer);
         }
+        this.logger.log('Ending fight');
+        if (payload.winner && payload.loser) {
+            this.server.to(payload.winner.id).emit(FightEvents.Winner);
+            this.server.to(payload.loser.id).emit(FightEvents.Loser);
+            this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
+            this.gameService.updatePlayerPathTurn(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
+        }
+        this.server.to(fight.player1.id).emit(FightEvents.End);
+        this.server.to(fight.player2.id).emit(FightEvents.End);
+        this.timerService.resumeTimer(payload.accessCode);
     }
 
     @SubscribeMessage(GameEvents.Create)
@@ -118,15 +141,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(TurnEvents.Move)
-    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo }) {
+    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo; player: PlayerStats }) {
         this.logger.log('Player movement');
-        this.gameService.processPath(payload.accessCode, payload.path);
+        this.gameService.processPath(payload.accessCode, payload.path, payload.player);
     }
 
     @SubscribeMessage(TurnEvents.DebugMove)
-    debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2 }) {
-        this.gameService.movePlayer(payload.accessCode, payload.direction);
-        this.gameService.updatePlayerPathTurn(payload.accessCode);
+    debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; player: PlayerStats }) {
+        this.gameService.movePlayer(payload.accessCode, payload.direction, payload.player);
+        this.gameService.updatePlayerPathTurn(payload.accessCode, payload.player);
     }
 
     @SubscribeMessage(TurnEvents.End)
@@ -144,13 +167,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(FightEvents.Flee)
-    handlePlayerFlee(client: Socket, payload: { accessCode: string; playerId: string }) {
-        this.fightService.playerFlee(payload.accessCode, payload.playerId);
+    handlePlayerFlee(client: Socket, accessCode: string) {
+        this.logger.log('Player fleeing from ' + accessCode);
+        this.fightService.playerFlee(accessCode);
     }
 
     @SubscribeMessage(FightEvents.Attack)
-    handlePlayerAttack(client: Socket, payload: { accessCode: string; playerId: string }) {
-        this.fightService.playerAttack(payload.accessCode, payload.playerId);
+    handlePlayerAttack(client: Socket, accessCode: string) {
+        this.fightService.playerAttack(accessCode);
     }
 
     afterInit(server: Server) {

@@ -27,6 +27,8 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     player2: PlayerStats | null;
     fleeAttempt1: number = 2;
     fleeAttempt2: number = 1;
+    currentPlayer: string = '';
+    isCurrentPlayer: boolean = false;
 
     private subscriptions: Subscription[] = [];
 
@@ -40,12 +42,17 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
                 this.player1 = fight.player1;
                 this.player2 = fight.player2;
                 this.currentTurn = fight.currentPlayer.name;
+                this.currentPlayer = fight.currentPlayer.id;
             }),
 
             this.socketService.onFightTimerUpdate().subscribe((remainingTime) => {
                 this.timer = remainingTime.toString();
             }),
         );
+
+        if (this.socketService.getCurrentPlayerId() === this.currentTurn) {
+            this.isCurrentPlayer = true;
+        }
     }
 
     ngOnDestroy(): void {
@@ -53,15 +60,15 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     }
 
     isMyTurn(): boolean {
-        return this.currentTurn === this.playerService.getPlayerName();
+        return this.currentTurn === this.playerService.getPlayer().name;
     }
 
     flee(): void {
-        // TODO: Implement flee
+        this.fightLogicService.flee();
     }
 
     attack(): void {
-        // TODO: Implement attack
+        this.fightLogicService.attack();
     }
 
     getFleeAttempts(name: string): number {

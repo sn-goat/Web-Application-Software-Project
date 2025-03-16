@@ -24,11 +24,11 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.currentPlayers$.pipe().subscribe((gamePlayers: PlayerStats[]) => {
+            this.gameService.playingPlayers.subscribe((gamePlayers: PlayerStats[]) => {
                 this.players = gamePlayers;
             }),
 
-            this.gameService.activePlayer$.pipe().subscribe((player: PlayerStats | null) => {
+            this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
                 this.activePlayer = player;
             }),
         );

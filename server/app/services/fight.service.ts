@@ -1,13 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { FIGHT_TURN_DURATION_IN_S, THREE_SECONDS_IN_MS } from '@app/gateways/game/game.gateway.constants';
+import { FIGHT_TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { TimerService } from '@app/services/timer/timer.service';
 import { Fight } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';
 import { Dice, PlayerStats } from '@common/player';
-import { TimerService } from '@app/services/timer/timer.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class FightService {
+    private readonly fleeThreshold = 0.3;
+    private readonly dice4 = 4;
+    private readonly dice6 = 6;
     private logger: Logger = new Logger(FightService.name);
     private activeFights: Map<string, Fight> = new Map();
 
@@ -26,11 +29,7 @@ export class FightService {
         const newFight: Fight = { player1, player2, currentPlayer };
         this.activeFights.set(accessCode, newFight);
         this.eventEmitter.emit(FightEvents.Init, newFight);
-        this.eventEmitter.emit(FightEvents.SwitchTurn, { accessCode, currentPlayer });
-        setTimeout(() => {
-            this.logger.log(`Starting timer for accessCode ${accessCode}`);
-            this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
-        }, THREE_SECONDS_IN_MS);
+        this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
     }
 
     nextTurn(accessCode: string) {
@@ -40,50 +39,40 @@ export class FightService {
             return;
         }
         this.switchPlayer(fight);
-        this.eventEmitter.emit(FightEvents.SwitchTurn, { accessCode, currentPlayer: fight.currentPlayer });
-        setTimeout(() => {
-            this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
-        }, THREE_SECONDS_IN_MS);
+        this.eventEmitter.emit(FightEvents.SwitchTurn, accessCode);
+        this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
     }
 
-    playerFlee(accessCode: string, playerId: string) {
+    playerFlee(accessCode: string) {
         const fight = this.activeFights.get(accessCode);
         if (!fight) {
             this.logger.error(`Aucun combat actif pour accessCode ${accessCode}`);
             return;
         }
-        if (this.getFighterById(fight, playerId)) {
-            this.logger.error(`Le joueur ${playerId} n'est pas participant dans le combat pour accessCode ${accessCode}`);
-            return;
-        }
-        const fleeThreshold = 0.3;
-        const fleeSuccess = Math.random() < fleeThreshold;
+        const fleeSuccess = Math.random() < this.fleeThreshold;
         if (fleeSuccess) {
-            this.logger.log(`Player ${playerId} a réussi à fuir le combat pour accessCode ${accessCode}`);
+            this.logger.log(`Player ${fight.currentPlayer.name} a réussi à fuir le combat pour accessCode ${accessCode}`);
+            this.endFight(accessCode);
             this.activeFights.delete(accessCode);
         } else {
-            this.logger.log(`Le joueur ${playerId} a échoué à fuir le combat pour accessCode ${accessCode}`);
+            this.nextTurn(accessCode);
+            this.logger.log(`Le joueur ${fight.currentPlayer.name} a échoué à fuir le combat pour accessCode ${accessCode}`);
         }
     }
 
-    endFight(accessCode: string, winner: PlayerStats | null) {
+    endFight(accessCode: string, winner?: PlayerStats, loser?: PlayerStats) {
+        this.eventEmitter.emit(FightEvents.End, { accessCode, winner, loser });
         this.activeFights.delete(accessCode);
-        this.eventEmitter.emit(FightEvents.End, { accessCode, winner });
     }
 
-    playerAttack(accessCode: string, playerId: string) {
+    playerAttack(accessCode: string) {
         const fight = this.activeFights.get(accessCode);
         if (!fight) {
             this.logger.error(`Aucun combat actif pour accessCode ${accessCode}`);
             return;
         }
-        const attacker: PlayerStats = this.getFighterById(fight, playerId);
-        if (!attacker) {
-            this.logger.error(`Le joueur ${playerId} n'est pas participant dans le combat pour accessCode ${accessCode}`);
-            return;
-        }
-        const defender: PlayerStats = fight.player1.id === playerId ? fight.player2 : fight.player1;
-
+        const attacker: PlayerStats = fight.currentPlayer;
+        const defender: PlayerStats = fight.player1.id === attacker.id ? fight.player2 : fight.player1;
         const attackDiceValue = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
         const defenseDiceValue = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
 
@@ -96,8 +85,9 @@ export class FightService {
         this.logger.log(`Player ${attacker.id} attaque ${defender.id} et inflige ${damage} points de dégâts (vie restante: ${defender.life}).`);
 
         if (defender.life === 0) {
-            this.logger.log(`Player ${defender.id} est mort.`);
-            this.activeFights.delete(accessCode);
+            this.endFight(accessCode, attacker, defender);
+        } else {
+            this.nextTurn(accessCode);
         }
     }
 
@@ -105,26 +95,7 @@ export class FightService {
         fight.currentPlayer = fight.currentPlayer.id === fight.player1.id ? fight.player2 : fight.player1;
     }
 
-    private getFighterById(fight: Fight, playerId: string): PlayerStats | null {
-        if (fight.player1.id === playerId) {
-            return fight.player1;
-        }
-        if (fight.player2.id === playerId) {
-            return fight.player2;
-        }
-        return null;
-    }
-
     private diceToNumber(dice: Dice): number {
-        const die4 = 4;
-        const die6 = 6;
-        switch (dice) {
-            case 'D6':
-                return die6;
-            case 'D4':
-                return die4;
-            default:
-                return 0;
-        }
+        return dice === 'D6' ? this.dice6 : this.dice4;
     }
 }

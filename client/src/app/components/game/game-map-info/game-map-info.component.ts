@@ -23,13 +23,13 @@ export class GameMapInfoComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.activePlayer$.subscribe((player: PlayerStats | null) => {
+            this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
                 this.activePlayer = player;
             }),
-            this.gameService.currentPlayers$.subscribe((players) => {
+            this.gameService.playingPlayers.subscribe((players) => {
                 this.playerCount = players.length;
             }),
-            this.gameService.map$.subscribe((map) => {
+            this.gameService.map.subscribe((map) => {
                 this.mapSize = map.length;
             }),
         );

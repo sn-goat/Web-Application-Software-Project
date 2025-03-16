@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
 import { GameMapService } from '@app/services/code/game-map.service';
+import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
 import { PlayerStats } from '@common/player';
@@ -52,6 +53,7 @@ export class FormCharacterComponent implements OnInit {
     takenAvatars: string[] = [];
 
     private readonly gameMapService = inject(GameMapService);
+    private readonly playerService = inject(PlayerService);
     private readonly socketService = inject(SocketService);
 
     constructor(private router: Router) {}
@@ -132,6 +134,8 @@ export class FormCharacterComponent implements OnInit {
     }
 
     shareCharacter(): void {
+        this.playerService.setPlayer(this.playerStats);
+        this.playerService.setAccessCode(this.accessCode);
         this.socketService.shareCharacter(this.accessCode, this.playerStats);
     }
 
@@ -146,6 +150,9 @@ export class FormCharacterComponent implements OnInit {
                     this.accessCode = (data as { accessCode: string }).accessCode;
                     this.socketService.createGame(this.accessCode, map.name);
                     this.socketService.shareCharacter(this.accessCode, this.playerStats);
+                    this.playerService.setPlayer(this.playerStats);
+                    this.playerService.setAdmin(true);
+                    this.playerService.setAccessCode(this.accessCode);
                     this.router.navigate(['/lobby'], { state: { accessCode: this.accessCode } });
                 });
             });

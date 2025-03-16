@@ -11,8 +11,6 @@ import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { Vec2 } from '@common/board';
-import { TurnInfo } from '@common/game';
 
 @Component({
     selector: 'app-game-page',
@@ -38,35 +36,17 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
-    private currentPlayerId: string | undefined;
 
     ngOnInit(): void {
+        const myPlayerId = this.playerService.getPlayer().id;
+
+        console.log(myPlayerId);
+
+        if (myPlayerId) {
+            this.socketService.readyUp(this.gameService.getAccessCode(), myPlayerId);
+        }
         this.fightLogicService.fightStarted.subscribe((show) => {
             this.showFightInterface = show;
-        });
-
-        this.gameService.clientPlayer$.subscribe((player) => {
-            this.currentPlayerId = player?.id;
-        });
-
-        this.socketService.onTurnSwitch().subscribe((turn: TurnInfo) => {
-            this.gameService.updateTurn(turn.player, turn.path);
-        });
-
-        if (this.currentPlayerId) {
-            this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
-        }
-
-        this.socketService.onBroadcastMove().subscribe((payload: { position: Vec2; direction: Vec2 }) => {
-            this.gameService.onMove(payload.position, payload.direction);
-        });
-
-        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
-            this.gameService.updateTurn(turn.player, turn.path);
-        });
-
-        this.socketService.onBroadcastDebugState().subscribe(() => {
-            this.gameService.onDebugStateChange();
         });
     }
 
@@ -74,7 +54,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         const originalAbandonMethod = this.headerBar.getBack;
 
         this.headerBar.getBack = async () => {
-            const confirmed = await this.gameService.confirmAndAbandonGame(this.playerService.getPlayerName());
+            const confirmed = await this.gameService.confirmAndAbandonGame();
             if (confirmed) {
                 return originalAbandonMethod.call(this.headerBar);
             }

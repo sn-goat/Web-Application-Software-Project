@@ -3,6 +3,7 @@ export enum GameEvents {
     Configure = 'configureGame', // Client qui envoi l'état du jeu
     Ready = 'readyForStart', // Client
     Debug = 'toggleDebug', // Client
+    AssignSpawn = 'assignSpawn',
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debug', // Serveur
 }
@@ -26,7 +27,9 @@ export enum TurnEvents {
 export enum FightEvents {
     Init = 'initFightAck', // Client
     SwitchTurn = 'switchTurn', // Serveur (id du joueur dont c'est le tour & met fin à celui de l'autre)
-    End = 'endFight', // Server (fuite réussite/mort ennemie)
+    End = 'endFight', // Server (fuite réussite)
+    Winner = 'winner',
+    Loser = 'loser', 
     Flee = 'fleeAck', // Client
     Attack = 'attackAck', // Client
     UpdateTimer = 'fightTimeUpdate', // Server
