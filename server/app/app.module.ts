@@ -11,6 +11,7 @@ import { BoardService } from './services/board/board.service';
 import { GameService } from './services/game.service';
 import { RoomService } from './services/room.service';
 import { TimerService } from './services/timer/timer.service';
+import { FightService } from './services/fight.service';
 
 @Module({
     imports: [
@@ -26,6 +27,6 @@ import { TimerService } from './services/timer/timer.service';
         EventEmitterModule.forRoot(),
     ],
     controllers: [BoardController],
-    providers: [ChatGateway, BoardService, Logger, RoomService, RoomGateway, TimerService, GameService, GameGateway],
+    providers: [ChatGateway, BoardService, Logger, RoomService, RoomGateway, TimerService, GameService, GameGateway, FightService],
 })
 export class AppModule {}

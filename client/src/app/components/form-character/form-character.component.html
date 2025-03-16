@@ -1,7 +1,5 @@
-<!-- Popup -->
 <div class="popup">
     <div class="popup-content">
-        <!-- Portrait Navigation -->
         <div class="portrait-container">
             <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
             <div class="portrait-display">
@@ -13,18 +11,13 @@
             </div>
             <button class="arrow-button" (click)="navigatePortrait('next')">→</button>
         </div>
-
         @if(isCurrentAvatarTaken) {
-        <p style="color: red">Avatar already taken</p>
+        <p style="color: red">Avatar déjà sélectionné par un autre joueur</p>
         }
-
-        <!-- Name Input -->
         <div class="name-container">
             <label for="player-name">Who are you ?</label>
             <input type="text" id="player-name" [(ngModel)]="playerStats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
         </div>
-
-        <!-- Stat Selection -->
         <div class="stat-container">
             <div class="stat-column">
                 <p class="stat-description">Attribuer un +2</p>
@@ -59,14 +52,15 @@
                 </div>
             </div>
         </div>
-
-        <button class="close-popup-button" (click)="onClose()">Close</button>
-        @if (canJoin()) { @if(isCreationPage) {
+        <button class="close-popup-button" (click)="onClose()">Fermer</button>
+        @if (!isRoomLocked) { @if (canJoin()) { @if(isCreationPage) {
         <button class="join-button" (click)="createGame()">Commencer partie</button>
         } @else {
-        <button class="join-button" (click)="shareCharacter()" routerLink="/lobby" [disabled]="isCurrentAvatarTaken">
-            Joindre
-        </button>
-        } }
+        <button class="join-button" (click)="shareCharacter()" routerLink="/lobby" [disabled]="isCurrentAvatarTaken">Joindre</button>
+        } } } @else {
+        <p style="color: red">L'admin a verrouillé la partie. Cette partie n'accepte plus de joueuers.</p>
+        <p style="color: red">Veuillez vous diriger vers le menu principal ou soumettre un nouveau code d'accès.</p>
+        <button class="close-popup-button" routerLink="/home" (click)="onClose()">Retour au menu principal</button>
+        }
     </div>
 </div>

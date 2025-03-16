@@ -89,3 +89,25 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     // S'assurer que le panneau de dialogue est au-dessus du backdrop
     z-index: 1000 !important;
 }
+
+
+.grid {
+    display: flex;
+    flex-direction: column;
+    width: 540px;
+    height: 540px;
+    padding-left: 0;
+}
+
+
+.row {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.row > * {
+    flex-grow: 1;
+    aspect-ratio: 1/1;
+    justify-self: center;
+    width: auto;
+}

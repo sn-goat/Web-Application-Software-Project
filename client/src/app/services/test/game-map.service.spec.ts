@@ -3,7 +3,7 @@
 import { TestBed } from '@angular/core/testing';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { MockSocketService } from '@app/testHelpers/mockSocketService';
+import { MockSocketService } from '@app/helpers/mockSocketService';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { first } from 'rxjs/operators';
@@ -44,7 +44,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         };
 
         service.setGameMap(testBoard);
@@ -66,7 +65,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         };
 
         service.setGameMap(testBoard);
@@ -84,7 +82,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         } as unknown as Board;
 
         service.setGameMap(incompleteBoard);
@@ -102,7 +99,6 @@ describe('GameMapService', () => {
             isCTF: false,
             board: [],
             visibility: Visibility.PRIVATE,
-            image: 'test.jpg',
         };
 
         service.setGameMap(testBoard);
