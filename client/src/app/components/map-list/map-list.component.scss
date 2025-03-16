@@ -16,6 +16,13 @@ body {
     overflow-y: auto;
 }
 
+app-header-bar {
+    width: 65px;
+    height: 45px;
+    padding: 0px;
+    margin: 0px;
+}
+
 .map-list-container {
     width: 98%;
     margin: 0 auto;

@@ -152,6 +152,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.gameService.processPath(payload.accessCode, payload.path, payload.player);
     }
 
+    @SubscribeMessage(GameEvents.Quit)
+    async handleGameQuit(client: Socket, payload: { accessCode: string; playerId: string }) {
+        const game = await this.gameService.quitGame(payload.accessCode, payload.playerId);
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game: game.game, lastPlayer: game.lastPlayer });
+    }
+
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; player: PlayerStats }) {
         this.gameService.movePlayer(payload.accessCode, payload.direction, payload.player);

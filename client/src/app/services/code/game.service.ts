@@ -52,6 +52,11 @@ export class GameService {
             newMap[payload.position.y][payload.position.x].tile = payload.newState;
             this.map.next(newMap);
         });
+
+        this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
+            this.playingPlayers.next(game.game.players);
+            this.map.next(game.game.map);
+        });
     }
 
     initFight(avatar: Avatar): void {

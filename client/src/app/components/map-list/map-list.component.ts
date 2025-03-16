@@ -11,6 +11,10 @@ import { GameMapService } from '@app/services/code/game-map.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
+import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
+import { firstValueFrom } from 'rxjs';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { Alert } from '@app/constants/enums';
 
 type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
 
@@ -20,7 +24,7 @@ type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [CommonModule, FormsModule, MapCardComponent],
+    imports: [CommonModule, FormsModule, MapCardComponent, HeaderBarComponent],
 })
 export class MapListComponent implements OnInit {
     @Input() items: Board[] = [];
@@ -43,20 +47,14 @@ export class MapListComponent implements OnInit {
         private readonly gameMapService: GameMapService,
     ) {}
 
-    reloadPage(): void {
-        window.location.reload();
-    }
-
     onDivClick(map: Board): void {
-        this.boardService.getAllBoards().subscribe((serverMaps) => {
+        this.boardService.getAllBoards().subscribe(async (serverMaps) => {
             const serverMap = serverMaps.find((m) => m._id === map._id);
             if (this.isCreationPage) {
                 if (!serverMap) {
-                    alert('La carte a été supprimée du serveur.');
-                    this.reloadPage();
+                    await this.warning('La carte a été supprimée du serveur.');
                 } else if (!this.areMapsEqual(map, serverMap)) {
-                    alert('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
-                    this.reloadPage();
+                    await this.warning('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
                 } else {
                     this.divClicked.emit();
                     this.gameMapService.setGameMap(map);
@@ -160,5 +158,21 @@ export class MapListComponent implements OnInit {
         if (mapSize <= Size.MEDIUM) return 'size-medium';
         if (mapSize <= Size.LARGE) return 'size-large';
         return 'size-default'; // Fallback for undefined sizes
+    }
+
+    async warning(message: string): Promise<void> {
+        await this.openDialog(message, Alert.WARNING);
+        window.location.reload();
+    }
+
+    private async openDialog(message: string, type: Alert): Promise<boolean> {
+        const dialogRef = this.dialog.open(AlertComponent, {
+            data: { type, message },
+            disableClose: true,
+            hasBackdrop: true,
+            backdropClass: 'backdrop-block',
+            panelClass: 'alert-dialog',
+        });
+        return firstValueFrom(dialogRef.afterClosed());
     }
 }

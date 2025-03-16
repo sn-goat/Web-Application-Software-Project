@@ -116,6 +116,32 @@ export class GameService {
         }
     }
 
+    async quitGame(accessCode: string, playerId: string) {
+        const game = this.currentGames.get(accessCode);
+        const lastPlayer: PlayerStats = game.players.filter((player) => player.id !== playerId)[0];
+        if (game) {
+            const index = game.players.findIndex((playerFound: PlayerStats) => playerFound.id === playerId);
+            if (index >= 0) {
+                const player = game.players[index];
+                if (game.players.length === 2) {
+                    for (let i = game.players.length - 1; i >= 0; i--) {
+                        game.map[player.position.y][player.position.x].player = Avatar.Default;
+                        game.players.splice(i, 1);
+                        this.logger.log(`Player ${playerId} quit the game`);
+                    }
+                    this.currentGames.delete(accessCode);
+                    this.logger.log(`Game ${accessCode} deleted`);
+                } else {
+                    game.map[player.position.y][player.position.x].player = Avatar.Default;
+                    game.players.splice(index, 1);
+                    this.logger.log(`Player ${playerId} quit the game`);
+                }
+            }
+            return { game, lastPlayer };
+        }
+        return null;
+    }
+
     processPath(accessCode: string, pathInfo: PathInfo, player: PlayerStats) {
         const activePlayer = this.getPlayer(accessCode, player.id);
         if (activePlayer) {

@@ -4,8 +4,15 @@ export enum GameEvents {
     Ready = 'readyForStart', // Client
     Debug = 'toggleDebug', // Client
     AssignSpawn = 'assignSpawn',
+    Quit = 'quitGame', // Client    
+    End = 'endGame', // Serveur
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debug', // Serveur
+    BroadcastEndGame = 'endGame', // Serveur
+    BroadcastQuitGame = 'playerQuit', // Serveur
+
+
+
 }
 
 export enum TurnEvents {
@@ -22,6 +29,7 @@ export enum TurnEvents {
     BroadcastMove = 'playerMove', // Serveur (pos_debut, pos_fin) x nombre de mouvements
     BroadcastItem = 'eventItem', // Serveur (type, pos, Item?)
     BroadcastDoor = 'eventOnDoor', // Serveur (type, pos)
+
 }
 
 export enum FightEvents {
