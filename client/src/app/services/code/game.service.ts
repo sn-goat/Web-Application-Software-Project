@@ -54,8 +54,8 @@ export class GameService {
         });
 
         this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
-            this.currentPlayers$.next(game.game.players);
-            this.map$.next(game.game.map);
+            this.playingPlayers.next(game.game.players);
+            this.map.next(game.game.map);
         });
     }
 

@@ -142,11 +142,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
-    handleChangeDoorState(client: Socket, payload: { accessCode: string; position: Vec2 }) {
-        const newState = this.gameService.changeDoorState(payload.accessCode, payload.position);
-        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastDoor, { position: payload.position, newState });
+    handleChangeDoorState(client: Socket, payload: { accessCode: string; position: Vec2; player: PlayerStats }) {
+        this.gameService.changeDoorState(payload.accessCode, payload.position, payload.player);
     }
 
+    @SubscribeMessage(TurnEvents.Move)
+    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo; player: PlayerStats }) {
+        this.logger.log('Player movement');
+        this.gameService.processPath(payload.accessCode, payload.path, payload.player);
+    }
+
+    @SubscribeMessage(GameEvents.Quit)
+    async handleGameQuit(client: Socket, payload: { accessCode: string; playerId: string }) {
+        const game = await this.gameService.quitGame(payload.accessCode, payload.playerId);
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game: game.game, lastPlayer: game.lastPlayer });
+    }
 
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; player: PlayerStats }) {

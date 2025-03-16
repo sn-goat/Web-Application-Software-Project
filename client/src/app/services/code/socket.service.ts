@@ -131,8 +131,6 @@ export class SocketService {
         this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
     }
 
-
-
     quitGame(accessCode: string, playerId: string) {
         this.socket.emit(GameEvents.Quit, { accessCode, playerId });
         this.socket.emit(RoomEvents.QuitGame, { accessCode, playerId });
