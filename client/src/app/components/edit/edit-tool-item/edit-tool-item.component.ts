@@ -50,7 +50,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
         } else {
             this.mapService.nbrItemsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingItems) => {
                 this.remainingItem = remainingItems;
-                this.isDraggable = this.remainingItem > 0;
+                this.isDraggable = this.remainingItem > Infinity; // ITEM DISABLE - TO-DO SPRINT 3
             });
         }
     }
