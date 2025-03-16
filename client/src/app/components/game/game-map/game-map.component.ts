@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { PlayerService } from '@app/services/code/player.service';
+import { Tile } from '@common/enums';
 
 @Component({
     selector: 'app-game-map',
@@ -81,6 +82,8 @@ export class GameMapComponent implements OnInit, OnDestroy {
             if (this.isActionSelected && this.gameService.isWithinActionRange(cell)) {
                 if (this.fightLogicService.isAttackProvocation(cell)) {
                     this.gameService.initFight(cell.player);
+                } else if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
+                    this.gameService.toggleDoor(cell.position);
                 }
             } else {
                 this.playerService.sendMove(cell.position);

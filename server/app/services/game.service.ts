@@ -38,10 +38,29 @@ export class GameService {
         return this.activeFights.has(accessCode);
     }
 
-    changeDoorState(accessCode: string, position: Vec2) {
+    changeDoorState(accessCode: string, position: Vec2, player: PlayerStats) {
+        const activePlayer = this.getPlayer(accessCode, player.id);
         const cell: Cell = this.getMap(accessCode)[position.y][position.x];
         cell.tile = cell.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
-        return cell;
+        this.eventEmitter.emit(TurnEvents.BroadcastDoor, { accessCode, position, newState: cell.tile });
+        this.decrementAction(accessCode, activePlayer);
+    }
+
+    decrementAction(accessCode: string, player: PlayerStats) {
+        const activePlayer = this.getPlayer(accessCode, player.id);
+        activePlayer.actions--;
+        if (this.isPlayerTurnEnded(accessCode, activePlayer)) {
+            this.eventEmitter.emit(TurnEvents.End, accessCode);
+        }
+    }
+
+    decrementMovement(accessCode: string, player: PlayerStats, cost: number) {
+        const activePlayer = this.getPlayer(accessCode, player.id);
+        activePlayer.movementPts -= cost;
+        if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
+            this.eventEmitter.emit(TurnEvents.End, accessCode);
+            this.pendingEndTurn.set(accessCode, false);
+        }
     }
 
     configureGame(accessCode: string, players: PlayerStats[]) {
@@ -116,11 +135,7 @@ export class GameService {
                 } else {
                     clearInterval(interval);
                     this.movementInProgress.set(accessCode, false);
-                    activePlayer.movementPts -= pathInfo.cost;
-                    if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
-                        this.eventEmitter.emit(TurnEvents.End, accessCode);
-                        this.pendingEndTurn.set(accessCode, false);
-                    }
+                    this.decrementMovement(accessCode, activePlayer, pathInfo.cost);
                 }
             }, MOVEMENT_TIMEOUT_IN_MS);
         }

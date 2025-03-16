@@ -23,7 +23,6 @@ export class FightService {
     }
 
     initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
-        this.timerService.pauseTimer(accessCode);
         this.logger.log(`Init fight between ${player1.id} and ${player2.id}`);
         const currentPlayer = player1.speed >= player2.speed ? player1 : player2;
         const newFight: Fight = { player1, player2, currentPlayer };
