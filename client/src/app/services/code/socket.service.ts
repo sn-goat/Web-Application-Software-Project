@@ -25,7 +25,7 @@ export class SocketService {
     onRoomCreated(): Observable<unknown> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.RoomCreated, (data) => {
-                this.gameRoom = data as Room; // Mettre à jour les données de la partie
+                this.gameRoom = data as Room;
                 observer.next(data);
             });
         });
@@ -99,8 +99,6 @@ export class SocketService {
         });
     }
 
-    // Game events
-    // Send
     createGame(accessCode: string, mapName: string) {
         this.socket.emit(GameEvents.Create, { accessCode, mapName, organizerId: this.socket.id });
     }
@@ -129,12 +127,10 @@ export class SocketService {
         this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position });
     }
 
-    // Faudrait créer une room spécifique pour gérer les events du fight elle sera supprimée à la fin du fight
     initFight(accessCode: string, playerId: string, enemyPosition: Vec2) {
         this.socket.emit(FightEvents.Init, { accessCode, playerId, enemyPosition });
     }
 
-    // Assembler les deux fonctions suivantes en une seule en donnant un  type d'action de combat qui sera géré back
     playerFlee(accessCode: string, playerId: string) {
         this.socket.emit(FightEvents.Flee, { accessCode, playerId });
     }
@@ -147,7 +143,6 @@ export class SocketService {
         this.socket.emit(TurnEvents.End, accessCode);
     }
 
-    // Receive
     onBroadcastStartGame(): Observable<Game> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.BroadcastStartGame, (game: Game) => observer.next(game));
