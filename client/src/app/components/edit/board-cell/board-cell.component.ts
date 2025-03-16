@@ -16,6 +16,8 @@ import { Item } from '@common/enums';
 export class BoardCellComponent {
     @Input() cell!: Cell;
     @Input() isInGameView = false;
+    @Input() tooltipContent: string | null = null;
+
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;
     readonly fileType = '.png';

@@ -1,11 +1,14 @@
+/* eslint-disable no-console */
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
-import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
+import { FightLogicService } from '@app/services/code/fight-logic.service';
+import { PlayerService } from '@app/services/code/player.service';
+import { Tile } from '@common/enums';
 
 @Component({
     selector: 'app-game-map',
@@ -15,9 +18,10 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
 })
 export class GameMapComponent implements OnInit, OnDestroy {
     boardGame: Cell[][] = [];
-    selectedCell: Cell | null = null;
+    leftSelectedCell: Cell | null = null;
+    rightSelectedCell: Cell | null = null;
 
-    actionMode = false;
+    isActionSelected = false;
     isPlayerTurn = false;
     isDebugMode = false;
 
@@ -26,7 +30,9 @@ export class GameMapComponent implements OnInit, OnDestroy {
     highlightedPathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
-    private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
+    private fightLogicService = inject(FightLogicService);
+    private playerService = inject(PlayerService);
+
     private subscriptions: Subscription[] = [];
     constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -40,23 +46,21 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.map$.subscribe((map: Cell[][]) => {
+            this.gameService.map.subscribe((map: Cell[][]) => {
                 this.boardGame = map;
             }),
 
-            this.playerToolsService.actionMode$.subscribe((mode: boolean) => {
-                this.actionMode = mode;
-            }),
-
-            this.gameService.isPlayerTurn$.subscribe((isPlayerTurn: boolean) => {
+            this.playerService.isActivePlayer.subscribe((isPlayerTurn: boolean) => {
                 this.isPlayerTurn = isPlayerTurn;
             }),
 
-            this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
+            this.playerService.path.subscribe((path: Map<string, PathInfo> | null) => {
+                this.rightSelectedCell = null;
                 if (!path) {
                     this.path = null;
                     this.pathCells = new Set();
                     this.highlightedPathCells.clear();
+                    this.rightSelectedCell = null;
                     return;
                 }
 
@@ -65,7 +69,11 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
             }),
 
-            this.gameService.isDebugMode$.subscribe((isDebugMode) => {
+            this.gameService.isActionSelected.subscribe((isAction) => {
+                this.isActionSelected = isAction;
+            }),
+
+            this.gameService.isDebugMode.subscribe((isDebugMode) => {
                 this.isDebugMode = isDebugMode;
             }),
         );
@@ -73,11 +81,14 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     onLeftClicked(cell: Cell) {
         if (this.isPlayerTurn) {
-            if (this.actionMode) {
-                this.selectedCell = cell;
-                this.actionMode = false;
+            if (this.isActionSelected && this.gameService.isWithinActionRange(cell)) {
+                if (this.fightLogicService.isAttackProvocation(cell)) {
+                    this.gameService.initFight(cell.player);
+                } else if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
+                    this.gameService.toggleDoor(cell.position);
+                }
             } else {
-                this.gameService.movePlayer(cell.position);
+                this.playerService.sendMove(cell.position);
             }
         }
     }
@@ -86,8 +97,31 @@ export class GameMapComponent implements OnInit, OnDestroy {
         if (this.isDebugMode && this.isPlayerTurn) {
             this.gameService.debugMovePlayer(cell);
         } else {
-            // console.log('Right clicked on cell', cell);
+            if (
+                this.rightSelectedCell &&
+                cell.position.x === this.rightSelectedCell.position.x &&
+                cell.position.y === this.rightSelectedCell.position.y
+            ) {
+                this.rightSelectedCell = null;
+            } else {
+                this.rightSelectedCell = cell;
+            }
         }
+    }
+
+    getTooltipContent(cell: Cell): string {
+        return this.gameService.getCellDescription(cell);
+    }
+
+    getCellTooltip(cell: Cell): string | null {
+        if (
+            this.rightSelectedCell &&
+            cell.position.x === this.rightSelectedCell.position.x &&
+            cell.position.y === this.rightSelectedCell.position.y
+        ) {
+            return this.getTooltipContent(cell);
+        }
+        return null;
     }
 
     isPathCell(cell: Cell): boolean {

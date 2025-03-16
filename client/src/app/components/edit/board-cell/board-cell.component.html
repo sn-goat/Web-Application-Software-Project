@@ -1,36 +1,41 @@
 <div
-class="cell"
-(dragover)="onDragOver($event)"
-(drop)="onDrop($event)"
-(mouseenter)="showTooltip = true"
-(mouseleave)="showTooltip = false">
+    class="cell"
+    (dragover)="onDragOver($event)"
+    (drop)="onDrop($event)"
+    (mouseenter)="showTooltip = true"
+    (mouseleave)="showTooltip = false">
     <div class="image-container">
         <img
-        class="base-image"
-        [src]="srcTiles + cell.tile + fileType"
-        draggable="false"
-        >
+            class="base-image"
+            [src]="srcTiles + cell.tile + fileType"
+            draggable="false">
         @if (cell.item) {
             <img
-            class="image-stack"
-            [draggable]="!isInGameView"
-            (dragstart)="onDragStart($event)"
-            (drag)="onDrag()"
-            [src]="srcItem + cell.item + fileType"
-            >
+                class="image-stack"
+                [draggable]="!isInGameView"
+                (dragstart)="onDragStart($event)"
+                (drag)="onDrag()"
+                [src]="srcItem + cell.item + fileType">
 
-            @if(showTooltip && !isInGameView){
+            @if(!isInGameView && showTooltip) {
                 <div class="tooltip">
                     {{ cell.item ? getItemDescription(cell.item) : '' }}
                 </div>
             }
+
         }
+
+        @if(isInGameView && tooltipContent) {
+            <div class="tooltip-gameView">
+                {{ tooltipContent }}
+            </div>
+        }
+        
         @if (cell.player) {
             <img
-            class="player-stack"
-            draggable="false"
-            [src]="cell.player"
-            >
+                class="player-stack"
+                draggable="false"
+                [src]="cell.player">
         }
     </div>
 </div>

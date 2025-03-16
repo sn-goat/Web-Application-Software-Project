@@ -132,6 +132,31 @@ $glow-gold: rgba(255, 215, 0, 0.2);
     z-index: 1000;
 }
 
+.tooltip-gameView {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #1a1625;
+    color: #7ee0d0;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    z-index: 1000;
+    width: auto;
+    height: auto;
+    max-height: 260px;
+    min-height: 25px;
+    max-width: 500px;
+    min-width: 150px;
+    white-space: normal;
+    word-wrap: break-word;
+    text-align: center;
+}
+
+
+
+
 .image-container:hover .tooltip,
 .tooltip.visible {
     opacity: 1;

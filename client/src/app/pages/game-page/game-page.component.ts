@@ -7,11 +7,10 @@ import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-pl
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
+import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { Vec2 } from '@common/board';
-import { TurnInfo } from '@common/game';
 
 @Component({
     selector: 'app-game-page',
@@ -34,37 +33,18 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     showFightInterface: boolean = false;
 
     private gameService = inject(GameService);
+    private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
-    private currentPlayerId: string | undefined;
 
     ngOnInit(): void {
-        this.gameService.showFightInterface$.subscribe((show) => {
-            this.showFightInterface = show;
-        });
+        const myPlayerId = this.playerService.getPlayer().id;
 
-        this.gameService.clientPlayer$.subscribe((player) => {
-            this.currentPlayerId = player?.id;
-        });
-
-        this.socketService.onTurnSwitch().subscribe((turn: TurnInfo) => {
-            this.gameService.updateTurn(turn.player, turn.path);
-        });
-
-        if (this.currentPlayerId) {
-            this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
+        if (myPlayerId) {
+            this.socketService.readyUp(this.gameService.getAccessCode(), myPlayerId);
         }
-
-        this.socketService.onBroadcastMove().subscribe((payload: { position: Vec2; direction: Vec2 }) => {
-            this.gameService.onMove(payload.position, payload.direction);
-        });
-
-        this.socketService.onTurnUpdate().subscribe((turn: TurnInfo) => {
-            this.gameService.updateTurn(turn.player, turn.path);
-        });
-
-        this.socketService.onBroadcastDebugState().subscribe(() => {
-            this.gameService.onDebugStateChange();
+        this.fightLogicService.fightStarted.subscribe((show) => {
+            this.showFightInterface = show;
         });
     }
 
@@ -72,7 +52,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         const originalAbandonMethod = this.headerBar.getBack;
 
         this.headerBar.getBack = async () => {
-            const confirmed = await this.gameService.confirmAndAbandonGame(this.playerService.getPlayerName());
+            const confirmed = await this.gameService.confirmAndAbandonGame();
             if (confirmed) {
                 return originalAbandonMethod.call(this.headerBar);
             }
