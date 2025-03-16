@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { SocketService } from '@app/services/code/socket.service';
 import { Cell, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 import { Avatar, Game, PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FightLogicService } from './fight-logic.service';
-import { Tile, Item } from '@common/enums';
-import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 
 @Injectable({
     providedIn: 'root',
@@ -123,7 +123,6 @@ export class GameService {
     }
 
     onMove(position: Vec2, direction: Vec2): void {
-        // console.log(`Moving player to ${direction.x},${direction.y}`);
         const map: Cell[][] = this.map$.value;
         const player = this.activePlayer$.value;
         if (player) {
@@ -166,29 +165,30 @@ export class GameService {
     }
 
     getCellDescription(cell: Cell): string {
-        if (cell.player !== Avatar.Default) {
-            return `Joueur: ${this.getAvatarName(cell.player)}`;
+        if (cell.player) {
+            const currentPlayers = this.currentPlayers$.value;
+            const playerInfo = currentPlayers.find((player) => player.avatar === cell.player) || { name: 'Unknown' };
+
+            return 'Joueur: ' + playerInfo.name + ' Avatar: ' + this.getAvatarName(cell.player);
         }
         const tileDesc = this.getTileDescription(cell.tile);
-        let desc = `Tuile: ${tileDesc}`;
+        let desc = tileDesc;
         if (cell.item && cell.item !== (Item.DEFAULT as unknown as Item)) {
             const itemDesc = this.getItemDescription(cell.item);
-            desc += `, Effet: ${itemDesc}`;
+            desc += ', ' + itemDesc;
         }
+        console.log(desc);
         return desc;
     }
 
-    // Returns a description for a tile.
     getTileDescription(tile: Tile): string {
         return ASSETS_DESCRIPTION.get(tile) || 'Aucune description';
     }
 
-    // Returns a description for an item.
     getItemDescription(item: Item): string {
         return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
     }
 
-    // Returns a human-readable player name for a given avatar.
     getAvatarName(avatar: Avatar): string {
         switch (avatar) {
             case Avatar.Dwarf:
