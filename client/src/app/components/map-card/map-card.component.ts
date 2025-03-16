@@ -42,7 +42,7 @@ export class MapCardComponent {
     }
 
     async onDelete(): Promise<void> {
-        if (await this.confirm(`Are you sure you want to delete "${this.map.name}"?`)) {
+        if (await this.confirm(`Êtes-vous sûr de vouloir supprimer? "${this.map.name}"?`)) {
             this.delete.emit(this.map);
         }
     }
