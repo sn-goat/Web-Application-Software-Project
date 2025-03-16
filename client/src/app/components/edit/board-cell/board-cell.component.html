@@ -23,16 +23,12 @@
                 </div>
             }
 
-            @if(isInGameView && tooltipContent) {
-                <div class="tooltip">
-                    {{ tooltipContent }}
-                </div>
-            }
         }
+
         @if(isInGameView && tooltipContent) {
-        <div class="tooltip">
-            {{ tooltipContent }}
-        </div>
+            <div class="tooltip-gameView">
+                {{ tooltipContent }}
+            </div>
         }
         
         @if (cell.player) {
