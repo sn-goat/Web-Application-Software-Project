@@ -40,8 +40,6 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     ngOnInit(): void {
         const myPlayerId = this.playerService.getPlayer().id;
 
-        console.log(myPlayerId);
-
         if (myPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), myPlayerId);
         }

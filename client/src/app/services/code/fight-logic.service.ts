@@ -32,11 +32,11 @@ export class FightLogicService {
         });
 
         this.socketService.onWinner().subscribe(() => {
-            console.log('Winner');
+            // console.log('Winner');
         });
 
         this.socketService.onLoser().subscribe(() => {
-            console.log('Loser');
+            // console.log('Loser');
         });
     }
 

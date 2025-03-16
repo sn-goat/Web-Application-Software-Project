@@ -50,7 +50,6 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     }
 
     performAction(): void {
-        console.log('Performing action');
         this.gameService.toggleActionMode();
     }
 }
