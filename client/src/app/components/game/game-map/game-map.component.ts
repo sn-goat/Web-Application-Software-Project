@@ -14,7 +14,6 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
     imports: [BoardCellComponent, MouseHandlerDirective],
 })
 export class GameMapComponent implements OnInit, OnDestroy {
-    toolTipContent: string | null = null;
     boardGame: Cell[][] = [];
     leftSelectedCell: Cell | null = null;
     rightSelectedCell: Cell | null = null;
@@ -56,14 +55,12 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
             this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
                 this.rightSelectedCell = null;
-                this.toolTipContent = null;
 
                 if (!path) {
                     this.path = null;
                     this.pathCells = new Set();
                     this.highlightedPathCells.clear();
                     this.rightSelectedCell = null;
-                    this.toolTipContent = null;
                     return;
                 }
 
@@ -100,16 +97,14 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 cell.position.y === this.rightSelectedCell.position.y
             ) {
                 this.rightSelectedCell = null;
-                this.toolTipContent = null;
             } else {
                 this.rightSelectedCell = cell;
-                this.toolTipContent = this.getTooltipContent(cell);
             }
         }
     }
 
     getTooltipContent(cell: Cell): string {
-        return this.gameService.getItemDescription(cell.item);
+        return this.gameService.getCellDescription(cell);
     }
 
     getCellTooltip(cell: Cell): string | null {
@@ -118,7 +113,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
             cell.position.x === this.rightSelectedCell.position.x &&
             cell.position.y === this.rightSelectedCell.position.y
         ) {
-            return this.toolTipContent;
+            return this.getTooltipContent(cell);
         }
         return null;
     }
