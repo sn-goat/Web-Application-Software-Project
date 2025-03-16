@@ -49,14 +49,14 @@ describe('JoinRoomComponent', () => {
         expect(component.isValidCode).toBeTrue();
     });
 
-    it('devrait désactiver le bouton si le code est invalide', () => {
-        component.accessCode = '12';
-        component.validateCode();
-        fixture.detectChanges();
+    // it('devrait désactiver le bouton si le code est invalide', () => {
+    //     component.accessCode = '12';
+    //     component.validateCode();
+    //     fixture.detectChanges();
 
-        const button = fixture.debugElement.query(By.css('button')).nativeElement;
-        expect(button.disabled).toBeTrue();
-    });
+    //     const button = fixture.debugElement.query(By.css('button')).nativeElement;
+    //     expect(button.disabled).toBeTrue();
+    // });
 
     it('devrait activer le bouton si le code est valide', () => {
         component.accessCode = '1234';

@@ -189,7 +189,6 @@ export class GameService {
         return this.getPlayerTurn(accessCode).id === playerId;
     }
 
-
     getPlayerTurn(accessCode: string): PlayerStats {
         const game = this.currentGames.get(accessCode);
         return game ? game.players[game.currentTurn] : undefined;

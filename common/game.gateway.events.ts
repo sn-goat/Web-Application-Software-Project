@@ -6,7 +6,6 @@ export enum GameEvents {
     AssignSpawn = 'assignSpawn',
     Quit = 'quitGame', // Client    
     End = 'endGame', // Serveur
-    AssignSpawn = 'assignSpawn',
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debug', // Serveur
     BroadcastEndGame = 'endGame', // Serveur
