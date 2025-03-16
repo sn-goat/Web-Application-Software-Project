@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { Board, Validation } from '@common/board';
+import { Board, TILE_COST, Validation } from '@common/board';
 import { Item, Size, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -56,7 +56,8 @@ export class MapService {
         if (this.nbrSpawnsToPlace.value > 0) {
             returnMessage += 'Vous devez placer ' + this.nbrSpawnsToPlace.value + " points d'apparition sur la carte\n";
         }
-        if (this.nbrItemsToPlace.value > 0) {
+        /* DISABLE ITEM - TO-DO SPRINT 3*/
+        if (this.nbrItemsToPlace.value > Infinity) {
             returnMessage += 'Vous devez placer ' + this.nbrItemsToPlace.value + ' objets sur la carte\n';
         }
         if (this.isModeCTF() && !this.hasFlagOnBoard.value) {
@@ -109,6 +110,7 @@ export class MapService {
     setCellTile(col: number, row: number, newTile: Tile) {
         const currentBoard = this.boardToSave.value;
         currentBoard.board[row][col].tile = newTile;
+        currentBoard.board[row][col].cost = TILE_COST.get(newTile) as number;
         this.boardToSave.next(currentBoard);
     }
 
@@ -146,7 +148,6 @@ export class MapService {
             visibility: Visibility.PRIVATE,
             board: [],
             updatedAt: new Date(),
-            image: '',
         } as Partial<Board> as Board);
     }
 
@@ -156,7 +157,7 @@ export class MapService {
         for (let i = 0; i < this.firstBoardValue.size; i++) {
             const row = [];
             for (let j = 0; j < this.firstBoardValue.size; j++) {
-                row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i } });
+                row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i }, cost: TILE_COST.get(Tile.FLOOR) as number });
             }
             boardGame.push(row);
         }

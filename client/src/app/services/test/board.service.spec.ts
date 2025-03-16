@@ -31,7 +31,6 @@ describe('BoardService', () => {
             isCTF: true,
             description: 'Test Description',
             visibility: Visibility.PUBLIC,
-            image: 'image.jpg',
             updatedAt: new Date(),
         } as Board;
 
@@ -68,7 +67,6 @@ describe('BoardService', () => {
             isCTF: false,
             description: 'New Board Description',
             visibility: Visibility.PUBLIC,
-            image: 'image.jpg',
             updatedAt: new Date(),
             board: [],
         };

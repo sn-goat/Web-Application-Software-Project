@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MapCardComponent } from './map-card.component';
-import { Board } from '@common/board';
 import { By } from '@angular/platform-browser';
+import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
+import { MapCardComponent } from './map-card.component';
 
 describe('MapCardComponent', () => {
     let component: MapCardComponent;
@@ -16,7 +16,6 @@ describe('MapCardComponent', () => {
         board: [],
         isCTF: false,
         visibility: Visibility.PUBLIC,
-        image: '',
         updatedAt: new Date(),
         createdAt: new Date(),
     };

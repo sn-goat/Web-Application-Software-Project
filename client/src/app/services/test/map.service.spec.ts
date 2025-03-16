@@ -19,7 +19,6 @@ describe('MapService', () => {
         board: [],
         isCTF: false,
         visibility: Visibility.PUBLIC,
-        image: 'dummyImage',
         updatedAt: new Date(),
     };
 
@@ -115,7 +114,6 @@ describe('MapService', () => {
             board: [],
             isCTF: true,
             visibility: Visibility.PRIVATE,
-            image: 'newImage',
             updatedAt: new Date(),
         };
         service.setMapData(newBoard);
@@ -216,7 +214,6 @@ describe('MapService', () => {
                 board: [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default }]],
                 isCTF: false,
                 visibility: Visibility.PUBLIC,
-                image: '',
                 updatedAt: new Date(),
             };
 
@@ -247,7 +244,6 @@ describe('MapService', () => {
                 board: [], // tableau vide
                 isCTF: false,
                 visibility: Visibility.PUBLIC,
-                image: '',
                 updatedAt: new Date(),
             };
 
@@ -286,7 +282,6 @@ describe('MapService', () => {
                 ],
                 isCTF: true,
                 visibility: Visibility.PUBLIC,
-                image: '',
                 updatedAt: new Date(),
             };
 

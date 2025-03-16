@@ -36,7 +36,6 @@ describe('GameMapComponent', () => {
                     ),
             ),
         visibility: Visibility.PUBLIC,
-        image: 'test-image.png',
     };
 
     beforeEach(async () => {

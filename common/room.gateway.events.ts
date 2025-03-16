@@ -6,6 +6,7 @@ export enum RoomEvents {
     ShareCharacter = 'shareCharacter',
     RemovePlayer = 'removePlayer',
     DisconnectPlayer = 'disconnectPlayer',
+    PlayerList = 'playersList',
     GetRoom = 'getRoom',
     RoomCreated = 'roomCreated',
     JoinError = 'joinError',

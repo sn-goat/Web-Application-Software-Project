@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
-import { GameService } from '@app/services/code/game.service';
+import { PlayerService } from '@app/services/code/player.service';
 import { Dice, PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-map-player-detailed.component.html',
     styleUrl: './game-map-player-detailed.component.scss',
 })
-export class GameMapPlayerDetailedComponent implements OnInit {
+export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly srcDice: string = DEFAULT_PATH_DICE;
     readonly fileType: string = DEFAULT_FILE_TYPE;
@@ -21,20 +21,22 @@ export class GameMapPlayerDetailedComponent implements OnInit {
     maxHealth: number = 0;
     myPlayer: PlayerStats | null;
 
-    private gameService: GameService = inject(GameService);
-    private clientPlayerSub: Subscription;
+    private playerService: PlayerService = inject(PlayerService);
+    private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        this.clientPlayerSub = this.gameService.clientPlayer$.subscribe((player: PlayerStats | null) => {
-            this.myPlayer = player;
-            if (player) {
-                this.maxHealth = player.life;
-            }
-        });
+        this.subscriptions.push(
+            this.playerService.myPlayer.subscribe((player: PlayerStats | null) => {
+                this.myPlayer = player;
+                if (player) {
+                    this.maxHealth = player.life;
+                }
+            }),
+        );
     }
 
-    ngOndestroy() {
-        this.clientPlayerSub.unsubscribe();
+    ngOnDestroy() {
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
     }
 
     getHealthBar(): string {

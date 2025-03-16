@@ -1,32 +1,56 @@
+/* eslint-disable no-console */
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { SocketService } from '@app/services/code/socket.service';
-import { Cell } from '@common/board';
-import { Game } from '@common/game';
+import { Cell, Vec2 } from '@common/board';
+import { Avatar, Game, getAvatarName } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { FightLogicService } from './fight-logic.service';
+import { Tile, Item } from '@common/enums';
+import { PlayerService } from './player.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameService {
-    showFightInterface$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    map$: BehaviorSubject<Cell[][]> = new BehaviorSubject<Cell[][]>([]);
-    currentPlayers$: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
-    activePlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
-    clientPlayer$: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    map: BehaviorSubject<Cell[][]> = new BehaviorSubject<Cell[][]>([]);
+    playingPlayers: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
+    activePlayer: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
+    private organizerId: string;
+
     private dialog = inject(MatDialog);
-    private fightLogicService = inject(FightLogicService);
     private socketService = inject(SocketService);
+    private playerService = inject(PlayerService);
 
     constructor() {
-        this.fightLogicService.fightStarted$.subscribe((started) => {
-            this.showFightInterface$.next(started);
+        this.socketService.onTurnSwitch().subscribe((turn) => {
+            this.updateTurn(turn.player);
+        });
+
+        this.socketService.onEndFight().subscribe(() => {
+            this.toggleActionMode();
+        });
+
+        this.socketService.onBroadcastMove().subscribe((payload) => {
+            this.onMove(payload.previousPosition, payload.player);
+        });
+
+        this.socketService.onBroadcastDebugState().subscribe(() => {
+            this.onDebugStateChange();
+        });
+
+        this.socketService.onBroadcastDoor().subscribe((payload) => {
+            console.log('Changement de la porte à la position', payload.position, 'avec le nouvel état', payload.newState);
+            const newMap = this.map.value;
+            newMap[payload.position.y][payload.position.x].tile = payload.newState;
+            this.map.next(newMap);
         });
 
         this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
@@ -35,8 +59,37 @@ export class GameService {
         });
     }
 
+    initFight(avatar: Avatar): void {
+        const myPlayer = this.playerService.getPlayer();
+        const findDefender: PlayerStats | null = this.findDefender(avatar);
+        if (findDefender && myPlayer) {
+            this.socketService.initFight(this.accessCode, myPlayer, findDefender);
+        }
+    }
+
+    findDefender(avatar: Avatar): PlayerStats | null {
+        return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
+    }
+
+    toggleActionMode(): void {
+        this.isActionSelected.next(!this.isActionSelected.value);
+    }
+
+    toggleDoor(position: Vec2): void {
+        this.socketService.changeDoorState(this.accessCode, position, this.playerService.getPlayer());
+    }
+
+    isWithinActionRange(cell: Cell): boolean {
+        const playerPos = this.activePlayer.value?.position;
+        if (!playerPos) return false;
+        const actionPos = cell.position;
+        const dx = Math.abs(playerPos.x - actionPos.x);
+        const dy = Math.abs(playerPos.y - actionPos.y);
+        return dx + dy === 1;
+    }
+
     isPlayerInGame(player: PlayerStats): boolean {
-        return this.currentPlayers$.value.some((currentPlayer) => currentPlayer.id === player.id);
+        return this.playingPlayers.value.some((currentPlayer) => currentPlayer.id === player.id);
     }
 
     getInitialPlayers(): PlayerStats[] {
@@ -45,31 +98,76 @@ export class GameService {
 
     removePlayerInGame(player: PlayerStats): void {
         if (this.isPlayerInGame(player)) {
-            const updatePlayers = this.currentPlayers$.value.filter((currentPlayer) => currentPlayer.id !== player.id);
-            this.currentPlayers$.next(updatePlayers);
+            const updatePlayers = this.playingPlayers.value.filter((currentPlayer) => currentPlayer.id !== player.id);
+            this.playingPlayers.next(updatePlayers);
         }
     }
 
-    setActivePlayer(playerIndex: number): void {
-        this.activePlayer$.next(this.currentPlayers$.value[playerIndex]);
-    }
-
     setGame(game: Game): void {
-        this.map$.next(game.map);
-        this.currentPlayers$.next(game.players);
-        this.activePlayer$.next(game.players[game.currentTurn]);
-        this.clientPlayer$.next(this.socketService.getCurrentPlayer());
+        this.map.next(game.map);
+        this.playingPlayers.next(game.players);
+        this.activePlayer.next(game.players[game.currentTurn]);
+        this.isDebugMode.next(false);
+
         this.initialPlayers = game.players;
         this.accessCode = game.accessCode;
+        this.organizerId = game.organizerId;
     }
 
-    async confirmAndAbandonGame(name: string): Promise<boolean> {
+    updateTurn(player: PlayerStats): void {
+        this.activePlayer.next(player);
+    }
+
+    debugMovePlayer(cell: Cell): void {
+        if (this.canTeleport(cell)) {
+            this.socketService.debugMove(this.accessCode, cell.position);
+        }
+    }
+
+    canTeleport(cell: Cell): boolean {
+        return (
+            (cell.player === undefined || cell.player === Avatar.Default) &&
+            cell.tile !== Tile.WALL &&
+            cell.tile !== Tile.CLOSED_DOOR &&
+            cell.tile !== Tile.OPENED_DOOR
+        );
+    }
+
+    toggleDebugMode(): void {
+        if (this.playerService.isPlayerAdmin()) {
+            this.socketService.toggleDebugMode(this.accessCode);
+        }
+    }
+
+    onDebugStateChange(): void {
+        this.isDebugMode.next(!this.isDebugMode.value);
+    }
+
+    onMove(previousPosition: Vec2, player: PlayerStats): void {
+        const map: Cell[][] = this.map.value;
+        if (player) {
+            map[previousPosition.y][previousPosition.x].player = Avatar.Default;
+            map[player.position.y][player.position.x].player = player.avatar as Avatar;
+            this.activePlayer.next(player);
+            if (this.playerService.isActive()) {
+                this.playerService.setPlayer(player);
+            }
+            this.map.next(map);
+        }
+    }
+
+    endTurn(): void {
+        this.toggleActionMode();
+        this.socketService.endTurn(this.accessCode);
+    }
+
+    async confirmAndAbandonGame(): Promise<boolean> {
         return new Promise((resolve) => {
             const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
                 width: '350px',
                 data: {
                     title: 'Abandonner la partie',
-                    message: `Êtes-vous sûr de vouloir abandonner cette partie ${name}?`,
+                    message: 'Êtes-vous sûr de vouloir abandonner cette partie ?',
                     confirmText: 'Abandonner',
                     cancelText: 'Annuler',
                 },
@@ -87,5 +185,33 @@ export class GameService {
 
     getAccessCode(): string {
         return this.accessCode;
+    }
+
+    getCellDescription(cell: Cell): string {
+        if (cell.player) {
+            const currentPlayers = this.playingPlayers.value;
+            const playerInfo = currentPlayers.find((player) => player.avatar === cell.player) || { name: 'Unknown' };
+
+            return 'Joueur: ' + playerInfo.name + ' Avatar: ' + getAvatarName(cell.player);
+        }
+        const tileDesc = this.getTileDescription(cell.tile);
+        let desc = tileDesc;
+        if (cell.item && cell.item !== (Item.DEFAULT as unknown as Item)) {
+            const itemDesc = this.getItemDescription(cell.item);
+            desc += ', ' + itemDesc;
+        }
+        return desc;
+    }
+
+    getTileDescription(tile: Tile): string {
+        return ASSETS_DESCRIPTION.get(tile) || 'Aucune description';
+    }
+
+    getItemDescription(item: Item): string {
+        return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
+    }
+
+    getOrganizerId(): string {
+        return this.organizerId;
     }
 }
