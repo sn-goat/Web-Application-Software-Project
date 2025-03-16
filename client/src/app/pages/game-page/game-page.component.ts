@@ -45,12 +45,10 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     private socketService = inject(SocketService);
     private router = inject(Router);
     private readonly dialog = inject(MatDialog);
-    private currentPlayerId: string | undefined;
-    private currentPlayerTurnId: string | undefined;
 
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
-        this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
+        this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.playerService.getPlayer().id);
     }
 
     @HostListener('window:pageshow', ['$event'])
@@ -67,9 +65,10 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.fightLogicService.fightStarted.subscribe((show) => {
             this.showFightInterface = show;
         });
+
         this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
             this.socketService.onQuitRoomGame().subscribe(async (players: PlayerStats[]) => {
-                if (!game.game.players.length && !players.length && game.lastPlayer.id === this.currentPlayerId) {
+                if (!game.game.players.length && !players.length && game.lastPlayer.id === this.playerService.getPlayer().id) {
                     await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
                 }
             });
