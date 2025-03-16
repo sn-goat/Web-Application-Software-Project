@@ -36,7 +36,7 @@ export class TimerService {
             if (this.timers[roomId].remainingTime <= 0) {
                 clearInterval(intervalId);
                 delete this.timers[roomId];
-                this.eventEmitter.emit('timerEnded', { roomId });
+                this.eventEmitter.emit('timerEnded', roomId);
 
                 return;
             }
@@ -57,6 +57,7 @@ export class TimerService {
 
     resumeTimer(roomId: string) {
         if (this.timers[roomId] && this.timers[roomId].pausedTime) {
+            this.logger.log(`Resuming timer for room ${this.timers[roomId].pausedTime}`);
             this.startTimer(roomId, this.timers[roomId].pausedTime, 'movement');
             this.timers[roomId].pausedTime = undefined;
         }

@@ -5,16 +5,21 @@ import { Cell } from '@common/board';
     selector: '[appMouseHandler]',
 })
 export class MouseHandlerDirective {
-    // Pass the cell object into the directive via the attribute binding.
     @Input('appMouseHandler') cell: Cell;
-    // Emit the cell when clicked.
-    @Output() cellClicked = new EventEmitter<Cell>();
+    @Output() leftClicked = new EventEmitter<Cell>();
+    @Output() rightClicked = new EventEmitter<Cell>();
 
-    @HostListener('click', ['$event'])
-    onClick(): void {
-        // Emit the cell without logging—let the component decide what to do.
-        this.cellClicked.emit(this.cell);
-        // eslint-disable-next-line no-console
-        // console.log('Cell clicked:', this.cell, event);
+    @HostListener('mousedown', ['$event'])
+    onClick(event: MouseEvent): void {
+        if (event.button === 0) {
+            this.leftClicked.emit(this.cell);
+        } else if (event.button === 2) {
+            this.rightClicked.emit(this.cell);
+        }
+    }
+
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent): void {
+        event.preventDefault();
     }
 }

@@ -36,10 +36,6 @@ export class Board {
     @Prop({ required: true, enum: ['Public', 'Private'] })
     visibility: Visibility;
 
-    @ApiProperty({ description: 'Link or name for board miniature' })
-    @Prop({})
-    image: string;
-
     @ApiProperty({ description: 'Date when the board was last modified' })
     @Prop({ required: true })
     updatedAt: Date;

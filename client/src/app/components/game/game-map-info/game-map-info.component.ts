@@ -13,10 +13,7 @@ export class GameMapInfoComponent implements OnInit, OnDestroy {
     mapSize: number;
     activePlayer: PlayerStats | null;
     playerCount: number;
-
-    private playersSub: Subscription;
-    private activePlayerSub: Subscription;
-    private mapSub: Subscription;
+    private subscriptions: Subscription[] = [];
 
     constructor(private gameService: GameService) {
         this.mapSize = 0;
@@ -25,20 +22,20 @@ export class GameMapInfoComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.activePlayerSub = this.gameService.activePlayer$.subscribe((player: PlayerStats | null) => {
-            this.activePlayer = player;
-        });
-        this.playersSub = this.gameService.currentPlayers$.subscribe((players) => {
-            this.playerCount = players.length;
-        });
-        this.mapSub = this.gameService.map$.subscribe((map) => {
-            this.mapSize = map.length;
-        });
+        this.subscriptions.push(
+            this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
+                this.activePlayer = player;
+            }),
+            this.gameService.playingPlayers.subscribe((players) => {
+                this.playerCount = players.length;
+            }),
+            this.gameService.map.subscribe((map) => {
+                this.mapSize = map.length;
+            }),
+        );
     }
 
     ngOnDestroy() {
-        this.playersSub.unsubscribe();
-        this.activePlayerSub.unsubscribe();
-        this.mapSub.unsubscribe();
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
     }
 }

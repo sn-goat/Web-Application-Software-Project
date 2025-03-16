@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
 import { GameMapService } from '@app/services/code/game-map.service';
+import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
 import { PlayerStats } from '@common/player';
@@ -33,7 +34,7 @@ export class FormCharacterComponent implements OnInit {
     defenseSelected: boolean = false;
 
     playerStats: PlayerStats = {
-        id: this.generateId(),
+        id: ' ',
         name: '',
         avatar: this.getCurrentPortraitImage(),
         life: 4,
@@ -50,8 +51,10 @@ export class FormCharacterComponent implements OnInit {
     };
 
     takenAvatars: string[] = [];
+    isRoomLocked: boolean = false;
 
     private readonly gameMapService = inject(GameMapService);
+    private readonly playerService = inject(PlayerService);
     private readonly socketService = inject(SocketService);
 
     constructor(private router: Router) {}
@@ -70,16 +73,14 @@ export class FormCharacterComponent implements OnInit {
                 this.takenAvatars = data.room.players.map((player) => player.avatar);
             }
         });
+
+        this.socketService.onRoomLocked().subscribe(() => {
+            this.isRoomLocked = true;
+        });
     }
 
     getCurrentPortraitImage(): string {
         return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
-    }
-
-    generateId(): string {
-        const base = 36;
-        const limit = 9;
-        return Math.random().toString(base).substring(2, limit);
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -138,6 +139,8 @@ export class FormCharacterComponent implements OnInit {
     }
 
     shareCharacter(): void {
+        this.playerService.setPlayer(this.playerStats);
+        this.playerService.setAccessCode(this.accessCode);
         this.socketService.shareCharacter(this.accessCode, this.playerStats);
     }
 
@@ -147,11 +150,14 @@ export class FormCharacterComponent implements OnInit {
             .pipe(first())
             .subscribe((map) => {
                 const selectedMapSize = map.size;
-                this.socketService.createRoom(this.playerStats.id, selectedMapSize);
+                this.socketService.createRoom(selectedMapSize);
                 this.socketService.onRoomCreated().subscribe((data: unknown) => {
                     this.accessCode = (data as { accessCode: string }).accessCode;
-                    this.socketService.createGame(this.accessCode, map.name, this.playerStats.id);
+                    this.socketService.createGame(this.accessCode, map.name);
                     this.socketService.shareCharacter(this.accessCode, this.playerStats);
+                    this.playerService.setPlayer(this.playerStats);
+                    this.playerService.setAdmin(true);
+                    this.playerService.setAccessCode(this.accessCode);
                     this.router.navigate(['/lobby'], { state: { accessCode: this.accessCode } });
                 });
             });
