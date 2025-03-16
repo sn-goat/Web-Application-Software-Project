@@ -56,7 +56,8 @@ export class MapService {
         if (this.nbrSpawnsToPlace.value > 0) {
             returnMessage += 'Vous devez placer ' + this.nbrSpawnsToPlace.value + " points d'apparition sur la carte\n";
         }
-        if (this.nbrItemsToPlace.value > 0) {
+        /* DISABLE ITEM - TO-DO SPRINT 3*/
+        if (this.nbrItemsToPlace.value > Infinity) {
             returnMessage += 'Vous devez placer ' + this.nbrItemsToPlace.value + ' objets sur la carte\n';
         }
         if (this.isModeCTF() && !this.hasFlagOnBoard.value) {
