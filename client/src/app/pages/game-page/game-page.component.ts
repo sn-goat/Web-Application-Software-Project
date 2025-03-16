@@ -70,11 +70,11 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.gameService.clientPlayer$.subscribe((player) => {
             this.currentPlayerId = player?.id;
         });
-        this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
-            this.currentPlayerTurnId = playerId.playerTurnId;
-            // eslint-disable-next-line no-console
-            console.log(this.currentPlayerTurnId);
-        });
+        // this.socketService.onTurnUpdate().subscribe((playerId: { playerTurnId: string }) => {
+        //     this.currentPlayerTurnId = playerId.playerTurnId;
+        //     // eslint-disable-next-line no-console
+        //     // console.log(this.currentPlayerTurnId);
+        // });
 
         if (this.currentPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), this.currentPlayerId);
