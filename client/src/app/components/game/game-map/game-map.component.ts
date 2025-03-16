@@ -1,11 +1,13 @@
+/* eslint-disable no-console */
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
 import { GameService } from '@app/services/code/game.service';
-import { PlayerToolsService } from '@app/services/code/player-tools.service';
 import { Cell } from '@common/board';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
+import { FightLogicService } from '@app/services/code/fight-logic.service';
+import { PlayerService } from '@app/services/code/player.service';
 
 @Component({
     selector: 'app-game-map',
@@ -18,7 +20,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     leftSelectedCell: Cell | null = null;
     rightSelectedCell: Cell | null = null;
 
-    actionMode = false;
+    isActionSelected = false;
     isPlayerTurn = false;
     isDebugMode = false;
 
@@ -27,7 +29,9 @@ export class GameMapComponent implements OnInit, OnDestroy {
     highlightedPathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
-    private playerToolsService: PlayerToolsService = inject(PlayerToolsService);
+    private fightLogicService = inject(FightLogicService);
+    private playerService = inject(PlayerService);
+
     private subscriptions: Subscription[] = [];
     constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -41,21 +45,16 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.map$.subscribe((map: Cell[][]) => {
+            this.gameService.map.subscribe((map: Cell[][]) => {
                 this.boardGame = map;
             }),
 
-            this.playerToolsService.actionMode$.subscribe((mode: boolean) => {
-                this.actionMode = mode;
-            }),
-
-            this.gameService.isPlayerTurn$.subscribe((isPlayerTurn: boolean) => {
+            this.playerService.isActivePlayer.subscribe((isPlayerTurn: boolean) => {
                 this.isPlayerTurn = isPlayerTurn;
             }),
 
-            this.gameService.path$.subscribe((path: Map<string, PathInfo> | null) => {
+            this.playerService.path.subscribe((path: Map<string, PathInfo> | null) => {
                 this.rightSelectedCell = null;
-
                 if (!path) {
                     this.path = null;
                     this.pathCells = new Set();
@@ -69,7 +68,11 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
             }),
 
-            this.gameService.isDebugMode$.subscribe((isDebugMode) => {
+            this.gameService.isActionSelected.subscribe((isAction) => {
+                this.isActionSelected = isAction;
+            }),
+
+            this.gameService.isDebugMode.subscribe((isDebugMode) => {
                 this.isDebugMode = isDebugMode;
             }),
         );
@@ -77,12 +80,12 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     onLeftClicked(cell: Cell) {
         if (this.isPlayerTurn) {
-            if (this.actionMode) {
-                this.leftSelectedCell = cell;
-                this.actionMode = false;
+            if (this.isActionSelected && this.gameService.isWithinActionRange(cell)) {
+                if (this.fightLogicService.isAttackProvocation(cell)) {
+                    this.gameService.initFight(cell.player);
+                }
             } else {
-                this.leftSelectedCell = null;
-                this.gameService.movePlayer(cell.position);
+                this.playerService.sendMove(cell.position);
             }
         }
     }

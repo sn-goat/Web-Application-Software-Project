@@ -18,6 +18,12 @@ export interface Game {
     isDebugMode: boolean;
 }
 
+export interface Fight {
+    player1: PlayerStats;
+    player2: PlayerStats;
+    currentPlayer: PlayerStats;
+}
+
 export const ASSET_PATH = './assets/portraits/portrait';
 export const ASSET_EXT = '.png';
 

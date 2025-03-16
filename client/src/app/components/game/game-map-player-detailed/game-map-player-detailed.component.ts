@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
-import { GameService } from '@app/services/code/game.service';
+import { PlayerService } from '@app/services/code/player.service';
 import { Dice, PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -21,12 +21,12 @@ export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
     maxHealth: number = 0;
     myPlayer: PlayerStats | null;
 
-    private gameService: GameService = inject(GameService);
+    private playerService: PlayerService = inject(PlayerService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.clientPlayer$.subscribe((player: PlayerStats | null) => {
+            this.playerService.myPlayer.subscribe((player: PlayerStats | null) => {
                 this.myPlayer = player;
                 if (player) {
                     this.maxHealth = player.life;
