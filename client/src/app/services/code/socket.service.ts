@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
+import { Tile } from '@common/enums';
 import { Fight, Game, PathInfo, Room, TurnInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
@@ -130,8 +131,12 @@ export class SocketService {
         this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
     }
 
-    changeDoorState(accessCode: string, position: Vec2) {
-        this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position });
+    toggleDebugMode(accessCode: string) {
+        this.socket.emit(GameEvents.Debug, accessCode);
+    }
+
+    changeDoorState(accessCode: string, position: Vec2, player: PlayerStats) {
+        this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position, player });
     }
 
     // Faudrait créer une room spécifique pour gérer les events du fight elle sera supprimée à la fin du fight
@@ -249,7 +254,7 @@ export class SocketService {
         });
     }
 
-    onBroadcastDoor(): Observable<unknown> {
+    onBroadcastDoor(): Observable<{ position: Vec2; newState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.BroadcastDoor, (data) => observer.next(data));
         });

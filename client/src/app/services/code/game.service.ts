@@ -39,12 +39,18 @@ export class GameService {
         });
 
         this.socketService.onBroadcastMove().subscribe((payload) => {
-            console.log('onBroadcastMove', payload);
             this.onMove(payload.previousPosition, payload.player);
         });
 
         this.socketService.onBroadcastDebugState().subscribe(() => {
             this.onDebugStateChange();
+        });
+
+        this.socketService.onBroadcastDoor().subscribe((payload) => {
+            console.log('Changement de la porte à la position', payload.position, 'avec le nouvel état', payload.newState);
+            const newMap = this.map.value;
+            newMap[payload.position.y][payload.position.x].tile = payload.newState;
+            this.map.next(newMap);
         });
     }
 
@@ -62,6 +68,10 @@ export class GameService {
 
     toggleActionMode(): void {
         this.isActionSelected.next(!this.isActionSelected.value);
+    }
+
+    toggleDoor(position: Vec2): void {
+        this.socketService.changeDoorState(this.accessCode, position, this.playerService.getPlayer());
     }
 
     isWithinActionRange(cell: Cell): boolean {
@@ -130,7 +140,6 @@ export class GameService {
 
     onMove(previousPosition: Vec2, player: PlayerStats): void {
         const map: Cell[][] = this.map.value;
-        console.log('onMove', previousPosition, player.avatar);
         if (player) {
             map[previousPosition.y][previousPosition.x].player = Avatar.Default;
             map[player.position.y][player.position.x].player = player.avatar as Avatar;

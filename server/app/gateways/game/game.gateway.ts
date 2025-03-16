@@ -3,6 +3,7 @@ import { FightService } from '@app/services/fight.service';
 import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
+import { Tile } from '@common/enums';
 import { PathInfo, Fight } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
@@ -56,6 +57,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { previousPosition: payload.previousPosition, player: payload.player });
     }
 
+    @OnEvent(TurnEvents.BroadcastDoor)
+    sendDoorState(payload: { accessCode: string; position: Vec2; newState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR }) {
+        this.logger.log('Changing door state at position: ' + payload.position + ' to: ' + payload.newState);
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastDoor, { position: payload.position, newState: payload.newState });
+    }
+
     @OnEvent(TurnEvents.UpdateTurn)
     handleUpdateTurn(turn: { player: PlayerStats; path: Record<string, PathInfo> }) {
         this.logger.log('Updating turn for player: ' + turn.player.id);
@@ -100,7 +107,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             this.server.to(payload.winner.id).emit(FightEvents.Winner);
             this.server.to(payload.loser.id).emit(FightEvents.Loser);
             this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
-            this.gameService.updatePlayerPathTurn(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
+            this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
         }
         this.server.to(fight.player1.id).emit(FightEvents.End);
         this.server.to(fight.player2.id).emit(FightEvents.End);
@@ -135,9 +142,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
-    handleChangeDoorState(client: Socket, payload: { accessCode: string; position: Vec2 }) {
-        const newState = this.gameService.changeDoorState(payload.accessCode, payload.position);
-        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastDoor, { position: payload.position, newState });
+    handleChangeDoorState(client: Socket, payload: { accessCode: string; position: Vec2; player: PlayerStats }) {
+        this.gameService.changeDoorState(payload.accessCode, payload.position, payload.player);
     }
 
     @SubscribeMessage(TurnEvents.Move)
