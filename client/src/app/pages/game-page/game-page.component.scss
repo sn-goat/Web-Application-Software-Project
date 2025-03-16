@@ -1,27 +1,30 @@
-html {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
 $primary-bg: #1a1625;
 $primary-text: #7ee0d0;
 $glow-teal: rgba(126, 224, 208, 0.2);
 $glow-gold: rgba(255, 215, 0, 0.2);
 $rectangle-border: 1px solid $primary-text;
 
-.outer-container {
+html, body {
+    margin: 0;
+    padding: 0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+}
+
+
+
+.outer-container {
+    width: 100vw;
+    height: 100vh;
     background-color: $primary-bg;
-    box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
-    
+    box-sizing: border-box;
 }
+
 
 .header-container {
     position: absolute;
@@ -34,85 +37,136 @@ $rectangle-border: 1px solid $primary-text;
 
 .game-grid {
     display: grid;
-    grid-template-columns: minmax(150px, 28%) 1fr minmax(100px, 20%);
-    grid-template-rows: minmax(100px, 20%) 1fr minmax(100px, 20%);
-    grid-template-areas:
-        "left top right"
-        "left map right"
-        "left bottom bottom";
-    gap: 2px;
-    width: 100%;
-    height: 100%;
-}
-
-.left-rectangle,
-.right-rectangle,
-.top-rectangle,
-.bottom-rectangle {
-    box-sizing: border-box;
-    border: 2px solid $glow-teal;
-    border-radius: 10px;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
-    background-color: $primary-bg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: $primary-bg !important;
 }
 
+
+
+.top-rectangle,
+.bottom-rectangle,
+.right-rectangle,
 .map-container {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-area: map;
-    background-color: $primary-bg;
+    border-radius: 12px;
+    border: $rectangle-border;
 }
 
-.left-rectangle {
-    color: $primary-text;
-    grid-area: left;
-    overflow-y: auto;
-}
 
 .top-rectangle {
-    grid-area: top;
-    background-color: $primary-bg;
-    padding: 0;
+    grid-area: 1 / 1 / 6 / 2;
+    writing-mode: vertical-rl;
+    text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    background-color: $primary-bg;
+    color: $primary-text;
+    border: $rectangle-border;
+    border-radius: 10px;
+}
+
+.bottom-rectangle {
+    grid-area: 5 / 2 / 6 / 7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: $primary-bg;
+    border: $rectangle-border;
+    border-radius: 10px;
 }
 
 .right-rectangle {
-    grid-area: right;
-    overflow-y: auto;
+    grid-area: 1 / 6 / 5 / 7;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    height: 100%;
+    overflow-y: auto;
+    background-color: $primary-bg;
+    color: $primary-text;
+    border: $rectangle-border;
+    border-radius: 10px;
 }
 
-.bottom-rectangle {
-    grid-area: bottom;
-    background-color: $primary-bg;
-    padding: 0;
+.map-container {
+    grid-area: 1 / 2 / 5 / 6;
     display: flex;
-    align-items: stretch;
+    align-items: center;
     justify-content: center;
+    padding: 20px;
+    background-color: $primary-bg;
+    border: $rectangle-border;
 }
-  
+
+.chat-popup {
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    width: 300px;
+    height: 400px;
+    background: rgba(0, 0, 0, 0.9);
+    border: $rectangle-border;
+    color: $primary-text;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px $primary-text;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 5px;
+    border-bottom: 1px solid $primary-text;
+}
+
+.chat-toggle-button {
+    padding: 8px 16px;
+    background: $primary-text;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.close-chat {
+    background: transparent;
+    border: none;
+    color: $primary-text;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* 🔹 Keyframes */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+
+
 app-game-map-player-detailed,
 app-game-map-info {
     width: 100%;
     box-sizing: border-box;
 }
-  
+
 app-game-map-player-detailed {
     flex: 1;
     min-height: 0;
 }
-  
+
 app-game-map-info {
     flex: 1;
     min-height: 0;
@@ -140,19 +194,19 @@ app-game-map-player {
     padding: 20px;
     box-sizing: border-box;
     animation: fadeIn 0.3s ease-in-out;
-    
+
     app-game-fight-interface {
       width: 100%;
       max-width: 800px;
       animation: slideIn 0.4s ease-out;
     }
   }
-  
+
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-  
+
   @keyframes slideIn {
     from { transform: translateY(-50px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }

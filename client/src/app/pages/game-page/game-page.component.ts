@@ -31,6 +31,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     @ViewChild(HeaderBarComponent) headerBar!: HeaderBarComponent;
 
     showFightInterface: boolean = false;
+    showChat = false;
 
     private gameService = inject(GameService);
     private fightLogicService = inject(FightLogicService);
@@ -57,5 +58,9 @@ export class GamePageComponent implements OnInit, AfterViewInit {
                 return originalAbandonMethod.call(this.headerBar);
             }
         };
+    }
+
+    toggleChat() {
+        this.showChat = !this.showChat;
     }
 }
