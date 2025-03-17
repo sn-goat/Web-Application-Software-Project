@@ -7,7 +7,18 @@ import { GameMapService } from '@app/services/code/game-map.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
-import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, PlayerStats } from '@common/player';
+import {
+    DEFAULT_ACTIONS,
+    DEFAULT_ATTACK_VALUE,
+    DEFAULT_DEFENSE_VALUE,
+    DEFAULT_DICE,
+    DEFAULT_LIFE_VALUE,
+    DEFAULT_MOVEMENT_POINTS,
+    DEFAULT_POSITION,
+    DEFAULT_SPEED_VALUE,
+    DEFAULT_WINS,
+    PlayerStats,
+} from '@common/player';
 import { first } from 'rxjs/operators';
 
 type DiceBonus = 'attack' | 'defense';
@@ -37,17 +48,17 @@ export class FormCharacterComponent implements OnInit {
         id: ' ',
         name: '',
         avatar: this.getCurrentPortraitImage(),
-        life: 4,
+        life: DEFAULT_LIFE_VALUE,
         attack: DEFAULT_ATTACK_VALUE,
         defense: DEFAULT_DEFENSE_VALUE,
-        speed: 4,
-        attackDice: 'D4',
-        defenseDice: 'D4',
-        movementPts: 0,
-        actions: 1,
-        position: { x: 0, y: 0 },
-        spawnPosition: { x: 0, y: 0 },
-        wins: 0,
+        speed: DEFAULT_SPEED_VALUE,
+        attackDice: DEFAULT_DICE,
+        defenseDice: DEFAULT_DICE,
+        movementPts: DEFAULT_MOVEMENT_POINTS,
+        actions: DEFAULT_ACTIONS,
+        position: DEFAULT_POSITION,
+        spawnPosition: DEFAULT_POSITION,
+        wins: DEFAULT_WINS,
     };
 
     takenAvatars: string[] = [];

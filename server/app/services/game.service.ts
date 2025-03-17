@@ -4,7 +4,7 @@ import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
 import { GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, PlayerStats } from '@common/player';
+import { ATTACK_ICE_DECREMENT, DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFENSE_ICE_DECREMENT, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BoardService } from './board/board.service';
@@ -174,8 +174,8 @@ export class GameService {
         map[direction.y][direction.x].player = movingPlayer.avatar as Avatar;
         movingPlayer.position = direction;
         if (map[direction.y][direction.x].tile === Tile.ICE) {
-            movingPlayer.attack = DEFAULT_ATTACK_VALUE - 2;
-            movingPlayer.defense = DEFAULT_DEFENSE_VALUE - 2;
+            movingPlayer.attack = DEFAULT_ATTACK_VALUE - ATTACK_ICE_DECREMENT;
+            movingPlayer.defense = DEFAULT_DEFENSE_VALUE - DEFENSE_ICE_DECREMENT;
         } else {
             movingPlayer.attack = DEFAULT_ATTACK_VALUE;
             movingPlayer.defense = DEFAULT_DEFENSE_VALUE;
