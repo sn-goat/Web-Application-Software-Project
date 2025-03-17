@@ -1,6 +1,6 @@
 import { FIGHT_TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { TimerService } from '@app/services/timer/timer.service';
-import { Fight } from '@common/game';
+import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';
 import { Dice, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -23,9 +23,11 @@ export class FightService {
     }
 
     initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
-        this.logger.log(`Init fight between ${player1.id} and ${player2.id}`);
-        const currentPlayer = player1.speed >= player2.speed ? player1 : player2;
-        const newFight: Fight = { player1, player2, currentPlayer };
+        this.logger.log(`Init fight between ${player1.name} and ${player2.name}`);
+        const player1Info = { ...player1, fleeAttempts: 2, currentLife: player1.life, diceResult: 0 };
+        const player2Info = { ...player2, fleeAttempts: 2, currentLife: player2.life, diceResult: 0 };
+        const currentPlayer = player1.speed >= player2.speed ? player1Info : player2Info;
+        const newFight: Fight = { player1: player1Info, player2: player2Info, currentPlayer };
         this.activeFights.set(accessCode, newFight);
         this.eventEmitter.emit(FightEvents.Init, newFight);
         this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
@@ -54,6 +56,7 @@ export class FightService {
             this.endFight(accessCode);
             this.activeFights.delete(accessCode);
         } else {
+            this.decrementFleeCount(fight);
             this.nextTurn(accessCode);
             this.logger.log(`Le joueur ${fight.currentPlayer.name} a échoué à fuir le combat pour accessCode ${accessCode}`);
         }
@@ -70,20 +73,20 @@ export class FightService {
             this.logger.error(`Aucun combat actif pour accessCode ${accessCode}`);
             return;
         }
-        const attacker: PlayerStats = fight.currentPlayer;
-        const defender: PlayerStats = fight.player1.id === attacker.id ? fight.player2 : fight.player1;
-        const attackDiceValue = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
-        const defenseDiceValue = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
+        const attacker: PlayerStats & FightInfo = fight.currentPlayer.id === fight.player1.id ? fight.player1 : fight.player2;
+        const defender: PlayerStats & FightInfo = fight.player1.id === attacker.id ? fight.player2 : fight.player1;
+        attacker.diceResult = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
+        defender.diceResult = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
 
-        let damage = attacker.attack + attackDiceValue - (defender.defense + defenseDiceValue);
+        let damage = attacker.attack + attacker.diceResult - (defender.defense + defender.diceResult);
         if (damage < 0) {
             damage = 0;
         }
 
-        defender.life = Math.max((defender.life || 0) - damage, 0);
+        defender.currentLife = Math.max(defender.currentLife - damage, 0);
         this.logger.log(`Player ${attacker.id} attaque ${defender.id} et inflige ${damage} points de dégâts (vie restante: ${defender.life}).`);
 
-        if (defender.life === 0) {
+        if (defender.currentLife === 0) {
             this.endFight(accessCode, attacker, defender);
         } else {
             this.nextTurn(accessCode);
@@ -96,5 +99,9 @@ export class FightService {
 
     private diceToNumber(dice: Dice): number {
         return dice === 'D6' ? this.dice6 : this.dice4;
+    }
+
+    private decrementFleeCount(fight: Fight) {
+        fight.currentPlayer.fleeAttempts--;
     }
 }

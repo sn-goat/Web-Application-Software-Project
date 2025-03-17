@@ -19,13 +19,14 @@ export class TimerService {
     constructor(private eventEmitter: EventEmitter2) {}
 
     startTimer(roomId: string, duration: number, type: TimerType) {
-        let pausedTime;
+        let pausedTime = this.timers[roomId] ? this.timers[roomId]?.pausedTime : undefined;
         if (this.timers[roomId]?.intervalId) {
             clearInterval(this.timers[roomId].intervalId);
         }
 
-        if (type === 'combat') {
+        if (this.timers[roomId] && this.timers[roomId].currentTimerType === 'movement') {
             pausedTime = this.pauseTimer(roomId);
+            this.logger.log(`Timer movement paused at: ${pausedTime}`);
         }
 
         this.timers[roomId] = { currentTimerType: type, remainingTime: duration, pausedTime };
@@ -57,7 +58,7 @@ export class TimerService {
 
     resumeTimer(roomId: string) {
         if (this.timers[roomId] && this.timers[roomId].pausedTime) {
-            this.logger.log(`Resuming timer for room ${this.timers[roomId].pausedTime}`);
+            this.logger.log(`Timer resuming at: ${this.timers[roomId].pausedTime}`);
             this.startTimer(roomId, this.timers[roomId].pausedTime, 'movement');
             this.timers[roomId].pausedTime = undefined;
         }
@@ -70,10 +71,11 @@ export class TimerService {
         }
     }
 
-    getRemainingTime(roomId: string): { type?: TimerType; remainingTime?: number } {
+    getRemainingTime(roomId: string): { type?: TimerType; remainingTime?: number; pausedTime?: number } {
         return {
             type: this.timers[roomId]?.currentTimerType,
             remainingTime: this.timers[roomId]?.remainingTime ?? null,
+            pausedTime: this.timers[roomId]?.pausedTime ?? null,
         };
     }
 }

@@ -4,15 +4,12 @@ export enum GameEvents {
     Ready = 'readyForStart', // Client
     Debug = 'toggleDebug', // Client
     AssignSpawn = 'assignSpawn',
-    Quit = 'quitGame', // Client    
+    Quit = 'quitGame', // Client
     End = 'endGame', // Serveur
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debug', // Serveur
     BroadcastEndGame = 'endGame', // Serveur
     BroadcastQuitGame = 'playerQuit', // Serveur
-
-
-
 }
 
 export enum TurnEvents {
@@ -29,7 +26,7 @@ export enum TurnEvents {
     BroadcastMove = 'playerMove', // Serveur (pos_debut, pos_fin) x nombre de mouvements
     BroadcastItem = 'eventItem', // Serveur (type, pos, Item?)
     BroadcastDoor = 'eventOnDoor', // Serveur (type, pos)
-
+    UpdateActions = 'updateActions', // Client <-> Serveur
 }
 
 export enum FightEvents {
@@ -37,8 +34,9 @@ export enum FightEvents {
     SwitchTurn = 'switchTurn', // Serveur (id du joueur dont c'est le tour & met fin à celui de l'autre)
     End = 'endFight', // Server (fuite réussite)
     Winner = 'winner',
-    Loser = 'loser', 
+    Loser = 'loser',
     Flee = 'fleeAck', // Client
+    FailedFlee = 'failedFlee', // Serveur
     Attack = 'attackAck', // Client
     UpdateTimer = 'fightTimeUpdate', // Server
 }

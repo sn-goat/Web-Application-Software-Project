@@ -92,10 +92,9 @@ export class GameService {
     }
 
     updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats) {
-        const player = playerToUpdate === undefined ? this.getPlayerTurn(accessCode) : playerToUpdate;
         const map = this.getMap(accessCode);
-        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
-        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+        const updatedPath = this.findPossiblePaths(map, playerToUpdate.position, playerToUpdate.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player: playerToUpdate, path: Object.fromEntries(updatedPath) });
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -232,10 +231,6 @@ export class GameService {
             { x: 1, y: 0 }, // Right
             { x: 0, y: -1 }, // Up
             { x: -1, y: 0 }, // Left
-            { x: 1, y: 1 }, // Down Right
-            { x: 1, y: -1 }, // Up Right
-            { x: -1, y: 1 }, // Down Left
-            { x: -1, y: -1 }, // Up Left
         ];
         for (const dir of directions) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };

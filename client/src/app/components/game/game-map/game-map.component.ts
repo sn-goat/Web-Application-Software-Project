@@ -1,14 +1,13 @@
-/* eslint-disable no-console */
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
+import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
+import { PlayerService } from '@app/services/code/player.service';
 import { Cell } from '@common/board';
+import { Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
-import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { Tile } from '@common/enums';
 
 @Component({
     selector: 'app-game-map',
@@ -27,6 +26,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     pathCells: Set<string> = new Set();
+    actionCells: Set<string> = new Set();
     highlightedPathCells: Set<string> = new Set();
 
     private gameService: GameService = inject(GameService);
@@ -71,6 +71,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
             this.gameService.isActionSelected.subscribe((isAction) => {
                 this.isActionSelected = isAction;
+                this.actionCells = isAction ? this.gameService.findPossibleActions(this.playerService.getPlayer().position) : new Set<string>();
             }),
 
             this.gameService.isDebugMode.subscribe((isDebugMode) => {
@@ -80,17 +81,24 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     onLeftClicked(cell: Cell) {
-        if (this.isPlayerTurn) {
-            if (this.isActionSelected && this.gameService.isWithinActionRange(cell)) {
+        if (!this.isPlayerTurn) return;
+
+        if (this.isActionSelected) {
+            if (this.gameService.isWithinActionRange(cell)) {
                 if (this.fightLogicService.isAttackProvocation(cell)) {
                     this.gameService.initFight(cell.player);
-                } else if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
-                    this.gameService.toggleDoor(cell.position);
+                    return;
                 }
-            } else {
-                this.playerService.sendMove(cell.position);
+
+                if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
+                    this.gameService.toggleDoor(cell.position);
+                    return;
+                }
             }
+            return;
         }
+
+        this.playerService.sendMove(cell.position);
     }
 
     onRightClicked(cell: Cell) {
@@ -130,6 +138,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     isHighlightedPathCell(cell: Cell): boolean {
         return this.highlightedPathCells.has(`${cell.position.x},${cell.position.y}`);
+    }
+
+    isActionCell(cell: Cell): boolean {
+        return this.actionCells.has(`${cell.position.x},${cell.position.y}`);
     }
 
     onCellHovered(cell: Cell) {
