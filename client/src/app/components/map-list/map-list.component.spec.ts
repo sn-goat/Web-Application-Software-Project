@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable max-lines */
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -258,19 +260,6 @@ describe('MapListComponent', () => {
         serverMap.name = 'Board 2';
         expect(component.areMapsEqual(localMap, serverMap)).toBeFalse();
     });
-
-    // it('should alert and reload page if maps are not equal', () => {
-    //     const mockMap = mockBoardGames[0];
-    //     const serverMap = { ...mockMap, name: 'Different Name' };
-    //     spyOn(window, 'alert');
-    //     // const reloadSpy = spyOn(component, 'reloadPage').and.callFake(() => {});
-    //     mockBoardService.getAllBoards.and.returnValue(of([serverMap]));
-
-    //     component.onDivClick(mockMap);
-
-    //     expect(window.alert).toHaveBeenCalledWith('Les informations du jeu ont changé sur le serveur. La page va être rechargée.');
-    //     expect(reloadSpy).toHaveBeenCalled();
-    // });
 
     it('should emit divClicked if maps are equal', () => {
         const mockMap = mockBoardGames[0];

@@ -1,22 +1,23 @@
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { JoinRoomComponent } from './join-room.component';
 import { FormsModule } from '@angular/forms';
-import { SocketService } from '@app/services/code/socket.service';
-import { Subject } from 'rxjs';
 import { By } from '@angular/platform-browser';
+import { MockSocketService } from '@app/helpers/mockSocketService';
+import { SocketService } from '@app/services/code/socket.service';
+import { JoinRoomComponent } from './join-room.component';
 
 describe('JoinRoomComponent', () => {
     let component: JoinRoomComponent;
     let fixture: ComponentFixture<JoinRoomComponent>;
-    let socketServiceMock: jasmine.SpyObj<SocketService>;
+    let socketServiceMock: MockSocketService;
 
     beforeEach(async () => {
-        socketServiceMock = jasmine.createSpyObj('SocketService', ['joinRoom', 'onPlayerJoined', 'onJoinError']);
-        socketServiceMock.onPlayerJoined.and.returnValue(new Subject());
-        socketServiceMock.onJoinError.and.returnValue(new Subject());
+        socketServiceMock = new MockSocketService();
 
         await TestBed.configureTestingModule({
             imports: [FormsModule, JoinRoomComponent],
+            // Utiliser le type SocketService comme token :
             providers: [{ provide: SocketService, useValue: socketServiceMock }],
         }).compileComponents();
     });
@@ -68,33 +69,42 @@ describe('JoinRoomComponent', () => {
     });
 
     it('devrait appeler socketService.joinRoom() si le code est valide', () => {
+        spyOn(socketServiceMock, 'joinRoom');
         component.accessCode = '1234';
         component.isValidCode = true;
         component.joinRoom();
         expect(socketServiceMock.joinRoom).toHaveBeenCalledWith('1234');
     });
 
-    // it('devrait afficher un message de succès si la connexion réussit', () => {
-    //     const joinSubject = new Subject<void>();
-    //     socketServiceMock.onPlayerJoined.and.returnValue(joinSubject);
+    it('ne devrait pas appeler socketService.joinRoom() si le code est invalide', () => {
+        spyOn(socketServiceMock, 'joinRoom');
+        component.accessCode = '12';
+        component.isValidCode = false;
+        component.joinRoom();
+        expect(socketServiceMock.joinRoom).not.toHaveBeenCalled();
+    });
 
-    //     component.accessCode = '1234';
-    //     component.isValidCode = true;
-    //     component.joinRoom();
-    //     joinSubject.next();
+    it('devrait afficher un message de succès si la connexion réussit', () => {
+        component.accessCode = '1234';
+        component.isValidCode = true;
+        component.joinRoom();
 
-    //     expect(component.joinResult).toBe('Salle 1234 rejointe');
-    //     expect(component.showCharacterForm).toBeTrue();
-    // });
+        // Simuler l’événement de succès de connexion
+        socketServiceMock.triggerPlayerJoined({ room: { players: [] } });
+        fixture.detectChanges();
+
+        expect(component.joinResult).toBe('Salle 1234 rejointe');
+        expect(component.showCharacterForm).toBeTrue();
+    });
 
     it('devrait afficher un message d’erreur si la salle n’existe pas', () => {
-        const errorSubject = new Subject<{ message: string }>();
-        socketServiceMock.onJoinError.and.returnValue(errorSubject);
-
         component.accessCode = '9999';
         component.isValidCode = true;
         component.joinRoom();
-        errorSubject.next({ message: 'Salle inexistante' });
+
+        // Simuler l’événement d’erreur
+        socketServiceMock.triggerJoinError({ message: 'Salle inexistante' });
+        fixture.detectChanges();
 
         expect(component.joinResult).toBe('Salle inexistante');
         expect(component.showCharacterForm).toBeFalse();

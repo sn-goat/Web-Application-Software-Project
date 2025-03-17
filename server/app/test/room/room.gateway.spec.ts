@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { RoomService } from '@app/services/room.service';
 import { PlayerStats } from '@common/player';
@@ -12,9 +13,10 @@ describe('RoomGateway', () => {
     let client: Partial<Socket>;
     let server: any; // mock server
     let eventEmitter: EventEmitter2;
+    let logger: any;
 
     beforeEach(() => {
-        // Create a mock game service with jest.fn() for each method.
+        // Mock de roomService
         roomService = {
             createRoom: jest.fn(),
             joinRoom: jest.fn(),
@@ -25,20 +27,37 @@ describe('RoomGateway', () => {
             disconnectPlayer: jest.fn(),
             getRoom: jest.fn(),
         };
-        eventEmitter = new EventEmitter2(); // Instantiate EventEmitter2
+        eventEmitter = new EventEmitter2();
 
-        // Create a fake server that returns an object with an emit method.
+        // Création d'un mock de serveur COMPLET
         server = {
             to: jest.fn().mockReturnValue({
                 emit: jest.fn(),
             }),
+            // On définit ici les sous-objets nécessaires
+            sockets: {
+                adapter: {
+                    // rooms est un Map<accessCode, Set<clientId>>
+                    rooms: new Map<string, Set<string>>(),
+                },
+                // sockets est un Map<clientId, Socket>
+                sockets: new Map<string, Partial<Socket>>(),
+            },
         };
 
-        // Instantiate the gateway and inject the mocked service.
         gateway = new RoomGateway(roomService as RoomService, eventEmitter);
-        gateway.server = server;
+        // On injecte ce serveur mocké dans le gateway
+        gateway.server = server as any;
 
-        // Create a fake client socket.
+        // Mock d’un logger si besoin
+        logger = {
+            log: jest.fn(),
+            warn: jest.fn(),
+            error: jest.fn(),
+        };
+        (gateway as any).logger = logger;
+
+        // Création d'un faux client
         client = {
             join: jest.fn(),
             emit: jest.fn(),
@@ -301,5 +320,73 @@ describe('RoomGateway', () => {
             gateway.handleDisconnect(client as Socket);
             expect(logSpy).toHaveBeenCalledWith(`Client déconnecté : ${client.id}`);
         });
+
+        it('should register listener for "room.deleted" and call handleRoomDeletion when event is emitted', () => {
+            const accessCode = 'ROOM_TEST';
+            // Espionner la méthode privée handleRoomDeletion
+            const handleRoomDeletionSpy = jest.spyOn<any, any>(gateway as any, 'handleRoomDeletion').mockImplementation(() => {});
+
+            // Émettre l'événement "room.deleted" sur l'eventEmitter
+            eventEmitter.emit('room.deleted', accessCode);
+
+            // Vérifier que handleRoomDeletion a été appelée avec l'accessCode
+            expect(handleRoomDeletionSpy).toHaveBeenCalledWith(accessCode);
+        });
+    });
+    it('should warn when room is not found', () => {
+        const accessCode = 'TEST_ROOM';
+        // Aucune salle n'est présente dans rooms
+        (server.sockets as any).adapter.rooms = new Map();
+
+        const loggerWarnSpy = jest.spyOn(logger, 'warn');
+
+        // Appel de la méthode privée via cast en any
+        (gateway as any).handleRoomDeletion(accessCode);
+
+        expect(loggerWarnSpy).toHaveBeenCalledWith(`Room ${accessCode} not found.`);
+    });
+
+    it('should remove and disconnect all clients in the room', () => {
+        const accessCode = 'EXIST_ROOM';
+        const clientId1 = 'client1';
+        const clientId2 = 'client2';
+
+        // Créer un ensemble de sockets pour la salle
+        const roomSocketSet = new Set<string>([clientId1, clientId2]);
+        (server.sockets as any).adapter.rooms = new Map([[accessCode, roomSocketSet]]);
+
+        // Création de fake sockets avec des méthodes leave et disconnect espionnées
+        const fakeSocket1: Partial<Socket> = {
+            id: clientId1,
+            leave: jest.fn(),
+            disconnect: jest.fn(),
+        };
+        const fakeSocket2: Partial<Socket> = {
+            id: clientId2,
+            leave: jest.fn(),
+            disconnect: jest.fn(),
+        };
+
+        (server.sockets as any).sockets = new Map([
+            [clientId1, fakeSocket1],
+            [clientId2, fakeSocket2],
+        ]);
+
+        const loggerLogSpy = jest.spyOn(logger, 'log');
+
+        (gateway as any).handleRoomDeletion(accessCode);
+
+        // Vérifier que leave et disconnect ont été appelés sur chaque socket
+        expect(fakeSocket1.leave).toHaveBeenCalledWith(accessCode);
+        expect(fakeSocket1.disconnect).toHaveBeenCalledWith(true);
+        expect(fakeSocket2.leave).toHaveBeenCalledWith(accessCode);
+        expect(fakeSocket2.disconnect).toHaveBeenCalledWith(true);
+
+        // Vérifier que les logs attendus ont été écrits
+        expect(loggerLogSpy).toHaveBeenCalledWith(`Deleting sockets from room: ${accessCode}`);
+        expect(loggerLogSpy).toHaveBeenCalledWith(`Client ${clientId1} left room ${accessCode}`);
+        expect(loggerLogSpy).toHaveBeenCalledWith(`Client ${clientId1} disconnected`);
+        expect(loggerLogSpy).toHaveBeenCalledWith(`Client ${clientId2} left room ${accessCode}`);
+        expect(loggerLogSpy).toHaveBeenCalledWith(`Client ${clientId2} disconnected`);
     });
 });

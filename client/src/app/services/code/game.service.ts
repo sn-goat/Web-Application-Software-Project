@@ -5,10 +5,10 @@ import { ConfirmationDialogComponent } from '@app/components/common/confirmation
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { SocketService } from '@app/services/code/socket.service';
 import { Cell, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 import { Avatar, Game, getAvatarName } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { Tile, Item } from '@common/enums';
 import { PlayerService } from './player.service';
 
 @Injectable({
