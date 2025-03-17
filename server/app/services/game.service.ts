@@ -92,10 +92,9 @@ export class GameService {
     }
 
     updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats) {
-        const player = playerToUpdate === undefined ? this.getPlayerTurn(accessCode) : playerToUpdate;
         const map = this.getMap(accessCode);
-        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
-        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+        const updatedPath = this.findPossiblePaths(map, playerToUpdate.position, playerToUpdate.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player: playerToUpdate, path: Object.fromEntries(updatedPath) });
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -114,6 +113,32 @@ export class GameService {
                 accessCode,
             });
         }
+    }
+
+    async quitGame(accessCode: string, playerId: string) {
+        const game = this.currentGames.get(accessCode);
+        const lastPlayer: PlayerStats = game.players.filter((player) => player.id !== playerId)[0];
+        if (game) {
+            const index = game.players.findIndex((playerFound: PlayerStats) => playerFound.id === playerId);
+            if (index >= 0) {
+                const player = game.players[index];
+                if (game.players.length === 2) {
+                    for (let i = game.players.length - 1; i >= 0; i--) {
+                        game.map[player.position.y][player.position.x].player = Avatar.Default;
+                        game.players.splice(i, 1);
+                        this.logger.log(`Player ${playerId} quit the game`);
+                    }
+                    this.currentGames.delete(accessCode);
+                    this.logger.log(`Game ${accessCode} deleted`);
+                } else {
+                    game.map[player.position.y][player.position.x].player = Avatar.Default;
+                    game.players.splice(index, 1);
+                    this.logger.log(`Player ${playerId} quit the game`);
+                }
+            }
+            return { game, lastPlayer };
+        }
+        return null;
     }
 
     processPath(accessCode: string, pathInfo: PathInfo, player: PlayerStats) {
@@ -206,10 +231,6 @@ export class GameService {
             { x: 1, y: 0 }, // Right
             { x: 0, y: -1 }, // Up
             { x: -1, y: 0 }, // Left
-            { x: 1, y: 1 }, // Down Right
-            { x: 1, y: -1 }, // Up Right
-            { x: -1, y: 1 }, // Down Left
-            { x: -1, y: -1 }, // Up Left
         ];
         for (const dir of directions) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };

@@ -15,6 +15,7 @@ export class MockSocketService {
         isLocked: false,
         mapSize: 15,
     };
+
     private playerJoinedSubject = new Subject<unknown>();
     private playersListSubject = new Subject<PlayerStats[]>();
     private playerRemovedSubject = new Subject<PlayerStats[]>();
@@ -30,8 +31,12 @@ export class MockSocketService {
     private broadcastMoveSubject = new Subject<unknown>();
     private broadcastItemSubject = new Subject<unknown>();
     private broadcastDoorSubject = new Subject<unknown>();
+
     private switchTurnSubject = new Subject<unknown>();
+    private turnUpdateSubject = new Subject<unknown>();
+    private assignSpawnSubject = new Subject<unknown>();
     private endFightSubject = new Subject<unknown>();
+    private quitGameSubject = new Subject<unknown>();
 
     getGameSize() {
         return 15; // Retourne une taille numérique appropriée
@@ -110,20 +115,44 @@ export class MockSocketService {
         return this.endFightSubject.asObservable();
     }
 
+    onTurnSwitch() {
+        return this.switchTurnSubject.asObservable();
+    }
+
+    onTurnUpdate() {
+        return this.turnUpdateSubject.asObservable();
+    }
+
+    onAssignSpawn() {
+        return this.assignSpawnSubject.asObservable();
+    }
+
+    onQuitGame() {
+        return this.quitGameSubject.asObservable();
+    }
+
     createRoom(_size: number): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
     removePlayer(_accessCode: string, _playerId: string): void {}
     disconnect(_accessCode: string, _playerId: string): void {}
-    createGame(_accessCode: string, _mapName: string, _playerId: string): void {}
+    createGame(_accessCode: string, _mapName: string): void {}
     configureGame(_accessCode: string, _players: PlayerStats[]): void {}
     movePlayer(_accessCode: string, _playerId: string, _direction: Vec2): void {}
     changeDoorState(_accessCode: string, _position: Vec2): void {}
     joinRoom(_accessCode: string): void {}
     shareCharacter(_accessCode: string, _player: PlayerStats): void {}
-    initFight(_accessCode: string, _playerId: string, _enemyPosition: Vec2): void {}
     playerFlee(_accessCode: string, _playerId: string): void {}
     playerAttack(_accessCode: string, _playerId: string): void {}
+    quitGame(_accessCode: string): void {}
+
+    endTurn(_accessCode: string): void {
+        // On peut laisser vide ou ajouter une logique de mock ici
+    }
+
+    initFight(_accessCode: string, _player: PlayerStats, _defender: PlayerStats): void {}
+    debugMove(_accessCode: string, _position: Vec2): void {}
+    toggleDebugMode(_accessCode: string): void {}
 
     triggerPlayerJoined(data: { room: { players: unknown[] } }) {
         this.playerJoinedSubject.next(data);
@@ -192,5 +221,17 @@ export class MockSocketService {
 
     triggerEndFight(data: unknown) {
         this.endFightSubject.next(data);
+    }
+
+    triggerQuitGame(data: unknown) {
+        this.quitGameSubject.next(data);
+    }
+
+    triggerTurnUpdate(data: unknown) {
+        this.turnUpdateSubject.next(data);
+    }
+
+    triggerAssignSpawn(data: unknown) {
+        this.assignSpawnSubject.next(data);
     }
 }

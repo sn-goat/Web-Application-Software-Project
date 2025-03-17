@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable max-lines */
 import { RoomService } from '@app/services/room.service';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
@@ -382,5 +383,163 @@ describe('RoomService - non-existent room handling', () => {
         const result = service.disconnectPlayer(accessCode, 'player1');
         expect(result).toBeNull();
         expect(loggerErrorSpy).toHaveBeenCalledWith(`Room with access code ${accessCode} not found for player disconnection.`);
+    });
+
+    let emitSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+        emitSpy = jest.spyOn(service['eventEmitter'], 'emit');
+    });
+
+    it('should return null when room is not found', () => {
+        const result = service.quitGame('nonexistent', 'player1');
+        expect(result).toBeNull();
+        expect((service as any).logger.error).toHaveBeenCalledWith('Room with access code nonexistent not found for quitting game.');
+    });
+
+    it('should return null when player is not found in room', () => {
+        const room = service.createRoom('org1', 10);
+        const result = service.quitGame(room.accessCode, 'nonexistent');
+        expect(result).toBeNull();
+        expect((service as any).logger.error).toHaveBeenCalledWith(`PlayerStats nonexistent not found in room ${room.accessCode}`);
+    });
+
+    it('should remove only the quitting player when more than 2 players are in the room', () => {
+        const room = service.createRoom('org1', 10);
+        const player1: PlayerStats = {
+            id: 'player1',
+            name: 'Alice',
+            avatar: 'default.png',
+            life: 4,
+            attack: 4,
+            defense: 4,
+            speed: 4,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 4,
+            actions: 4,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+        const player2: PlayerStats = {
+            id: 'player2',
+            name: 'Bob',
+            avatar: 'default.png',
+            life: 4,
+            attack: 4,
+            defense: 4,
+            speed: 4,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 4,
+            actions: 4,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+        const player3: PlayerStats = {
+            id: 'player3',
+            name: 'Charlie',
+            avatar: 'default.png',
+            life: 4,
+            attack: 4,
+            defense: 4,
+            speed: 4,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 4,
+            actions: 4,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+
+        service.shareCharacter(room.accessCode, player1);
+        service.shareCharacter(room.accessCode, player2);
+        service.shareCharacter(room.accessCode, player3);
+
+        // Spy on removePlayer to check it's called correctly
+        const removePlayerSpy = jest.spyOn(service, 'removePlayer');
+        const deleteRoomSpy = jest.spyOn(service, 'deleteRoom');
+
+        const result = service.quitGame(room.accessCode, player1.id);
+
+        // Verify only player1 was removed
+        expect(removePlayerSpy).toHaveBeenCalledTimes(1);
+        expect(removePlayerSpy).toHaveBeenCalledWith(room.accessCode, player1.id);
+
+        // Verify room was not deleted
+        expect(deleteRoomSpy).not.toHaveBeenCalled();
+
+        // Verify result
+        expect(result).toBe(room);
+
+        // Check that the room still exists and has 2 players
+        const updatedRoom = service.getRoom(room.accessCode);
+        expect(updatedRoom).not.toBeNull();
+        expect(updatedRoom?.players.length).toBe(2);
+    });
+
+    it('should remove all players and delete the room when only 2 players are in the room', () => {
+        const room = service.createRoom('org1', 10);
+        const player1: PlayerStats = {
+            id: 'player1',
+            name: 'Alice',
+            avatar: 'default.png',
+            life: 4,
+            attack: 4,
+            defense: 4,
+            speed: 4,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 4,
+            actions: 4,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+        const player2: PlayerStats = {
+            id: 'player2',
+            name: 'Bob',
+            avatar: 'default.png',
+            life: 4,
+            attack: 4,
+            defense: 4,
+            speed: 4,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            movementPts: 4,
+            actions: 4,
+            wins: 0,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+        };
+
+        service.shareCharacter(room.accessCode, player1);
+        service.shareCharacter(room.accessCode, player2);
+
+        // Spy on removePlayer and deleteRoom to check they're called correctly
+        const removePlayerSpy = jest.spyOn(service, 'removePlayer');
+        const deleteRoomSpy = jest.spyOn(service, 'deleteRoom');
+
+        const result = service.quitGame(room.accessCode, player1.id);
+
+        // Verify both players were removed
+        expect(removePlayerSpy).toHaveBeenCalledTimes(2);
+        expect(removePlayerSpy).toHaveBeenCalledWith(room.accessCode, player2.id); // Called in reverse order
+        expect(removePlayerSpy).toHaveBeenCalledWith(room.accessCode, player1.id);
+
+        // Verify room was deleted
+        expect(deleteRoomSpy).toHaveBeenCalledWith(room.accessCode);
+
+        // Verify result
+        expect(result).toBe(room);
+
+        // Verify the room is gone
+        expect(service.getRoom(room.accessCode)).toBeNull();
+
+        // Verify that the room.deleted event was emitted
+        expect(emitSpy).toHaveBeenCalledWith('room.deleted', room.accessCode);
     });
 });

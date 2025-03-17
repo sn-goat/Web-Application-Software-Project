@@ -15,12 +15,14 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     items: Item[];
     timer: string;
     isActivePlayer: boolean = false;
+    playerHasAction: boolean = false;
+    isActionEnabled: boolean = false;
 
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
 
+    playerService: PlayerService = inject(PlayerService);
     private gameService: GameService = inject(GameService);
-    private playerService: PlayerService = inject(PlayerService);
     private socketService: SocketService = inject(SocketService);
     private subscriptions: Subscription[] = [];
 
@@ -32,11 +34,17 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.subscriptions.push(
             this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
-                this.timer = time.remainingTime.toString();
+                this.timer = `${time.remainingTime.toString()}:00`;
             }),
 
             this.playerService.isActivePlayer.subscribe((isActive) => {
                 this.isActivePlayer = isActive;
+            }),
+            this.playerService.myPlayer.subscribe((player) => {
+                this.playerHasAction = (player?.actions ?? 0) > 0;
+            }),
+            this.gameService.isActionSelected.subscribe((isActive) => {
+                this.isActionEnabled = isActive;
             }),
         );
     }

@@ -13,6 +13,9 @@ $buttons-color: #7ee0d0;
     display: block;
     height: 100%;
     width: 100%;
+    display: block;
+    height: 100%;
+    width: 100%;
 }
 
 .container {
@@ -387,4 +390,12 @@ $buttons-color: #7ee0d0;
     50% {
         opacity: 0;
     }
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
 }
+

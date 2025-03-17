@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
+import { SocketService } from '@app/services/code/socket.service';
+import { Vec2 } from '@common/board';
+import { PathInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { SocketService } from '@app/services/code/socket.service';
-import { PathInfo } from '@common/game';
-import { Vec2 } from '@common/board';
 
 @Injectable({
     providedIn: 'root',

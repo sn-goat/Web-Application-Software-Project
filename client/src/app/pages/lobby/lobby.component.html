@@ -2,7 +2,6 @@
     <div class="access-code-container">
         <h1>Organizer Waiting Room</h1>
         <p>Your Access Code: {{ accessCode }}</p>
-        <!-- Bouton pour verrouiller/déverrouiller visible pour l'admin -->
         @if (isAdmin) {
         <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
             {{ isRoomLocked ? 'Unlock' : 'Lock' }}
@@ -11,13 +10,11 @@
 
         <button (click)="disconnect()">Disconnect</button>
 
-    <!-- Nouveau bouton "Start Game" accessible uniquement à l'admin, activable si le lobby est verrouillé et qu'il y a au moins 2 joueurs -->
     @if (isAdmin) {
       <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()"> Start Game </button>
     }
   </div>
 
-    <!-- Liste des joueurs de la salle -->
     <div class="players-list">
         <h2>Room Players</h2>
         <ul>
@@ -36,7 +33,6 @@
         </ul>
     </div>
 
-    <!-- Fausse boîte de clavardage -->
     <div class="chat-box">
         <h2>Chat Room</h2>
         <div class="chat-messages">

@@ -131,11 +131,15 @@ export class SocketService {
         this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
     }
 
+    quitGame(accessCode: string, playerId: string) {
+        this.socket.emit(GameEvents.Quit, { accessCode, playerId });
+        this.socket.emit(RoomEvents.QuitGame, { accessCode, playerId });
+    }
+
     changeDoorState(accessCode: string, position: Vec2, player: PlayerStats) {
         this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position, player });
     }
 
-    // Faudrait créer une room spécifique pour gérer les events du fight elle sera supprimée à la fin du fight
     initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
         this.socket.emit(FightEvents.Init, { accessCode, player1, player2 });
     }
@@ -268,6 +272,18 @@ export class SocketService {
         });
     }
 
+    onQuitGame(): Observable<{ game: Game; lastPlayer: PlayerStats }> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.BroadcastQuitGame, (game: { game: Game; lastPlayer: PlayerStats }) => observer.next(game));
+        });
+    }
+
+    onQuitRoomGame(): Observable<PlayerStats[]> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.QuitGame, (players: PlayerStats[]) => observer.next(players));
+        });
+    }
+
     onWinner(): Observable<void> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Winner, (data) => observer.next(data));
@@ -290,6 +306,10 @@ export class SocketService {
 
     getGameSize(): number {
         return this.size;
+    }
+
+    getGameRoom(): Room {
+        return this.gameRoom;
     }
 
     disconnect(accessCode: string, playerId: string) {

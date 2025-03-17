@@ -25,6 +25,15 @@ $rectangle-border: 1px solid $primary-text;
     box-shadow: 0 0 15px $glow-teal;
 }
 
+app-header-bar {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 0;
+    width: auto;
+    height: auto;
+}
+
 h1 {
     font-size: 2rem;
     text-align: center;

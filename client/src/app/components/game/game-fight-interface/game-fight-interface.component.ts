@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
+import { FightInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -15,20 +16,17 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-fight-interface.component.html',
     styleUrl: './game-fight-interface.component.scss',
 })
-export class GameFightInterfaceComponent implements OnInit, OnDestroy {
+export class GameFightInterfaceComponent implements OnDestroy {
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly fileType: string = DEFAULT_FILE_TYPE;
+    readonly perCent = 100;
 
     timer: string = '00:00';
-    diceD4: number = 0;
-    diceD6: number = 0;
-    currentTurn: string = '';
-    player1: PlayerStats | null;
-    player2: PlayerStats | null;
-    fleeAttempt1: number = 2;
-    fleeAttempt2: number = 1;
-    currentPlayer: string = '';
-    isCurrentPlayer: boolean = false;
+    currentNameTurn: string = '';
+    myPlayer: (PlayerStats & FightInfo) | null;
+    opponentPlayer: (PlayerStats & FightInfo) | null;
+    lifePercentMyPlayer: number;
+    lifePercentOpponent: number;
 
     private subscriptions: Subscription[] = [];
 
@@ -36,23 +34,21 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
 
-    ngOnInit(): void {
+    constructor() {
         this.subscriptions.push(
             this.fightLogicService.fight.subscribe((fight) => {
-                this.player1 = fight.player1;
-                this.player2 = fight.player2;
-                this.currentTurn = fight.currentPlayer.name;
-                this.currentPlayer = fight.currentPlayer.id;
+                const isMyPlayer = fight.player1.id === this.playerService.getPlayer().id;
+                this.myPlayer = isMyPlayer ? fight.player1 : fight.player2;
+                this.opponentPlayer = !isMyPlayer ? fight.player1 : fight.player2;
+                this.currentNameTurn = fight.currentPlayer.name;
+                this.lifePercentMyPlayer = ((this.myPlayer?.currentLife ?? 0) / (this.myPlayer?.life ?? 1)) * this.perCent;
+                this.lifePercentOpponent = ((this.opponentPlayer?.currentLife ?? 0) / (this.opponentPlayer?.life ?? 1)) * this.perCent;
             }),
 
             this.socketService.onFightTimerUpdate().subscribe((remainingTime) => {
-                this.timer = remainingTime.toString();
+                this.timer = `${remainingTime.toString()}:00`;
             }),
         );
-
-        if (this.socketService.getCurrentPlayerId() === this.currentTurn) {
-            this.isCurrentPlayer = true;
-        }
     }
 
     ngOnDestroy(): void {
@@ -60,7 +56,7 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     }
 
     isMyTurn(): boolean {
-        return this.currentTurn === this.playerService.getPlayer().name;
+        return this.currentNameTurn === this.playerService.getPlayer().name;
     }
 
     flee(): void {
@@ -69,14 +65,5 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
 
     attack(): void {
         this.fightLogicService.attack();
-    }
-
-    getFleeAttempts(name: string): number {
-        if (this.player1 && name === this.player1.name) {
-            return this.fleeAttempt1;
-        } else if (this.player2 && name === this.player2.name) {
-            return this.fleeAttempt2;
-        }
-        return 0;
     }
 }

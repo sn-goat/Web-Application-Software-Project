@@ -48,7 +48,7 @@ export class RoomService {
             this.logger.error(`Room with access code ${accessCode} not found for player removal.`);
             return null;
         }
-        const index = room.players.findIndex((p) => p.id === playerId);
+        const index = room.players.findIndex((p: PlayerStats) => p.id === playerId);
         if (index < 0) {
             this.logger.error(`PlayerStats ${playerId} not found in room ${accessCode}`);
             return null;
@@ -76,6 +76,29 @@ export class RoomService {
             this.logger.log(`organizerId: ${room.organizerId}, playerId: ${playerId}`);
             this.removePlayer(accessCode, playerId);
             this.logger.log(`PlayerStats ${playerId} disconnected from room ${accessCode}.`);
+        }
+        return room;
+    }
+
+    quitGame(accessCode: string, playerId: string): Room | null {
+        const room = this.gameRooms.get(accessCode);
+        if (!room) {
+            this.logger.error(`Room with access code ${accessCode} not found for quitting game.`);
+            return null;
+        }
+        const index = room.players.findIndex((p: PlayerStats) => p.id === playerId);
+        if (index < 0) {
+            this.logger.error(`PlayerStats ${playerId} not found in room ${accessCode}`);
+            return null;
+        }
+        if (room.players.length === 2) {
+            for (let i = room.players.length - 1; i >= 0; i--) {
+                const player = room.players[i];
+                this.removePlayer(accessCode, player.id);
+            }
+            this.deleteRoom(accessCode);
+        } else {
+            this.removePlayer(accessCode, playerId);
         }
         return room;
     }

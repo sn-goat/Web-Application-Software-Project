@@ -32,7 +32,7 @@ describe('TimerService', () => {
     it('should start a movement timer', () => {
         service.startTimer('room1', 5, 'movement');
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 5 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 5, pausedTime: null });
         expect(setInterval).toHaveBeenCalled();
     });
 
@@ -41,14 +41,14 @@ describe('TimerService', () => {
 
         jest.advanceTimersByTime(2000);
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'combat', remainingTime: 3 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'combat', remainingTime: 3, pausedTime: null });
     });
 
     it('should emit timerEnded event when timer reaches 0', () => {
         service.startTimer('room1', 2, 'movement');
         jest.advanceTimersByTime(3000);
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null });
+        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null, pausedTime: null });
     });
 
     it('should pause the timer', () => {
@@ -58,7 +58,7 @@ describe('TimerService', () => {
         service.pauseTimer('room1');
         jest.advanceTimersByTime(2000);
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'combat', remainingTime: 3 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'combat', remainingTime: 3, pausedTime: 3 });
     });
 
     it('should resume the paused timer', () => {
@@ -71,14 +71,14 @@ describe('TimerService', () => {
         service.resumeTimer('room1');
         jest.advanceTimersByTime(2000);
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 1 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 1, pausedTime: null });
     });
 
     it('should stop the timer', () => {
         service.startTimer('room1', 5, 'combat');
         service.stopTimer('room1');
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null });
+        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null, pausedTime: null });
     });
 
     it('should not resume a stopped timer', () => {
@@ -87,23 +87,23 @@ describe('TimerService', () => {
 
         service.resumeTimer('room1');
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null });
+        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null, pausedTime: null });
     });
 
     it('should correctly transition from movement to combat', () => {
         service.startTimer('room1', 10, 'movement');
 
         jest.advanceTimersByTime(5000);
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 5 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 5, pausedTime: null });
 
         service.startTimer('room1', 7, 'combat');
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'combat', remainingTime: 7 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'combat', remainingTime: 7, pausedTime: 5 });
         expect(service.getRemainingTime('room1').remainingTime).not.toBe(5);
 
         jest.advanceTimersByTime(7000);
 
         service.resumeTimer('room1');
-        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 5 });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 5, pausedTime: null });
     });
 });

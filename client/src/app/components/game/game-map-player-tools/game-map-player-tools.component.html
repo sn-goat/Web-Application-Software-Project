@@ -35,7 +35,9 @@
 
         <div class="buttons">
             <button class="button" [disabled]="!isActivePlayer" (click)="endTurn()">Terminer le tour</button>
-            <button class="button" [disabled]="!isActivePlayer" (click)="performAction()">Action</button>
+            <button class="button" [disabled]="!isActivePlayer || !playerHasAction" [class.selected]="isActionEnabled" (click)="performAction()">
+                Action
+            </button>
         </div>
     </div>
 </div>
