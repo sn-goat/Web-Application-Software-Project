@@ -19,6 +19,7 @@ import { SocketService } from '@app/services/code/socket.service';
         GameMapPlayerDetailedComponent,
         GameMapPlayerToolsComponent,
         GameMapPlayerComponent,
+        HeaderBarComponent,
         CommonModule,
     ],
     templateUrl: './game-page.component.html',
