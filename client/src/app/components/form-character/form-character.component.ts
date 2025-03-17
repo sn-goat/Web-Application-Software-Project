@@ -87,9 +87,13 @@ export class FormCharacterComponent implements OnInit {
 
         this.socketService.onPlayerRemoved().subscribe((data) => {
             if (!this.isCreationPage) {
-                // take out avatars if not in data array
                 this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
-                // this.takenAvatars = data.map((player) => player.avatar);
+            }
+        });
+
+        this.socketService.onPlayerDisconnected().subscribe((data) => {
+            if (!this.isCreationPage) {
+                this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
             }
         });
 
