@@ -11,11 +11,14 @@
         <app-game-map-player-detailed></app-game-map-player-detailed>
     </div>
 
-    <div class="bottom-rectangle">
+<div class="bottom-rectangle">
+    <div class="chat-info-container">
         <button (click)="toggleChat()" class="toggle-button">Chat</button>
         <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
-        <app-game-map-player-tools></app-game-map-player-tools>
     </div>
+    <app-game-map-player-tools></app-game-map-player-tools>
+</div>
+
 
     <!-- Chat Popup -->
     @if(showChat) {
