@@ -79,9 +79,8 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     confirm("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                 }
+                this.router.navigate(['/home']);
             }
-
-            this.router.navigate(['/home']);
         });
 
         this.socketService.onAdminDisconnected().subscribe(() => {
