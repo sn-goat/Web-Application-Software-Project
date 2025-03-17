@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Game, Room } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -24,8 +27,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
     isAdmin: boolean = false;
     maxPlayers: number = 0;
     diceToImageLink = diceToImageLink;
-    
-    // Stocker toutes les souscriptions pour les désabonner plus tard
+
+    private readonly dialog = inject(MatDialog);
     private subscriptions: Subscription[] = [];
 
     constructor(
@@ -74,11 +77,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
         );
 
         this.addSubscription(
-            this.socketService.onPlayerRemoved().subscribe((players: PlayerStats[]) => {
+            this.socketService.onPlayerRemoved().subscribe( async (players: PlayerStats[]) => {
                 this.players = players;
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                     if (!this.isAdmin) {
-                        confirm("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
+                        await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
                         this.router.navigate(['/home']);
                     }
                 }
@@ -86,11 +89,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
         );
 
         this.addSubscription(
-            this.socketService.onPlayerDisconnected().subscribe((players: PlayerStats[]) => {
+            this.socketService.onPlayerDisconnected().subscribe( async (players: PlayerStats[]) => {
                 this.players = players;
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                     if (!this.isAdmin) {
-                        confirm("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
+                        await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                         this.router.navigate(['/home']);
                     }
                 }
@@ -98,11 +101,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
         );
 
         this.addSubscription(
-            this.socketService.onAdminDisconnected().subscribe(() => {
+            this.socketService.onAdminDisconnected().subscribe( async () => {
                 const message = this.isAdmin ? 
                     "Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil" : 
                     "L'admin s'est déconnecté. Vous allez être redirigé vers la page d'accueil";
-                confirm(message);
+                    await this.warning(message);
                 this.subscriptions.forEach(subscription => subscription.unsubscribe());
                 this.subscriptions = [];
                 this.socketService.resetSocketState();
@@ -152,9 +155,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.socketService.removePlayer(this.accessCode, playerId);
     }
 
-    disconnect() {
+    disconnect(){
         // Afficher la confirmation pour l'admin
-        confirm("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
+        this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
 
         const currentId = this.socketService.getCurrentPlayerId();
         const currentAccessCode = this.accessCode;
@@ -171,6 +174,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
     getCurrentPlayerId(): string {
         return this.socketService.getCurrentPlayerId();
+    }
+
+    async warning(message: string): Promise<void> {
+        await this.openDialog(message, Alert.WARNING);
+    }
+
+    private async openDialog(message: string, type: Alert): Promise<boolean> {
+        const dialogRef = this.dialog.open(AlertComponent, {
+            data: { type, message },
+            disableClose: true,
+            hasBackdrop: true,
+            backdropClass: 'backdrop-block',
+            panelClass: 'alert-dialog',
+        });
+        return firstValueFrom(dialogRef.afterClosed());
     }
 }
 
