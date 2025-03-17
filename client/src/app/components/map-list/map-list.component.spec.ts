@@ -117,7 +117,7 @@ describe('MapListComponent', () => {
 
         expect(mockBoardService.getBoard).toHaveBeenCalledWith('Game A');
         expect(mockMapService.setMapData).toHaveBeenCalledWith(fullMap);
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/edition']);
     });
 
     it('should display the list of available games', () => {
@@ -229,7 +229,7 @@ describe('MapListComponent', () => {
         component.createNewMap();
         expect(mockDialog.open).toHaveBeenCalled();
         dialogRefSpyObj.afterClosed().subscribe(() => {
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edit']);
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edition']);
         });
     });
 
