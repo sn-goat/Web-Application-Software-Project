@@ -39,7 +39,7 @@ export class GameMapInfoComponent implements OnInit, OnDestroy {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
     }
 
-    toggleInfo() {
-        this.gameService.toggleInfo();
-    }
+    // toggleInfo() {
+    //     this.gameService.toggleInfo();
+    // }
 }

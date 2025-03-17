@@ -12,14 +12,13 @@
         <app-game-map-player-detailed></app-game-map-player-detailed>
     </div>
 
-<div class="bottom-rectangle">
-    <div class="chat-info-container">
-        <button (click)="toggleChat()" class="toggle-button">Chat</button>
-        <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
+    <div class="bottom-rectangle">
+        <div class="chat-info-container">
+            <button (click)="toggleChat()" class="toggle-button">Chat</button>
+            <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
+        </div>
+        <app-game-map-player-tools></app-game-map-player-tools>
     </div>
-    <app-game-map-player-tools></app-game-map-player-tools>
-</div>
-
 
     @if(showChat) {
     <div class="popup">
@@ -30,6 +29,12 @@
         <div class="chat-content"></div>
     </div>
     } @if (showInfo) {
-    <app-game-map-info></app-game-map-info>
+    <div class="popup">
+        <div class="popup-header">
+            <span>Infos Partie</span>
+            <button (click)="toggleInfo()" class="close-popup">X</button>
+        </div>
+        <app-game-map-info></app-game-map-info>
+    </div>
     }
 </div>
