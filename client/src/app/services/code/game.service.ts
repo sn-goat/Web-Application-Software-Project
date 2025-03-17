@@ -58,6 +58,11 @@ export class GameService {
             this.playingPlayers.next(game.game.players);
             this.map.next(game.game.map);
         });
+
+        this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
+            // End the game
+            console.log(winner);
+        });
     }
 
     initFight(avatar: Avatar): void {
@@ -121,7 +126,7 @@ export class GameService {
 
     debugMovePlayer(cell: Cell): void {
         if (this.canTeleport(cell)) {
-            this.socketService.debugMove(this.accessCode, cell.position);
+            this.socketService.debugMove(this.accessCode, cell.position, this.playerService.getPlayer());
         }
     }
 
@@ -149,8 +154,11 @@ export class GameService {
         if (player) {
             map[previousPosition.y][previousPosition.x].player = Avatar.Default;
             map[player.position.y][player.position.x].player = player.avatar as Avatar;
-            this.activePlayer.next(player);
-            if (this.playerService.isActive()) {
+            if (this.activePlayer.value && this.activePlayer.value.id === player.id) {
+                this.activePlayer.next(player);
+            }
+
+            if (this.playerService.getPlayer().id === player.id) {
                 this.playerService.setPlayer(player);
             }
             this.map.next(map);

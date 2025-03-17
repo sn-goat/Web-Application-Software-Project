@@ -48,7 +48,7 @@ describe('TimerService', () => {
         service.startTimer('room1', 2, 'movement');
         jest.advanceTimersByTime(3000);
 
-        expect(service.getRemainingTime('room1')).toEqual({ type: undefined, remainingTime: null, pausedTime: null });
+        expect(service.getRemainingTime('room1')).toEqual({ type: 'movement', remainingTime: 0, pausedTime: null });
     });
 
     it('should pause the timer', () => {

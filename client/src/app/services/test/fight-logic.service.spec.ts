@@ -8,7 +8,7 @@ import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Fight, FightInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 // Définition unique des joueurs de test
 const testPlayer1 = {
@@ -66,7 +66,7 @@ describe('FightLogicService', () => {
     // Sujets pour simuler les événements du SocketService
     const fightInitSubject = new Subject<Fight>();
     const switchTurnSubject = new Subject<Fight>();
-    const endFightSubject = new Subject<void>();
+    const endFightSubject = new Subject<Fight>();
     const winnerSubject = new Subject<any>();
     const loserSubject = new Subject<any>();
 
@@ -83,6 +83,7 @@ describe('FightLogicService', () => {
 
     const gameServiceMock = {
         getAccessCode: jasmine.createSpy('getAccessCode').and.returnValue('ACCESS_CODE'),
+        isActionSelected: new BehaviorSubject<boolean>(false),
     };
 
     const playerServiceMock = {
@@ -117,7 +118,7 @@ describe('FightLogicService', () => {
     it('should call endFight when onEndFight is emitted', () => {
         const testFight = createTestFight();
         fightInitSubject.next(testFight);
-        endFightSubject.next();
+        endFightSubject.next({} as Fight);
         expect(service.fight.value).toEqual({} as Fight);
         expect(service.fightStarted.value).toBeFalse();
     });

@@ -92,9 +92,10 @@ export class GameService {
     }
 
     updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats) {
+        const player = this.getPlayer(accessCode, playerToUpdate.id);
         const map = this.getMap(accessCode);
-        const updatedPath = this.findPossiblePaths(map, playerToUpdate.position, playerToUpdate.movementPts);
-        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player: playerToUpdate, path: Object.fromEntries(updatedPath) });
+        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -208,6 +209,7 @@ export class GameService {
         const game = this.currentGames.get(accessCode);
         if (game) {
             game.currentTurn = (game.currentTurn + 1) % game.players.length;
+            this.logger.log(`Player's turn: ${this.getPlayerTurn(accessCode).name} `);
         }
     }
 
