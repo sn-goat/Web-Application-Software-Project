@@ -74,7 +74,6 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
                 }
-                this.router.navigate(['/accueil']).then(() => window.location.reload());
             }
         });
 
@@ -84,13 +83,12 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                 }
-                this.router.navigate(['/accueil']).then(() => window.location.reload());
             }
         });
 
         this.socketService.onBroadcastStartGame().subscribe((game: Game) => {
             this.gameService.setGame(game);
-            this.router.navigate(['/game']);
+            this.router.navigate(['/jeu']);
         });
     }
 
