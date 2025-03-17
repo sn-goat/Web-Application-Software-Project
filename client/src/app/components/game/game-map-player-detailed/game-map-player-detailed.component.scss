@@ -17,17 +17,17 @@ $skill-color: #7ee0d0;
     height: 100%;
     width: 100%;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.7rem; 
+    font-size: 1.5rem;
 }
 
 .container {
     background-color: $secondary-bg;
     border-radius: $border-radius;
-    height: 100%; 
-    width: 100%; 
+    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    overflow: visible; 
+    overflow: visible;
     box-shadow:
         0 0 10px rgba(0, 0, 0, 0.5),
         0 0 8px $glow-teal;
@@ -74,7 +74,7 @@ $skill-color: #7ee0d0;
 
         h3 {
             margin: 0 0 2px 0;
-            font-size: 0.75rem; 
+            font-size: 1rem; /* Increased from 0.75rem */
             color: $secondary-text;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -84,7 +84,7 @@ $skill-color: #7ee0d0;
 
         h4 {
             margin: 0;
-            font-size: 0.65rem; 
+            font-size: 0.85rem; /* Increased from 0.65rem */
             color: $secondary-text;
             font-weight: normal;
             display: inline-block;
@@ -92,7 +92,7 @@ $skill-color: #7ee0d0;
 
         p {
             margin: 0 0 0 2px;
-            font-size: 0.7rem;
+            font-size: 0.9rem; /* Increased from 0.7rem */
             font-weight: bold;
             display: inline-block;
             text-shadow: 0 0 4px $glow-teal;
@@ -108,13 +108,12 @@ $skill-color: #7ee0d0;
         flex: 1;
     }
 
-
     .life,
     .attribute,
     .dices,
     .skills {
-        padding: 3px; 
-        border-radius: 4px; 
+        padding: 3px;
+        border-radius: 4px;
         background: rgba(0, 0, 0, 0.2);
         display: flex;
         flex-direction: column;
@@ -181,40 +180,16 @@ $skill-color: #7ee0d0;
             justify-content: space-between;
             align-items: center;
             padding: 0px;
-            font-size: 0.7rem !important;
 
             h4 {
                 margin: 0;
-                font-size: 0.65rem !important;
             }
 
             p {
                 margin: 0;
-                font-size: 0.7rem !important;
                 color: $health-color;
             }
         }
-    }
-
-    .health-bar-container {
-        width: 100%;
-        height: 10px;
-        background-color: rgba(0, 0, 0, 0.5);
-        border: 1px solid $glow-teal;
-        border-radius: 3px;
-        margin: 5px 0;
-        overflow: hidden;
-        position: relative;
-        box-shadow: 0 0 3px rgba($health-color, 0.3) inset;
-    }
-
-    .health-bar {
-        height: 100%;
-        background: linear-gradient(to right, #ff5252, #ff7b7b);
-        transition: width 0.5s ease-out;
-        border-right: 1px solid rgba(0, 0, 0, 0.3);
-        position: relative;
-        min-width: 5px;
     }
 
     .health-text {
@@ -231,22 +206,6 @@ $skill-color: #7ee0d0;
         left: 0;
         mix-blend-mode: difference;
         z-index: 5;
-    }
-
-    .health-hight {
-        background: linear-gradient(to right, #4caf50, #8bc34a);
-        box-shadow: 0 0 10px rgba(#4caf50, 0.7); 
-    }
-
-    .health-medium {
-        background: linear-gradient(to right, #ffc107, #ffeb3b);
-        box-shadow: 0 0 10px rgba(#ffc107, 0.7);
-    }
-
-    .health-low {
-        background: linear-gradient(to right, #f44336, #ff5722);
-        box-shadow: 0 0 10px rgba(#f44336, 0.7);
-        animation: pulse 1.5s infinite;
     }
 
     .attribute {
@@ -266,7 +225,7 @@ $skill-color: #7ee0d0;
 
         .attributes-container {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 2px;
@@ -328,7 +287,7 @@ $skill-color: #7ee0d0;
 
         .skills-container {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             justify-content: space-around;
             flex: 1;
             align-items: center;
@@ -348,176 +307,16 @@ $skill-color: #7ee0d0;
 
     h3 {
         margin-bottom: 6px !important;
-        font-size: 0.8rem !important;
+        font-size: 1rem !important;
     }
 
     h4,
     p {
-        font-size: 0.75rem !important;
+        font-size: 0.9rem !important;
     }
 
     .dice-image {
-        width: 24px !important;
-        height: 24px !important;
+        width: 42px !important;
+        height: 42px !important;
     }
-}
-
-.life,
-.attribute,
-.dices,
-.skills {
-    transition: none;
-    &:hover {
-        transform: none;
-        box-shadow: none;
-    }
-    padding-top: 1px;
-    padding-bottom: 2px;
-    max-height: 25%;
-}
-
-.player-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 3px;
-    margin-bottom: 5px;
-
-    .stat-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 2px 3px;
-        border-radius: 3px;
-        background-color: rgba(0, 0, 0, 0.2);
-        font-size: 0.7rem;
-
-        .stat-label {
-            color: $primary-text;
-            margin-right: 3px;
-            font-size: 0.7rem;
-        }
-
-        .stat-value {
-            color: white;
-            font-weight: bold;
-            font-size: 0.7rem;
-        }
-    }
-}
-
-
-@media (max-height: 600px) {
-    :host {
-        font-size: 0.65rem;
-    }
-
-    .container {
-        h2 {
-            padding: 4px;
-            font-size: 0.8rem;
-        }
-
-        .player {
-            padding: 5px;
-            .player-image {
-                width: 25px;
-                height: 25px;
-            }
-            p {
-                font-size: 0.8rem;
-            }
-        }
-
-        .info {
-            padding: 3px 5px;
-            gap: 3px;
-
-            h3 {
-                font-size: 0.7rem;
-                margin: 0 0 2px 0;
-            }
-
-            h4 {
-                font-size: 0.65rem;
-            }
-
-            p {
-                font-size: 0.7rem;
-            }
-        }
-
-        .life,
-        .attribute,
-        .dices,
-        .skills {
-            padding: 3px;
-        }
-
-        .health-bar-container {
-            height: 6px;
-            margin-bottom: 3px;
-        }
-
-        .health-text {
-            line-height: 6px;
-            font-size: 6px;
-        }
-    }
-
-    .player-stats .stat-item {
-        padding: 1px 2px;
-        font-size: 0.65rem;
-    }
-
-    .dice-image {
-        width: 14px !important;
-        height: 14px !important;
-    }
-}
-
-
-h3 {
-    margin-top: 0 !important;
-    margin-bottom: 3px !important;
-    padding-bottom: 1px !important;
-}
-
-
-.life h4,
-.life p {
-    font-size: 0.65rem !important;
-}
-
-
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
-    100% {
-        opacity: 1;
-    }
-}
-
-
-.health-hight {
-    background: linear-gradient(to right, #4caf50, #8bc34a) !important;
-}
-
-.health-medium {
-    background: linear-gradient(to right, #ff9800, #ffeb3b) !important;
-}
-
-.health-low {
-    background: linear-gradient(to right, #f44336, #ff5722) !important;
-    animation: pulse 1.5s infinite;
-}
-
-
-.container .health-bar-container,
-.container .health-bar,
-.container .health-text {
-    display: none;
 }
