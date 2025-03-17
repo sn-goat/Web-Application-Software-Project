@@ -21,6 +21,7 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     isActivePlayer: boolean = false;
     playerHasAction: boolean = false;
     isActionEnabled: boolean = false;
+    debugMode: boolean = false;
 
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;

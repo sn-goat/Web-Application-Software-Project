@@ -11,6 +11,16 @@ body {
     font-family: Arial, sans-serif;
 }
 
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: $primary-bg;
+    color: $primary-text;
+}
+
 .access-code-container {
     display: flex;
     flex-direction: column;
@@ -64,7 +74,6 @@ body {
     height: 20px;
     vertical-align: middle;
 }
-// ... styles existants ...
 
 .chat-box {
     margin-top: 20px;

@@ -32,6 +32,7 @@ export class MockSocketService {
     private broadcastItemSubject = new Subject<unknown>();
     private broadcastDoorSubject = new Subject<unknown>();
     private adminDisconnected = new Subject<unknown>();
+    private endOfGame = new Subject<unknown>();
 
     private switchTurnSubject = new Subject<unknown>();
     private turnUpdateSubject = new Subject<unknown>();
@@ -136,6 +137,10 @@ export class MockSocketService {
         return this.adminDisconnected.asObservable();
     }
 
+    onEndGame() {
+        return this.endOfGame.asObservable();
+    }
+
     createRoom(_size: number): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
@@ -150,6 +155,7 @@ export class MockSocketService {
     playerFlee(_accessCode: string, _playerId: string): void {}
     playerAttack(_accessCode: string, _playerId: string): void {}
     quitGame(_accessCode: string): void {}
+    resetSocketState(): void {}
 
     endTurn(_accessCode: string): void {
         // On peut laisser vide ou ajouter une logique de mock ici

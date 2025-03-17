@@ -38,7 +38,7 @@ describe('GameGateway', () => {
             configureTurn: jest.fn().mockReturnValue({ player: { id: 'player1', avatar: 'avatar.png' } }),
             startTimer: jest.fn(),
             endTurnRequested: jest.fn(),
-            getPlayerTurn: jest.fn(),
+            getPlayerTurn: jest.fn().mockReturnValue({ id: 'p1', name: 'Alice', avatar: 'a.png', spawnPosition: { x: 0, y: 0 } } as PlayerStats),
         };
 
         timerService = {
@@ -222,17 +222,16 @@ describe('GameGateway', () => {
             const payload = { accessCode: 'roomFight', winner: fight.player1, loser: fight.player2 };
             gateway.sendFightEnd(payload);
             expect(toMock).toHaveBeenCalledWith(fight.player1.id);
-            expect(toMock.mock.results[0].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Winner);
+            expect(toMock.mock.results[0].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Winner, fight.player1);
             expect(toMock).toHaveBeenCalledWith(fight.player2.id);
-            expect(toMock.mock.results[1].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Loser);
             // Vérification d'un appel à gameService.movePlayer et decrementAction
             expect(gameService.movePlayer).toHaveBeenCalledWith(payload.accessCode, fight.player2.spawnPosition, fight.player2);
             expect(gameService.decrementAction).toHaveBeenCalled();
             // Vérification de l'émission de l'event End
             expect(toMock).toHaveBeenCalledWith(fight.player1.id);
-            expect(toMock.mock.results[2].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
+            expect(toMock.mock.results[1].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
             expect(toMock).toHaveBeenCalledWith(fight.player2.id);
-            expect(toMock.mock.results[3].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
+            expect(toMock.mock.results[2].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
             expect(timerService.resumeTimer).toHaveBeenCalledWith(payload.accessCode);
         });
     });

@@ -24,6 +24,8 @@ export interface FightInfo {
     diceResult: number;
 }
 
+export const MAX_FIGHT_WINS = 3;
+
 export interface Fight {
     player1: PlayerStats & FightInfo;
     player2: PlayerStats & FightInfo;

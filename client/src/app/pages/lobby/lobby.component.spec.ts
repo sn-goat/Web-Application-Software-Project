@@ -79,7 +79,7 @@ describe('LobbyComponent', () => {
         spyOn(window, 'confirm').and.returnValue(true);
         // simulate removal such that current player is not in the list
         socketService.triggerPlayerRemoved([]);
-        component.disconnectWithoutReload();
+        component.disconnect();
         tick();
         expect(router.navigate).toHaveBeenCalledWith(['/home']);
     }));
@@ -87,7 +87,7 @@ describe('LobbyComponent', () => {
     it('should navigate home if current player disconnects', fakeAsync(() => {
         spyOn(window, 'confirm').and.returnValue(true);
         socketService.triggerPlayerDisconnected([]);
-        component.disconnectWithoutReload();
+        component.disconnect();
         tick();
         expect(router.navigate).toHaveBeenCalledWith(['/home']);
     }));
@@ -154,7 +154,7 @@ describe('LobbyComponent', () => {
     it('disconnect should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
         spyOn(socketService, 'disconnect');
         component.accessCode = 'ABC';
-        component.disconnectWithoutReload();
+        component.disconnect();
         tick();
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
     }));
@@ -162,7 +162,7 @@ describe('LobbyComponent', () => {
     it('disconnect should call socketService.disconnect', fakeAsync(() => {
         spyOn(socketService, 'disconnect');
         component.accessCode = 'ABC';
-        component.disconnectWithoutReload();
+        component.disconnect();
         tick();
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
     }));
@@ -171,18 +171,18 @@ describe('LobbyComponent', () => {
         spyOn(socketService, 'disconnect');
 
         component.accessCode = 'ABC';
-        component.disconnectWithoutReload();
+        component.disconnect();
         tick();
 
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
         expect(router.navigate).toHaveBeenCalledWith(['/home']);
     }));
 
-    it('disconnectWithoutReload should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
+    it('disconnect should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
         spyOn(socketService, 'disconnect');
 
         component.accessCode = 'ABC';
-        component.disconnectWithoutReload();
+        component.disconnect();
         tick();
 
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');

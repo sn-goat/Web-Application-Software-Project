@@ -1,6 +1,7 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/code/game.service';
+import { SocketService } from '@app/services/code/socket.service';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -17,6 +18,7 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy {
     players: PlayerStats[];
     activePlayer: PlayerStats | null;
     gameService: GameService = inject(GameService);
+    socketService: SocketService = inject(SocketService);
     private subscriptions: Subscription[] = [];
     constructor() {
         this.players = [];
@@ -30,6 +32,14 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy {
 
             this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
                 this.activePlayer = player;
+            }),
+
+            this.socketService.onWinner().subscribe((winner: PlayerStats) => {
+                for (let index = 0; index < this.players.length; index++) {
+                    if (this.players[index].id === winner.id) {
+                        this.players[index] = winner;
+                    }
+                }
             }),
         );
     }

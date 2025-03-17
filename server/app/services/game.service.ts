@@ -4,7 +4,7 @@ import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
 import { GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { PlayerStats } from '@common/player';
+import { ATTACK_ICE_DECREMENT, DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFENSE_ICE_DECREMENT, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BoardService } from './board/board.service';
@@ -92,9 +92,10 @@ export class GameService {
     }
 
     updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats) {
+        const player = this.getPlayer(accessCode, playerToUpdate.id);
         const map = this.getMap(accessCode);
-        const updatedPath = this.findPossiblePaths(map, playerToUpdate.position, playerToUpdate.movementPts);
-        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player: playerToUpdate, path: Object.fromEntries(updatedPath) });
+        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -173,6 +174,13 @@ export class GameService {
         map[previousPosition.y][previousPosition.x].player = Avatar.Default;
         map[direction.y][direction.x].player = movingPlayer.avatar as Avatar;
         movingPlayer.position = direction;
+        if (map[direction.y][direction.x].tile === Tile.ICE) {
+            movingPlayer.attack = DEFAULT_ATTACK_VALUE - ATTACK_ICE_DECREMENT;
+            movingPlayer.defense = DEFAULT_DEFENSE_VALUE - DEFENSE_ICE_DECREMENT;
+        } else {
+            movingPlayer.attack = DEFAULT_ATTACK_VALUE;
+            movingPlayer.defense = DEFAULT_DEFENSE_VALUE;
+        }
         this.eventEmitter.emit(TurnEvents.Move, { accessCode, previousPosition, player: movingPlayer });
     }
 
@@ -201,6 +209,7 @@ export class GameService {
         const game = this.currentGames.get(accessCode);
         if (game) {
             game.currentTurn = (game.currentTurn + 1) % game.players.length;
+            this.logger.log(`Player's turn: ${this.getPlayerTurn(accessCode).name} `);
         }
     }
 

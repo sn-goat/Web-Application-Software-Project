@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { FightService } from '@app/services/fight.service';
+import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';
@@ -12,6 +13,7 @@ describe('FightService', () => {
     let fightService: FightService;
     let timerService: Partial<TimerService>;
     let eventEmitter: Partial<EventEmitter2>;
+    let gameService: Partial<GameService>;
 
     beforeEach(async () => {
         timerService = {
@@ -25,8 +27,17 @@ describe('FightService', () => {
             emit: jest.fn(),
         };
 
+        gameService = {
+            isGameDebugMode: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
-            providers: [FightService, { provide: TimerService, useValue: timerService }, { provide: EventEmitter2, useValue: eventEmitter }],
+            providers: [
+                FightService,
+                { provide: GameService, useValue: gameService },
+                { provide: TimerService, useValue: timerService },
+                { provide: EventEmitter2, useValue: eventEmitter },
+            ],
         }).compile();
 
         fightService = module.get<FightService>(FightService);
