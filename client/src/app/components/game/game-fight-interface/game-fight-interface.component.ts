@@ -21,7 +21,7 @@ export class GameFightInterfaceComponent implements OnDestroy {
     readonly fileType: string = DEFAULT_FILE_TYPE;
     readonly perCent = 100;
 
-    timer: string = '00:00';
+    timer: string = '00 s';
     currentNameTurn: string = '';
     myPlayer: (PlayerStats & FightInfo) | null;
     opponentPlayer: (PlayerStats & FightInfo) | null;
@@ -46,7 +46,7 @@ export class GameFightInterfaceComponent implements OnDestroy {
             }),
 
             this.socketService.onFightTimerUpdate().subscribe((remainingTime) => {
-                this.timer = `${remainingTime.toString()}:00`;
+                this.timer = `${remainingTime.toString()} s`;
             }),
         );
     }
