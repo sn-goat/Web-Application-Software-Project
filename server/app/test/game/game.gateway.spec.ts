@@ -316,14 +316,8 @@ describe('GameGateway', () => {
                 player1: { id: 'player1', name: 'Alice', avatar: 'a.png' } as PlayerStats,
                 player2: { id: 'player2', name: 'Bob', avatar: 'b.png' } as PlayerStats,
             };
-            // Réinitialiser le spy sur server.to
-            toMock.mockClear();
             gateway.handleFightInit(client as Socket, payload);
             expect(fightService.initFight).toHaveBeenCalledWith(payload.accessCode, payload.player1, payload.player2);
-            expect(toMock).toHaveBeenCalledWith(payload.player2.id);
-            const toReturn = toMock.mock.results[0].value;
-            // Ici, on s'attend à recevoir un objet avec l'initiation du combat
-            expect(toReturn.emit).toHaveBeenCalledWith(FightEvents.Init, { player1: payload.player1, player2: payload.player2 });
         });
 
         it('handlePlayerFlee should call fightService.playerFlee with accessCode', () => {

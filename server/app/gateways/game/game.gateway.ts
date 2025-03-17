@@ -4,7 +4,7 @@ import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
-import { PathInfo, Fight } from '@common/game';
+import { Fight, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -65,7 +65,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TurnEvents.UpdateTurn)
     handleUpdateTurn(turn: { player: PlayerStats; path: Record<string, PathInfo> }) {
-        this.logger.log('Updating turn for player: ' + turn.player.id);
+        this.logger.log('Updating turn for player: ' + turn.player.name);
         this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
     }
 
@@ -104,11 +104,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
         this.logger.log('Ending fight');
         if (payload.winner && payload.loser) {
+            this.logger.log(`The winner is: ${payload.winner.name} and the loser is: ${payload.loser.name}`);
             this.server.to(payload.winner.id).emit(FightEvents.Winner);
             this.server.to(payload.loser.id).emit(FightEvents.Loser);
             this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
-            this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
         }
+        this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
         this.server.to(fight.player1.id).emit(FightEvents.End);
         this.server.to(fight.player2.id).emit(FightEvents.End);
         this.timerService.resumeTimer(payload.accessCode);
@@ -174,8 +175,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Initiating fight between ' + payload.player1.name + ' and ' + payload.player2.name);
         this.logger.log('Access code: ' + payload.accessCode);
         this.fightService.initFight(payload.accessCode, payload.player1, payload.player2);
-        // switch the positions for the defender render
-        this.server.to(payload.player2.id).emit(FightEvents.Init, { player1: payload.player1, player2: payload.player2 });
     }
 
     @SubscribeMessage(FightEvents.Flee)

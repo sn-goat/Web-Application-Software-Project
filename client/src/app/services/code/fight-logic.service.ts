@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
 import { SocketService } from '@app/services/code/socket.service';
-import { Avatar, Fight } from '@common/game';
-import { GameService } from './game.service';
-import { PlayerStats } from '@common/player';
 import { Cell } from '@common/board';
+import { Avatar, Fight } from '@common/game';
+import { PlayerStats } from '@common/player';
+import { BehaviorSubject } from 'rxjs';
+import { GameService } from './game.service';
 import { PlayerService } from './player.service';
 
 @Injectable({
@@ -14,7 +14,6 @@ export class FightLogicService {
     fight: BehaviorSubject<Fight> = new BehaviorSubject<Fight>({} as Fight);
     fightStarted: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-    // private endReason: PlayerStats | null = null;
     private socketService = inject(SocketService);
     private gameService = inject(GameService);
     private playerService = inject(PlayerService);

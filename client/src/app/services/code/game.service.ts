@@ -32,6 +32,7 @@ export class GameService {
     constructor() {
         this.socketService.onTurnSwitch().subscribe((turn) => {
             this.updateTurn(turn.player);
+            this.isActionSelected.next(false);
         });
 
         this.socketService.onEndFight().subscribe(() => {
@@ -213,5 +214,28 @@ export class GameService {
 
     getOrganizerId(): string {
         return this.organizerId;
+    }
+
+    findPossibleActions(position: Vec2): Set<string> {
+        const possibleActions = new Set<string>();
+        const directions: Vec2[] = [
+            { x: 0, y: 1 }, // Down
+            { x: 1, y: 0 }, // Right
+            { x: 0, y: -1 }, // Up
+            { x: -1, y: 0 }, // Left
+        ];
+        for (const dir of directions) {
+            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
+                if (this.isValidCellForAction(this.map.value[newPos.y][newPos.x])) {
+                    possibleActions.add(`${newPos.x},${newPos.y}`);
+                }
+            }
+        }
+        return possibleActions;
+    }
+
+    private isValidCellForAction(cell: Cell): boolean {
+        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
     }
 }

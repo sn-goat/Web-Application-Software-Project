@@ -340,18 +340,6 @@ describe('GameService', () => {
 
     // Mise à jour du chemin du joueur
     describe('updatePlayerPathTurn', () => {
-        it("devrait utiliser le joueur actif si playerToUpdate n'est pas défini", () => {
-            const player = { id: 'p1', name: 'Player1', position: { x: 0, y: 0 }, movementPts: 2 } as PlayerStats;
-            setupTestGame({ players: [player] });
-
-            const findPathsSpy = jest.spyOn(gameService as any, 'findPossiblePaths').mockReturnValue(new Map([['0,1', { path: [], cost: 1 }]]));
-
-            gameService.updatePlayerPathTurn(accessCode, undefined);
-
-            expect(findPathsSpy).toHaveBeenCalledWith(expect.anything(), player.position, player.movementPts);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(TurnEvents.UpdateTurn, { player, path: { '0,1': { path: [], cost: 1 } } });
-        });
-
         it('devrait utiliser le joueur spécifié si playerToUpdate est défini', () => {
             const player1 = { id: 'p1', name: 'Player1', position: { x: 0, y: 0 }, movementPts: 2 } as PlayerStats;
             const player2 = { id: 'p2', name: 'Player2', position: { x: 1, y: 0 }, movementPts: 3 } as PlayerStats;

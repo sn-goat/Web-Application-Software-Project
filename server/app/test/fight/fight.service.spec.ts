@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { FightService } from '@app/services/fight.service';
 import { TimerService } from '@app/services/timer/timer.service';
-import { Fight } from '@common/game';
+import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -18,6 +18,7 @@ describe('FightService', () => {
             startTimer: jest.fn(),
             stopTimer: jest.fn(),
             resumeTimer: jest.fn(),
+            getRemainingTime: jest.fn(),
         };
 
         eventEmitter = {
@@ -44,8 +45,22 @@ describe('FightService', () => {
 
     describe('initFight', () => {
         it('devrait créer et initialiser un combat', () => {
-            const player1: PlayerStats = { id: 'p1', name: 'Alice', speed: 10 } as PlayerStats;
-            const player2: PlayerStats = { id: 'p2', name: 'Bob', speed: 5 } as PlayerStats;
+            const player1: PlayerStats = {
+                id: 'p1',
+                name: 'Alice',
+                speed: 10,
+                fleeAttempts: 2,
+                currentLife: undefined,
+                diceResult: 0,
+            } as PlayerStats & FightInfo;
+            const player2: PlayerStats = {
+                id: 'p2',
+                name: 'Bob',
+                speed: 5,
+                fleeAttempts: 2,
+                currentLife: undefined,
+                diceResult: 0,
+            } as PlayerStats & FightInfo;
             fightService.initFight('roomFight', player1, player2);
 
             const fight = fightService.getFight('roomFight');
@@ -69,9 +84,9 @@ describe('FightService', () => {
 
         it('devrait changer de joueur, émettre SwitchTurn et relancer le timer', () => {
             const fight: Fight = {
-                player1: { id: 'p1', name: 'Alice' } as PlayerStats,
-                player2: { id: 'p2', name: 'Bob' } as PlayerStats,
-                currentPlayer: { id: 'p1', name: 'Alice' } as PlayerStats,
+                player1: { id: 'p1', name: 'Alice' } as PlayerStats & FightInfo,
+                player2: { id: 'p2', name: 'Bob' } as PlayerStats & FightInfo,
+                currentPlayer: { id: 'p1', name: 'Alice' } as PlayerStats & FightInfo,
             };
             fightService['activeFights'].set('roomTurn', fight);
 
@@ -137,8 +152,8 @@ describe('FightService', () => {
         });
 
         it('devrait infliger des dégâts et passer le tour si le défenseur n’est pas vaincu', () => {
-            const attacker = { id: 'p1', attack: 2, attackDice: 'D4', name: 'Attacker' } as PlayerStats;
-            const defender = { id: 'p2', defense: 1, defenseDice: 'D4', life: 10, name: 'Defender' } as PlayerStats;
+            const attacker = { id: 'p1', attack: 2, attackDice: 'D4', name: 'Attacker' } as PlayerStats & FightInfo;
+            const defender = { id: 'p2', defense: 1, defenseDice: 'D4', currentLife: 10, name: 'Defender' } as PlayerStats & FightInfo;
             const fight: Fight = { player1: attacker, player2: defender, currentPlayer: attacker };
             fightService['activeFights'].set('roomAttack', fight);
 
@@ -148,14 +163,14 @@ describe('FightService', () => {
             fightService.playerAttack('roomAttack');
 
             // Dégâts calculés = (2 + 1) - (1 + 1) => 1
-            expect(defender.life).toBe(9);
+            expect(defender.currentLife).toBe(9);
             expect(nextTurnSpy).toHaveBeenCalledWith('roomAttack');
             jest.spyOn(global.Math, 'random').mockRestore();
         });
 
         it('devrait appeler endFight si le défenseur est vaincu', () => {
-            const attacker = { id: 'p1', attack: 5, attackDice: 'D6' } as PlayerStats;
-            const defender = { id: 'p2', defense: 1, defenseDice: 'D4', life: 2 } as PlayerStats;
+            const attacker = { id: 'p1', attack: 5, attackDice: 'D6' } as PlayerStats & FightInfo;
+            const defender = { id: 'p2', defense: 1, defenseDice: 'D4', currentLife: 2 } as PlayerStats & FightInfo;
             const fight: Fight = { player1: attacker, player2: defender, currentPlayer: attacker };
             fightService['activeFights'].set('roomKO', fight);
 
@@ -170,8 +185,8 @@ describe('FightService', () => {
 
         it('ne devrait pas infliger de dégâts négatifs (damage = 0 si calcul < 0)', () => {
             // Admettons un attaquant très faible et un défenseur très résistant
-            const attacker: PlayerStats = { id: 'pA', attack: 4, attackDice: 'D4', name: 'Attacker' } as PlayerStats;
-            const defender: PlayerStats = { id: 'pB', defense: 10, defenseDice: 'D4', life: 4, name: 'Defender' } as PlayerStats;
+            const attacker = { id: 'pA', attack: 4, attackDice: 'D4', name: 'Attacker' } as PlayerStats & FightInfo;
+            const defender = { id: 'pB', defense: 10, defenseDice: 'D4', life: 4, name: 'Defender' } as PlayerStats & FightInfo;
             const fight: Fight = { player1: attacker, player2: defender, currentPlayer: attacker };
             fightService['activeFights'].set('roomNegativeDamage', fight);
 

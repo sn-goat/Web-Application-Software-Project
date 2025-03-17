@@ -1,45 +1,45 @@
 <div class="fight-container">
     <div class="fight-header">
         <h2 class="timer">Combat!</h2>
-        <h2>C'est le tour à {{ currentTurn }}</h2>
+        <h2>Tour de: {{ currentNameTurn }}</h2>
         <div class="timer">⏱️ {{ timer }}</div>
     </div>
 
     <div class="players-container">
-        <div class="player-card" [class.active]="currentTurn === player1?.name">
+        <div class="player-card" [class.active]="currentNameTurn === myPlayer?.name">
             <div class="player-avatar">
-                @if (player1) {
-                <img [src]="player1.avatar" [alt]="player1.name" />
+                @if (myPlayer) {
+                <img [src]="myPlayer.avatar" [alt]="myPlayer.name" />
                 }
             </div>
             <div class="player-info">
-                <h3>{{ player1?.name }}</h3>
+                <h3>{{ myPlayer?.name }}</h3>
                 <div class="health-bar">
-                    <div class="health-fill" [style.width.%]="player1?.life"></div>
-                    <span>{{ player1?.life }}/100</span>
+                    <div class="health-fill" [style.width.%]="lifePercentMyPlayer"></div>
+                    <span>{{ lifePercentMyPlayer }}%</span>
                 </div>
                 <div class="flee-attempts">
-                    <span>Fuites: {{ getFleeAttempts(player1?.name || '') }}/2</span>
+                    <span>Fuites: {{ myPlayer?.fleeAttempts || 0 }}/2</span>
                 </div>
             </div>
         </div>
 
         <div class="vs">VS</div>
 
-        <div class="player-card" [class.active]="currentTurn === player2?.name">
+        <div class="player-card" [class.active]="currentNameTurn === opponentPlayer?.name">
             <div class="player-avatar">
-                @if (player2) {
-                <img [src]="player2.avatar" [alt]="player2.name" />
+                @if (opponentPlayer) {
+                <img [src]="opponentPlayer.avatar" [alt]="opponentPlayer.name" />
                 }
             </div>
             <div class="player-info">
-                <h3>{{ player2?.name }}</h3>
+                <h3>{{ opponentPlayer?.name }}</h3>
                 <div class="health-bar">
-                    <div class="health-fill" [style.width.%]="player2?.life"></div>
-                    <span>{{ player2?.life }}/100</span>
+                    <div class="health-fill" [style.width.%]="lifePercentOpponent"></div>
+                    <span>{{ lifePercentOpponent }}%</span>
                 </div>
                 <div class="flee-attempts">
-                    <span>Fuites: {{ getFleeAttempts(player2?.name || '') }}/2</span>
+                    <span>Fuites: {{ opponentPlayer?.fleeAttempts || 0 }}/2</span>
                 </div>
             </div>
         </div>
@@ -47,17 +47,19 @@
 
     <div class="dice-container">
         <div class="dice d4">
-            <span>D4</span>
-            <div class="dice-value">{{ diceD4 }}</div>
+            <span></span>
+            <div class="dice-value">{{ myPlayer?.diceResult }}</div>
         </div>
         <div class="dice d6">
-            <span>D6</span>
-            <div class="dice-value">{{ diceD6 }}</div>
+            <span></span>
+            <div class="dice-value">{{ opponentPlayer?.diceResult }}</div>
         </div>
     </div>
 
     <div class="action-buttons">
-        <button mat-raised-button color="warn" (click)="flee()">Fuir</button>
-        <button mat-raised-button color="primary" (click)="attack()">Attaquer</button>
+        @if( (myPlayer?.fleeAttempts ?? 0) > 0 ){
+        <button mat-raised-button color="primary" (click)="flee()" [class.disabled]="!isMyTurn()">Fuir</button>
+        }
+        <button mat-raised-button color="warn" (click)="attack()" [class.disabled]="!isMyTurn()">Attaquer</button>
     </div>
 </div>

@@ -6,7 +6,7 @@ import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
-import { Fight } from '@common/game';
+import { Fight, FightInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { Subject } from 'rxjs';
 
@@ -45,12 +45,18 @@ const testPlayer2 = {
     spawnPosition: { x: 1, y: 1 },
 } as PlayerStats;
 
+const fightInfo = {
+    fleeAttempts: 2,
+    currentLife: 4,
+    diceResult: 3,
+} as FightInfo;
+
 // Fonction utilitaire pour créer un combat de test
 function createTestFight(): Fight {
     return {
-        player1: { ...testPlayer1 },
-        player2: { ...testPlayer2 },
-        currentPlayer: { ...testPlayer1 },
+        player1: { ...testPlayer1, ...fightInfo },
+        player2: { ...testPlayer2, ...fightInfo },
+        currentPlayer: { ...testPlayer1, ...fightInfo },
     };
 }
 

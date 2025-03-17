@@ -1,5 +1,5 @@
-import { Cell, Vec2 } from "@common/board";
-import { PlayerStats } from "@common/player";
+import { Cell, Vec2 } from '@common/board';
+import { PlayerStats } from '@common/player';
 
 export interface Room {
     accessCode: string;
@@ -18,10 +18,16 @@ export interface Game {
     isDebugMode: boolean;
 }
 
+export interface FightInfo {
+    fleeAttempts: number;
+    currentLife: number;
+    diceResult: number;
+}
+
 export interface Fight {
-    player1: PlayerStats;
-    player2: PlayerStats;
-    currentPlayer: PlayerStats;
+    player1: PlayerStats & FightInfo;
+    player2: PlayerStats & FightInfo;
+    currentPlayer: PlayerStats & FightInfo;
 }
 
 export const ASSET_PATH = './assets/portraits/portrait';
@@ -43,13 +49,10 @@ export enum Avatar {
     Default = '',
 }
 
-const avatarNameMap = Object.entries(Avatar).reduce(
-    (acc, [key, value]) => {
-        acc[value] = key;
-        return acc;
-    },
-    {} as Record<string, string>,
-);
+const avatarNameMap = Object.entries(Avatar).reduce((acc, [key, value]) => {
+    acc[value] = key;
+    return acc;
+}, {} as Record<string, string>);
 
 export function getAvatarName(avatar: Avatar): string {
     return avatarNameMap[avatar] || 'Unknown';
