@@ -1,3 +1,5 @@
+@use 'src/styles.scss';
+
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
 $primary-text: #7ee0d0;
@@ -5,9 +7,6 @@ $glow-teal: rgba(126, 224, 208, 0.2);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 5px;
-$inventory-color: #7ee0d0;
-$timer-color: #7ee0d0;
-$buttons-color: #7ee0d0;
 
 :host {
     display: block;
@@ -80,7 +79,7 @@ $buttons-color: #7ee0d0;
         padding: 0;
         border-radius: 4px;
         background: rgba(0, 0, 0, 0.2);
-        border-left: 2px solid $inventory-color;
+        border-left: 2px solid $primary-text;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -95,7 +94,7 @@ $buttons-color: #7ee0d0;
         width: 100%;
         background: rgba(0, 0, 0, 0.3);
         padding: 2px 0;
-        border-bottom: 1px solid rgba($inventory-color, 0.4);
+        border-bottom: 1px solid rgba($primary-text, 0.4);
         display: flex;
         justify-content: center;
         height: 25%;
@@ -103,7 +102,7 @@ $buttons-color: #7ee0d0;
     }
 
     .inventory-header h2 {
-        color: color-mix(in srgb, $inventory-color, white 5%);
+        color: color-mix(in srgb, $primary-text, white 5%);
         font-size: 0.75rem;
         text-transform: uppercase;
         font-weight: bold;
@@ -121,7 +120,7 @@ $buttons-color: #7ee0d0;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        border-top: 1px solid rgba($inventory-color, 0.4);
+        border-top: 1px solid rgba($primary-text, 0.4);
     }
 
     .items {
@@ -140,15 +139,15 @@ $buttons-color: #7ee0d0;
         align-items: center;
         justify-content: center;
         border-radius: 3px;
-        border: 1px solid $inventory-color;
+        border: 1px solid $primary-text;
         background: rgba(0, 0, 0, 0.3);
-        box-shadow: 0 0 3px rgba($inventory-color, 0.2);
+        box-shadow: 0 0 3px rgba($primary-text, 0.2);
         width: 5vh;
         height: 5vh;
     }
 
     .item-slot.empty {
-        border: 1px dashed rgba($inventory-color, 0.4);
+        border: 1px dashed rgba($primary-text, 0.4);
         opacity: 0.7;
     }
 
@@ -156,8 +155,8 @@ $buttons-color: #7ee0d0;
         font-size: 0.7rem;
         font-weight: bold;
         padding: 10px;
-        color: $inventory-color;
-        text-shadow: 0 0 5px rgba($inventory-color, 0.6);
+        color: $primary-text;
+        text-shadow: 0 0 5px rgba($primary-text, 0.6);
         margin: 2px 0 0 0;
         letter-spacing: 1px;
         text-align: center;
@@ -167,7 +166,7 @@ $buttons-color: #7ee0d0;
         padding: 0;
         border-radius: 4px;
         background: rgba(0, 0, 0, 0.2);
-        border-left: 2px solid $timer-color;
+        border-left: 2px solid $primary-text;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -182,14 +181,14 @@ $buttons-color: #7ee0d0;
             background: rgba(0, 0, 0, 0.3);
             padding: 2px 0;
             height: 25%;
-            border-bottom: 1px solid rgba($timer-color, 0.4);
+            border-bottom: 1px solid rgba($primary-text, 0.4);
             display: flex;
             justify-content: center;
             align-items: center;
         }
 
         .timer-header h2 {
-            color: color-mix(in srgb, $timer-color, white 5%);
+            color: color-mix(in srgb, $primary-text, white 5%);
             font-size: 0.75rem;
             text-transform: uppercase;
             font-weight: bold;
@@ -215,8 +214,8 @@ $buttons-color: #7ee0d0;
             font-size: 0.9rem;
             font-weight: bold;
             font-family: 'Digital-7', 'Orbitron', monospace;
-            color: $timer-color;
-            text-shadow: 0 0 5px rgba($timer-color, 0.6);
+            color: $primary-text;
+            text-shadow: 0 0 5px rgba($primary-text, 0.6);
             margin: 0;
             letter-spacing: 1px;
 
@@ -225,7 +224,7 @@ $buttons-color: #7ee0d0;
                 display: inline-block;
                 width: 3px;
                 height: 3px;
-                background-color: $timer-color;
+                background-color: $primary-text;
                 border-radius: 50%;
                 margin: 0 2px;
                 vertical-align: middle;
@@ -239,7 +238,7 @@ $buttons-color: #7ee0d0;
         padding: 3px;
         border-radius: 8px;
         background: rgba(0, 0, 0, 0.2);
-        border-left: 3px solid $buttons-color;
+        border-left: 3px solid $primary-text;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
@@ -251,7 +250,7 @@ $buttons-color: #7ee0d0;
             padding: 0px 10px;
             height: 35%;
             min-height: 25px;
-            background: $buttons-color;
+            background: $primary-text;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 5px;
             color: $secondary-bg;
@@ -262,7 +261,7 @@ $buttons-color: #7ee0d0;
             letter-spacing: 1px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba($buttons-color, 0.3);
+            box-shadow: 0 0 10px rgba($primary-text, 0.3);
             position: relative;
             overflow: hidden;
             text-align: center;
@@ -284,13 +283,13 @@ $buttons-color: #7ee0d0;
                 transform: translateY(-2px);
                 box-shadow:
                     0 4px 8px rgba(0, 0, 0, 0.3),
-                    0 0 15px rgba($buttons-color, 0.5);
+                    0 0 15px rgba($primary-text, 0.5);
             }
 
             &:active {
                 transform: translateY(1px);
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
-                background: color-mix(in srgb, $buttons-color, black 15%);
+                background: color-mix(in srgb, $primary-text, black 15%);
             }
 
             &:first-of-type {
@@ -380,39 +379,6 @@ $buttons-color: #7ee0d0;
         object-fit: contain;
         background-color: rgba(0, 0, 0, 0.2);
     }
-}
-
-::ng-deep .custom-snackbar {
-    background-color: #1a1625 !important;
-    color: #7ee0d0 !important;
-    border: 1px solid #7ee0d0 !important;
-    box-shadow: 0 0 12px rgba(126, 224, 208, 0.5);
-    font-weight: bold;
-    text-align: center;
-    padding: 14px 24px;
-    border-radius: 8px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-::ng-deep .mat-snack-bar-container {
-    background: transparent !important;
-    box-shadow: none !important;
-    min-width: 280px;
-    max-width: 400px;
-    justify-content: center;
-}
-
-::ng-deep .custom-snackbar .mat-button {
-    color: #7ee0d0 !important;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-::ng-deep .custom-snackbar .mat-button:hover {
-    color: #00ffd0 !important;
-    text-shadow: 0 0 8px rgba(126, 224, 208, 0.8);
 }
 
 
