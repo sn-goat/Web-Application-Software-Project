@@ -5,6 +5,7 @@ import { FightEvents } from '@common/game.gateway.events';
 import { Dice, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GameService } from './game.service';
 
 @Injectable()
 export class FightService {
@@ -15,9 +16,11 @@ export class FightService {
     private activeFights: Map<string, Fight> = new Map();
 
     constructor(
+        private gameService: GameService,
         private timerService: TimerService,
         private eventEmitter: EventEmitter2,
     ) {}
+
     getFight(accessCode: string): Fight | null {
         return this.activeFights.get(accessCode) ?? null;
     }
@@ -75,8 +78,14 @@ export class FightService {
         }
         const attacker: PlayerStats & FightInfo = fight.currentPlayer.id === fight.player1.id ? fight.player1 : fight.player2;
         const defender: PlayerStats & FightInfo = fight.player1.id === attacker.id ? fight.player2 : fight.player1;
-        attacker.diceResult = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
-        defender.diceResult = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
+
+        if (!this.gameService.isGameDebugMode(accessCode)) {
+            attacker.diceResult = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
+            defender.diceResult = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
+        } else {
+            attacker.diceResult = this.diceToNumber(attacker.attackDice);
+            defender.diceResult = this.diceToNumber(defender.defenseDice);
+        }
 
         let damage = attacker.attack + attacker.diceResult - (defender.defense + defender.diceResult);
         if (damage < 0) {
@@ -84,7 +93,7 @@ export class FightService {
         }
 
         defender.currentLife = Math.max(defender.currentLife - damage, 0);
-        this.logger.log(`Player ${attacker.id} attaque ${defender.id} et inflige ${damage} points de dégâts (vie restante: ${defender.life}).`);
+        this.logger.log(`Player ${attacker.name} attaque ${defender.name} et inflige ${damage} points de dégâts (vie restante: ${defender.life}).`);
 
         if (defender.currentLife === 0) {
             this.endFight(accessCode, attacker, defender);

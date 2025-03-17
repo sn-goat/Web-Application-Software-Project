@@ -127,8 +127,8 @@ export class SocketService {
         this.socket.emit(GameEvents.Debug, accessCode);
     }
 
-    debugMove(accessCode: string, direction: Vec2) {
-        this.socket.emit(TurnEvents.DebugMove, { accessCode, direction });
+    debugMove(accessCode: string, direction: Vec2, player: PlayerStats) {
+        this.socket.emit(TurnEvents.DebugMove, { accessCode, direction, player });
     }
 
     quitGame(accessCode: string, playerId: string) {
@@ -217,10 +217,6 @@ export class SocketService {
                 const receivedMap = new Map(Object.entries(turn.path));
                 observer.next({ player: turn.player, path: receivedMap });
             });
-            this.socket.on(TurnEvents.UpdateTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {
-                const receivedMap = new Map(Object.entries(turn.path));
-                observer.next({ player: turn.player, path: receivedMap });
-            });
         });
     }
 
@@ -284,9 +280,19 @@ export class SocketService {
         });
     }
 
-    onWinner(): Observable<void> {
+    onWinner(): Observable<PlayerStats> {
         return new Observable((observer) => {
-            this.socket.on(FightEvents.Winner, (data) => observer.next(data));
+            this.socket.on(FightEvents.Winner, (winner) => {
+                observer.next(winner);
+            });
+        });
+    }
+
+    onEndGame(): Observable<PlayerStats> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.End, (winner) => {
+                observer.next(winner);
+            });
         });
     }
 

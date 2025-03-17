@@ -22,6 +22,7 @@ export class PlayerService {
             if (data.player.id === this.getPlayer().id) {
                 this.setPlayerActive(true);
                 this.setPath(data.path);
+                this.setPlayer(data.player);
             } else {
                 this.setPlayerActive(false);
                 this.setPath(new Map());
@@ -29,9 +30,11 @@ export class PlayerService {
         });
 
         this.socketService.onTurnUpdate().subscribe((data) => {
-            this.setPlayer(data.player);
-            this.setPath(data.path);
-            this.setPlayerActive(true);
+            if (data.player.id === this.getPlayer().id) {
+                this.setPlayer(data.player);
+                this.setPath(data.path);
+                this.setPlayerActive(true);
+            }
         });
 
         this.socketService.onAssignSpawn().subscribe((data) => {
