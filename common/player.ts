@@ -1,4 +1,4 @@
-import { Vec2 } from "./board";
+import { Vec2 } from './board';
 
 export interface PlayerInfo {
     id: string;
@@ -26,3 +26,6 @@ export interface GameStats {
 }
 
 export type PlayerStats = PlayerInfo & PlayerAttributes & GameStats;
+
+export const DEFAULT_ATTACK_VALUE = 4;
+export const DEFAULT_DEFENSE_VALUE = 4;

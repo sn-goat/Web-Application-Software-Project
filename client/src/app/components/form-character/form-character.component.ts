@@ -7,7 +7,7 @@ import { GameMapService } from '@app/services/code/game-map.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, PlayerStats } from '@common/player';
 import { first } from 'rxjs/operators';
 
 type DiceBonus = 'attack' | 'defense';
@@ -38,8 +38,8 @@ export class FormCharacterComponent implements OnInit {
         name: '',
         avatar: this.getCurrentPortraitImage(),
         life: 4,
-        attack: 4,
-        defense: 4,
+        attack: DEFAULT_ATTACK_VALUE,
+        defense: DEFAULT_DEFENSE_VALUE,
         speed: 4,
         attackDice: 'D4',
         defenseDice: 'D4',
