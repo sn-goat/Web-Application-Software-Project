@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, ViewChild, inject } from '@angular/core';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
-import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 import { GameMapInfoComponent } from '@app/components/game/game-map-info/game-map-info.component';
 import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-player-detailed/game-map-player-detailed.component';
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
@@ -20,8 +19,6 @@ import { SocketService } from '@app/services/code/socket.service';
         GameMapPlayerDetailedComponent,
         GameMapPlayerToolsComponent,
         GameMapPlayerComponent,
-        HeaderBarComponent,
-        GameFightInterfaceComponent,
         CommonModule,
     ],
     templateUrl: './game-page.component.html',

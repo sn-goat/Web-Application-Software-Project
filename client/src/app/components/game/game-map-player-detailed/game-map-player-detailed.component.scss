@@ -1,7 +1,9 @@
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
 $primary-text: #7ee0d0;
-$glow-teal: rgba(126, 224, 208, 0.3);
+$glow-teal: rgba(126, 224, 208, 0.2);
+$glow-gold: rgba(255, 215, 0, 0.2);
+$rectangle-border: 1px solid $primary-text;
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
@@ -14,273 +16,508 @@ $skill-color: #7ee0d0;
     display: block;
     height: 100%;
     width: 100%;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.7rem; 
 }
 
 .container {
-  background-color: $secondary-bg;
-  border-radius: $border-radius;
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 10px $glow-teal;
-  color: $primary-text;
-  font-family: 'Rajdhani', sans-serif;
-  
-  h2 {
-    margin: 0;
-    padding: 12px 15px;
-    font-size: 1rem;
-    font-weight: 600;
-    text-align: center;
+    background-color: $secondary-bg;
+    border-radius: $border-radius;
+    height: 100%; 
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    overflow: visible; 
+    box-shadow:
+        0 0 10px rgba(0, 0, 0, 0.5),
+        0 0 8px $glow-teal;
     color: $primary-text;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 0 0 10px $glow-teal;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid $glow-teal;
-  }
-  
-  .player {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid $glow-teal;
-    
-    .player-image {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 2px solid $primary-text;
-      box-shadow: 0 0 10px $glow-teal;
-      object-fit: cover;
+
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid $glow-teal;
+        padding: 4px 6px;
+
+        h2 {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: $primary-text;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px $glow-teal;
+        }
+
+        .player-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid $primary-text;
+            box-shadow: 0 0 6px $glow-teal;
+            object-fit: cover;
+        }
     }
-    
+
+    .info {
+        flex-grow: 1;
+        overflow: visible;
+        padding: 3px 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        background-color: rgba(0, 0, 0, 0.3);
+        flex: 1;
+        min-height: 0;
+
+        h3 {
+            margin: 0 0 2px 0;
+            font-size: 0.75rem; 
+            color: $secondary-text;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba($primary-text, 0.3);
+            padding-bottom: 1px;
+        }
+
+        h4 {
+            margin: 0;
+            font-size: 0.65rem; 
+            color: $secondary-text;
+            font-weight: normal;
+            display: inline-block;
+        }
+
+        p {
+            margin: 0 0 0 2px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: inline-block;
+            text-shadow: 0 0 4px $glow-teal;
+        }
+    }
+
+    .stats-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        height: 100%;
+        overflow: visible;
+        flex: 1;
+    }
+
+
+    .life,
+    .attribute,
+    .dices,
+    .skills {
+        padding: 3px; 
+        border-radius: 4px; 
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        border-left: 2px solid;
+        flex-shrink: 0;
+        height: auto;
+        min-height: 0;
+        flex: 1;
+    }
+
+    .life {
+        border-color: $health-color;
+        display: flex;
+        flex-direction: column;
+
+        h3 {
+            color: color-mix(in srgb, $health-color, white 10%);
+            margin-bottom: 3px !important;
+        }
+
+        .life-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 4px;
+
+            h4 {
+                margin-right: 5px;
+                color: $health-color;
+            }
+
+            p {
+                color: $health-color;
+                text-shadow: 0 0 4px rgba($health-color, 0.5);
+                font-weight: bold;
+            }
+        }
+
+        .health-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+            color: white;
+            text-shadow:
+                0 0 3px black,
+                0 0 2px black;
+            font-size: 12px;
+            left: 0;
+            z-index: 10;
+        }
+
+        .life-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+        }
+
+        .life-left,
+        .max-life {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0px;
+            font-size: 0.7rem !important;
+
+            h4 {
+                margin: 0;
+                font-size: 0.65rem !important;
+            }
+
+            p {
+                margin: 0;
+                font-size: 0.7rem !important;
+                color: $health-color;
+            }
+        }
+    }
+
+    .health-bar-container {
+        width: 100%;
+        height: 10px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border: 1px solid $glow-teal;
+        border-radius: 3px;
+        margin: 5px 0;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 0 3px rgba($health-color, 0.3) inset;
+    }
+
+    .health-bar {
+        height: 100%;
+        background: linear-gradient(to right, #ff5252, #ff7b7b);
+        transition: width 0.5s ease-out;
+        border-right: 1px solid rgba(0, 0, 0, 0.3);
+        position: relative;
+        min-width: 5px;
+    }
+
+    .health-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        line-height: 15px;
+        font-weight: bold;
+        color: white;
+        text-shadow:
+            0 0 3px black,
+            0 0 2px black;
+        font-size: 10px;
+        left: 0;
+        mix-blend-mode: difference;
+        z-index: 5;
+    }
+
+    .health-hight {
+        background: linear-gradient(to right, #4caf50, #8bc34a);
+        box-shadow: 0 0 10px rgba(#4caf50, 0.7); 
+    }
+
+    .health-medium {
+        background: linear-gradient(to right, #ffc107, #ffeb3b);
+        box-shadow: 0 0 10px rgba(#ffc107, 0.7);
+    }
+
+    .health-low {
+        background: linear-gradient(to right, #f44336, #ff5722);
+        box-shadow: 0 0 10px rgba(#f44336, 0.7);
+        animation: pulse 1.5s infinite;
+    }
+
+    .attribute {
+        border-color: $attribute-color;
+
+        h3 {
+            color: color-mix(in srgb, $attribute-color, white 10%);
+            margin-bottom: 4px;
+        }
+
+        .speed p,
+        .attack p,
+        .defense p {
+            color: $attribute-color;
+            text-shadow: 0 0 4px rgba($attribute-color, 0.5);
+        }
+
+        .attributes-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 2px;
+            flex: 1;
+            align-items: center;
+
+            .speed,
+            .attack,
+            .defense {
+                flex: 0 0 auto;
+            }
+        }
+    }
+
+    .dices {
+        border-color: $dice-color;
+
+        h3 {
+            color: color-mix(in srgb, $dice-color, white 10%);
+            margin-bottom: 4px;
+        }
+
+        .dice-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex: 1;
+
+            .dice-label {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+
+                h4 {
+                    margin-bottom: 5px;
+                }
+
+                .dice-image {
+                    width: 28px;
+                    height: 28px;
+                    margin-top: 3px;
+                    border: 1px solid $dice-color;
+                    border-radius: 2px;
+                    background-color: rgba(0, 0, 0, 0.3);
+                }
+            }
+        }
+    }
+
+    .skills {
+        border-color: $skill-color;
+
+        h3 {
+            color: color-mix(in srgb, $skill-color, white 10%);
+            margin-bottom: 4px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            flex: 1;
+            align-items: center;
+        }
+    }
+
+    .life-left,
+    .max-life,
+    .speed,
+    .attack,
+    .defense,
+    .mouvements,
+    .actions {
+        margin-left: 2px;
+        padding: 0;
+    }
+
+    h3 {
+        margin-bottom: 6px !important;
+        font-size: 0.8rem !important;
+    }
+
+    h4,
     p {
-      margin: 0 0 0 15px;
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: $primary-text;
-      text-shadow: 0 0 8px $glow-teal;
+        font-size: 0.75rem !important;
     }
-  }
-  
-  .info {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 10px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background-color: rgba(0, 0, 0, 0.3);
-    
-    &::-webkit-scrollbar {
-      width: 5px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: $secondary-bg;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background-color: $glow-teal;
-      border-radius: 20px;
-    }
-    
-    h3 {
-      margin: 0 0 8px 0;
-      font-size: 1.1rem;
-      color: $secondary-text;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid rgba($primary-text, 0.3);
-      padding-bottom: 5px;
-    }
-    
-    h4 {
-      margin: 0;
-      font-size: 0.9rem;
-      color: $secondary-text;
-      font-weight: normal;
-      display: inline-block;
-    }
-    
-    p {
-      margin: 0 0 0 5px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      display: inline-block;
-      text-shadow: 0 0 5px $glow-teal;
-    }
-  }
-  
-  .life, .attribute, .dices, .skills {
-    padding: 10px;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .life {
-    border-left: 3px solid $health-color;
-    
-    h3 {
-      color: color-mix(in srgb, $health-color, white 10%);
-    }
-    
-    .life-left p {
-      color: $health-color;
-      text-shadow: 0 0 5px rgba($health-color, 0.5);
-    }
-  }
 
-  .health-bar-container {
-    width: 100%;
-    height: 24px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border: 1px solid $glow-teal;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 0 10px rgba($health-color, 0.3) inset;
-  }
-  
-  .health-bar {
-    height: 100%;
-    background: linear-gradient(to right, color-mix(in srgb, $health-color, black 10%), $health-color);
-    transition: width 0.5s ease-out;
-    border-right: 2px solid rgba(0, 0, 0, 0.3);
-    position: relative;
-  }
-  
-  .health-text {
-    position: absolute;
-    width: 100%;
-    text-align: center;
-    line-height: 24px;
-    font-weight: bold;
-    color: white;
-    text-shadow: 0 0 2px black, 0 0 4px black;
-    font-size: 14px;
-    left: 0;
-    mix-blend-mode: difference;
-  }
-  
-  .health-high {
-    background: linear-gradient(to right, #4CAF50, #8BC34A);
-    box-shadow: 0 0 15px rgba(#4CAF50, 0.5);
-  }
-  
-  .health-medium {
-    background: linear-gradient(to right, #FFC107, #FFEB3B);
-    box-shadow: 0 0 15px rgba(#FFC107, 0.5);
-  }
-  
-  .health-low {
-    background: linear-gradient(to right, #F44336, #FF5722);
-    box-shadow: 0 0 15px rgba(#F44336, 0.5);
-    animation: pulse 1.5s infinite;
-  }
-  
-  @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.8; }
-    100% { opacity: 1; }
-  }
-  
-  .attribute {
-    border-left: 3px solid $attribute-color;
-    
-    h3 {
-      color: color-mix(in srgb, $attribute-color, white 10%);
-    }
-    
-    .speed p, .attack p, .defense p {
-      color: $attribute-color;
-      text-shadow: 0 0 5px rgba($attribute-color, 0.5);
-    }
-  }
-  
-  .dices {
-    border-left: 3px solid $dice-color;
-    
-    h3 {
-      color: color-mix(in srgb, $dice-color, white 10%);
-    }
-    
-    .attack-dice p, .defense-dice p {
-      color: $dice-color;
-      text-shadow: 0 0 5px rgba($dice-color, 0.5);
-    }
-  }
-  
-  .skills {
-    border-left: 3px solid $skill-color;
-    
-    h3 {
-      color: color-mix(in srgb, $skill-color, white 10%);
-    }
-    
-    .mouvements p, .actions p {
-      color: $skill-color;
-      text-shadow: 0 0 5px rgba($skill-color, 0.5);
-    }
-  }
-  
-
-  .life-left, .max-life, .speed, .attack, .defense, 
-  .attack-dice, .defense-dice, .mouvements, .actions {
-    margin-left: 10px;
-    padding: 3px 0;
-  }
-}
-
-.life, .attribute, .dices, .skills {
-  transition: transform 0.2s, box-shadow 0.2s;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-}
-
-.dices {
-    border-left: 3px solid $dice-color;
-    
-    h3 {
-      color: color-mix(in srgb, $dice-color, white 10%);
-    }
-    
-    .attack-dice, .defense-dice {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      margin-left: 10px;
-      padding: 3px 0;
-    }
-    
-    h4 {
-      margin-bottom: 5px;
-    }
-    
     .dice-image {
-      width: 40px;
-      height: 40px;
-      margin-top: 5px;
-      border: 1px solid $dice-color;
-      border-radius: 5px;
-      box-shadow: 0 0 8px rgba($dice-color, 0.5);
-      background-color: rgba(0, 0, 0, 0.3);
-      transition: transform 0.3s ease;
-      
-      &:hover {
-        transform: rotate(10deg) scale(1.1);
-        box-shadow: 0 0 15px rgba($dice-color, 0.8);
-      }
+        width: 24px !important;
+        height: 24px !important;
     }
-  }
+}
+
+.life,
+.attribute,
+.dices,
+.skills {
+    transition: none;
+    &:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    padding-top: 1px;
+    padding-bottom: 2px;
+    max-height: 25%;
+}
+
+.player-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    margin-bottom: 5px;
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2px 3px;
+        border-radius: 3px;
+        background-color: rgba(0, 0, 0, 0.2);
+        font-size: 0.7rem;
+
+        .stat-label {
+            color: $primary-text;
+            margin-right: 3px;
+            font-size: 0.7rem;
+        }
+
+        .stat-value {
+            color: white;
+            font-weight: bold;
+            font-size: 0.7rem;
+        }
+    }
+}
+
+
+@media (max-height: 600px) {
+    :host {
+        font-size: 0.65rem;
+    }
+
+    .container {
+        h2 {
+            padding: 4px;
+            font-size: 0.8rem;
+        }
+
+        .player {
+            padding: 5px;
+            .player-image {
+                width: 25px;
+                height: 25px;
+            }
+            p {
+                font-size: 0.8rem;
+            }
+        }
+
+        .info {
+            padding: 3px 5px;
+            gap: 3px;
+
+            h3 {
+                font-size: 0.7rem;
+                margin: 0 0 2px 0;
+            }
+
+            h4 {
+                font-size: 0.65rem;
+            }
+
+            p {
+                font-size: 0.7rem;
+            }
+        }
+
+        .life,
+        .attribute,
+        .dices,
+        .skills {
+            padding: 3px;
+        }
+
+        .health-bar-container {
+            height: 6px;
+            margin-bottom: 3px;
+        }
+
+        .health-text {
+            line-height: 6px;
+            font-size: 6px;
+        }
+    }
+
+    .player-stats .stat-item {
+        padding: 1px 2px;
+        font-size: 0.65rem;
+    }
+
+    .dice-image {
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
+
+
+h3 {
+    margin-top: 0 !important;
+    margin-bottom: 3px !important;
+    padding-bottom: 1px !important;
+}
+
+
+.life h4,
+.life p {
+    font-size: 0.65rem !important;
+}
+
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+
+.health-hight {
+    background: linear-gradient(to right, #4caf50, #8bc34a) !important;
+}
+
+.health-medium {
+    background: linear-gradient(to right, #ff9800, #ffeb3b) !important;
+}
+
+.health-low {
+    background: linear-gradient(to right, #f44336, #ff5722) !important;
+    animation: pulse 1.5s infinite;
+}
+
+
+.container .health-bar-container,
+.container .health-bar,
+.container .health-text {
+    display: none;
+}

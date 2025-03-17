@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { PlayerService } from '@app/services/code/player.service';
@@ -37,10 +37,6 @@ export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
-    }
-
-    getHealthBar(): string {
-        return 'health-hight';
     }
 
     roundHealth(health: number): number {
