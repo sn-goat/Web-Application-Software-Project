@@ -315,4 +315,11 @@ export class SocketService {
     disconnect(accessCode: string, playerId: string) {
         this.socket.emit(RoomEvents.DisconnectPlayer, { accessCode, playerId });
     }
+
+    onAdminDisconnected(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.AdminDisconnected, () => observer.next());
+        });
+    }
 }
+

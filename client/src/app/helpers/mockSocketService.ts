@@ -31,6 +31,7 @@ export class MockSocketService {
     private broadcastMoveSubject = new Subject<unknown>();
     private broadcastItemSubject = new Subject<unknown>();
     private broadcastDoorSubject = new Subject<unknown>();
+    private adminDisconnected = new Subject<unknown>();
 
     private switchTurnSubject = new Subject<unknown>();
     private turnUpdateSubject = new Subject<unknown>();
@@ -129,6 +130,10 @@ export class MockSocketService {
 
     onQuitGame() {
         return this.quitGameSubject.asObservable();
+    }
+
+    onAdminDisconnected() {
+        return this.adminDisconnected.asObservable();
     }
 
     createRoom(_size: number): void {}
@@ -235,3 +240,4 @@ export class MockSocketService {
         this.assignSpawnSubject.next(data);
     }
 }
+
