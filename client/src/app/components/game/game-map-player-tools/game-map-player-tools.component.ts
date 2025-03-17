@@ -70,6 +70,24 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                     });
                 }
             }),
+
+            this.socketService.onWinner().subscribe(() => {
+                this.snackBar.open('Tu as gagner le combat!', 'Fermer', {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'top',
+                    panelClass: ['custom-snackbar'],
+                });
+            }),
+
+            this.socketService.onLoser().subscribe(() => {
+                this.snackBar.open('Tu as perdu le combat!', 'Fermer', {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'top',
+                    panelClass: ['custom-snackbar'],
+                });
+            }),
         );
     }
 
