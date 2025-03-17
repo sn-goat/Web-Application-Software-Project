@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild, inject, HostListener } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnInit, ViewChild, inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { GameMapInfoComponent } from '@app/components/game/game-map-info/game-map-info.component';
 import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-player-detailed/game-map-player-detailed.component';
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
+import { Alert } from '@app/constants/enums';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
@@ -14,9 +17,6 @@ import { SocketService } from '@app/services/code/socket.service';
 import { Game } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { firstValueFrom } from 'rxjs';
-import { AlertComponent } from '@app/components/common/alert/alert.component';
-import { MatDialog } from '@angular/material/dialog';
-import { Alert } from '@app/constants/enums';
 
 @Component({
     selector: 'app-game-page',
@@ -85,6 +85,14 @@ export class GamePageComponent implements OnInit, AfterViewInit {
                 return originalAbandonMethod.call(this.headerBar);
             }
         };
+    }
+
+    toggleInfo() {
+        this.showInfo = !this.showInfo;
+    }
+
+    toggleChat() {
+        this.showChat = !this.showChat;
     }
 
     async warning(message: string): Promise<void> {
