@@ -1,5 +1,6 @@
 <div class="game-grid">
-    <div class="top-rectangle">
+    <div class="left-rectangle">
+        <app-header-bar></app-header-bar>
         <app-game-map-player></app-game-map-player>
     </div>
 
@@ -20,24 +21,15 @@
 </div>
 
 
-    <!-- Chat Popup -->
     @if(showChat) {
     <div class="popup">
         <div class="popup-header">
             <span>Zone de messages</span>
             <button (click)="toggleChat()" class="close-popup">X</button>
         </div>
-        <div class="chat-content">
-            <!-- Chat messages go here -->
-        </div>
+        <div class="chat-content"></div>
     </div>
     } @if (showInfo) {
-    <!-- <div class="popup"> -->
-    <!-- <div class="popup-header">
-            <span>Info Partie</span>
-            <button (click)="toggleInfo()" class="close-chat">X</button>
-        </div> -->
     <app-game-map-info></app-game-map-info>
-    <!-- </div> -->
     }
 </div>
