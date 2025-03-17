@@ -5,6 +5,16 @@ $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #ff6b93;
 $accent-color: #ff6b93;
 $border-radius: 10px;
+$active-player-color: #ff9800;
+
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    --base-font-size: min(0.9rem, 3.2vw); /* Increased from 0.8rem */
+    --small-font-size: min(0.75rem, 2.4vw); /* Increased from 0.65rem */
+}
 
 .player-section {
     display: flex;
@@ -12,43 +22,50 @@ $border-radius: 10px;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    justify-content: space-evenly;
-    gap: calc(2px + (8px / var(--player-count)));
+    justify-content: space-between;
+    padding: 4px;
+    gap: 5px;
     overflow: hidden;
 }
 
 .player {
-    flex: 1 1 auto;
-    height: calc(90% / var(--player-count));
-    width: 100%;
-    max-height: 18%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: calc(6px + (6px / var(--player-count)));
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: 8px;
     border-left: 2px solid $primary-text;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5), 0 0 6px $glow-teal;
-    padding: calc(6px + (4px / var(--player-count)));
+    box-shadow:
+        0 0 8px rgba(0, 0, 0, 0.5),
+        0 0 6px $glow-teal;
+    padding: 4px;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 
     &.active-player {
-        flex: 1.5;
-        max-height: 22%;
+        box-shadow: 0 0 10px rgba($primary-text, 0.6); /* Changed from orange to teal */
+        border-left: 3px solid $primary-text; /* Changed from orange to teal */
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Removed animation */
     }
 
     .player-image {
         display: flex;
         align-items: center;
-        width: auto;
-        gap: 8px; 
+        gap: 6px;
+        width: 45%;
+        min-width: 0;
+        overflow: hidden;
 
         img {
             border-radius: 50%;
-            width: calc(40px - (var(--player-count) * 0.5px));
-            max-width: 50px;
-            height: auto;
+            width: 30px;
+            height: 30px;
+            min-width: 30px; /* Prevent shrinking */
             border: 1px solid $primary-text;
             box-shadow: 0 0 6px $glow-teal;
             object-fit: cover;
@@ -56,7 +73,7 @@ $border-radius: 10px;
         }
 
         h3 {
-            font-size: calc(1.2rem - (var(--player-count) * 0.05rem));
+            font-size: min(0.9rem, 3.2vw); /* Increased from 0.8rem */
             color: $primary-text;
             text-shadow: 0 0 5px $glow-teal;
             font-weight: 600;
@@ -64,105 +81,81 @@ $border-radius: 10px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 100%;
+            margin: 0;
+            max-width: calc(100% - 36px); /* Leave room for image */
         }
     }
 
     .player-info {
-        border-radius: 4px;
-        padding: 6px;
+        width: 50%;
+        padding: 2px;
         text-align: center;
-        flex: 1 1 auto;
-        height: 100%;
-        width: 60%;
-        overflow: hidden;
         display: flex;
         flex-direction: column;
-        justify-content: space-evenly;
-        gap: calc(6px + (5px / var(--player-count)));
+        justify-content: center;
+        align-items: center;
+        gap: 2px;
+        overflow: hidden;
 
         h3 {
             margin: 0;
-            font-size: calc(1.1rem - (var(--player-count) * 0.05rem));
+            font-size: min(0.8rem, 2.7vw); /* Increased from 0.7rem */
+            line-height: 1.1; /* Tighter line height */
             color: $secondary-text;
             font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             text-align: center;
+            width: 100%;
+            height: fit-content;
         }
 
         h3.admin,
         h3.active {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 4px;
+            font-size: min(0.75rem, 2.5vw); /* Increased from 0.65rem */
+            padding: 1px 3px; /* Smaller padding */
+            margin-bottom: 2px;
+            border-radius: 3px;
+            display: inline-block;
             width: auto;
             height: auto;
-            line-height: 1;
-            box-sizing: border-box;
-            vertical-align: middle;
-            font-size: calc(1rem - (var(--player-count) * 0.04rem));
-            padding: 5px 8px;
+            max-width: 100%; /* Ensure it doesn't overflow */
+            line-height: 1; /* Remove extra space */
         }
 
         h3.admin {
             color: $accent-color;
-            font-weight: bold;
-            border-radius: 3px;
             border: 1px solid rgba($accent-color, 0.4);
             text-shadow: 0 0 4px rgba($accent-color, 0.6);
         }
 
         h3.active {
-            color: #ff9800;
+            color: $active-player-color; /* Keep orange color */
+            border: 1px solid rgba($active-player-color, 0.4);
+            text-shadow: 0 0 4px rgba($active-player-color, 0.6); /* Enhanced glow */
+            animation: text-pulse 2s ease-in-out infinite; /* Keep pulsing animation */
             font-weight: bold;
-            border-radius: 3px;
-            border: 1px solid rgba(#ff9800, 0.4);
-            text-shadow: 0 0 4px rgba($primary-text, 0.6);
-            animation: text-pulse 2s ease-in-out infinite;
-            overflow: visible;
-        }
-
-        h3 + h3 {
-            margin-top: 4px;
-        }
-
-        p {
-            margin: 2px 0 0 0;
-            font-size: calc(0.7rem - (var(--player-count) * 0.02rem));
-            color: $accent-color;
-            font-weight: bold;
-            line-height: 1.2;
-            text-shadow: 0 0 5px rgba($accent-color, 0.5);
         }
     }
 }
 
-
+/* Player states */
 .player-not-in-game {
     text-decoration: line-through;
     opacity: 0.3;
     color: #7a7a7a;
-
-    &::after {
-        content: none;
-    }
 }
 
-.player-image:has(.player-not-in-game) {
-    img {
-        opacity: 0.3;
-        filter: grayscale(100%);
-    }
+.player-image:has(.player-not-in-game) img {
+    opacity: 0.3;
+    filter: grayscale(100%);
 }
 
 .player:has(.player-not-in-game) {
     background-color: rgba(0, 0, 0, 0.4);
     border-left: 2px solid #4a4a4a;
+
     h3,
     p {
         opacity: 0.3;
@@ -171,19 +164,127 @@ $border-radius: 10px;
 }
 
 @keyframes text-pulse {
-    0% {
+    0%,
+    100% {
         opacity: 0.9;
-        border-color: rgba(#ff9800, 0.9);
-        box-shadow: 0 0 5px rgba(#ff9800, 0.6);
+        border-color: rgba($active-player-color, 0.9);
+        box-shadow: 0 0 5px rgba($active-player-color, 0.6);
     }
     50% {
         opacity: 0.6;
-        border-color: rgba(#ff9800, 0.2);
-        box-shadow: 0 0 2px rgba(#ff9800, 0.2);
+        border-color: rgba($active-player-color, 0.2);
+        box-shadow: 0 0 2px rgba($active-player-color, 0.2);
     }
-    100% {
-        opacity: 0.9;
-        border-color: rgba(#ff9800, 0.9);
-        box-shadow: 0 0 5px rgba(#ff9800, 0.6);
+}
+
+:host[style*="--player-count='1'"] .player-section,
+:host[style*="--player-count='2'"] .player-section {
+    height: 100%;
+}
+
+:host[style*="--player-count='3'"] .player-section,
+:host[style*="--player-count='4'"] .player-section {
+    height: 100%;
+}
+
+:host[style*="--player-count='5'"] .player-section,
+:host[style*="--player-count='6'"] .player-section,
+:host[style*="--player-count='7'"] .player-section,
+:host[style*="--player-count='8'"] .player-section {
+    height: 100%;
+}
+
+:host[style*="--player-count='1'"] .player {
+    height: 100%;
+}
+:host[style*="--player-count='2'"] .player {
+    height: 50%;
+}
+:host[style*="--player-count='3'"] .player {
+    height: 33.3%;
+}
+:host[style*="--player-count='4'"] .player {
+    height: 25%;
+}
+:host[style*="--player-count='5'"] .player {
+    height: 20%;
+}
+:host[style*="--player-count='6'"] .player {
+    height: 16.6%;
+}
+:host[style*="--player-count='7'"] .player {
+    height: 14.3%;
+}
+:host[style*="--player-count='8'"] .player {
+    height: 12.5%;
+}
+
+:host[style*="--player-count='1'"] .player,
+:host[style*="--player-count='2'"] .player {
+    padding: 8px;
+    margin-bottom: 5px;
+
+    .player-image img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .player-image h3 {
+        font-size: min(1.1rem, 3.7vw); /* Increased from 1rem */
+    }
+
+    .player-info h3 {
+        font-size: min(0.95rem, 3.2vw); /* Increased from 0.85rem */
+    }
+}
+
+:host[style*="--player-count='3'"] .player,
+:host[style*="--player-count='4'"] .player {
+    padding: 5px;
+
+    .player-image img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .player-image h3 {
+        font-size: min(0.9rem, 3vw); /* Increased from 0.8rem */
+    }
+
+    .player-info h3 {
+        font-size: min(0.8rem, 2.7vw); /* Increased from 0.7rem */
+    }
+}
+
+:host[style*="--player-count='5'"],
+:host[style*="--player-count='6'"],
+:host[style*="--player-count='7'"],
+:host[style*="--player-count='8'"] {
+    .player {
+        padding: 4px;
+
+        .player-image {
+            gap: 4px;
+
+            img {
+                width: 24px;
+                height: 24px;
+            }
+
+            h3 {
+                font-size: min(0.8rem, 2.7vw); /* Increased from 0.7rem */
+            }
+        }
+
+        .player-info h3 {
+            font-size: min(0.75rem, 2.5vw); /* Increased from 0.65rem */
+            margin-bottom: 0;
+        }
+
+        .player-info h3.admin,
+        .player-info h3.active {
+            font-size: min(0.7rem, 2.4vw); /* Increased from 0.6rem */
+            padding: 1px 2px;
+        }
     }
 }
