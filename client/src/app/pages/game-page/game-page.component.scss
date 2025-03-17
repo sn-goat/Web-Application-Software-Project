@@ -60,7 +60,6 @@ body {
     text-align: center;
     display: flex;
     flex-direction: column;
-    // align-items: center;
     justify-content: center;
     background-color: $primary-bg;
     color: $primary-text;
@@ -141,10 +140,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 15px;
     background-color: $primary-bg;
     border: $rectangle-border;
+    box-sizing: border-box;
+    overflow: hidden; 
 }
+
+
+
 
 .popup {
     position: fixed;
