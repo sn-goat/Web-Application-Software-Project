@@ -3,18 +3,18 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, In
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapCardComponent } from '@app/components/map-card/map-card.component';
+import { Alert } from '@app/constants/enums';
 import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
 import { BoardService } from '@app/services/code/board.service';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
-import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { firstValueFrom } from 'rxjs';
-import { AlertComponent } from '@app/components/common/alert/alert.component';
-import { Alert } from '@app/constants/enums';
 
 type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
 
@@ -117,7 +117,7 @@ export class MapListComponent implements OnInit {
     onEdit(map: Board): void {
         this.boardService.getBoard(map.name).subscribe((fullMap) => {
             this.mapService.setMapData(fullMap);
-            this.router.navigate(['/edit']);
+            this.router.navigate(['/edition']);
         });
     }
 
@@ -143,7 +143,7 @@ export class MapListComponent implements OnInit {
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 this.mapService.setMapData(result);
-                this.router.navigate(['/edit']);
+                this.router.navigate(['/edition']);
             }
         });
     }

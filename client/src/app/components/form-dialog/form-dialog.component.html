@@ -31,7 +31,7 @@
         </div>
 
         <div class="form-row">
-            <mat-label>Choisissez la taille de votre jeu:</mat-label>
+            <mat-label>Choisissez la taille du jeu:</mat-label>
             <mat-radio-group [(ngModel)]="data.size" name="size" class="radio-group">
                 <mat-radio-button value="10">Petit (10x10)</mat-radio-button>
                 <mat-radio-button value="15">Moyen (15x15)</mat-radio-button>
@@ -40,7 +40,7 @@
         </div>
 
         <div class="form-row">
-            <mat-label>Choisissez le mode de votre jeu:</mat-label>
+            <mat-label>Choisissez le mode du jeu:</mat-label>
             <mat-radio-group [(ngModel)]="data.isCTF" name="ctf" class="radio-group">
                 <mat-radio-button [value]="true">CTF</mat-radio-button>
                 <mat-radio-button [value]="false">Classique</mat-radio-button>

@@ -1,7 +1,7 @@
 <div class="map-list-container">
     @if(isLoading) {
     <div class="circ">
-        <div class="load">Loading . . .</div>
+        <div class="load">En cours de chargement . . .</div>
         <div class="hands"></div>
         <div class="body"></div>
         <div class="head">
@@ -22,19 +22,19 @@
     </div>
     <div class="grid-container">
         @for (map of getFilteredAndSortedItems(); track map) {
-            <app-map-card
-                [map]="map"
-                [isCreationPage]="isCreationPage"
-                (click)="onDivClick(map)"
-                (edit)="onEdit($event)"
-                (delete)="onDelete($event)"
-                (toggleVisibility)="toggleVisibility($event)"
-            >
+        <app-map-card
+            [map]="map"
+            [isCreationPage]="isCreationPage"
+            (click)="onDivClick(map)"
+            (edit)="onEdit($event)"
+            (delete)="onDelete($event)"
+            (toggleVisibility)="toggleVisibility($event)"
+        >
         </app-map-card>
         } @if (!isCreationPage) {
         <div class="list-item new-map-card" (click)="createNewMap()">
             <div class="add-icon">+</div>
-            <p class="add-text">Create New Map</p>
+            <p class="add-text">Créer une carte</p>
         </div>
         }
     </div>

@@ -1,21 +1,16 @@
 <div class="container justified">
-    <h1 class="header-item"> {{ title }}</h1>
+    <h1 class="header-item">{{ title }}</h1>
     @if (!gameLogoError) {
-        <img 
-            [src]="gameLogoPath" 
-            (error)="handleGameLogoError()" 
-            alt="Logo Jeu" 
-        />
+    <img [src]="gameLogoPath" (error)="handleGameLogoError()" alt="Logo Jeu" />
     } @else {
-        <p class="error-message">Failed to load game logo.</p>
+    <p class="error-message">Erreur de chargement du logo</p>
     }
 
     <section id="server-message" class="justified">
-
-        <div class="button-container ">
-            <button class="button" routerLink="/joinGame"> Joindre une partie </button>
-            <button class="button" routerLink="/creation"> Créer une partie</button>
-            <button class="button" routerLink="/admin"> Administer les jeux</button>
+        <div class="button-container">
+            <button class="button" routerLink="/joindre">Joindre une partie</button>
+            <button class="button" routerLink="/creation">Créer une partie</button>
+            <button class="button" routerLink="/admin">Administer les jeux</button>
         </div>
     </section>
 
@@ -23,9 +18,8 @@
         <h4 class="team-name">Équipe 112</h4>
         <p>
             @for (member of teamMembers; track member) {
-                <span>{{ member }}</span>
-                @if (!$last) {, }
-            }
+            <span>{{ member }}</span>
+            @if (!$last) {, } }
         </p>
     </footer>
 </div>

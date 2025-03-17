@@ -20,15 +20,15 @@ Component({
 });
 
 const routes: Routes = [
-    { path: '', redirectTo: '/home', pathMatch: 'full' },
-    { path: 'home', component: MainPageComponent },
+    { path: '', redirectTo: '/accueil', pathMatch: 'full' },
+    { path: 'accueil', component: MainPageComponent },
     { path: 'creation', component: CreatePageComponent },
-    { path: 'edit', component: MapMakerComponent },
-    { path: 'game', component: GamePageComponent },
+    { path: 'edition', component: MapMakerComponent },
+    { path: 'jeu', component: GamePageComponent },
     { path: 'lobby', component: LobbyComponent },
-    { path: 'joinGame', component: JoinRoomComponent },
+    { path: 'joindre', component: JoinRoomComponent },
     { path: 'admin', component: AdminPageComponent },
-    { path: '**', redirectTo: '/home' },
+    { path: '**', redirectTo: '/accueil' },
 ];
 
 bootstrapApplication(AppComponent, {

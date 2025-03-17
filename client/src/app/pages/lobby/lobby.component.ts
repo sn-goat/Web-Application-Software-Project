@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Game, Room } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
-import { map } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
-import { AlertComponent } from '@app/components/common/alert/alert.component';
-import { MatDialog } from '@angular/material/dialog';
-import { Alert } from '@app/constants/enums';
+import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'app-lobby',
@@ -74,7 +74,7 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
                 }
-                this.router.navigate(['/home']).then(() => window.location.reload());
+                this.router.navigate(['/accueil']).then(() => window.location.reload());
             }
         });
 
@@ -84,7 +84,7 @@ export class LobbyComponent implements OnInit {
                 if (!this.isAdmin) {
                     await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                 }
-                this.router.navigate(['/home']).then(() => window.location.reload());
+                this.router.navigate(['/accueil']).then(() => window.location.reload());
             }
         });
 
@@ -121,12 +121,12 @@ export class LobbyComponent implements OnInit {
 
     disconnect() {
         this.socketService.disconnect(this.accessCode, this.socketService.getCurrentPlayerId());
-        this.router.navigate(['/home']).then(() => window.location.reload());
+        this.router.navigate(['/accueil']).then(() => window.location.reload());
     }
 
     disconnectWithoutReload() {
         this.socketService.disconnect(this.accessCode, this.socketService.getCurrentPlayerId());
-        this.router.navigate(['/home']);
+        this.router.navigate(['/accueil']);
     }
 
     getCurrentPlayerId(): string {
