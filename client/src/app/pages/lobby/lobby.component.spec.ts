@@ -79,14 +79,14 @@
 //         // simulate removal such that current player is not in the list
 //         socketService.triggerPlayerRemoved([]);
 //         tick();
-//         expect(router.navigate).toHaveBeenCalledWith(['/home']);
+//         expect(router.navigate).toHaveBeenCalledWith(['/accueil']);
 //     }));
 
 //     it('should navigate home if current player disconnects', fakeAsync(() => {
 //         spyOn(window, 'confirm').and.returnValue(true);
 //         socketService.triggerPlayerDisconnected([]);
 //         tick();
-//         expect(router.navigate).toHaveBeenCalledWith(['/home']);
+//         expect(router.navigate).toHaveBeenCalledWith(['/accueil']);
 //     }));
 
 //     it('checkIfAdmin should set isAdmin true if current player is first in list', () => {
@@ -172,7 +172,7 @@
 //         tick();
 
 //         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
-//         expect(router.navigate).toHaveBeenCalledWith(['/home']);
+//         expect(router.navigate).toHaveBeenCalledWith(['/accueil']);
 //     }));
 
 //     it('disconnectWithoutReload should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
@@ -183,7 +183,7 @@
 //         tick();
 
 //         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
-//         expect(router.navigate).toHaveBeenCalledWith(['/home']);
+//         expect(router.navigate).toHaveBeenCalledWith(['/accueil']);
 //     }));
 
 //     it('should set accessCode from history state if available', () => {

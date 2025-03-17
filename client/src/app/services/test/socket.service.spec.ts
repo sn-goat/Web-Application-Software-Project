@@ -42,7 +42,7 @@ describe('SocketService', () => {
         (service as any).socket = fakeSocket;
         // Simuler l'enregistrement du callback pour "redirectHome"
         fakeSocket.on('redirectHome', () => {
-            routerSpy.navigate(['/home']);
+            routerSpy.navigate(['/accueil']);
         });
     });
 
@@ -52,11 +52,11 @@ describe('SocketService', () => {
         expect(fakeSocket.callbacks['redirectHome']).toBeDefined();
     });
 
-    it('should navigate to /home on redirectHome event', () => {
+    it('should navigate to /accueil on redirectHome event', () => {
         expect(fakeSocket.callbacks['redirectHome']).toBeDefined();
         // Simuler l'appel du callback pour "redirectHome"
         fakeSocket.callbacks['redirectHome']();
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+        expect(routerSpy.navigate).toHaveBeenCalledWith(['/accueil']);
     });
 
     it('should emit createRoom event with correct parameters', () => {
@@ -164,15 +164,15 @@ describe('SocketService', () => {
         expect(fakeSocket.emit).toHaveBeenCalledWith('disconnectPlayer', { accessCode, playerId });
     });
 
-    it('should register redirectHome callback in the constructor and navigate to /home when triggered', () => {
+    it('should register redirectHome callback in the constructor and navigate to /accueil when triggered', () => {
         // Vérifier que le callback a bien été enregistré
         expect(fakeSocket.callbacks['redirectHome']).toBeDefined();
 
         // Simuler l'événement 'redirectHome'
         fakeSocket.callbacks['redirectHome']();
 
-        // Vérifier que router.navigate a été appelé avec ['/home']
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+        // Vérifier que router.navigate a été appelé avec ['/accueil']
+        expect(routerSpy.navigate).toHaveBeenCalledWith(['/accueil']);
     });
 
     it('should emit data through onGameCreated observable when gameCreated event is triggered', (done) => {

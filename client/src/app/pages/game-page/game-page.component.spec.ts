@@ -99,7 +99,7 @@
 //             getBack: () => {
 //                 return;
 //             },
-//             backUrl: '/home',
+//             backUrl: '/accueil',
 //         };
 
 //         spyOn(headerBarMock, 'getBack');
@@ -124,7 +124,7 @@
 //             getBack: () => {
 //                 originalWasCalled = true;
 //             },
-//             backUrl: '/home',
+//             backUrl: '/accueil',
 //         };
 
 //         component.handleBackAction(headerBarMock);
