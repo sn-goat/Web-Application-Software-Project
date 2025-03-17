@@ -61,4 +61,24 @@ describe('BoardCellComponent', () => {
     it('should get item description', () => {
         expect(component.getItemDescription(Item.BOW)).toContain('Arc');
     });
+
+    it('should call event.preventDefault when isInGameView is true', () => {
+        const mockEvent = new DragEvent('dragstart');
+        spyOn(mockEvent, 'preventDefault');
+        component.isInGameView = true;
+
+        component.onDragStart(mockEvent);
+
+        expect(mockEvent.preventDefault).toHaveBeenCalled();
+    });
+
+    it('should NOT call event.preventDefault when isInGameView is false', () => {
+        const mockEvent = new DragEvent('dragstart');
+        spyOn(mockEvent, 'preventDefault');
+        component.isInGameView = false;
+
+        component.onDragStart(mockEvent);
+
+        expect(mockEvent.preventDefault).not.toHaveBeenCalled();
+    });
 });
