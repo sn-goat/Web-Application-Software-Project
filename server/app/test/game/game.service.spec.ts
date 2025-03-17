@@ -77,8 +77,8 @@ describe('GameService', () => {
         return game;
     };
 
-    describe('Méthodes publiques', () => {
-        it('changeDoorState - devrait changer une porte fermée en porte ouverte et vice versa', () => {
+    describe('Public Methods', () => {
+        it('changeDoorState - should change door state', () => {
             const playerTest: PlayerStats = { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1', position: { x: 0, y: 0 } } as PlayerStats;
             const mapCopy = JSON.parse(JSON.stringify(dummyMap));
             mapCopy[0][0].tile = Tile.CLOSED_DOOR;
@@ -93,7 +93,7 @@ describe('GameService', () => {
             expect(gameService.getMap(accessCode)[0][0].tile).toBe(Tile.CLOSED_DOOR);
         });
 
-        it('configureGame - devrait configurer un jeu en triant les joueurs et en assignant des points de spawn', () => {
+        it('configureGame - should configure game', () => {
             const players: PlayerStats[] = [
                 { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1' } as PlayerStats,
                 { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2' } as PlayerStats,
@@ -109,7 +109,7 @@ describe('GameService', () => {
             expect(configuredGame.players[2].id).toBe('p1');
         });
 
-        it('createGame - devrait créer un nouveau jeu avec les paramètres corrects', async () => {
+        it('createGame - should create game', async () => {
             await gameService.createGame(accessCode, 'org1', 'testMap');
             const game = gameService['currentGames'].get(accessCode);
 
@@ -119,7 +119,7 @@ describe('GameService', () => {
             expect(game.isDebugMode).toBe(false);
         });
 
-        it('movePlayer - devrait mettre à jour la position et émettre un événement', () => {
+        it('movePlayer - should update position', () => {
             setupTestGame({
                 players: [{ id: 'p1', position: { x: 0, y: 0 }, avatar: 'avatar1' } as PlayerStats],
                 map: dummyMap,
@@ -129,7 +129,7 @@ describe('GameService', () => {
             expect(eventEmitter.emit).toHaveBeenCalledWith(TurnEvents.Move, expect.any(Object));
         });
 
-        it('toggleDebugState - devrait basculer le mode debug', () => {
+        it('toggleDebugState - should toggle debug mode', () => {
             setupTestGame({ isDebugMode: false });
             gameService.toggleDebugState(accessCode);
             expect(gameService['currentGames'].get(accessCode).isDebugMode).toBe(true);
@@ -139,8 +139,8 @@ describe('GameService', () => {
         });
     });
 
-    describe("Méthodes d'accès aux données", () => {
-        it("getPlayer - devrait retourner le joueur correspondant à l'ID", () => {
+    describe('data manipulation methods', () => {
+        it('getPlayer - should return player by id', () => {
             setupTestGame({
                 players: [{ id: 'p1', name: 'Player1' } as PlayerStats, { id: 'p2', name: 'Player2' } as PlayerStats],
             });
@@ -148,19 +148,19 @@ describe('GameService', () => {
             expect(gameService.getPlayer(accessCode, 'p2').name).toBe('Player2');
         });
 
-        it("getPlayerTurn - devrait retourner le joueur dont c'est le tour", () => {
+        it('getPlayerTurn - should return active player', () => {
             const players = [{ id: 'p1', name: 'Player1' } as PlayerStats, { id: 'p2', name: 'Player2' } as PlayerStats];
 
             setupTestGame({ players, currentTurn: 1 });
             expect(gameService.getPlayerTurn(accessCode)).toEqual(players[1]);
         });
 
-        it("isGameDebugMode - devrait retourner l'état du mode debug", () => {
+        it('isGameDebugMode - should return debug state', () => {
             setupTestGame({ isDebugMode: true });
             expect(gameService.isGameDebugMode(accessCode)).toBe(true);
         });
 
-        it('hasActiveFight - devrait vérifier si un combat est actif', () => {
+        it('hasActiveFight - should verify if fight is active', () => {
             gameService['activeFights'].delete(accessCode);
             expect(gameService.hasActiveFight(accessCode)).toBe(false);
 
@@ -169,8 +169,8 @@ describe('GameService', () => {
         });
     });
 
-    describe('Gestion des tours', () => {
-        it('configureTurn - devrait configurer le tour et retourner les informations correctes', () => {
+    describe('Turn Management', () => {
+        it('configureTurn - shoudl configure turn', () => {
             const players = [
                 { id: 'p1', name: 'Player1', position: { x: 0, y: 0 } } as PlayerStats,
                 { id: 'p2', name: 'Player2', position: { x: 1, y: 0 } } as PlayerStats,
@@ -181,7 +181,7 @@ describe('GameService', () => {
             expect(turn.player).toEqual(players[0]);
         });
 
-        it('switchTurn - devrait passer au joueur suivant', () => {
+        it('switchTurn - should switch to next player', () => {
             setupTestGame({
                 players: [{ id: 'p1' } as PlayerStats, { id: 'p2' } as PlayerStats],
                 currentTurn: 0,
@@ -191,7 +191,7 @@ describe('GameService', () => {
             expect(gameService['currentGames'].get(accessCode).currentTurn).toBe(1);
         });
 
-        it('endTurnRequested - devrait gérer la fin de tour avec/sans mouvement en cours', () => {
+        it('endTurnRequested - should manage ending turn', () => {
             gameService['movementInProgress'].set(accessCode, false);
             gameService.endTurnRequested(accessCode);
             expect(eventEmitter.emit).toHaveBeenCalledWith(TurnEvents.End, accessCode);
@@ -201,7 +201,7 @@ describe('GameService', () => {
             expect(gameService['pendingEndTurn'].get(accessCode)).toBe(true);
         });
 
-        it("decrementAction - devrait gérer les points d'action et la fin de tour", () => {
+        it('decrementAction - should mange action and movement points', () => {
             const player = { id: 'p1', actions: 1, movementPts: 0, position: { x: 0, y: 0 } } as PlayerStats;
             setupTestGame({ players: [player] });
 
@@ -217,8 +217,8 @@ describe('GameService', () => {
         });
     });
 
-    describe('Méthodes privées', () => {
-        it('sortPlayersBySpeed - devrait trier les joueurs par vitesse décroissante', () => {
+    describe('Private Methods', () => {
+        it('sortPlayersBySpeed - should sort player by speed', () => {
             const players = [{ id: 'p1', speed: 3 } as PlayerStats, { id: 'p2', speed: 5 } as PlayerStats, { id: 'p3', speed: 1 } as PlayerStats];
 
             const sorted = (gameService as any).sortPlayersBySpeed([...players]);
@@ -227,7 +227,7 @@ describe('GameService', () => {
             expect(sorted[2].id).toBe('p3');
         });
 
-        it('getTileCost - devrait calculer correctement le coût des tuiles', () => {
+        it('getTileCost - should get tile cost', () => {
             const invokeGetTileCost = (cell: Cell): number => (gameService as any).getTileCost(cell);
 
             // Test des différents cas
@@ -241,7 +241,7 @@ describe('GameService', () => {
             expect(invokeGetTileCost({ tile: unknownTile as Tile, cost: 5 } as Cell)).toBe(5);
         });
 
-        it('findPossiblePaths - devrait calculer les chemins possibles selon les contraintes', () => {
+        it('findPossiblePaths - should get all possible paths', () => {
             // Test des contraintes de mouvement
             const grid: Cell[][] = [
                 [{ tile: Tile.FLOOR, position: { x: 0, y: 0 }, cost: 1, player: null, item: Item.DEFAULT }],
@@ -254,11 +254,11 @@ describe('GameService', () => {
     });
     // Configuration du jeu
     describe('configureGame', () => {
-        it("devrait renvoyer null si le jeu n'existe pas", () => {
+        it('should return null if nonexistant', () => {
             expect(gameService.configureGame('nonexistent', [])).toBeNull();
         });
 
-        it('devrait configurer un jeu correctement avec tous les joueurs assignés aux spawn points', () => {
+        it('should assign spawn', () => {
             const players: PlayerStats[] = [
                 { id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1' } as PlayerStats,
                 { id: 'p2', name: 'Player2', speed: 10, avatar: 'avatar2' } as PlayerStats,
@@ -285,7 +285,7 @@ describe('GameService', () => {
             expect(playersOnMap.length).toBe(2);
         });
 
-        it('devrait supprimer les points de spawn inutilisés', () => {
+        it('should delete spawn point unused', () => {
             const players: PlayerStats[] = [{ id: 'p1', name: 'Player1', speed: 5, avatar: 'avatar1' } as PlayerStats];
 
             const testMap = [
@@ -304,7 +304,7 @@ describe('GameService', () => {
 
     // Configuration d'un tour
     describe('configureTurn', () => {
-        it("devrait réinitialiser les points de mouvement et d'action du joueur actuel", () => {
+        it('should reset movement points', () => {
             const player = { id: 'p1', name: 'Player1', position: { x: 0, y: 0 }, speed: 5, movementPts: 0, actions: 0 } as PlayerStats;
             setupTestGame({ players: [player] });
 
@@ -312,7 +312,7 @@ describe('GameService', () => {
             expect(player.actions).toBe(0); // Réinitialisé à 1
         });
 
-        it('devrait calculer les chemins possibles pour le joueur actuel', () => {
+        it('should calculate path to destination', () => {
             const player = { id: 'p1', name: 'Player1', position: { x: 0, y: 0 }, speed: 2 } as PlayerStats;
             const testMap = [
                 [{ tile: Tile.FLOOR, position: { x: 0, y: 0 }, cost: 1, player: null, item: Item.DEFAULT }],
@@ -340,7 +340,7 @@ describe('GameService', () => {
 
     // Mise à jour du chemin du joueur
     describe('updatePlayerPathTurn', () => {
-        it('devrait utiliser le joueur spécifié si playerToUpdate est défini', () => {
+        it('should use playerToUpdate', () => {
             const player1 = { id: 'p1', name: 'Player1', position: { x: 0, y: 0 }, movementPts: 2 } as PlayerStats;
             const player2 = { id: 'p2', name: 'Player2', position: { x: 1, y: 0 }, movementPts: 3 } as PlayerStats;
             setupTestGame({ players: [player1, player2] });
@@ -356,7 +356,7 @@ describe('GameService', () => {
 
     // Création d'un jeu
     describe('createGame', () => {
-        it('devrait créer un jeu avec les propriétés correctes', async () => {
+        it('should create game with right settings', async () => {
             await gameService.createGame(accessCode, 'org123', 'testMap');
 
             const game = gameService['currentGames'].get(accessCode);
@@ -368,7 +368,7 @@ describe('GameService', () => {
             expect(game.accessCode).toBe(accessCode);
         });
 
-        it("devrait lancer une erreur si le board n'est pas trouvé", async () => {
+        it('should throw error if game not found', async () => {
             (boardService.getBoard as jest.Mock).mockResolvedValueOnce(null);
 
             await expect(gameService.createGame(accessCode, 'org123', 'notFoundMap')).rejects.toThrow('Board not found');
@@ -378,19 +378,19 @@ describe('GameService', () => {
     });
 
     // Méthodes d'accès aux données
-    describe("Méthodes d'accès aux données", () => {
-        it("getPlayer - devrait retourner undefined si le joueur n'est pas trouvé", () => {
+    describe('data management methods', () => {
+        it('getPlayer', () => {
             setupTestGame({ players: [{ id: 'p1' } as PlayerStats] });
             expect(gameService.getPlayer(accessCode, 'nonExistent')).toBeUndefined();
         });
 
-        it('startTimer - devrait appeler timerService.startTimer avec les paramètres corrects', () => {
+        it('startTimer', () => {
             const startTimerSpy = jest.spyOn(timerService, 'startTimer');
             gameService.startTimer(accessCode);
             expect(startTimerSpy).toHaveBeenCalledWith(accessCode, 30, 'movement');
         });
 
-        it("isActivePlayerReady - devrait retourner true si c'est le tour du joueur spécifié", () => {
+        it('isActivePlayerReady', () => {
             setupTestGame({
                 players: [{ id: 'p1' } as PlayerStats, { id: 'p2' } as PlayerStats],
                 currentTurn: 1,
@@ -400,11 +400,11 @@ describe('GameService', () => {
             expect(gameService.isActivePlayerReady(accessCode, 'p1')).toBe(false);
         });
 
-        it("getPlayerTurn - devrait retourner undefined si le jeu n'existe pas", () => {
+        it('getPlayerTurn', () => {
             expect(gameService.getPlayerTurn('nonExistent')).toBeUndefined();
         });
 
-        it('getMap - devrait retourner la carte du jeu', () => {
+        it('getMap', () => {
             const testMap = [[{ tile: 'testTile' } as any]];
             setupTestGame({ map: testMap });
             expect(gameService.getMap(accessCode)).toBe(testMap);
@@ -412,13 +412,13 @@ describe('GameService', () => {
     });
 
     // Gestion des tours
-    describe('Gestion des tours', () => {
-        it("switchTurn - ne devrait rien faire si le jeu n'existe pas", () => {
+    describe('Turn Management', () => {
+        it('switchTurn', () => {
             gameService.switchTurn('nonExistent');
             // Pas d'erreur = test réussi
         });
 
-        it('switchTurn - devrait passer au joueur suivant cycliquement', () => {
+        it('switchTurn', () => {
             setupTestGame({
                 players: [{ id: 'p1' } as PlayerStats, { id: 'p2' } as PlayerStats, { id: 'p3' } as PlayerStats],
                 currentTurn: 2,
@@ -428,7 +428,7 @@ describe('GameService', () => {
             expect(gameService['currentGames'].get(accessCode).currentTurn).toBe(0);
         });
 
-        it('endTurnRequested - devrait émettre un événement de fin de tour immédiatement si pas de mouvement en cours', () => {
+        it('endTurnRequested ', () => {
             gameService['movementInProgress'].set(accessCode, false);
             const emitSpy = jest.spyOn(eventEmitter, 'emit');
 
@@ -437,7 +437,7 @@ describe('GameService', () => {
             expect(emitSpy).toHaveBeenCalledWith(TurnEvents.End, accessCode);
         });
 
-        it('endTurnRequested - devrait définir pendingEndTurn si un mouvement est en cours', () => {
+        it('endTurnRequested', () => {
             gameService['movementInProgress'].set(accessCode, true);
             const emitSpy = jest.spyOn(eventEmitter, 'emit');
 
@@ -449,9 +449,9 @@ describe('GameService', () => {
     });
 
     // Méthodes privées
-    describe('Méthodes privées', () => {
+    describe('Private Methods', () => {
         describe('isPlayerTurnEnded', () => {
-            it('devrait retourner false si le joueur a encore des points de mouvement', () => {
+            it('should return false if there is remaining movement points', () => {
                 const player = { id: 'p1', movementPts: 2, actions: 0, position: { x: 0, y: 0 } } as PlayerStats;
                 setupTestGame({ players: [player] });
 
@@ -459,7 +459,7 @@ describe('GameService', () => {
                 expect(result).toBe(false);
             });
 
-            it('devrait retourner false si le joueur a des actions et peut en effectuer', () => {
+            it('should return false if there is remaining action points', () => {
                 const player = { id: 'p1', movementPts: 0, actions: 1, position: { x: 0, y: 0 } } as PlayerStats;
                 setupTestGame({ players: [player] });
 
@@ -469,7 +469,7 @@ describe('GameService', () => {
                 expect(result).toBe(false);
             });
 
-            it("devrait retourner true si le joueur n'a plus de points de mouvement ni d'actions possibles", () => {
+            it('should return true if no points remaining', () => {
                 const player = { id: 'p1', movementPts: 0, actions: 0, position: { x: 0, y: 0 } } as PlayerStats;
                 setupTestGame({ players: [player] });
 
@@ -481,7 +481,7 @@ describe('GameService', () => {
         });
 
         describe('isPlayerCanMakeAction', () => {
-            it('devrait retourner false si aucune cellule adjacente ne permet une action', () => {
+            it('should return false if no action possible', () => {
                 const position = { x: 1, y: 1 };
                 const testMap = [
                     [{ tile: Tile.FLOOR }, { tile: Tile.FLOOR }, { tile: Tile.FLOOR }],
@@ -497,26 +497,26 @@ describe('GameService', () => {
         });
 
         describe('isValidCellForAction', () => {
-            it('devrait retourner true pour une cellule avec un joueur non par défaut', () => {
+            it('should return true if player on cell', () => {
                 const cell = { player: Avatar.Berserker } as Cell;
                 expect((gameService as any).isValidCellForAction(cell)).toBe(true);
             });
 
-            it('devrait retourner true pour une porte (fermée ou ouverte)', () => {
+            it('should return true for door', () => {
                 expect((gameService as any).isValidCellForAction({ tile: Tile.CLOSED_DOOR } as Cell)).toBe(true);
                 expect((gameService as any).isValidCellForAction({ tile: Tile.OPENED_DOOR } as Cell)).toBe(true);
             });
 
-            it('devrait retourner false pour les autres cellules', () => {
+            it('should return false if no player or door', () => {
                 expect((gameService as any).isValidCellForAction({ player: Avatar.Default } as Cell)).toBe(false);
                 expect((gameService as any).isValidCellForAction({ tile: Tile.FLOOR } as Cell)).toBe(false);
             });
         });
     });
 
-    describe("findPossiblePaths - logique d'optimisation des chemins", () => {
-        it('devrait choisir les chemins optimaux en fonction du coût et de la longueur', () => {
-            // Créer une carte de test plus simple
+    describe('findPossiblePaths - path optimization logic', () => {
+        it('should choose optimal paths based on cost and length', () => {
+            // Create a simpler test map
             const testMap = [
                 [
                     { tile: Tile.FLOOR, position: { x: 0, y: 0 }, cost: 1, player: null, item: Item.DEFAULT },
@@ -530,10 +530,10 @@ describe('GameService', () => {
                 ],
             ];
 
-            // Mock la méthode findPossiblePaths complètement au lieu de tester son implémentation
+            // Completely mock the findPossiblePaths method instead of testing its implementation
             const mockPaths = new Map<string, PathInfo>();
 
-            // Ajouter des chemins simulés
+            // Add simulated paths
             mockPaths.set('1,0', { path: [{ x: 1, y: 0 }], cost: 1 });
             mockPaths.set('2,0', {
                 path: [
@@ -543,7 +543,7 @@ describe('GameService', () => {
                 cost: 2,
             });
             mockPaths.set('0,1', { path: [{ x: 0, y: 1 }], cost: 1 });
-            mockPaths.set('1,1', { path: [{ x: 1, y: 1 }], cost: 4 }); // Coût élevé
+            mockPaths.set('1,1', { path: [{ x: 1, y: 1 }], cost: 4 }); // High cost
             mockPaths.set('2,1', {
                 path: [
                     { x: 1, y: 0 },
@@ -553,18 +553,18 @@ describe('GameService', () => {
                 cost: 3,
             });
 
-            // Mock l'appel complet à findPossiblePaths
+            // Mock the complete call to findPossiblePaths
             jest.spyOn(gameService as any, 'findPossiblePaths').mockReturnValue(mockPaths);
 
-            // Appel de la méthode (maintenant complètement mockée)
+            // Call the method (now fully mocked)
             const paths = (gameService as any).findPossiblePaths(testMap, { x: 0, y: 0 }, 4);
 
-            // Vérifications sur les chemins mockés
+            // Verifications on the mocked paths
             expect(paths.has('2,1')).toBe(true);
             expect(paths.has('1,1')).toBe(true);
             expect(paths.get('1,1').cost).toBe(4);
 
-            // Test de la préférence pour les chemins courts
+            // Test preference for shorter paths
             const paths2 = new Map<string, PathInfo>();
             paths2.set('1,0', {
                 path: [
@@ -577,25 +577,25 @@ describe('GameService', () => {
                 cost: 5,
             });
 
-            // Remplacer par un chemin plus court
+            // Replace with a shorter path
             paths2.set('1,0', {
                 path: [{ x: 1, y: 0 }],
                 cost: 5,
             });
 
-            // Vérifier que le chemin plus court est utilisé
+            // Verify that the shorter path is used
             expect(paths2.get('1,0').path.length).toBe(1);
         });
     });
 
     describe('activeFights Map', () => {
-        it('devrait être initialisée comme vide au démarrage du service', () => {
+        it('should be initialized as empty when the service starts', () => {
             expect(gameService['activeFights']).toBeDefined();
             expect(gameService['activeFights']).toBeInstanceOf(Map);
             expect(gameService['activeFights'].size).toBe(0);
         });
 
-        it('hasActiveFight devrait retourner true quand un combat est enregistré', () => {
+        it('hasActiveFight should return true when a fight is registered', () => {
             gameService['activeFights'].set(accessCode, {} as Fight);
             expect(gameService.hasActiveFight(accessCode)).toBe(true);
 
@@ -604,23 +604,23 @@ describe('GameService', () => {
         });
     });
 
-    // Test pour la ligne 296 et la méthode sortPlayersBySpeed
-    describe('sortPlayersBySpeed détaillé', () => {
-        it("devrait maintenir l'ordre original en cas d'égalité avec un decalage aléatoire précis", () => {
+    // Test for line 296 and the sortPlayersBySpeed method
+    describe('Detailed sortPlayersBySpeed', () => {
+        it('should maintain the original order in case of equality with a precise random offset', () => {
             const players = [{ id: 'p1', speed: 5 } as PlayerStats, { id: 'p2', speed: 5 } as PlayerStats];
 
-            // Forcer la valeur de retour de Math.random pour prévoir le résultat
-            jest.spyOn(Math, 'random').mockReturnValue(0.3); // 0.3 - 0.5 = -0.2 (négatif = p1 avant p2)
+            // Force Math.random to return a specific value to predict the result
+            jest.spyOn(Math, 'random').mockReturnValue(0.3); // 0.3 - 0.5 = -0.2 (negative: p1 before p2)
 
             const sorted = (gameService as any).sortPlayersBySpeed([...players]);
             expect(sorted[0].id).toBe('p2');
             expect(sorted[1].id).toBe('p1');
 
-            // Restaurer Math.random
+            // Restore Math.random
             jest.spyOn(Math, 'random').mockRestore();
 
-            // Maintenant avec une valeur différente
-            jest.spyOn(Math, 'random').mockReturnValue(0.7); // 0.7 - 0.5 = 0.2 (positif = p2 avant p1)
+            // Now with a different value
+            jest.spyOn(Math, 'random').mockReturnValue(0.7); // 0.7 - 0.5 = 0.2 (positive: p2 before p1)
 
             const sorted2 = (gameService as any).sortPlayersBySpeed([...players]);
             expect(sorted2[0].id).toBe('p1');

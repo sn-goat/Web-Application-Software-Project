@@ -33,18 +33,18 @@ describe('FightService', () => {
     });
 
     describe('getFight', () => {
-        it('devrait retourner null si le fight est introuvable', () => {
+        it('should return null if the fight is not found', () => {
             expect(fightService.getFight('inexistant')).toBeNull();
         });
 
-        it('devrait retourner le fight si existant', () => {
+        it('should return the fight if it exists', () => {
             fightService['activeFights'].set('room1', {} as Fight);
             expect(fightService.getFight('room1')).toBeDefined();
         });
     });
 
     describe('initFight', () => {
-        it('devrait créer et initialiser un combat', () => {
+        it('should create and initialize a fight', () => {
             const player1: PlayerStats = {
                 id: 'p1',
                 name: 'Alice',
@@ -72,8 +72,7 @@ describe('FightService', () => {
     });
 
     describe('nextTurn', () => {
-        it('devrait logger une erreur si le fight est introuvable', () => {
-            // On espionne this.logger.error plutôt que console.error
+        it('should log an error if the fight is not found', () => {
             const loggerErrorSpy = jest.spyOn(fightService['logger'], 'error').mockImplementation();
 
             fightService.nextTurn('absent');
@@ -82,7 +81,7 @@ describe('FightService', () => {
             loggerErrorSpy.mockRestore();
         });
 
-        it('devrait changer de joueur, émettre SwitchTurn et relancer le timer', () => {
+        it('should switch player, emit SwitchTurn and restart the timer', () => {
             const fight: Fight = {
                 player1: { id: 'p1', name: 'Alice' } as PlayerStats & FightInfo,
                 player2: { id: 'p2', name: 'Bob' } as PlayerStats & FightInfo,
@@ -98,15 +97,15 @@ describe('FightService', () => {
     });
 
     describe('playerFlee', () => {
-        it('devrait logger une erreur si fight introuvable', () => {
+        it('should log an error if the fight is not found', () => {
             const loggerErrorSpy = jest.spyOn(fightService['logger'], 'error').mockImplementation();
             fightService.playerFlee('noRoom');
             expect(loggerErrorSpy).toHaveBeenCalledWith('Aucun combat actif pour accessCode noRoom');
             loggerErrorSpy.mockRestore();
         });
 
-        it('devrait appeler endFight et supprimer le fight si fuite réussie', () => {
-            jest.spyOn(global.Math, 'random').mockReturnValue(0.2); // Succès de la fuite < 0.3
+        it('should call endFight and remove the fight if flee is successful', () => {
+            jest.spyOn(global.Math, 'random').mockReturnValue(0.2); // Successful flee (< 0.3)
             const endFightSpy = jest.spyOn(fightService, 'endFight');
             fightService['activeFights'].set('roomFlee', { currentPlayer: { id: 'pA', name: 'Fleeing' } } as Fight);
 
@@ -116,8 +115,8 @@ describe('FightService', () => {
             jest.spyOn(global.Math, 'random').mockRestore();
         });
 
-        it('devrait appeler nextTurn si fuite échouée', () => {
-            jest.spyOn(global.Math, 'random').mockReturnValue(0.5); // Échec de la fuite
+        it('should call nextTurn if the flee attempt fails', () => {
+            jest.spyOn(global.Math, 'random').mockReturnValue(0.5); // Failed flee
             const nextTurnSpy = jest.spyOn(fightService, 'nextTurn');
             fightService['activeFights'].set('roomFleeFail', {
                 currentPlayer: { id: 'pA', name: 'FleeFail' } as PlayerStats,
@@ -131,7 +130,7 @@ describe('FightService', () => {
     });
 
     describe('endFight', () => {
-        it('devrait émettre FightEvents.End et supprimer le fight', () => {
+        it('should emit FightEvents.End and remove the fight', () => {
             fightService['activeFights'].set('roomEnd', {} as Fight);
             fightService.endFight('roomEnd', { id: 'p1' } as PlayerStats, { id: 'p2' } as PlayerStats);
             expect(eventEmitter.emit).toHaveBeenCalledWith(FightEvents.End, {
@@ -144,47 +143,47 @@ describe('FightService', () => {
     });
 
     describe('playerAttack', () => {
-        it('devrait logger une erreur si fight introuvable', () => {
+        it('should log an error if the fight is not found', () => {
             const loggerErrorSpy = jest.spyOn(fightService['logger'], 'error').mockImplementation();
             fightService.playerAttack('missingFight');
             expect(loggerErrorSpy).toHaveBeenCalledWith('Aucun combat actif pour accessCode missingFight');
             loggerErrorSpy.mockRestore();
         });
 
-        it('devrait infliger des dégâts et passer le tour si le défenseur n’est pas vaincu', () => {
+        it('should inflict damage and change turn if the defender is not defeated', () => {
             const attacker = { id: 'p1', attack: 2, attackDice: 'D4', name: 'Attacker' } as PlayerStats & FightInfo;
             const defender = { id: 'p2', defense: 1, defenseDice: 'D4', currentLife: 10, name: 'Defender' } as PlayerStats & FightInfo;
             const fight: Fight = { player1: attacker, player2: defender, currentPlayer: attacker };
             fightService['activeFights'].set('roomAttack', fight);
 
-            // On force les jets de dés
+            // Force dice roll
             jest.spyOn(global.Math, 'random').mockReturnValue(0); // dice = 1
             const nextTurnSpy = jest.spyOn(fightService, 'nextTurn');
             fightService.playerAttack('roomAttack');
 
-            // Dégâts calculés = (2 + 1) - (1 + 1) => 1
+            // Calculated damage = (2 + 1) - (1 + 1) => 1
             expect(defender.currentLife).toBe(9);
             expect(nextTurnSpy).toHaveBeenCalledWith('roomAttack');
             jest.spyOn(global.Math, 'random').mockRestore();
         });
 
-        it('devrait appeler endFight si le défenseur est vaincu', () => {
+        it('should call endFight if the defender is defeated', () => {
             const attacker = { id: 'p1', attack: 5, attackDice: 'D6' } as PlayerStats & FightInfo;
             const defender = { id: 'p2', defense: 1, defenseDice: 'D4', currentLife: 2 } as PlayerStats & FightInfo;
             const fight: Fight = { player1: attacker, player2: defender, currentPlayer: attacker };
             fightService['activeFights'].set('roomKO', fight);
 
-            jest.spyOn(global.Math, 'random').mockReturnValue(0); // forcer un roll = 1
+            jest.spyOn(global.Math, 'random').mockReturnValue(0); // force roll = 1
             const endFightSpy = jest.spyOn(fightService, 'endFight');
             fightService.playerAttack('roomKO');
 
-            // Dégâts = (5+1) - (1+1) = 4 => le défenseur a 2 PV => 2 - 4 = 0 => KO
+            // Damage = (5+1) - (1+1) = 4 => 2 - 4 = 0 => KO
             expect(endFightSpy).toHaveBeenCalledWith('roomKO', attacker, defender);
             jest.spyOn(global.Math, 'random').mockRestore();
         });
 
-        it('ne devrait pas infliger de dégâts négatifs (damage = 0 si calcul < 0)', () => {
-            // Admettons un attaquant très faible et un défenseur très résistant
+        it('should not inflict negative damage (damage = 0 if calculation < 0)', () => {
+            // Assume a very weak attacker and a very resistant defender
             const attacker = { id: 'pA', attack: 4, attackDice: 'D4', name: 'Attacker' } as PlayerStats & FightInfo;
             const defender = { id: 'pB', defense: 10, defenseDice: 'D4', life: 4, name: 'Defender' } as PlayerStats & FightInfo;
             const fight: Fight = { player1: attacker, player2: defender, currentPlayer: attacker };

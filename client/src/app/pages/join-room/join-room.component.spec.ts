@@ -28,38 +28,29 @@ describe('JoinRoomComponent', () => {
         fixture.detectChanges();
     });
 
-    it('devrait créer la composante', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('devrait invalider un code de moins de 4 chiffres', () => {
+    it('should invalidate a code with less than 4 digits', () => {
         component.accessCode = '123';
         component.validateCode();
         expect(component.isValidCode).toBeFalse();
     });
 
-    it('devrait invalider un code de plus de 4 chiffres', () => {
+    it('should invalidate a code with more than 4 digits', () => {
         component.accessCode = '12345';
         component.validateCode();
         expect(component.isValidCode).toBeFalse();
     });
 
-    it('devrait valider un code de 4 chiffres', () => {
+    it('should validate a code with exactly 4 digits', () => {
         component.accessCode = '1234';
         component.validateCode();
         expect(component.isValidCode).toBeTrue();
     });
 
-    // it('devrait désactiver le bouton si le code est invalide', () => {
-    //     component.accessCode = '12';
-    //     component.validateCode();
-    //     fixture.detectChanges();
-
-    //     const button = fixture.debugElement.query(By.css('button')).nativeElement;
-    //     expect(button.disabled).toBeTrue();
-    // });
-
-    it('devrait activer le bouton si le code est valide', () => {
+    it('should enable the button if the code is valid', () => {
         component.accessCode = '1234';
         component.validateCode();
         fixture.detectChanges();
@@ -68,7 +59,7 @@ describe('JoinRoomComponent', () => {
         expect(button.disabled).toBeFalse();
     });
 
-    it('devrait appeler socketService.joinRoom() si le code est valide', () => {
+    it('should call socketService.joinRoom() if the code is valid', () => {
         spyOn(socketServiceMock, 'joinRoom');
         component.accessCode = '1234';
         component.isValidCode = true;
@@ -76,7 +67,7 @@ describe('JoinRoomComponent', () => {
         expect(socketServiceMock.joinRoom).toHaveBeenCalledWith('1234');
     });
 
-    it('ne devrait pas appeler socketService.joinRoom() si le code est invalide', () => {
+    it('should not call socketService.joinRoom() if the code is invalid', () => {
         spyOn(socketServiceMock, 'joinRoom');
         component.accessCode = '12';
         component.isValidCode = false;
@@ -84,12 +75,12 @@ describe('JoinRoomComponent', () => {
         expect(socketServiceMock.joinRoom).not.toHaveBeenCalled();
     });
 
-    it('devrait afficher un message de succès si la connexion réussit', () => {
+    it('should display a success message if the connection is successful', () => {
         component.accessCode = '1234';
         component.isValidCode = true;
         component.joinRoom();
 
-        // Simuler l’événement de succès de connexion
+        // Simulate success event
         socketServiceMock.triggerPlayerJoined({ room: { players: [] } });
         fixture.detectChanges();
 
@@ -97,12 +88,12 @@ describe('JoinRoomComponent', () => {
         expect(component.showCharacterForm).toBeTrue();
     });
 
-    it('devrait afficher un message d’erreur si la salle n’existe pas', () => {
+    it('should display an error message if the room does not exist', () => {
         component.accessCode = '9999';
         component.isValidCode = true;
         component.joinRoom();
 
-        // Simuler l’événement d’erreur
+        // Simulate error event
         socketServiceMock.triggerJoinError({ message: 'Salle inexistante' });
         fixture.detectChanges();
 
@@ -110,7 +101,7 @@ describe('JoinRoomComponent', () => {
         expect(component.showCharacterForm).toBeFalse();
     });
 
-    it('devrait cacher le formulaire de personnage quand closeCharacterForm() est appelé', () => {
+    it('should hide the character form when closeCharacterForm() is called', () => {
         component.showCharacterForm = true;
         component.closeCharacterForm();
         expect(component.showCharacterForm).toBeFalse();
