@@ -76,7 +76,7 @@ export class LobbyComponent implements OnInit {
         this.socketService.onPlayerDisconnected().subscribe((players: PlayerStats[]) => {
             this.players = players;
             if (!players.find((p) => p.id === this.socketService.gameRoom.organizerId)) {
-                if(!this.isAdmin) { 
+                if (!this.isAdmin) {
                     confirm("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
                 }
             }
@@ -134,4 +134,3 @@ export class LobbyComponent implements OnInit {
         return this.socketService.getCurrentPlayerId();
     }
 }
-

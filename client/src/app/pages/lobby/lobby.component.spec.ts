@@ -212,14 +212,14 @@ describe('LobbyComponent', () => {
         const testPlayers = [{ id: 'player1' } as PlayerStats, { id: 'player2' } as PlayerStats];
         component.accessCode = 'TEST123';
         component.players = testPlayers;
-        
+
         // Act
         component.configureGame();
-        
+
         // Assert
         expect(socketService.configureGame).toHaveBeenCalledWith('TEST123', testPlayers);
     });
-    
+
     it('should set game and navigate to game page when onBroadcastStartGame emits', fakeAsync(() => {
         // Arrange
         const mockGame: Game = {
@@ -228,14 +228,14 @@ describe('LobbyComponent', () => {
             players: [{ id: 'player1' } as PlayerStats],
             map: [],
             currentTurn: 0,
-            isDebugMode: false
+            isDebugMode: false,
         };
         spyOn(component['gameService'], 'setGame');
-        
+
         // Act
         socketService.triggerOnBroadcastStartGame(mockGame);
         tick();
-        
+
         // Assert
         expect(component['gameService'].setGame).toHaveBeenCalledWith(mockGame);
         expect(router.navigate).toHaveBeenCalledWith(['/game']);
@@ -243,37 +243,30 @@ describe('LobbyComponent', () => {
 
     it('should automatically unlock room if players count drops below maxPlayers and room is locked', fakeAsync(() => {
         spyOn(socketService, 'unlockRoom');
-        
+
         // Configurer d'abord la salle comme verrouillée avec le nombre max de joueurs
         component.maxPlayers = 3;
         component.isRoomLocked = true;
         component.accessCode = 'XYZ';
-        
+
         // Simuler 3 joueurs dans la salle (nombre max)
-        let players: PlayerStats[] = [
-            { id: 'player1' } as PlayerStats,
-            { id: 'player2' } as PlayerStats,
-            { id: 'player3' } as PlayerStats
-        ];
-        
+        let players: PlayerStats[] = [{ id: 'player1' } as PlayerStats, { id: 'player2' } as PlayerStats, { id: 'player3' } as PlayerStats];
+
         // Mise à jour initiale - ne devrait rien faire car nombre de joueurs = maxPlayers
         socketService.triggerPlayersList(players);
         tick();
         expect(socketService.unlockRoom).not.toHaveBeenCalled();
         expect(component.isRoomLocked).toBeTrue();
-        
+
         // Maintenant simuler qu'un joueur quitte (nombre de joueurs < maxPlayers)
-        players = [
-            { id: 'player1' } as PlayerStats,
-            { id: 'player2' } as PlayerStats
-        ];
-        
+        players = [{ id: 'player1' } as PlayerStats, { id: 'player2' } as PlayerStats];
+
         socketService.triggerPlayersList(players);
         tick();
-        
+
         // Vérifier que la méthode unlockRoom a été appelée
         expect(socketService.unlockRoom).toHaveBeenCalledWith('XYZ');
-        
+
         // Vérifier que isRoomLocked a bien été mis à false
         expect(component.isRoomLocked).toBeFalse();
     }));
@@ -281,13 +274,12 @@ describe('LobbyComponent', () => {
     it('should set isRoomLocked to true when onRoomLocked event is received', fakeAsync(() => {
         // Arrange
         component.isRoomLocked = false;
-        
+
         // Act - passer un objet vide ou une valeur null
         socketService.triggerRoomLocked(null);
         tick();
-        
+
         // Assert
         expect(component.isRoomLocked).toBeTrue();
     }));
 });
-
