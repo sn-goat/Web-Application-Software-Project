@@ -327,4 +327,15 @@ export class SocketService {
             this.socket.on(RoomEvents.AdminDisconnected, () => observer.next());
         });
     }
+
+    resetSocketState(): void {
+        // Déconnexion de tous les écouteurs d'événements
+        this.socket.removeAllListeners();
+
+        this.gameRoom = undefined as unknown as Room;
+        this.currentPlayer = undefined as unknown as PlayerStats;
+
+        this.socket.disconnect();
+        this.socket.connect();
+    }
 }

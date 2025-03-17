@@ -155,6 +155,7 @@ export class MockSocketService {
     playerFlee(_accessCode: string, _playerId: string): void {}
     playerAttack(_accessCode: string, _playerId: string): void {}
     quitGame(_accessCode: string): void {}
+    resetSocketState(): void {}
 
     endTurn(_accessCode: string): void {
         // On peut laisser vide ou ajouter une logique de mock ici
