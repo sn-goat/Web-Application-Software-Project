@@ -54,7 +54,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
                     this.players = room.players;
                     this.accessCode = room.accessCode;
                     this.checkIfAdmin();
-                })
+                }),
         );
 
         this.addSubscription(
@@ -67,17 +67,17 @@ export class LobbyComponent implements OnInit, OnDestroy {
                     this.socketService.unlockRoom(this.accessCode);
                     this.isRoomLocked = false;
                 }
-            })
+            }),
         );
 
         this.addSubscription(
             this.socketService.onRoomLocked().subscribe(() => {
                 this.isRoomLocked = true;
-            })
+            }),
         );
 
         this.addSubscription(
-            this.socketService.onPlayerRemoved().subscribe( async (players: PlayerStats[]) => {
+            this.socketService.onPlayerRemoved().subscribe(async (players: PlayerStats[]) => {
                 this.players = players;
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                     if (!this.isAdmin) {
@@ -85,11 +85,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
                         this.router.navigate(['/home']);
                     }
                 }
-            })
+            }),
         );
 
         this.addSubscription(
-            this.socketService.onPlayerDisconnected().subscribe( async (players: PlayerStats[]) => {
+            this.socketService.onPlayerDisconnected().subscribe(async (players: PlayerStats[]) => {
                 this.players = players;
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                     if (!this.isAdmin) {
@@ -97,36 +97,32 @@ export class LobbyComponent implements OnInit, OnDestroy {
                         this.router.navigate(['/home']);
                     }
                 }
-            })
+            }),
         );
 
         this.addSubscription(
-            this.socketService.onAdminDisconnected().subscribe( async () => {
-                const message = this.isAdmin ? 
-                    "Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil" : 
-                    "L'admin s'est déconnecté. Vous allez être redirigé vers la page d'accueil";
-                    await this.warning(message);
-                this.subscriptions.forEach(subscription => subscription.unsubscribe());
+            this.socketService.onAdminDisconnected().subscribe(async () => {
+                const message = this.isAdmin
+                    ? "Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil"
+                    : "L'admin s'est déconnecté. Vous allez être redirigé vers la page d'accueil";
+                await this.warning(message);
+                this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                 this.subscriptions = [];
                 this.socketService.resetSocketState();
                 this.router.navigate(['/home']);
-            })
+            }),
         );
 
         this.addSubscription(
             this.socketService.onBroadcastStartGame().subscribe((game: Game) => {
                 this.gameService.setGame(game);
                 this.router.navigate(['/game']);
-            })
+            }),
         );
     }
 
-    private addSubscription(subscription: Subscription): void {
-        this.subscriptions.push(subscription);
-    }
-    
     ngOnDestroy(): void {
-        this.subscriptions.forEach(subscription => subscription.unsubscribe());
+        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
         this.subscriptions = [];
     }
 
@@ -155,20 +151,20 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.socketService.removePlayer(this.accessCode, playerId);
     }
 
-    disconnect(){
+    disconnect() {
         // Afficher la confirmation pour l'admin
         this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
 
         const currentId = this.socketService.getCurrentPlayerId();
         const currentAccessCode = this.accessCode;
-        
+
         this.socketService.disconnect(currentAccessCode, currentId);
-        
-        this.subscriptions.forEach(subscription => subscription.unsubscribe());
+
+        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
         this.subscriptions = [];
-        
+
         this.socketService.resetSocketState();
-        
+
         this.router.navigate(['/home']);
     }
 
@@ -178,6 +174,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
     async warning(message: string): Promise<void> {
         await this.openDialog(message, Alert.WARNING);
+    }
+
+    private addSubscription(subscription: Subscription): void {
+        this.subscriptions.push(subscription);
     }
 
     private async openDialog(message: string, type: Alert): Promise<boolean> {
@@ -191,4 +191,3 @@ export class LobbyComponent implements OnInit, OnDestroy {
         return firstValueFrom(dialogRef.afterClosed());
     }
 }
-
