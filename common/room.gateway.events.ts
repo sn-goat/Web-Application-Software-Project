@@ -24,4 +24,5 @@ export enum RoomEvents {
     RoomUnlocked = 'roomUnlocked',
     Welcome = 'welcome',
     QuitGame = 'quitRoomGame',
+    AdminDisconnected = 'adminDisconnected',
 }

@@ -87,6 +87,12 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.DisconnectPlayer)
     handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
+        // Vérifier si le joueur déconnecté est l'admin et émettre l'événement avant toute modification de la salle
+        const currentRoom = this.roomService.getRoom(payload.accessCode);
+        if (currentRoom && payload.playerId === currentRoom.organizerId) {
+            this.server.to(payload.accessCode).emit(RoomEvents.AdminDisconnected);
+        }
+
         const room = this.roomService.disconnectPlayer(payload.accessCode, payload.playerId);
         if (!room) {
             client.emit(RoomEvents.DisconnectError, { message: 'Impossible de déconnecter le joueur.' });

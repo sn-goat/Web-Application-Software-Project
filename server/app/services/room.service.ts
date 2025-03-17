@@ -48,7 +48,7 @@ export class RoomService {
             this.logger.error(`Room with access code ${accessCode} not found for player removal.`);
             return null;
         }
-        const index = room.players.findIndex((p: PlayerStats) => p.id === playerId);
+        const index = room.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             this.logger.error(`PlayerStats ${playerId} not found in room ${accessCode}`);
             return null;
