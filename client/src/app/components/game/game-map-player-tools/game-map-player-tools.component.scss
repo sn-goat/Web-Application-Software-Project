@@ -382,6 +382,40 @@ $buttons-color: #7ee0d0;
     }
 }
 
+::ng-deep .custom-snackbar {
+    background-color: #1a1625 !important;
+    color: #7ee0d0 !important;
+    border: 1px solid #7ee0d0 !important;
+    box-shadow: 0 0 12px rgba(126, 224, 208, 0.5);
+    font-weight: bold;
+    text-align: center;
+    padding: 14px 24px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+::ng-deep .mat-snack-bar-container {
+    background: transparent !important;
+    box-shadow: none !important;
+    min-width: 280px;
+    max-width: 400px;
+    justify-content: center;
+}
+
+::ng-deep .custom-snackbar .mat-button {
+    color: #7ee0d0 !important;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+::ng-deep .custom-snackbar .mat-button:hover {
+    color: #00ffd0 !important;
+    text-shadow: 0 0 8px rgba(126, 224, 208, 0.8);
+}
+
+
 @keyframes blink {
     0%,
     100% {
