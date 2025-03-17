@@ -32,6 +32,7 @@ export class MockSocketService {
     private broadcastItemSubject = new Subject<unknown>();
     private broadcastDoorSubject = new Subject<unknown>();
     private adminDisconnected = new Subject<unknown>();
+    private endOfGame = new Subject<unknown>();
 
     private switchTurnSubject = new Subject<unknown>();
     private turnUpdateSubject = new Subject<unknown>();
@@ -134,6 +135,10 @@ export class MockSocketService {
 
     onAdminDisconnected() {
         return this.adminDisconnected.asObservable();
+    }
+
+    onEndGame() {
+        return this.endOfGame.asObservable();
     }
 
     createRoom(_size: number): void {}

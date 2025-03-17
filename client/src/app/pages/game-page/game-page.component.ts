@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
+import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
 import { GameMapInfoComponent } from '@app/components/game/game-map-info/game-map-info.component';
 import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-player-detailed/game-map-player-detailed.component';
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
@@ -28,6 +29,7 @@ import { firstValueFrom } from 'rxjs';
         GameMapPlayerComponent,
         HeaderBarComponent,
         CommonModule,
+        GameFightInterfaceComponent,
     ],
     templateUrl: './game-page.component.html',
     styleUrl: './game-page.component.scss',
@@ -38,6 +40,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     showFightInterface: boolean = false;
     showChat = false;
     showInfo = false;
+    debugMode = false;
 
     private gameService = inject(GameService);
     private fightLogicService = inject(FightLogicService);
@@ -72,6 +75,10 @@ export class GamePageComponent implements OnInit, AfterViewInit {
                     await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
                 }
             });
+        });
+
+        this.gameService.isDebugMode.subscribe((isDebugMode) => {
+            this.debugMode = isDebugMode;
         });
     }
 

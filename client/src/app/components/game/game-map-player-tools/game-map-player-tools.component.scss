@@ -163,6 +163,31 @@ $buttons-color: #7ee0d0;
         text-align: center;
     }
 
+    .button {
+        background-color: rgba(0, 0, 0, 0.3);
+        color: $primary-text;
+        border: 1px solid $primary-text;
+        border-radius: $border-radius;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 5px $glow-teal;
+        white-space: nowrap;
+    
+        &:hover {
+            background-color: rgba(126, 224, 208, 0.1);
+        }
+    
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
     .timer {
         padding: 0;
         border-radius: 4px;
@@ -246,69 +271,81 @@ $buttons-color: #7ee0d0;
         gap: 5px;
         height: 100%;
         box-sizing: border-box;
+    }
 
-        .button {
-            padding: 0px 10px;
-            height: 35%;
-            min-height: 25px;
-            background: $buttons-color;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            color: $secondary-bg;
-            font-weight: bold;
-            font-size: 1rem;
-            font-family: 'Rajdhani', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba($buttons-color, 0.3);
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    .button {
+        padding: 0 10px;
+        height: 35%;
+        min-height: 25px;
+        background: $buttons-color;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        color: $secondary-bg;
+        font-weight: bold;
+        font-size: 1rem;
+        font-family: 'Rajdhani', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 10px rgba($buttons-color, 0.3);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 2px;
-                background: rgba(0, 0, 0, 0.4);
-            }
+    .button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(0, 0, 0, 0.4);
+    }
 
-            &:hover {
-                transform: translateY(-2px);
-                box-shadow:
-                    0 4px 8px rgba(0, 0, 0, 0.3),
-                    0 0 15px rgba($buttons-color, 0.5);
-            }
+    .button:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 0 15px rgba($buttons-color, 0.5);
+    }
 
-            &:active {
-                transform: translateY(1px);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
-                background: color-mix(in srgb, $buttons-color, black 15%);
-            }
+    .button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+        background: color-mix(in srgb, $buttons-color, black 15%);
+    }
 
-            &:first-of-type {
-                background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, white 5%), color-mix(in srgb, $accent-color, black 10%));
-                box-shadow: 0 0 10px rgba($accent-color, 0.3);
+    .button:first-of-type {
+        background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, white 5%), color-mix(in srgb, $accent-color, black 10%));
+        box-shadow: 0 0 10px rgba($accent-color, 0.3);
+    }
 
-                &:hover {
-                    box-shadow:
-                        0 4px 8px rgba(0, 0, 0, 0.3),
-                        0 0 15px rgba($accent-color, 0.5);
-                }
+    .button:first-of-type:hover {
+        box-shadow:
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 0 15px rgba($accent-color, 0.5);
+    }
 
-                &:active {
-                    background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, black 10%), $accent-color);
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
-                }
-            }
-        }
+    .button:first-of-type:active {
+        background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, black 10%), $accent-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+    }
+
+    .button.selected {
+        background: color-mix(in srgb, crimson, black 40%);
+        border: 3px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 12px rgba($buttons-color, 0.6);
+        color: white;
+    }
+
+    .button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .item-image {
@@ -323,31 +360,6 @@ $buttons-color: #7ee0d0;
     align-items: center;
     height: 100%;
     gap: 8px;
-}
-
-.button {
-    background-color: rgba(0, 0, 0, 0.3);
-    color: $primary-text;
-    border: 1px solid $primary-text;
-    border-radius: $border-radius;
-    padding: 2px 8px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 5px $glow-teal;
-    white-space: nowrap;
-
-    &:hover {
-        background-color: rgba(126, 224, 208, 0.1);
-    }
-
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
 }
 
 .timer {
@@ -398,4 +410,3 @@ $buttons-color: #7ee0d0;
         opacity: 0;
     }
 }
-

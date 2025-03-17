@@ -4,7 +4,7 @@ import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
-import { Fight, PathInfo } from '@common/game';
+import { Fight, MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -65,7 +65,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TurnEvents.UpdateTurn)
     handleUpdateTurn(turn: { player: PlayerStats; path: Record<string, PathInfo> }) {
-        this.logger.log('Updating turn for player: ' + turn.player.name);
+        this.logger.log('Updating turn for player: ' + turn.player.name + turn.player.id);
         this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
     }
 
@@ -105,14 +105,22 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Ending fight');
         if (payload.winner && payload.loser) {
             this.logger.log(`The winner is: ${payload.winner.name} and the loser is: ${payload.loser.name}`);
-            this.server.to(payload.winner.id).emit(FightEvents.Winner);
-            this.server.to(payload.loser.id).emit(FightEvents.Loser);
+            payload.winner.wins++;
+            if (payload.winner && payload.winner.wins >= MAX_FIGHT_WINS) {
+                this.server.to(payload.accessCode).emit(GameEvents.End, payload.winner);
+            }
+            this.server.to(payload.accessCode).emit(FightEvents.Winner, payload.winner);
             this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
         }
         this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
         this.server.to(fight.player1.id).emit(FightEvents.End);
         this.server.to(fight.player2.id).emit(FightEvents.End);
-        this.timerService.resumeTimer(payload.accessCode);
+        if (payload.loser && this.gameService.getPlayerTurn(payload.accessCode).id === payload.loser.id) {
+            this.endTurn(payload.accessCode);
+        } else {
+            this.timerService.resumeTimer(payload.accessCode);
+            this.gameService.updatePlayerPathTurn(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
+        }
     }
 
     @SubscribeMessage(GameEvents.Create)

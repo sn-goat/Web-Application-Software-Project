@@ -58,5 +58,6 @@ export class FightLogicService {
     endFight(): void {
         this.fight.next({} as Fight);
         this.fightStarted.next(false);
+        this.gameService.isActionSelected.next(false);
     }
 }
