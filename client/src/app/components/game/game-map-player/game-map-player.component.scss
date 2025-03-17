@@ -6,171 +6,142 @@ $secondary-text: #ff6b93;
 $accent-color: #ff6b93;
 $border-radius: 10px;
 
-// :host {
-//     display: block;
-//     width: 100%;
-//     height: 100%;
-// }
-
 .player-section {
     display: flex;
     flex-direction: column;
-    gap: 5px;
     width: 100%;
     height: 100%;
-    overflow: hidden;
     box-sizing: border-box;
     justify-content: space-evenly;
+    gap: calc(2px + (8px / var(--player-count)));
+    overflow: hidden;
+}
 
-    .player {
-        height: 95%;
+.player {
+    flex: 1 1 auto;
+    height: calc(90% / var(--player-count));
+    width: 100%;
+    max-height: 18%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(6px + (6px / var(--player-count)));
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border-left: 2px solid $primary-text;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.5), 0 0 6px $glow-teal;
+    padding: calc(6px + (4px / var(--player-count)));
+
+    &.active-player {
+        flex: 1.5;
+        max-height: 22%;
+    }
+
+    .player-image {
+        display: flex;
+        align-items: center;
         width: auto;
-        flex: 1;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        border-left: 2px solid $primary-text;
-        box-shadow:
-            0 0 8px rgba(0, 0, 0, 0.5),
-            0 0 6px $glow-teal;
-        padding: 3px;
-        transition:
-            transform 0.2s ease,
-            box-shadow 0.2s ease;
+        gap: 8px; 
+
+        img {
+            border-radius: 50%;
+            width: calc(40px - (var(--player-count) * 0.5px));
+            max-width: 50px;
+            height: auto;
+            border: 1px solid $primary-text;
+            box-shadow: 0 0 6px $glow-teal;
+            object-fit: cover;
+            background-color: $secondary-bg;
+        }
+
+        h3 {
+            font-size: calc(1.2rem - (var(--player-count) * 0.05rem));
+            color: $primary-text;
+            text-shadow: 0 0 5px $glow-teal;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+    }
+
+    .player-info {
+        border-radius: 4px;
+        padding: 6px;
+        text-align: center;
+        flex: 1 1 auto;
+        height: 100%;
+        width: 60%;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        gap: 6px;
+        justify-content: space-evenly;
+        gap: calc(6px + (5px / var(--player-count)));
 
-        &:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 4px 12px rgba(0, 0, 0, 0.6),
-                0 0 10px $glow-teal;
-        }
-
-        .player-image {
-            display: flex;
-            flex-direction: column;
-            width: 50%;
-            align-items: center;
-            margin-bottom: 2px;
-
-            img {
-                border-radius: 50%;
-                width: 100%;
-                height: auto;
-                border: 1px solid $primary-text;
-                box-shadow: 0 0 6px $glow-teal;
-                object-fit: cover;
-                background-color: $secondary-bg;
-            }
-
-            .empty-player {
-                border-radius: 50%;
-                border: 1px dashed rgba($primary-text, 0.4);
-                background-color: rgba(0, 0, 0, 0.2);
-                position: relative;
-
-                &::after {
-                    content: '+';
-                    font-size: 20px;
-                    color: rgba($primary-text, 0.4);
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                }
-            }
-
-            h3 {
-                margin: 2px 0 0 0;
-                font-size: 1.55rem;
-                color: $primary-text;
-                text-shadow: 0 0 5px $glow-teal;
-                font-weight: 600;
-                text-align: center;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-                max-width: 100%;
-            }
-        }
-
-        .player-info {
-            border-radius: 4px;
-            padding: 2px;
-            text-align: center;
-            flex: 1 1 auto;
-            height: 100%;
-            width: 50%;
+        h3 {
+            margin: 0;
+            font-size: calc(1.1rem - (var(--player-count) * 0.05rem));
+            color: $secondary-text;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0;
+            white-space: nowrap;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        h3.admin,
+        h3.active {
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
+            margin-bottom: 4px;
+            width: auto;
+            height: auto;
+            line-height: 1;
+            box-sizing: border-box;
+            vertical-align: middle;
+            font-size: calc(1rem - (var(--player-count) * 0.04rem));
+            padding: 5px 8px;
+        }
 
-            h3 {
-                margin: 0;
-                font-size: 1.2rem;
-                color: $secondary-text;
-                font-weight: 500;
-                text-transform: uppercase;
-                letter-spacing: 0;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                text-align: center;
-            }
+        h3.admin {
+            color: $accent-color;
+            font-weight: bold;
+            border-radius: 3px;
+            border: 1px solid rgba($accent-color, 0.4);
+            text-shadow: 0 0 4px rgba($accent-color, 0.6);
+        }
 
-            h3.admin,
-            h3.active {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                margin-bottom: 2px;
-                width: auto;
-                height: auto;
-                line-height: 1;
-                box-sizing: border-box;
-                vertical-align: middle;
-            }
+        h3.active {
+            color: #ff9800;
+            font-weight: bold;
+            border-radius: 3px;
+            border: 1px solid rgba(#ff9800, 0.4);
+            text-shadow: 0 0 4px rgba($primary-text, 0.6);
+            animation: text-pulse 2s ease-in-out infinite;
+            overflow: visible;
+        }
 
-            h3.admin {
-                color: $accent-color;
-                font-weight: bold;
-                border-radius: 3px;
+        h3 + h3 {
+            margin-top: 4px;
+        }
 
-                border: 1px solid rgba($accent-color, 0.4);
-                text-shadow: 0 0 4px rgba($accent-color, 0.6);
-            }
-
-            h3.active {
-                color: #ff9800;
-                font-weight: bold;
-                border-radius: 3px;
-                border: 1px solid rgba(#ff9800, 0.4);
-                text-shadow: 0 0 4px rgba($primary-text, 0.6);
-                position: relative;
-                padding: 1px 3px;
-                animation: text-pulse 2s ease-in-out infinite;
-                overflow: visible;
-            }
-
-            h3 + h3 {
-                margin-top: 2px;
-            }
-
-            p {
-                margin: 1px 0 0 0;
-                font-size: 0.6rem;
-                color: $accent-color;
-                font-weight: bold;
-                line-height: 1.2;
-                text-shadow: 0 0 5px rgba($accent-color, 0.5);
-            }
+        p {
+            margin: 2px 0 0 0;
+            font-size: calc(0.7rem - (var(--player-count) * 0.02rem));
+            color: $accent-color;
+            font-weight: bold;
+            line-height: 1.2;
+            text-shadow: 0 0 5px rgba($accent-color, 0.5);
         }
     }
 }
+
 
 .player-not-in-game {
     text-decoration: line-through;
