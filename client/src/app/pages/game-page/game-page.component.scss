@@ -77,6 +77,51 @@ body {
     background-color: $primary-bg;
     border: $rectangle-border;
     border-radius: 10px;
+    gap: 10px;
+}
+
+.chat-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.toggle-button {
+    width: 100%;
+    height: 35px;
+    background: $primary-text;
+    border: none;
+    border-radius: 5px;
+    color: #000; 
+    font-weight: bold;
+    font-size: 0.9rem;
+    font-family: 'Rajdhani', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px $glow-teal;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hover Effect */
+.toggle-button:hover {
+    background: color-mix(in srgb, $primary-text, white 20%);
+    box-shadow: 0 0 15px $glow-teal;
+    transform: translateY(-2px);
+}
+
+/* Active (Click) Effect */
+.toggle-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3) inset;
+    background: color-mix(in srgb, $primary-text, black 15%);
 }
 
 .right-rectangle {
