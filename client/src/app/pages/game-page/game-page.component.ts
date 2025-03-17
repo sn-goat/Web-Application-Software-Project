@@ -32,6 +32,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     showFightInterface: boolean = false;
     showChat = false;
+    showInfo = false;
 
     private gameService = inject(GameService);
     private fightLogicService = inject(FightLogicService);
@@ -46,6 +47,10 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         }
         this.fightLogicService.fightStarted.subscribe((show) => {
             this.showFightInterface = show;
+        });
+
+        this.gameService.showInfo.subscribe((show) => {
+            this.showInfo = show;
         });
     }
 
@@ -62,5 +67,9 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     toggleChat() {
         this.showChat = !this.showChat;
+    }
+
+    toggleInfo() {
+        this.gameService.toggleInfo();
     }
 }

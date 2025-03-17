@@ -4,15 +4,14 @@ $glow-teal: rgba(126, 224, 208, 0.2);
 $glow-gold: rgba(255, 215, 0, 0.2);
 $rectangle-border: 1px solid $primary-text;
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
 }
-
-
 
 .outer-container {
     width: 100vw;
@@ -24,7 +23,6 @@ html, body {
     padding: 10px;
     box-sizing: border-box;
 }
-
 
 .header-container {
     position: absolute;
@@ -49,8 +47,6 @@ html, body {
     background-color: $primary-bg !important;
 }
 
-
-
 .top-rectangle,
 .bottom-rectangle,
 .right-rectangle,
@@ -58,7 +54,6 @@ html, body {
     border-radius: 12px;
     border: $rectangle-border;
 }
-
 
 .top-rectangle {
     grid-area: 1 / 1 / 6 / 2;
@@ -105,7 +100,7 @@ html, body {
     border: $rectangle-border;
 }
 
-.chat-popup {
+.popup {
     position: fixed;
     bottom: 60px;
     left: 20px;
@@ -121,7 +116,7 @@ html, body {
     animation: fadeIn 0.3s ease-in-out;
 }
 
-.chat-header {
+.popup-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -129,7 +124,7 @@ html, body {
     border-bottom: 1px solid $primary-text;
 }
 
-.chat-toggle-button {
+.toggle-button {
     padding: 8px 16px;
     background: $primary-text;
     color: black;
@@ -140,7 +135,7 @@ html, body {
     margin-left: 10px;
 }
 
-.close-chat {
+.close-popup {
     background: transparent;
     border: none;
     color: $primary-text;
@@ -150,11 +145,13 @@ html, body {
 
 /* 🔹 Keyframes */
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
-
-
 
 app-game-map-player-detailed,
 app-game-map-info {
@@ -196,18 +193,28 @@ app-game-map-player {
     animation: fadeIn 0.3s ease-in-out;
 
     app-game-fight-interface {
-      width: 100%;
-      max-width: 800px;
-      animation: slideIn 0.4s ease-out;
+        width: 100%;
+        max-width: 800px;
+        animation: slideIn 0.4s ease-out;
     }
-  }
+}
 
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 
-  @keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

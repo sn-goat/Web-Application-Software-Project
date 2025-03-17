@@ -5,10 +5,10 @@ import { ConfirmationDialogComponent } from '@app/components/common/confirmation
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { SocketService } from '@app/services/code/socket.service';
 import { Cell, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
 import { Avatar, Game, getAvatarName } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { Tile, Item } from '@common/enums';
 import { PlayerService } from './player.service';
 
 @Injectable({
@@ -20,6 +20,7 @@ export class GameService {
     activePlayer: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    showInfo: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
     private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
@@ -72,6 +73,10 @@ export class GameService {
 
     toggleDoor(position: Vec2): void {
         this.socketService.changeDoorState(this.accessCode, position, this.playerService.getPlayer());
+    }
+
+    toggleInfo(): void {
+        this.showInfo.next(!this.showInfo.value);
     }
 
     isWithinActionRange(cell: Cell): boolean {
