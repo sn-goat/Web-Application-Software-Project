@@ -1,4 +1,4 @@
-<body>
+<div class="container justified">
     <div class="access-code-container">
         <h1>Organizer Waiting Room</h1>
         <p>Your Access Code: {{ accessCode }}</p>
@@ -10,10 +10,10 @@
 
         <button (click)="disconnect()">Disconnect</button>
 
-    @if (isAdmin) {
-      <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()"> Start Game </button>
-    }
-  </div>
+        @if (isAdmin) {
+        <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()">Start Game</button>
+        }
+    </div>
 
     <div class="players-list">
         <h2>Room Players</h2>
@@ -40,4 +40,4 @@
         </div>
         <input type="text" placeholder="Tapez votre message..." disabled />
     </div>
-</body>
+</div>
