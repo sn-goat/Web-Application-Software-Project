@@ -16,6 +16,7 @@ import { Subscription } from 'rxjs';
 })
 export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     readonly perCent = 100;
+    Math = Math;
     timer: string = '00 s';
     currentNameTurn: string = '';
     myPlayer: (PlayerStats & FightInfo) | null;
