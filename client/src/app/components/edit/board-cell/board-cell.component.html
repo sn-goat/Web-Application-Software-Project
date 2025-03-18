@@ -26,11 +26,11 @@
         }
 
         @if(isInGameView && tooltipContent) {
-            <div class="tooltip-gameView">
+            <div class="tooltip-gameView" [ngClass]="{ 'small-row': isSmallRow }">
                 {{ tooltipContent }}
             </div>
         }
-        
+
         @if (cell.player) {
             <img
                 class="player-stack"

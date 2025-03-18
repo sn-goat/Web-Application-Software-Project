@@ -24,7 +24,12 @@ Pour changer son état, utilisez cet outil et clique droit sur une tuile porte.`
 C'est une tuile de terrain qui peut être parcourue par le joueur.
 Le coût pour la traverser s'élève à 2 pts`,
     ],
-    [Tile.OPENED_DOOR, ''],
+    [
+        Tile.OPENED_DOOR,
+        `Porte ouverte :
+Cette tuile est accessible et permet au joueur de passer librement.`,
+    ],
+
     [
         Tile.FLOOR,
         `Sol :
