@@ -144,6 +144,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(accessCode).emit(GameEvents.BroadcastDebugState);
     }
 
+    @SubscribeMessage(GameEvents.EndDebug)
+    handleEndDebug(client: Socket, accessCode: string) {
+        this.logger.log('End debug mode');
+        this.gameService.endDebugMode(accessCode);
+        this.server.to(accessCode).emit(GameEvents.BroadcastEndDebugState);
+    }
+
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         if (this.gameService.isActivePlayerReady(payload.accessCode, payload.playerId)) {

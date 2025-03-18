@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/code/game.service';
 import { SocketService } from '@app/services/code/socket.service';
@@ -11,11 +11,12 @@ import { Subscription } from 'rxjs';
     templateUrl: './game-map-player.component.html',
     styleUrl: './game-map-player.component.scss',
 })
-export class GameMapPlayerComponent implements OnInit, OnDestroy {
+export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly fileType: string = DEFAULT_FILE_TYPE;
 
     players: PlayerStats[];
+    playersInGame: PlayerStats[];
     activePlayer: PlayerStats | null;
     gameService: GameService = inject(GameService);
     socketService: SocketService = inject(SocketService);
@@ -27,7 +28,7 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.subscriptions.push(
             this.gameService.playingPlayers.subscribe((gamePlayers: PlayerStats[]) => {
-                this.players = gamePlayers;
+                this.playersInGame = gamePlayers;
             }),
 
             this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
@@ -44,7 +45,16 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy {
         );
     }
 
+    ngAfterViewInit(): void {
+        this.players = this.playersInGame;
+    }
+
+    playerIsInGame(player: PlayerStats): boolean {
+        return this.playersInGame.some((p) => p.id === player.id);
+    }
+
     ngOnDestroy() {
         this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+        this.socketService.resetSocketState();
     }
 }

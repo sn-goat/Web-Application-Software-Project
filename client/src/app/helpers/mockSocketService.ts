@@ -141,6 +141,10 @@ export class MockSocketService {
         return this.endOfGame.asObservable();
     }
 
+    onBroadcastDebugEndState() {
+        return this.broadcastDebugStateSubject.asObservable();
+    }
+
     createRoom(_size: number): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
@@ -244,5 +248,9 @@ export class MockSocketService {
 
     triggerAssignSpawn(data: unknown) {
         this.assignSpawnSubject.next(data);
+    }
+
+    triggerOnAdminDisconect(data: unknown) {
+        this.adminDisconnected.next(data);
     }
 }

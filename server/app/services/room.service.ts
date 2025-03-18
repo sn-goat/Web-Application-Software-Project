@@ -80,27 +80,23 @@ export class RoomService {
         return room;
     }
 
-    quitGame(accessCode: string, playerId: string): Room | null {
+    quitGame(accessCode: string, playerId: string): PlayerStats | null {
         const room = this.gameRooms.get(accessCode);
+        let lastPlayer: PlayerStats | undefined;
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for quitting game.`);
             return null;
         }
-        const index = room.players.findIndex((p: PlayerStats) => p.id === playerId);
-        if (index < 0) {
-            this.logger.error(`PlayerStats ${playerId} not found in room ${accessCode}`);
-            return null;
-        }
-        if (room.players.length === 2) {
-            for (let i = room.players.length - 1; i >= 0; i--) {
-                const player = room.players[i];
-                this.removePlayer(accessCode, player.id);
-            }
+        this.removePlayer(accessCode, playerId);
+
+        if (room.players.length === 1) {
+            lastPlayer = room.players[0];
+            this.removePlayer(accessCode, room.players[0].id);
+            this.logger.log(`LastPlayer ${lastPlayer.id} quit game in room ${accessCode}.`);
             this.deleteRoom(accessCode);
-        } else {
-            this.removePlayer(accessCode, playerId);
         }
-        return room;
+
+        return lastPlayer;
     }
 
     lockRoom(accessCode: string): Room | null {

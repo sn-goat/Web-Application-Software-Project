@@ -82,6 +82,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                     if (!this.isAdmin) {
                         await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
+                        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+                        this.subscriptions = [];
+                        this.socketService.resetSocketState();
                         this.router.navigate(['/home']);
                     }
                 }
@@ -94,6 +97,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
                     if (!this.isAdmin) {
                         await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
+                        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+                        this.subscriptions = [];
+                        this.socketService.resetSocketState();
                         this.router.navigate(['/home']);
                     }
                 }

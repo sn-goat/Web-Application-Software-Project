@@ -99,6 +99,14 @@ describe('LobbyComponent', () => {
         expect(component.isAdmin).toBeTrue();
     });
 
+    it('should navigate home if the admin disconnects', fakeAsync(() => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        socketService.triggerOnAdminDisconect([]);
+        component.disconnect();
+        tick();
+        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    }));
+
     it('toggleRoomLock should call unlockRoom if room is locked', () => {
         spyOn(socketService, 'unlockRoom');
         // Forcer l'état: la room est verrouillée et il y a moins de joueurs que maxPlayers

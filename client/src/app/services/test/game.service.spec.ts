@@ -28,7 +28,7 @@ describe('GameService', () => {
     let testPlayer: any;
     let adjacentCell: any;
     let nonAdjacentCell: any;
-    // let teleportableCell: any;
+    let teleportableCell: any;
     let nonTeleportableCell: any;
 
     beforeEach(() => {
@@ -58,13 +58,13 @@ describe('GameService', () => {
         // Cellule non adjacente: distance > 1
         nonAdjacentCell = { position: { x: 3, y: 3 } };
         // Cellule téléportable : pas de joueur et tile différent de WALL, CLOSED_DOOR, OPENED_DOOR
-        // teleportableCell = { player: undefined, tile: 'FLOOR', position: { x: 0, y: 0 } };
+        teleportableCell = { player: undefined, tile: 'FLOOR', position: { x: 0, y: 0 } };
         // Cellule non téléportable : par exemple, tile = WALL
         nonTeleportableCell = { player: undefined, tile: Tile.WALL, position: { x: 0, y: 1 } };
 
-        // Pour tester initFight, préparer playingPlayers
+        //         // Pour tester initFight, préparer playingPlayers
         service.playingPlayers.next([testPlayer]);
-        // Initialiser le jeu pour définir accessCode et organizerId
+        //         // Initialiser le jeu pour définir accessCode et organizerId
         service.setGame({
             map: [[]],
             players: [testPlayer],
@@ -283,12 +283,16 @@ describe('GameService', () => {
         expect(service.getInitialPlayers()).toEqual(gamePlayers);
     });
 
-    // it('should call debugMove if cell can be teleported (debugMovePlayer)', () => {
-    //     spyOn(service['socketService'], 'debugMove');
-    //     // Pour cell téléportable, canTeleport devrait retourner true
-    //     service.debugMovePlayer(teleportableCell);
-    //     expect(service['socketService'].debugMove).toHaveBeenCalledWith(dummyAccessCode, teleportableCell.position, undefined as PlayerStats);
-    // });
+    it('should call debugMove if cell can be teleported (debugMovePlayer)', () => {
+        spyOn(service['socketService'], 'debugMove');
+        // Pour cell téléportable, canTeleport devrait retourner true
+        service.debugMovePlayer(teleportableCell);
+        expect(service['socketService'].debugMove).toHaveBeenCalledWith(
+            dummyAccessCode,
+            teleportableCell.position,
+            undefined as unknown as PlayerStats,
+        );
+    });
 
     it('should not call debugMove if cell cannot be teleported (debugMovePlayer)', () => {
         spyOn(service['socketService'], 'debugMove');
@@ -368,12 +372,6 @@ describe('GameService', () => {
         expect(service.map.value[prevPos.y][prevPos.x].player).toBe(Avatar.Default);
         expect(service.map.value[movingPlayer.position.y][movingPlayer.position.x].player).toBe('Wizard');
         expect(service.activePlayer.value).toEqual(movingPlayer);
-    });
-
-    it('should toggle debug mode when broadcast debug state event is received', () => {
-        const oldValue = service.isDebugMode.value;
-        socketServiceMock.triggerBroadcastDebugState({});
-        expect(service.isDebugMode.value).toBe(!oldValue);
     });
 
     it('should return player description when cell contains a player', () => {

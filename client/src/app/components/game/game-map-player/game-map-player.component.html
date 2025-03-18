@@ -3,7 +3,7 @@
         <div class="player" [class.active-player]="activePlayer && player.name === activePlayer.name">
             <div class="player-image">
                 <img draggable="false" [src]="player.avatar" [alt]="player.name" />
-                <h3>{{ player.name }}</h3>
+                <h3 [class.player-not-in-game]="!playerIsInGame(player)">{{ player.name }}</h3>
             </div>
             <div class="player-info">
                 @if (player.id === gameService.getOrganizerId()) {

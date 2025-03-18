@@ -224,9 +224,7 @@ $skill-color: #7ee0d0;
         .attributes-container {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             flex-wrap: wrap;
-            gap: 2px;
             flex: 1;
             align-items: center;
 
@@ -305,12 +303,12 @@ $skill-color: #7ee0d0;
 
     h3 {
         margin-bottom: 6px !important;
-        font-size: 1.2rem !important; /* Increased from 1.1rem */
+        font-size: 1.1rem !important; /* Increased from 1.1rem */
     }
 
     h4,
     p {
-        font-size: 1.1rem !important; /* Increased from 1.0rem */
+        font-size: 0.95rem !important; /* Increased from 1.0rem */
     }
 
     .dice-image {
