@@ -160,6 +160,31 @@ $border-radius: 5px;
         text-align: center;
     }
 
+    .button {
+        background-color: rgba(0, 0, 0, 0.3);
+        color: $primary-text;
+        border: 1px solid $primary-text;
+        border-radius: $border-radius;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 5px $glow-teal;
+        white-space: nowrap;
+
+        &:hover {
+            background-color: rgba(126, 224, 208, 0.1);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
     .timer {
         padding: 0;
         border-radius: 4px;
@@ -245,28 +270,29 @@ $border-radius: 5px;
         box-sizing: border-box;
     }
 
-        .button {
-            padding: 0px 10px;
-            height: 35%;
-            min-height: 25px;
-            background: $primary-text;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            color: $secondary-bg;
-            font-weight: bold;
-            font-size: 1rem;
-            font-family: 'Rajdhani', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba($primary-text, 0.3);
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    .button {
+        padding: 0 10px;
+        height: 35%;
+        min-height: 25px;
+        background: $primary-text;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        color: $secondary-bg;
+        font-weight: bold;
+        font-size: 1rem;
+        font-family: 'Rajdhani', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 10px rgba($primary-text, 0.3);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
     .button::after {
         content: '';
@@ -278,18 +304,18 @@ $border-radius: 5px;
         background: rgba(0, 0, 0, 0.4);
     }
 
-            &:hover {
-                transform: translateY(-2px);
-                box-shadow:
-                    0 4px 8px rgba(0, 0, 0, 0.3),
-                    0 0 15px rgba($primary-text, 0.5);
-            }
+    .button:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 0 15px rgba($primary-text, 0.5);
+    }
 
-            &:active {
-                transform: translateY(1px);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
-                background: color-mix(in srgb, $primary-text, black 15%);
-            }
+    .button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+        background: color-mix(in srgb, $primary-text, black 15%);
+    }
 
     .button:first-of-type {
         background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, white 5%), color-mix(in srgb, $accent-color, black 10%));
@@ -365,7 +391,6 @@ $border-radius: 5px;
     }
 }
 
-
 @keyframes blink {
     0%,
     100% {
@@ -381,5 +406,4 @@ $border-radius: 5px;
     50% {
         opacity: 0;
     }
-}
 }
