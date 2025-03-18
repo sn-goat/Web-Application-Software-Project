@@ -478,6 +478,20 @@ describe('GameService', () => {
                 const result = (gameService as any).isPlayerTurnEnded(accessCode, player);
                 expect(result).toBe(true);
             });
+
+            it("incrementWins should correcly increment a player's wins count", () => {
+                const player = { id: 'p1', name: 'Player1', movementPts: 0, actions: 0, position: { x: 0, y: 0 }, wins: 0 } as PlayerStats;
+                setupTestGame({ players: [player] });
+                gameService.incrementWins(accessCode, player.id);
+                expect(gameService.getPlayer(accessCode, player.id).wins).toEqual(1);
+            });
+
+            it("incrementWins should not correcly increment a player's wins count if the player is not found", () => {
+                const player = { id: 'p1', name: 'Player1', movementPts: 0, actions: 0, position: { x: 0, y: 0 }, wins: 0 } as PlayerStats;
+                setupTestGame({ players: [player] });
+                gameService.incrementWins(accessCode, 'incorrect_id');
+                expect(gameService.getPlayer(accessCode, player.id).wins).toEqual(0);
+            });
         });
 
         describe('isPlayerCanMakeAction', () => {

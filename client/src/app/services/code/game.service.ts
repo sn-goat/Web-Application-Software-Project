@@ -77,7 +77,7 @@ export class GameService {
         const myPlayer = this.playerService.getPlayer();
         const findDefender: PlayerStats | null = this.findDefender(avatar);
         if (findDefender && myPlayer) {
-            this.socketService.initFight(this.accessCode, myPlayer, findDefender);
+            this.socketService.initFight(this.accessCode, myPlayer.id, findDefender.id);
         }
     }
 

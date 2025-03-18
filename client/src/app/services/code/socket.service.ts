@@ -144,7 +144,7 @@ export class SocketService {
         this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position, player });
     }
 
-    initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
+    initFight(accessCode: string, player1: string, player2: string) {
         this.socket.emit(FightEvents.Init, { accessCode, player1, player2 });
     }
 
