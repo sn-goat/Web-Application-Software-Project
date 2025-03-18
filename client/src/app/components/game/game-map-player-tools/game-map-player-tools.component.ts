@@ -26,7 +26,7 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
 
-    playerService: PlayerService = inject(PlayerService);
+    private playerService: PlayerService = inject(PlayerService);
     private gameService: GameService = inject(GameService);
     private socketService: SocketService = inject(SocketService);
     private subscriptions: Subscription[] = [];
@@ -38,10 +38,6 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
-                this.timer = `${time.remainingTime.toString()} s`;
-            }),
-
             this.playerService.isActivePlayer.subscribe((isActive) => {
                 this.isActivePlayer = isActive;
             }),
@@ -58,6 +54,10 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 this.activePlayer = player;
             }),
 
+            this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
+                this.timer = `${time.remainingTime.toString()} s`;
+            }),
+
             this.socketService.onTurnSwitch().subscribe((turnInfo) => {
                 this.activePlayer = turnInfo.player;
 
@@ -72,22 +72,27 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 }
             }),
 
-            this.socketService.onWinner().subscribe(() => {
-                this.snackBar.open('Tu as gagner le combat!', 'Fermer', {
-                    duration: 3000,
-                    horizontalPosition: 'center',
-                    verticalPosition: 'top',
-                    panelClass: ['custom-snackbar'],
-                });
+            this.socketService.onWinner().subscribe((player: PlayerStats) => {
+                if (this.playerService.getPlayer().id === player.id) {
+                    this.snackBar.open('Tu as gagner le combat!', 'Fermer', {
+                        duration: 3000,
+                        horizontalPosition: 'center',
+                        verticalPosition: 'top',
+                        panelClass: ['custom-snackbar'],
+                    });
+                }
             }),
 
-            this.socketService.onLoser().subscribe(() => {
-                this.snackBar.open('Tu as perdu le combat!', 'Fermer', {
-                    duration: 3000,
-                    horizontalPosition: 'center',
-                    verticalPosition: 'top',
-                    panelClass: ['custom-snackbar'],
-                });
+            this.socketService.onLoser().subscribe((player: PlayerStats) => {
+                console.log('Y a eu un perdant');
+                if (this.playerService.getPlayer().id === player.id) {
+                    this.snackBar.open('Tu as perdu le combat!', 'Fermer', {
+                        duration: 3000,
+                        horizontalPosition: 'center',
+                        verticalPosition: 'top',
+                        panelClass: ['custom-snackbar'],
+                    });
+                }
             }),
         );
     }

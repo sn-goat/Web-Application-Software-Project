@@ -312,7 +312,7 @@ $border-radius: 5px;
     .button.selected {
         background: color-mix(in srgb, crimson, black 40%);
         border: 3px solid rgba(255, 255, 255, 0.6);
-        box-shadow: 0 0 12px rgba($buttons-color, 0.6);
+        box-shadow: 0 0 12px rgba($primary-text, 0.6);
         color: white;
     }
 
@@ -383,4 +383,5 @@ $border-radius: 5px;
     50% {
         opacity: 0;
     }
+}
 }

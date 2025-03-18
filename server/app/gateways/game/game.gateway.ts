@@ -110,6 +110,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
                 this.server.to(payload.accessCode).emit(GameEvents.End, payload.winner);
             }
             this.server.to(payload.accessCode).emit(FightEvents.Winner, payload.winner);
+            this.server.to(payload.accessCode).emit(FightEvents.Loser, payload.loser);
             this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
         }
         this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
