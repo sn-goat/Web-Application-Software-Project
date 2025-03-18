@@ -200,7 +200,7 @@ describe('GameService', () => {
         service.initFight(Avatar.Knight);
 
         // Assert
-        expect(service['socketService'].initFight).toHaveBeenCalledWith(dummyAccessCode, testPlayer, defender);
+        expect(service['socketService'].initFight).toHaveBeenCalledWith(dummyAccessCode, testPlayer.id, defender.id);
     });
 
     it('should not init fight when no defender is found', () => {

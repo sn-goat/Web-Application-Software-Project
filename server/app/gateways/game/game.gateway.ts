@@ -105,12 +105,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Ending fight');
         if (payload.winner && payload.loser) {
             this.logger.log(`The winner is: ${payload.winner.name} and the loser is: ${payload.loser.name}`);
-            payload.winner.wins++;
+            this.gameService.incrementWins(payload.accessCode, payload.winner.id);
             if (payload.winner && payload.winner.wins >= MAX_FIGHT_WINS) {
                 this.server.to(payload.accessCode).emit(GameEvents.End, payload.winner);
             }
-            this.server.to(payload.accessCode).emit(FightEvents.Winner, payload.winner);
-            this.server.to(payload.accessCode).emit(FightEvents.Loser, payload.loser);
+            this.server.to(payload.accessCode).emit(FightEvents.Winner, this.gameService.getPlayer(payload.accessCode, payload.winner.id));
+            this.server.to(payload.accessCode).emit(FightEvents.Loser, this.gameService.getPlayer(payload.accessCode, payload.loser.id));
             this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
         }
         this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
@@ -187,10 +187,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(FightEvents.Init)
-    handleFightInit(client: Socket, payload: { accessCode: string; player1: PlayerStats; player2: PlayerStats }) {
-        this.logger.log('Initiating fight between ' + payload.player1.name + ' and ' + payload.player2.name);
+    handleFightInit(client: Socket, payload: { accessCode: string; player1: string; player2: string }) {
+        const player1 = this.gameService.getPlayer(payload.accessCode, payload.player1);
+        const player2 = this.gameService.getPlayer(payload.accessCode, payload.player2);
+        this.logger.log('Initiating fight between ' + player1 + ' and ' + player2);
         this.logger.log('Access code: ' + payload.accessCode);
-        this.fightService.initFight(payload.accessCode, payload.player1, payload.player2);
+        this.fightService.initFight(payload.accessCode, player1, player2);
     }
 
     @SubscribeMessage(FightEvents.Flee)

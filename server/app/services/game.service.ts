@@ -240,6 +240,13 @@ export class GameService {
         }
     }
 
+    incrementWins(accessCode: string, playerId: string) {
+        const player = this.getPlayer(accessCode, playerId);
+        if (player) {
+            player.wins++;
+        }
+    }
+
     private isPlayerTurnEnded(accessCode: string, player: PlayerStats) {
         const map = this.getMap(accessCode);
         if (map) {
