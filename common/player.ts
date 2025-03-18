@@ -45,3 +45,13 @@ export const DEFAULT_MOVEMENT_DIRECTIONS: Vec2[] = [
     { x: 0, y: -1 }, // Up
     { x: -1, y: 0 }, // Left
 ];
+export const DIAGONAL_MOVEMENT_DIRECTIONS: Vec2[] = [
+    { x: 0, y: 1 }, // Vertical movement
+    { x: 0, y: -1 },
+    { x: 1, y: 0 }, // Horizontal movement
+    { x: -1, y: 0 },
+    { x: 1, y: 1 }, // Diagonal movement
+    { x: -1, y: -1 },
+    { x: -1, y: 1 },
+    { x: 1, y: -1 },
+];
