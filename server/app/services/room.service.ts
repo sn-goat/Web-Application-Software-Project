@@ -3,6 +3,7 @@ import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GameService } from './game.service';
 
 const minNumber = 1000;
 const maxNumber = 9000;
@@ -12,7 +13,10 @@ export class RoomService {
     private readonly logger = new Logger(RoomService.name);
     private gameRooms: Map<string, Room> = new Map();
 
-    constructor(private readonly eventEmitter: EventEmitter2) {}
+    constructor(
+        private readonly eventEmitter: EventEmitter2,
+        private readonly gameService: GameService,
+    ) {}
 
     createRoom(organizerId: string, size: number): Room {
         const accessCode = this.generateUniqueAccessCode();
@@ -80,23 +84,25 @@ export class RoomService {
         return room;
     }
 
-    quitGame(accessCode: string, playerId: string): PlayerStats | null {
+    quitGame(accessCode: string, playerId: string): string {
         const room = this.gameRooms.get(accessCode);
-        let lastPlayer: PlayerStats | undefined;
         if (!room) {
             this.logger.error(`Room with access code ${accessCode} not found for quitting game.`);
-            return null;
+            return;
         }
+        this.logger.log(`PlayerStats ${playerId} quit game in room ${accessCode}.`);
+        this.gameService.removePlayer(accessCode, playerId);
         this.removePlayer(accessCode, playerId);
 
         if (room.players.length === 1) {
-            lastPlayer = room.players[0];
+            const lastPlayerId = room.players[0].id;
+            this.logger.log(`LastPlayer ${room.players[0].name} quit game in room ${accessCode}.`);
             this.removePlayer(accessCode, room.players[0].id);
-            this.logger.log(`LastPlayer ${lastPlayer.id} quit game in room ${accessCode}.`);
+            this.gameService.deleteGame(accessCode);
             this.deleteRoom(accessCode);
+            return lastPlayerId;
         }
-
-        return lastPlayer;
+        return;
     }
 
     lockRoom(accessCode: string): Room | null {

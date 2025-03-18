@@ -1,10 +1,10 @@
-import { THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
+import { THREE_SECONDS_IN_MS, TimerEvents, InternalEvents } from '@app/gateways/game/game.gateway.constants';
 import { FightService } from '@app/services/fight.service';
 import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
-import { Fight, MAX_FIGHT_WINS, PathInfo } from '@common/game';
+import { Fight, Game, MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -124,6 +124,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
+    @OnEvent(InternalEvents.PlayerRemoved)
+    handlePlayerRemoved(payload: { accessCode: string; game: Game }) {
+        this.logger.log('Player removed from game');
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, payload.game);
+    }
+
     @SubscribeMessage(GameEvents.Create)
     handleGameCreation(client: Socket, payload: { accessCode: string; mapName: string; organizerId: string }) {
         this.gameService.createGame(payload.accessCode, payload.organizerId, payload.mapName);
@@ -169,12 +175,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.gameService.processPath(payload.accessCode, payload.path, payload.player);
     }
 
-    @SubscribeMessage(GameEvents.Quit)
-    async handleGameQuit(client: Socket, payload: { accessCode: string; playerId: string }) {
-        const game = await this.gameService.quitGame(payload.accessCode, payload.playerId);
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game: game.game, lastPlayer: game.lastPlayer });
-    }
-
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; player: PlayerStats }) {
         this.gameService.movePlayer(payload.accessCode, payload.direction, payload.player);
@@ -203,7 +203,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(FightEvents.Attack)
     handlePlayerAttack(client: Socket, accessCode: string) {
-        this.fightService.playerAttack(accessCode);
+        this.fightService.playerAttack(accessCode, this.gameService.isGameDebugMode(accessCode));
     }
 
     afterInit(server: Server) {
