@@ -110,6 +110,8 @@ describe('GameService', () => {
     });
 
     it('should toggle action mode', () => {
+        service.activePlayer.next({ id: 'p1', actions: 1 } as PlayerStats);
+
         const oldValue = service.isActionSelected.value;
         service.toggleActionMode();
         expect(service.isActionSelected.value).toBe(!oldValue);
@@ -145,6 +147,7 @@ describe('GameService', () => {
     });
 
     it('should end turn and toggle action mode', () => {
+        service.activePlayer.next({ id: 'p1', actions: 1 } as PlayerStats);
         spyOn(socketServiceMock, 'endTurn');
         const oldValue = service.isActionSelected.value;
 
@@ -238,6 +241,8 @@ describe('GameService', () => {
     });
 
     it('should toggle action mode', () => {
+        service.activePlayer.next({ id: 'p1', actions: 1 } as PlayerStats);
+
         const current = service.isActionSelected.value;
         service.toggleActionMode();
         expect(service.isActionSelected.value).toBe(!current);
@@ -337,6 +342,8 @@ describe('GameService', () => {
     });
 
     it('should toggle action mode when end fight event is received', () => {
+        service.activePlayer.next({ id: 'p1', actions: 1 } as PlayerStats);
+
         const oldValue = service.isActionSelected.value;
         // Simuler l'événement onEndFight
         socketServiceMock.triggerEndFight({});
@@ -464,5 +471,41 @@ describe('GameService', () => {
         spyOn(ASSETS_DESCRIPTION, 'get').and.returnValue(undefined);
         const result = service.getItemDescription(Item.BOW);
         expect(result).toEqual('Aucune description');
+    });
+
+    it('findPossibleActions should return possible actions for players and doors', () => {
+        const initialMap: Cell[][] = [
+            [
+                { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
+                { player: Avatar.Default, tile: Tile.WALL, position: { x: 1, y: 0 } } as Cell,
+            ],
+            [
+                { player: Avatar.Wizard, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 } } as Cell,
+            ],
+        ];
+        service.map.next(initialMap);
+
+        const result = service.findPossibleActions({ x: 0, y: 1 });
+        expect(result.size).toBe(2);
+        expect(result).toEqual(new Set(['0,0', '1,1']));
+    });
+
+    it('findPossibleActions should return an empty set if no actions available', () => {
+        const initialMap: Cell[][] = [
+            [
+                { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
+                { player: Avatar.Default, tile: Tile.WALL, position: { x: 1, y: 0 } } as Cell,
+            ],
+            [
+                { player: Avatar.Default, tile: Tile.WALL, position: { x: 0, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 } } as Cell,
+            ],
+        ];
+        service.map.next(initialMap);
+
+        const result = service.findPossibleActions({ x: 0, y: 0 });
+        expect(result.size).toBe(0);
+        expect(result).toEqual(new Set());
     });
 });

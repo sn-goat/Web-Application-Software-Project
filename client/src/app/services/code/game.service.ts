@@ -56,6 +56,7 @@ export class GameService {
             const newMap = this.map.value;
             newMap[payload.position.y][payload.position.x].tile = payload.newState;
             this.map.next(newMap);
+            this.isActionSelected.next(false);
         });
 
         this.socketService.onQuitGame().subscribe((game) => {
@@ -82,7 +83,9 @@ export class GameService {
     }
 
     toggleActionMode(): void {
-        this.isActionSelected.next(!this.isActionSelected.value);
+        if (this.activePlayer.value && this.activePlayer.value?.actions > 0) {
+            this.isActionSelected.next(!this.isActionSelected.value);
+        }
     }
 
     toggleDoor(position: Vec2): void {
