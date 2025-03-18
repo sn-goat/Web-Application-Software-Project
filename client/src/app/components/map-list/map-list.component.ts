@@ -73,6 +73,10 @@ export class MapListComponent implements OnInit {
         });
     }
 
+    isAllMapsHidden(): boolean {
+        return this.isCreationPage && this.items.every((map) => map.visibility !== Visibility.PUBLIC);
+    }
+
     getFilteredAndSortedItems(): Board[] {
         let filtered = this.items.filter((item) => {
             const matchesSearch =
