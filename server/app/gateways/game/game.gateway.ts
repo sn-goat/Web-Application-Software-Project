@@ -1,4 +1,4 @@
-import { THREE_SECONDS_IN_MS, TimerEvents, InternalEvents } from '@app/gateways/game/game.gateway.constants';
+import { InternalEvents, THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
 import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
@@ -135,8 +135,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(GameEvents.Configure)
-    async handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
-        const game = await this.gameService.configureGame(payload.accessCode, payload.players);
+    handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
+        const game = this.gameService.configureGame(payload.accessCode, payload.players);
         this.logger.log('Game configured');
         this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, game);
         this.logger.log('Game started');

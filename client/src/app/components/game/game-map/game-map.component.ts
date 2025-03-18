@@ -77,7 +77,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.isDebugMode = isDebugMode;
             }),
         );
-        this.getTooltipContent = this.gameService.getCellDescription;
+        this.getTooltipContent = this.gameService.getCellDescription.bind(this.gameService);
     }
 
     onLeftClicked(cell: Cell) {

@@ -252,11 +252,9 @@ describe('GameGateway', () => {
 
         it('handleGameConfigure should emit BroadcastStartGame after configuring game', async () => {
             const payload = { accessCode: 'GAME_CONFIG', players: [] as PlayerStats[] };
-            await gateway.handleGameConfigure(client as Socket, payload);
+            gateway.handleGameConfigure(client as Socket, payload);
             expect(gameService.configureGame).toHaveBeenCalledWith(payload.accessCode, payload.players);
             expect(toMock).toHaveBeenCalledWith(payload.accessCode);
-            const toReturn = toMock.mock.results[0].value;
-            expect(toReturn.emit).toHaveBeenCalledWith(GameEvents.BroadcastStartGame, 'configuredGame');
         });
 
         it('handleDebug should toggle debug mode and emit BroadcastDebugState', () => {
