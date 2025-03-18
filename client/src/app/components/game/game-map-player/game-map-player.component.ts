@@ -27,6 +27,7 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
         this.subscriptions.push(
             this.gameService.playingPlayers.subscribe((gamePlayers: PlayerStats[]) => {
                 this.playersInGame = gamePlayers;
+                this.players = gamePlayers;
             }),
 
             this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {

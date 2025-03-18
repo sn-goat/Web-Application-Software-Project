@@ -209,3 +209,88 @@ describe('FightService', () => {
         });
     });
 });
+
+describe('FightService - getFighter and getOpponent', () => {
+    let fightService: FightService;
+    let timerService: Partial<TimerService>;
+    let eventEmitter: Partial<EventEmitter2>;
+
+    beforeEach(() => {
+        timerService = {
+            startTimer: jest.fn(),
+            stopTimer: jest.fn(),
+            resumeTimer: jest.fn(),
+            getRemainingTime: jest.fn(),
+        };
+        eventEmitter = {
+            emit: jest.fn(),
+        };
+
+        fightService = new FightService(timerService as TimerService, eventEmitter as EventEmitter2);
+        // S'assurer de partir d'un contexte propre
+        (fightService as any)['activeFights'].clear();
+    });
+
+    const accessCode = 'room1';
+    const fighter1: PlayerStats & FightInfo = {
+        id: 'p1',
+        name: 'Alice',
+        life: 100,
+        attack: 10,
+        defense: 5,
+        speed: 7,
+        fleeAttempts: 2,
+        currentLife: 100,
+        diceResult: 0,
+        // Ajoutez d'autres propriétés nécessaires selon votre interface
+    } as PlayerStats & FightInfo;
+    const fighter2: PlayerStats & FightInfo = {
+        id: 'p2',
+        name: 'Bob',
+        life: 100,
+        attack: 8,
+        defense: 6,
+        speed: 5,
+        fleeAttempts: 2,
+        currentLife: 100,
+        diceResult: 0,
+        // Ajoutez d'autres propriétés nécessaires selon votre interface
+    } as PlayerStats & FightInfo;
+    const fight: Fight = {
+        player1: fighter1,
+        player2: fighter2,
+        currentPlayer: fighter1,
+    };
+
+    describe('getFighter', () => {
+        it('should return null if no fight exists for the given accessCode', () => {
+            expect(fightService.getFighter('nonexistent', 'p1')).toBeNull();
+        });
+
+        it('should return fighter1 when the given playerId matches fighter1 id', () => {
+            (fightService as any)['activeFights'].set(accessCode, fight);
+            expect(fightService.getFighter(accessCode, 'p1')).toEqual(fighter1);
+        });
+
+        it('should return fighter2 when the given playerId does not match fighter1 id', () => {
+            (fightService as any)['activeFights'].set(accessCode, fight);
+            expect(fightService.getFighter(accessCode, 'p2')).toEqual(fighter2);
+        });
+    });
+
+    describe('getOpponent', () => {
+        it('should return null if no fight exists for the given accessCode', () => {
+            expect(fightService.getOpponent('nonexistent', 'p1')).toBeNull();
+        });
+
+        it('should return fighter2 as opponent for fighter1', () => {
+            (fightService as any)['activeFights'].set(accessCode, fight);
+            expect(fightService.getOpponent(accessCode, 'p1')).toEqual(fighter2);
+        });
+
+        it('should return fighter1 as opponent for fighter2', () => {
+            (fightService as any)['activeFights'].set(accessCode, fight);
+            expect(fightService.getOpponent(accessCode, 'p2')).toEqual(fighter1);
+        });
+    });
+});

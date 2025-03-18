@@ -7,7 +7,7 @@ import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
-import { Fight, PathInfo } from '@common/game';
+import { Fight, FightInfo, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Logger } from '@nestjs/common';
@@ -121,10 +121,11 @@ describe('GameGateway', () => {
         });
 
         it('handleTimerEnd should call fightService.nextTurn if fight exists', () => {
-            (fightService.getFight as jest.Mock).mockReturnValue({} as Fight);
+            (gameService.isGameDebugMode as jest.Mock).mockReturnValue(false);
+            (fightService.getFight as jest.Mock).mockReturnValue({ player1: { id: 'p1' } as PlayerStats & FightInfo } as Fight);
             const roomId = 'roomFight';
             gateway.handleTimerEnd(roomId);
-            expect(fightService.nextTurn).toHaveBeenCalledWith(roomId);
+            expect(fightService.playerAttack).toHaveBeenCalledWith(roomId, false);
         });
 
         it('handleTimerEnd should call gameService.endTurnRequested if pas de fight', () => {

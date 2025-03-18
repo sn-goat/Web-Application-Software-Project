@@ -1,183 +1,90 @@
-// /* eslint-disable @typescript-eslint/no-magic-numbers */
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { TestBed } from '@angular/core/testing';
-// import { PlayerToolsService } from '@app/services/code/player-tools.service';
-// import { PlayerService } from '@app/services/code/player.service';
-// import { Item } from '@common/enums';
-// import { PlayerStats } from '@common/player';
-// import { BehaviorSubject } from 'rxjs';
+import { TestBed } from '@angular/core/testing';
+import { Item } from '@common/enums';
+import { take } from 'rxjs/operators';
+import { PlayerToolsService } from './player-tools.service';
 
-// describe('PlayerToolsService', () => {
-//     let service: PlayerToolsService;
-//     let playerServiceSpy: jasmine.SpyObj<PlayerService>;
-//     let playersSubject: BehaviorSubject<PlayerStats[]>;
+describe('PlayerToolsService', () => {
+    let service: PlayerToolsService;
 
-//     const mockPlayer: PlayerStats = {
-//         id: '1',
-//         name: 'testPlayer',
-//         avatar: '1',
-//         life: 100,
-//         attack: 10,
-//         defense: 10,
-//         speed: 5,
-//         attackDice: 'D6',
-//         defenseDice: 'D4',
-//         movementPts: 5,
-//         actions: 2,
-//         wins: 0,
-//         position: { x: 0, y: 0 },
-//         spawnPosition: { x: 0, y: 0 },
-//     };
+    beforeEach(() => {
+        TestBed.configureTestingModule({
+            providers: [PlayerToolsService],
+        });
+        service = TestBed.inject(PlayerToolsService);
+    });
 
-//     beforeEach(() => {
-//         playersSubject = new BehaviorSubject<PlayerStats[]>([]);
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 
-//         const spy = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName'], {
-//             players$: playersSubject.asObservable(),
-//         });
+    it('should have initial timer value "00 s"', (done) => {
+        service.timer$.pipe(take(1)).subscribe((timer) => {
+            expect(timer).toBe('00 s');
+            done();
+        });
+    });
 
-//         spy.getPlayerName.and.returnValue('testPlayer');
-//         spy.getPlayer.and.returnValue(undefined);
+    it('should set timer correctly', (done) => {
+        const newTime = '10 s';
+        service.setTimer(newTime);
+        service.timer$.pipe(take(1)).subscribe((timer) => {
+            expect(timer).toBe(newTime);
+            done();
+        });
+    });
 
-//         TestBed.configureTestingModule({
-//             providers: [PlayerToolsService, { provide: PlayerService, useValue: spy }],
-//         });
+    it('should add an item if it is not DEFAULT', (done) => {
+        // Initial items should be empty
+        service.items$.pipe(take(1)).subscribe((items) => {
+            expect(items.length).toBe(0);
+        });
 
-//         service = TestBed.inject(PlayerToolsService);
-//         playerServiceSpy = TestBed.inject(PlayerService) as jasmine.SpyObj<PlayerService>;
-//     });
+        service.addItem(Item.BOW);
+        service.items$.pipe(take(1)).subscribe((items) => {
+            expect(items.length).toBe(1);
+            expect(items[0]).toBe(Item.BOW);
+        });
 
-//     it('should be created', () => {
-//         expect(service).toBeTruthy();
-//     });
+        // Add second item
+        service.addItem(Item.SWORD);
+        service.items$.pipe(take(1)).subscribe((items) => {
+            expect(items.length).toBe(2);
+            expect(items).toEqual([Item.BOW, Item.SWORD]);
+        });
 
-//     it('should initialize with default values', () => {
-//         let items: Item[] | undefined;
-//         let timer: string | undefined;
+        // Adding a new item when 2 are already there should pop le dernier et ajouter le nouvel item
+        service.addItem(Item.SHIELD);
+        service.items$.pipe(take(1)).subscribe((items) => {
+            expect(items.length).toBe(2);
+            // La logique: items[0] reste, items[1] devient la nouvelle valeur
+            expect(items).toEqual([Item.BOW, Item.SHIELD]);
+            done();
+        });
+    });
 
-//         service.items$.subscribe((value) => (items = value));
-//         service.timer$.subscribe((value) => (timer = value));
+    it('should not add DEFAULT item', (done) => {
+        service.addItem(Item.DEFAULT);
+        service.items$.pipe(take(1)).subscribe((items) => {
+            expect(items.length).toBe(0);
+            done();
+        });
+    });
 
-//         expect(items).toEqual([]);
-//         expect(timer).toEqual('00:00');
-//         expect((service as any).player).toEqual({});
-//     });
+    it('should remove an item correctly', (done) => {
+        // Pré-remplissage de quelques items
+        service.addItem(Item.BOW);
+        service.addItem(Item.SWORD);
 
-//     it('should update player when players$ emits and getPlayer returns a value', () => {
-//         playerServiceSpy.getPlayer.and.returnValue(mockPlayer);
+        // Vérifier que les items ont été ajoutés
+        service.items$.pipe(take(1)).subscribe((items) => {
+            expect(items.length).toBe(2);
 
-//         playersSubject.next([mockPlayer]);
-
-//         expect((service as any).player).toEqual(mockPlayer);
-//     });
-
-//     it('should not update player if getPlayer returns undefined', () => {
-//         playerServiceSpy.getPlayer.and.returnValue(undefined);
-
-//         (service as any).player = {};
-
-//         playersSubject.next([]);
-
-//         expect((service as any).player).toEqual({});
-//     });
-
-//     it('should set timer correctly', () => {
-//         let timer: string | undefined;
-//         service.timer$.subscribe((value) => (timer = value));
-
-//         expect(timer).toBe('00:00');
-
-//         service.setTimer('01:30');
-
-//         expect(timer).toBe('01:30');
-//     });
-
-//     it('should add item when items array has less than 2 items', () => {
-//         let items: Item[] | undefined;
-//         service.items$.subscribe((value) => (items = value));
-
-//         expect(items).toEqual([]);
-
-//         service.addItem(Item.SWORD);
-
-//         expect(items).toEqual([Item.SWORD]);
-
-//         service.addItem(Item.BOW);
-
-//         expect(items).toEqual([Item.SWORD, Item.BOW]);
-//     });
-
-//     it('should replace last item when items array already has 2 items', () => {
-//         (service as any).items.next([Item.SWORD, Item.BOW]);
-
-//         let items: Item[] | undefined;
-//         service.items$.subscribe((value) => (items = value));
-
-//         expect(items).toEqual([Item.SWORD, Item.BOW]);
-
-//         service.addItem(Item.CHEST);
-
-//         expect(items).toEqual([Item.SWORD, Item.CHEST]);
-//     });
-
-//     it('should not add DEFAULT items', () => {
-//         (service as any).items.next([Item.SWORD]);
-
-//         let items: Item[] | undefined;
-//         service.items$.subscribe((value) => (items = value));
-
-//         service.addItem(Item.DEFAULT);
-
-//         expect(items).toEqual([Item.SWORD]);
-//     });
-
-//     it('should remove item when it exists', () => {
-//         (service as any).items.next([Item.SWORD, Item.BOW]);
-
-//         let items: Item[] | undefined;
-//         service.items$.subscribe((value) => (items = value));
-
-//         expect(items).toEqual([Item.SWORD, Item.BOW]);
-
-//         service.removeItem(Item.SWORD);
-
-//         expect(items).toEqual([Item.BOW]);
-//     });
-
-//     it('should not remove item when it does not exist', () => {
-//         (service as any).items.next([Item.SWORD]);
-
-//         let items: Item[] | undefined;
-//         service.items$.subscribe((value) => (items = value));
-
-//         expect(items).toEqual([Item.SWORD]);
-
-//         service.removeItem(Item.BOW);
-
-//         expect(items).toEqual([Item.SWORD]);
-//     });
-
-//     it('should call endTurn without errors', () => {
-//         (service as any).player = mockPlayer;
-
-//         expect(() => service.endTurn()).not.toThrow();
-//     });
-
-//     it('should call performAction without errors', () => {
-//         (service as any).player = mockPlayer;
-
-//         expect(() => service.performAction()).not.toThrow();
-//     });
-
-//     it('should handle endTurn with empty player', () => {
-//         (service as any).player = {} as PlayerStats;
-
-//         expect(() => service.endTurn()).not.toThrow();
-//     });
-
-//     it('should handle performAction with empty player', () => {
-//         (service as any).player = {} as PlayerStats;
-
-//         expect(() => service.performAction()).not.toThrow();
-//     });
-// });
+            // Suppression d'un item
+            service.removeItem(Item.BOW);
+            service.items$.pipe(take(1)).subscribe((updatedItems) => {
+                expect(updatedItems).toEqual([Item.SWORD]);
+                done();
+            });
+        });
+    });
+});

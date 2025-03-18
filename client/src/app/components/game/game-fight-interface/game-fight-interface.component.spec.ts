@@ -1,260 +1,109 @@
-// /* eslint-disable @typescript-eslint/no-magic-numbers */
-// import { CommonModule } from '@angular/common';
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { MatButtonModule } from '@angular/material/button';
-// import { GameFightInterfaceComponent } from '@app/components/game/game-fight-interface/game-fight-interface.component';
-// import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
-// import { FightLogicService } from '@app/services/code/fight-logic.service';
-// import { PlayerService } from '@app/services/code/player.service';
-// import { PlayerStats } from '@common/player';
-// import { BehaviorSubject } from 'rxjs';
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { SocketService } from '@app/services/socket/socket.service';
+import { Fight } from '@common/game';
+import { PlayerStats } from '@common/player';
+import { BehaviorSubject, of } from 'rxjs';
+import { GameFightInterfaceComponent } from './game-fight-interface.component';
 
-// describe('GameFightInterfaceComponent', () => {
-//     let component: GameFightInterfaceComponent;
-//     let fixture: ComponentFixture<GameFightInterfaceComponent>;
-//     let fightLogicServiceMock: jasmine.SpyObj<FightLogicService>;
-//     let playerServiceMock: jasmine.SpyObj<PlayerService>;
+describe('GameFightInterfaceComponent', () => {
+    let component: GameFightInterfaceComponent;
+    let fixture: ComponentFixture<GameFightInterfaceComponent>;
+    let fightLogicService: jasmine.SpyObj<FightLogicService>;
+    let playerService: jasmine.SpyObj<PlayerService>;
 
-//     let timerSubject: BehaviorSubject<string>;
-//     let d4Subject: BehaviorSubject<number>;
-//     let d6Subject: BehaviorSubject<number>;
-//     let turnSubject: BehaviorSubject<string>;
-//     let fleeAttempt1Subject: BehaviorSubject<number>;
-//     let fleeAttempt2Subject: BehaviorSubject<number>;
+    beforeEach(async () => {
+        const fightLogicSpy = jasmine.createSpyObj('FightLogicService', ['flee', 'attack'], {
+            fight: new BehaviorSubject<Fight>({
+                player1: { id: '1', name: 'Player1', currentLife: 80, life: 100 },
+                player2: { id: '2', name: 'Player2', currentLife: 50, life: 100 },
+                currentPlayer: { name: 'Player1' },
+            } as Fight),
+        });
+        const playerSpy = jasmine.createSpyObj('PlayerService', ['getPlayer']);
+        // Ensuite, définissez la valeur de retour par défaut :
+        playerSpy.getPlayer.and.returnValue({ id: '1', name: 'Player1' });
+        const socketSpy = jasmine.createSpyObj('SocketService', ['onFightTimerUpdate'], { onFightTimerUpdate: () => of(30) });
 
-//     const mockPlayers: PlayerStats[] = [
-//         {
-//             id: '1',
-//             name: 'player1',
-//             avatar: '1',
-//             life: 100,
-//             attack: 10,
-//             defense: 10,
-//             speed: 5,
-//             attackDice: 'D6',
-//             defenseDice: 'D4',
-//             movementPts: 5,
-//             actions: 2,
-//             wins: 0,
-//             position: { x: 0, y: 0 },
-//             spawnPosition: { x: 0, y: 0 },
-//         },
-//         {
-//             id: '2',
-//             name: 'player2',
-//             avatar: '2',
-//             life: 90,
-//             attack: 12,
-//             defense: 8,
-//             speed: 7,
-//             attackDice: 'D6',
-//             defenseDice: 'D4',
-//             movementPts: 4,
-//             actions: 1,
-//             wins: 0,
-//             position: { x: 0, y: 0 },
-//             spawnPosition: { x: 0, y: 0 },
-//         },
-//     ];
+        await TestBed.configureTestingModule({
+            imports: [GameFightInterfaceComponent],
+            providers: [
+                { provide: FightLogicService, useValue: fightLogicSpy },
+                { provide: PlayerService, useValue: playerSpy },
+                { provide: SocketService, useValue: socketSpy },
+            ],
+        }).compileComponents();
 
-//     beforeEach(async () => {
-//         timerSubject = new BehaviorSubject<string>('00:00');
-//         d4Subject = new BehaviorSubject<number>(0);
-//         d6Subject = new BehaviorSubject<number>(0);
-//         turnSubject = new BehaviorSubject<string>('');
-//         fleeAttempt1Subject = new BehaviorSubject<number>(2);
-//         fleeAttempt2Subject = new BehaviorSubject<number>(2);
+        fixture = TestBed.createComponent(GameFightInterfaceComponent);
+        component = fixture.componentInstance;
+        fightLogicService = TestBed.inject(FightLogicService) as jasmine.SpyObj<FightLogicService>;
+        playerService = TestBed.inject(PlayerService) as jasmine.SpyObj<PlayerService>;
+        fixture.detectChanges();
+    });
 
-//         fightLogicServiceMock = jasmine.createSpyObj('FightLogicService', ['attack', 'flee', 'getName1', 'getName2'], {
-//             timer$: timerSubject.asObservable(),
-//             d4$: d4Subject.asObservable(),
-//             d6$: d6Subject.asObservable(),
-//             turn$: turnSubject.asObservable(),
-//             fleeAttempt1$: fleeAttempt1Subject.asObservable(),
-//             fleeAttempt2$: fleeAttempt2Subject.asObservable(),
-//         });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-//         fightLogicServiceMock.getName1.and.returnValue('player1');
-//         fightLogicServiceMock.getName2.and.returnValue('player2');
+    it('should set fight data correctly on init when player is player1', () => {
+        expect(component.myPlayer?.name).toBe('Player1');
+        expect(component.opponentPlayer?.name).toBe('Player2');
+        expect(component.currentNameTurn).toBe('Player1');
+        expect(component.lifePercentMyPlayer).toBe(80);
+        expect(component.lifePercentOpponent).toBe(50);
+    });
 
-//         playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'getPlayerName']);
+    it('should set fight data correctly on init when player is player2', () => {
+        // Définir la valeur de retour avant d'émettre le combat
+        playerService.getPlayer.and.returnValue({ id: '2', name: 'Player2' } as PlayerStats);
+        fightLogicService.fight.next({
+            player1: { id: '1', name: 'Player1', currentLife: 80, life: 100 },
+            player2: { id: '2', name: 'Player2', currentLife: 50, life: 100 },
+            currentPlayer: { name: 'Player2' },
+        } as Fight);
+        fixture.detectChanges();
 
-//         playerServiceMock.getPlayerName.and.returnValue('player1'); // Current player is player1
-//         playerServiceMock.getPlayer.and.callFake((username: string) => {
-//             if (username === 'player1') return mockPlayers[0];
-//             if (username === 'player2') return mockPlayers[1];
-//             return undefined;
-//         });
+        expect(component.myPlayer?.name).toBe('Player2');
+        expect(component.opponentPlayer?.name).toBe('Player1');
+        expect(component.currentNameTurn).toBe('Player2');
+        expect(component.lifePercentMyPlayer).toBe(50);
+        expect(component.lifePercentOpponent).toBe(80);
+    });
 
-//         await TestBed.configureTestingModule({
-//             imports: [CommonModule, MatButtonModule, GameFightInterfaceComponent],
-//             providers: [
-//                 { provide: FightLogicService, useValue: fightLogicServiceMock },
-//                 { provide: PlayerService, useValue: playerServiceMock },
-//             ],
-//         }).compileComponents();
+    it('should update timer on socket event', () => {
+        expect(component.timer).toBe('30 s');
+    });
 
-//         fixture = TestBed.createComponent(GameFightInterfaceComponent);
-//         component = fixture.componentInstance;
-//         fixture.detectChanges();
-//     });
+    it('should determine if it is my turn correctly', () => {
+        expect(component.isMyTurn()).toBeTrue();
+    });
 
-//     it('should create', () => {
-//         expect(component).toBeTruthy();
-//     });
+    it('should call flee when flee method is executed', () => {
+        component.flee();
+        expect(fightLogicService.flee).toHaveBeenCalled();
+    });
 
-//     it('should initialize constant paths', () => {
-//         expect(component.srcAvatar).toBe(DEFAULT_PATH_AVATARS);
-//         expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
-//     });
+    it('should call attack when attack method is executed', () => {
+        component.attack();
+        expect(fightLogicService.attack).toHaveBeenCalled();
+    });
 
-//     it('should initialize with default values', () => {
-//         expect(component.timer).toBe('00:00');
-//         expect(component.diceD4).toBe(0);
-//         expect(component.diceD6).toBe(0);
-//         expect(component.currentTurn).toBe('');
-//         expect(component.fleeAttempt1).toBe(2);
-//         expect(component.fleeAttempt2).toBe(2);
-//     });
+    it('should compute default life percentages when life properties are undefined', () => {
+        // On simule le cas d'un joueur dont currentLife et life sont undefined.
+        playerService.getPlayer.and.returnValue({ id: '1', name: 'Player1' } as PlayerStats);
+        fightLogicService.fight.next({
+            player1: { id: '1', name: 'Player1', avatar: 'defaultAvatar', currentLife: undefined, life: 4 } as unknown as PlayerStats,
+            player2: { id: '2', name: 'Player2', avatar: 'defaultAvatar', currentLife: undefined, life: 4 } as unknown as PlayerStats,
+            currentPlayer: { name: 'Player2' },
+        } as Fight);
+        fixture.detectChanges();
 
-//     it('should initialize player1 and player2 in ngOnInit', () => {
-//         expect(fightLogicServiceMock.getName1).toHaveBeenCalled();
-//         expect(fightLogicServiceMock.getName2).toHaveBeenCalled();
-//         expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('player1');
-//         expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('player2');
-//         expect(component.player1).toEqual(mockPlayers[0]);
-//         expect(component.player2).toEqual(mockPlayers[1]);
-//     });
-
-//     it('should update timer when timer$ emits', () => {
-//         const newTime = '01:30';
-//         timerSubject.next(newTime);
-//         expect(component.timer).toBe(newTime);
-//     });
-
-//     it('should update dice values when dice observables emit', () => {
-//         d4Subject.next(3);
-//         expect(component.diceD4).toBe(3);
-
-//         d6Subject.next(5);
-//         expect(component.diceD6).toBe(5);
-//     });
-
-//     it('should update currentTurn and players when turn$ emits', () => {
-//         playerServiceMock.getPlayer.calls.reset();
-//         fightLogicServiceMock.getName1.calls.reset();
-//         fightLogicServiceMock.getName2.calls.reset();
-
-//         turnSubject.next('player2');
-
-//         expect(component.currentTurn).toBe('player2');
-
-//         expect(fightLogicServiceMock.getName1).toHaveBeenCalled();
-//         expect(fightLogicServiceMock.getName2).toHaveBeenCalled();
-//         expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('player1');
-//         expect(playerServiceMock.getPlayer).toHaveBeenCalledWith('player2');
-//     });
-
-//     it('should update fleeAttempts when fleeAttempt$ subjects emit', () => {
-//         fleeAttempt1Subject.next(1);
-//         expect(component.fleeAttempt1).toBe(1);
-
-//         fleeAttempt2Subject.next(0);
-//         expect(component.fleeAttempt2).toBe(0);
-//     });
-
-//     it('should unsubscribe from all observables on destroy', () => {
-//         const nextSpy = spyOn(component['destroy$'], 'next').and.callThrough();
-//         const completeSpy = spyOn(component['destroy$'], 'complete').and.callThrough();
-
-//         component.ngOnDestroy();
-
-//         expect(nextSpy).toHaveBeenCalled();
-//         expect(completeSpy).toHaveBeenCalled();
-//     });
-
-//     it('should return true for isMyTurn when currentTurn matches player username', () => {
-//         component.currentTurn = 'player1';
-
-//         expect(component.isMyTurn()).toBeTrue();
-//         expect(playerServiceMock.getPlayerName).toHaveBeenCalled();
-//     });
-
-//     it('should return false for isMyTurn when currentTurn does not match player username', () => {
-//         component.currentTurn = 'player2';
-
-//         expect(component.isMyTurn()).toBeFalse();
-//         expect(playerServiceMock.getPlayerName).toHaveBeenCalled();
-//     });
-
-//     it("should call fightLogicService.flee when flee is called and it is player's turn", () => {
-//         component.currentTurn = 'player1';
-
-//         component.flee();
-
-//         expect(fightLogicServiceMock.flee).toHaveBeenCalledWith('player1');
-//     });
-
-//     it("should not call fightLogicService.flee when flee is called but it is not player's turn", () => {
-//         component.currentTurn = 'player2';
-
-//         component.flee();
-
-//         expect(fightLogicServiceMock.flee).not.toHaveBeenCalled();
-//     });
-
-//     it("should call fightLogicService.attack when attack is called and it is player's turn", () => {
-//         component.currentTurn = 'player1';
-
-//         component.attack();
-
-//         expect(fightLogicServiceMock.attack).toHaveBeenCalledWith('player1');
-//     });
-
-//     it("should not call fightLogicService.attack when attack is called but it is not player's turn", () => {
-//         component.currentTurn = 'player2';
-
-//         component.attack();
-
-//         expect(fightLogicServiceMock.attack).not.toHaveBeenCalled();
-//     });
-
-//     it('should return correct flee attempts for player1', () => {
-//         component.player1 = mockPlayers[0];
-//         component.fleeAttempt1 = 1;
-
-//         expect(component.getFleeAttempts('player1')).toBe(1);
-//     });
-
-//     it('should return correct flee attempts for player2', () => {
-//         component.player2 = mockPlayers[1];
-//         component.fleeAttempt2 = 0;
-
-//         expect(component.getFleeAttempts('player2')).toBe(0);
-//     });
-
-//     it('should return 0 for getFleeAttempts when username does not match either player', () => {
-//         expect(component.getFleeAttempts('unknown')).toBe(0);
-//     });
-
-//     it('should handle undefined players in getFleeAttempts', () => {
-//         component.player1 = undefined;
-//         component.player2 = undefined;
-
-//         expect(component.getFleeAttempts('player1')).toBe(0);
-//         expect(component.getFleeAttempts('player2')).toBe(0);
-//     });
-
-//     it('should handle case where player gets undefined from service in ngOnInit', () => {
-//         playerServiceMock.getPlayer.and.returnValue(undefined);
-
-//         const newFixture = TestBed.createComponent(GameFightInterfaceComponent);
-//         const newComponent = newFixture.componentInstance;
-
-//         newFixture.detectChanges();
-
-//         expect(newComponent.player1).toBeUndefined();
-//         expect(newComponent.player2).toBeUndefined();
-//         expect(() => newComponent.getFleeAttempts('player1')).not.toThrow();
-//     });
-// });
+        // Pour myPlayer, comme currentLife vaut undefined -> default à 0,
+        // et life vaut undefined -> default à 1, on obtient (0/1)*100 = 0.
+        expect(component.lifePercentMyPlayer).toBe(0);
+        // De même pour opponent.
+        expect(component.lifePercentOpponent).toBe(0);
+    });
+});
