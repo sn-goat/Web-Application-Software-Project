@@ -3,11 +3,13 @@ export enum GameEvents {
     Configure = 'configureGame', // Client qui envoi l'état du jeu
     Ready = 'readyForStart', // Client
     Debug = 'toggleDebug', // Client
+    EndDebug = 'endDebug', // Client
     AssignSpawn = 'assignSpawn',
     Quit = 'quitGame', // Client
     End = 'endGame', // Serveur
     BroadcastStartGame = 'startGame', // Serveur
     BroadcastDebugState = 'debug', // Serveur
+    BroadcastEndDebugState = 'endDebug', // Serveur
     BroadcastEndGame = 'endGame', // Serveur
     BroadcastQuitGame = 'playerQuit', // Serveur
 }

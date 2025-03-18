@@ -30,6 +30,10 @@ export class GameService {
         this.currentGames.get(accessCode).isDebugMode = !this.currentGames.get(accessCode).isDebugMode;
     }
 
+    endDebugMode(accessCode: string) {
+        this.currentGames.get(accessCode).isDebugMode = false;
+    }
+
     isGameDebugMode(accessCode: string): boolean {
         return this.currentGames.get(accessCode).isDebugMode;
     }
@@ -118,21 +122,27 @@ export class GameService {
 
     async quitGame(accessCode: string, playerId: string) {
         const game = this.currentGames.get(accessCode);
-        const lastPlayer: PlayerStats = game.players.filter((player) => player.id !== playerId)[0];
+        let lastPlayer: PlayerStats;
         if (game) {
             const index = game.players.findIndex((playerFound: PlayerStats) => playerFound.id === playerId);
             if (index >= 0) {
                 const player = game.players[index];
+                game.isDebugMode = false;
+
                 if (game.players.length === 2) {
+                    lastPlayer = game.players.find((playerFound: PlayerStats) => playerFound.id !== playerId);
                     for (let i = game.players.length - 1; i >= 0; i--) {
                         game.map[player.position.y][player.position.x].player = Avatar.Default;
+                        game.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
                         game.players.splice(i, 1);
                         this.logger.log(`Player ${playerId} quit the game`);
                     }
+                    this.timerService.stopTimer(accessCode);
                     this.currentGames.delete(accessCode);
                     this.logger.log(`Game ${accessCode} deleted`);
                 } else {
                     game.map[player.position.y][player.position.x].player = Avatar.Default;
+                    game.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
                     game.players.splice(index, 1);
                     this.logger.log(`Player ${playerId} quit the game`);
                 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, HostListener, OnInit, ViewChild, inject } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
@@ -17,7 +17,7 @@ import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Game } from '@common/game';
 import { PlayerStats } from '@common/player';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-page',
@@ -34,7 +34,7 @@ import { firstValueFrom } from 'rxjs';
     templateUrl: './game-page.component.html',
     styleUrl: './game-page.component.scss',
 })
-export class GamePageComponent implements OnInit, AfterViewInit {
+export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(HeaderBarComponent) headerBar!: HeaderBarComponent;
 
     showFightInterface: boolean = false;
@@ -42,6 +42,7 @@ export class GamePageComponent implements OnInit, AfterViewInit {
     showInfo = false;
     debugMode = false;
 
+    private quitGameSubscription: Subscription;
     private gameService = inject(GameService);
     private fightLogicService = inject(FightLogicService);
     private playerService = inject(PlayerService);
@@ -51,6 +52,9 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
+        if (this.socketService.getGameRoom().organizerId === this.playerService.getPlayer().id) {
+            this.socketService.endDebugMode(this.socketService.getGameRoom().accessCode);
+        }
         this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.playerService.getPlayer().id);
     }
 
@@ -69,12 +73,11 @@ export class GamePageComponent implements OnInit, AfterViewInit {
             this.showFightInterface = show;
         });
 
-        this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
-            this.socketService.onQuitRoomGame().subscribe(async (players: PlayerStats[]) => {
-                if (!game.game.players.length && !players.length && game.lastPlayer.id === this.playerService.getPlayer().id) {
-                    await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
-                }
-            });
+        this.quitGameSubscription = this.socketService.onQuitGame().subscribe(async (game: { game: Game; lastPlayer: PlayerStats }) => {
+            if (!game.game.players.length && game.lastPlayer.id === this.playerService.getPlayer().id) {
+                await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
+                this.socketService.resetSocketState();
+            }
         });
 
         this.gameService.isDebugMode.subscribe((isDebugMode) => {
@@ -88,6 +91,9 @@ export class GamePageComponent implements OnInit, AfterViewInit {
         this.headerBar.getBack = async () => {
             const confirmed = await this.gameService.confirmAndAbandonGame();
             if (confirmed) {
+                if (this.socketService.getGameRoom().organizerId === this.playerService.getPlayer().id) {
+                    this.socketService.endDebugMode(this.socketService.getGameRoom().accessCode);
+                }
                 this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
                 return originalAbandonMethod.call(this.headerBar);
             }
@@ -104,7 +110,12 @@ export class GamePageComponent implements OnInit, AfterViewInit {
 
     async warning(message: string): Promise<void> {
         await this.openDialog(message, Alert.WARNING);
-        this.router.navigate(['/home']).then(() => window.location.reload());
+        this.router.navigate(['/home']);
+    }
+
+    ngOnDestroy(): void {
+        this.quitGameSubscription.unsubscribe();
+        this.socketService.resetSocketState();
     }
 
     private async openDialog(message: string, type: Alert): Promise<boolean> {

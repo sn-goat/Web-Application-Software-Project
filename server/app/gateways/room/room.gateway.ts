@@ -114,12 +114,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.QuitGame)
     handleQuitGame(client: Socket, payload: { accessCode: string; playerId: string }) {
-        const room = this.roomService.quitGame(payload.accessCode, payload.playerId);
-        if (!room) {
-            client.emit(RoomEvents.QuitGame, { message: 'Impossible de quitter la partie.' });
-            return;
-        }
-        this.server.to(payload.accessCode).emit(RoomEvents.QuitGame, room.players);
+        this.roomService.quitGame(payload.accessCode, payload.playerId);
     }
 
     afterInit(server: Server) {

@@ -127,6 +127,10 @@ export class SocketService {
         this.socket.emit(GameEvents.Debug, accessCode);
     }
 
+    endDebugMode(accessCode: string) {
+        this.socket.emit(GameEvents.EndDebug, accessCode);
+    }
+
     debugMove(accessCode: string, direction: Vec2, player: PlayerStats) {
         this.socket.emit(TurnEvents.DebugMove, { accessCode, direction, player });
     }
@@ -175,6 +179,12 @@ export class SocketService {
     onBroadcastDebugState(): Observable<void> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.BroadcastDebugState, (data) => observer.next(data));
+        });
+    }
+
+    onBroadcastDebugEndState(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.BroadcastEndDebugState, (data) => observer.next(data));
         });
     }
 
@@ -271,12 +281,6 @@ export class SocketService {
     onQuitGame(): Observable<{ game: Game; lastPlayer: PlayerStats }> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.BroadcastQuitGame, (game: { game: Game; lastPlayer: PlayerStats }) => observer.next(game));
-        });
-    }
-
-    onQuitRoomGame(): Observable<PlayerStats[]> {
-        return new Observable((observer) => {
-            this.socket.on(RoomEvents.QuitGame, (players: PlayerStats[]) => observer.next(players));
         });
     }
 

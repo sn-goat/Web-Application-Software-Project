@@ -397,13 +397,6 @@ describe('RoomService - non-existent room handling', () => {
         expect((service as any).logger.error).toHaveBeenCalledWith('Room with access code nonexistent not found for quitting game.');
     });
 
-    it('should return null when player is not found in room', () => {
-        const room = service.createRoom('org1', 10);
-        const result = service.quitGame(room.accessCode, 'nonexistent');
-        expect(result).toBeNull();
-        expect((service as any).logger.error).toHaveBeenCalledWith(`PlayerStats nonexistent not found in room ${room.accessCode}`);
-    });
-
     it('should remove only the quitting player when more than 2 players are in the room', () => {
         const room = service.createRoom('org1', 10);
         const player1: PlayerStats = {
@@ -463,7 +456,7 @@ describe('RoomService - non-existent room handling', () => {
         const removePlayerSpy = jest.spyOn(service, 'removePlayer');
         const deleteRoomSpy = jest.spyOn(service, 'deleteRoom');
 
-        const result = service.quitGame(room.accessCode, player1.id);
+        service.quitGame(room.accessCode, player1.id);
 
         // Verify only player1 was removed
         expect(removePlayerSpy).toHaveBeenCalledTimes(1);
@@ -471,9 +464,6 @@ describe('RoomService - non-existent room handling', () => {
 
         // Verify room was not deleted
         expect(deleteRoomSpy).not.toHaveBeenCalled();
-
-        // Verify result
-        expect(result).toBe(room);
 
         // Check that the room still exists and has 2 players
         const updatedRoom = service.getRoom(room.accessCode);
@@ -534,7 +524,7 @@ describe('RoomService - non-existent room handling', () => {
         expect(deleteRoomSpy).toHaveBeenCalledWith(room.accessCode);
 
         // Verify result
-        expect(result).toBe(room);
+        expect(result).toBe(player2);
 
         // Verify the room is gone
         expect(service.getRoom(room.accessCode)).toBeNull();

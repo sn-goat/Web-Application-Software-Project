@@ -12,8 +12,8 @@ $active-player-color: #ff9800;
     height: 100%;
     width: 100%;
     overflow: hidden;
-    --base-font-size: min(0.9rem, 3.2vw); /* Increased from 0.8rem */
-    --small-font-size: min(0.75rem, 2.4vw); /* Increased from 0.65rem */
+    --base-font-size: min(0.9rem, 3.2vw);
+    --small-font-size: min(0.75rem, 2.4vw);
 }
 
 .player-section {
@@ -47,10 +47,9 @@ $active-player-color: #ff9800;
     box-sizing: border-box;
 
     &.active-player {
-        box-shadow: 0 0 10px rgba($primary-text, 0.6); /* Changed from orange to teal */
-        border-left: 3px solid $primary-text; /* Changed from orange to teal */
+        box-shadow: 0 0 10px rgba($primary-text, 0.6); 
+        border-left: 3px solid $primary-text;
         background-color: rgba(0, 0, 0, 0.5);
-        /* Removed animation */
     }
 
     .player-image {
@@ -65,7 +64,7 @@ $active-player-color: #ff9800;
             border-radius: 50%;
             width: 30px;
             height: 30px;
-            min-width: 30px; /* Prevent shrinking */
+            min-width: 30px;
             border: 1px solid $primary-text;
             box-shadow: 0 0 6px $glow-teal;
             object-fit: cover;
@@ -73,7 +72,7 @@ $active-player-color: #ff9800;
         }
 
         h3 {
-            font-size: min(0.9rem, 3.2vw); /* Increased from 0.8rem */
+            font-size: min(0.9rem, 3.2vw);
             color: $primary-text;
             text-shadow: 0 0 5px $glow-teal;
             font-weight: 600;
@@ -82,7 +81,7 @@ $active-player-color: #ff9800;
             overflow: hidden;
             text-overflow: ellipsis;
             margin: 0;
-            max-width: calc(100% - 36px); /* Leave room for image */
+            max-width: calc(100% - 36px);
         }
     }
 
@@ -98,9 +97,9 @@ $active-player-color: #ff9800;
         overflow: hidden;
 
         h3 {
-            margin: 0;
-            font-size: min(0.8rem, 2.7vw); /* Increased from 0.7rem */
-            line-height: 1.1; /* Tighter line height */
+            margin: 10px;
+            font-size: min(0.8rem, 2.7vw);
+            line-height: 1.1;
             color: $secondary-text;
             font-weight: 500;
             white-space: nowrap;
@@ -113,15 +112,15 @@ $active-player-color: #ff9800;
 
         h3.admin,
         h3.active {
-            font-size: min(0.75rem, 2.5vw); /* Increased from 0.65rem */
-            padding: 1px 3px; /* Smaller padding */
+            font-size: min(0.75rem, 2.5vw);
+            padding: 1px 3px;
             margin-bottom: 2px;
             border-radius: 3px;
             display: inline-block;
             width: auto;
             height: auto;
-            max-width: 100%; /* Ensure it doesn't overflow */
-            line-height: 1; /* Remove extra space */
+            max-width: 100%;
+            line-height: 1;
         }
 
         h3.admin {
@@ -131,10 +130,10 @@ $active-player-color: #ff9800;
         }
 
         h3.active {
-            color: $active-player-color; /* Keep orange color */
+            color: $active-player-color;
             border: 1px solid rgba($active-player-color, 0.4);
-            text-shadow: 0 0 4px rgba($active-player-color, 0.6); /* Enhanced glow */
-            animation: text-pulse 2s ease-in-out infinite; /* Keep pulsing animation */
+            text-shadow: 0 0 4px rgba($active-player-color, 0.6);
+            animation: text-pulse 2s ease-in-out infinite;
             font-weight: bold;
         }
     }
@@ -143,6 +142,7 @@ $active-player-color: #ff9800;
 /* Player states */
 .player-not-in-game {
     text-decoration: line-through;
+    text-decoration-thickness: 3px;
     opacity: 0.3;
     color: #7a7a7a;
 }
@@ -230,11 +230,11 @@ $active-player-color: #ff9800;
     }
 
     .player-image h3 {
-        font-size: min(1.1rem, 3.7vw); /* Increased from 1rem */
+        font-size: min(1.1rem, 3.7vw); 
     }
 
     .player-info h3 {
-        font-size: min(0.95rem, 3.2vw); /* Increased from 0.85rem */
+        font-size: min(0.95rem, 3.2vw);
     }
 }
 
@@ -248,11 +248,11 @@ $active-player-color: #ff9800;
     }
 
     .player-image h3 {
-        font-size: min(0.9rem, 3vw); /* Increased from 0.8rem */
+        font-size: min(0.9rem, 3vw);
     }
 
     .player-info h3 {
-        font-size: min(0.8rem, 2.7vw); /* Increased from 0.7rem */
+        font-size: min(0.8rem, 2.7vw);
     }
 }
 
@@ -272,18 +272,18 @@ $active-player-color: #ff9800;
             }
 
             h3 {
-                font-size: min(0.8rem, 2.7vw); /* Increased from 0.7rem */
+                font-size: min(0.8rem, 2.7vw);
             }
         }
 
         .player-info h3 {
-            font-size: min(0.75rem, 2.5vw); /* Increased from 0.65rem */
+            font-size: min(0.75rem, 2.5vw);
             margin-bottom: 0;
         }
 
         .player-info h3.admin,
         .player-info h3.active {
-            font-size: min(0.7rem, 2.4vw); /* Increased from 0.6rem */
+            font-size: min(0.7rem, 2.4vw);
             padding: 1px 2px;
         }
     }

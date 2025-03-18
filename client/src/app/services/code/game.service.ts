@@ -47,6 +47,14 @@ export class GameService {
             this.onDebugStateChange();
         });
 
+        this.socketService.onBroadcastDebugEndState().subscribe(() => {
+            this.onEndDebugState();
+        });
+
+        // this.socketService.onQuitGame().subscribe(() => {
+        //     this.socketService.resetSocketState();
+        // });
+
         this.socketService.onBroadcastDoor().subscribe((payload) => {
             console.log('Changement de la porte à la position', payload.position, 'avec le nouvel état', payload.newState);
             const newMap = this.map.value;
@@ -147,6 +155,10 @@ export class GameService {
 
     onDebugStateChange(): void {
         this.isDebugMode.next(!this.isDebugMode.value);
+    }
+
+    onEndDebugState(): void {
+        this.isDebugMode.next(false);
     }
 
     onMove(previousPosition: Vec2, player: PlayerStats): void {
