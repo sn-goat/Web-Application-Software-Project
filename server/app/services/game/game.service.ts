@@ -242,11 +242,9 @@ export class GameService {
     }
 
     endTurnRequested(accessCode: string) {
-        // If movement is in progress, flag that we should end the turn when movement finishes.
         if (this.movementInProgress.get(accessCode)) {
             this.pendingEndTurn.set(accessCode, true);
         } else {
-            // Otherwise, end turn immediately.
             this.eventEmitter.emit(TurnEvents.End, accessCode);
         }
     }

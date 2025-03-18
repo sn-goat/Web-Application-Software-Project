@@ -209,7 +209,11 @@ export class SocketService {
             });
         });
     }
-
+    onTurnStart(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.Start, (data) => observer.next(data));
+        });
+    }
     onTurnUpdate(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.UpdateTurn, (turn: { player: PlayerStats; path: Record<string, PathInfo> }) => {

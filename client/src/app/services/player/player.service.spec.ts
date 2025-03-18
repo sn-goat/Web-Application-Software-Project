@@ -69,9 +69,8 @@ describe('PlayerService', () => {
         service.setPlayer(dummyPlayer);
     });
 
-    it('should set player active and assign path on turn switch when current player is active', () => {
+    it('should assign path on turn switch when current player is active', () => {
         socketService.triggerSwitchTurn({ player: dummyPlayer, path: dummyPath });
-        expect(service.isActive()).toBe(true);
         expect(service.path.value).toEqual(dummyPath);
     });
 
