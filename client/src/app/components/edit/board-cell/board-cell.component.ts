@@ -14,6 +14,8 @@ import { Item } from '@common/enums';
     encapsulation: ViewEncapsulation.None,
 })
 export class BoardCellComponent {
+    private static readonly smallRowThreshhold = 4;
+
     @Input() cell!: Cell;
     @Input() isInGameView = false;
     @Input() tooltipContent: string | null = null;
@@ -23,6 +25,10 @@ export class BoardCellComponent {
     readonly fileType = DEFAULT_FILE_TYPE;
     showTooltip = false;
     private readonly toolSelectionService = inject(ToolSelectionService);
+
+    get isSmallRow(): boolean {
+        return this.cell.position.y < BoardCellComponent.smallRowThreshhold;
+    }
 
     onDrag() {
         this.toolSelectionService.updateSelectedItem(this.cell.item);

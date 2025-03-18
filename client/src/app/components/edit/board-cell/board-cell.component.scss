@@ -152,6 +152,12 @@ $action-color: rgba(255, 0, 0, 0.3);
     white-space: normal;
     word-wrap: break-word;
     text-align: center;
+    pointer-events: none;
+}
+
+.tooltip-gameView.small-row {
+    top: 100%;
+    bottom: auto;
 }
 
 .image-container:hover .tooltip,
