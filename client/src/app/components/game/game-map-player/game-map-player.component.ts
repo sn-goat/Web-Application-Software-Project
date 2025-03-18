@@ -39,7 +39,7 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
                 this.playersInGame[playerToUpdate] = winner;
             }),
         );
-        this.getOrganizerId = this.gameService.getOrganizerId;
+        this.getOrganizerId = this.gameService.getOrganizerId.bind(this.gameService);
     }
 
     ngAfterViewInit(): void {
