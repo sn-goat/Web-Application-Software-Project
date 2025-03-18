@@ -1,10 +1,13 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
 import { Item } from '@common/enums';
+import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
+import { SnackbarComponent } from '@app/components/common/snack-bar/snack-bar.component';
 
 @Component({
     selector: 'app-game-map-player-tools',
@@ -13,7 +16,9 @@ import { Subscription } from 'rxjs';
 })
 export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     items: Item[];
+    players: PlayerStats[];
     timer: string;
+    activePlayer: PlayerStats | null = null;
     isActivePlayer: boolean = false;
     playerHasAction: boolean = false;
     isActionEnabled: boolean = false;
@@ -22,30 +27,84 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
 
-    playerService: PlayerService = inject(PlayerService);
+    private playerService: PlayerService = inject(PlayerService);
     private gameService: GameService = inject(GameService);
     private socketService: SocketService = inject(SocketService);
     private subscriptions: Subscription[] = [];
 
-    constructor() {
+    constructor(private snackBar: MatSnackBar) {
         this.items = [];
         this.timer = '';
     }
 
     ngOnInit() {
         this.subscriptions.push(
-            this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
-                this.timer = `${time.remainingTime.toString()}:00`;
-            }),
-
             this.playerService.isActivePlayer.subscribe((isActive) => {
                 this.isActivePlayer = isActive;
             }),
+
             this.playerService.myPlayer.subscribe((player) => {
                 this.playerHasAction = (player?.actions ?? 0) > 0;
             }),
+
             this.gameService.isActionSelected.subscribe((isActive) => {
                 this.isActionEnabled = isActive;
+            }),
+
+            this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
+                this.activePlayer = player;
+            }),
+
+            this.socketService.onTimerUpdate().subscribe((time: { remainingTime: number }) => {
+                this.timer = `${time.remainingTime.toString()} s`;
+            }),
+
+            this.socketService.onTurnSwitch().subscribe((turnInfo) => {
+                this.activePlayer = turnInfo.player;
+
+                if (!this.isActivePlayer && this.activePlayer) {
+                    this.snackBar.openFromComponent(SnackbarComponent, {
+                        duration: 3000,
+                        horizontalPosition: 'center',
+                        verticalPosition: 'bottom',
+                        panelClass: ['custom-snackbar'],
+                        data: { message: `C'est au tour de ${this.activePlayer.name} de jouer` },
+                    });
+                }
+            }),
+
+            this.socketService.onWinner().subscribe((winner: PlayerStats) => {
+                if (this.playerService.getPlayer().id === winner.id) {
+                    this.snackBar.openFromComponent(SnackbarComponent, {
+                        duration: 3000,
+                        horizontalPosition: 'center',
+                        verticalPosition: 'top',
+                        panelClass: ['custom-snackbar'],
+                        data: { message: 'Tu as gagné le combat!' },
+                    });
+                }
+            }),
+
+            this.socketService.onLoser().subscribe((loser: PlayerStats) => {
+                if (this.playerService.getPlayer().id === loser.id) {
+                    this.snackBar.openFromComponent(SnackbarComponent, {
+                        duration: 3000,
+                        horizontalPosition: 'center',
+                        verticalPosition: 'top',
+                        panelClass: ['custom-snackbar'],
+                        data: { message: 'Tu as perdu le combat!' },
+                    });
+                }
+            }),
+
+            this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
+                this.snackBar.openFromComponent(SnackbarComponent, {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'top',
+                    panelClass: ['custom-snackbar'],
+                    data: { message: `${winner.name} a gagné la partie avec 3 victoires!` },
+                });
             }),
         );
     }

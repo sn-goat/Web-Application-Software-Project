@@ -288,17 +288,19 @@ export class SocketService {
         });
     }
 
+    onLoser(): Observable<PlayerStats> {
+        return new Observable((observer) => {
+            this.socket.on(FightEvents.Loser, (loser) => {
+                observer.next(loser);
+            });
+        });
+    }
+
     onEndGame(): Observable<PlayerStats> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.End, (winner) => {
                 observer.next(winner);
             });
-        });
-    }
-
-    onLoser(): Observable<void> {
-        return new Observable((observer) => {
-            this.socket.on(FightEvents.Loser, (data) => observer.next(data));
         });
     }
 
