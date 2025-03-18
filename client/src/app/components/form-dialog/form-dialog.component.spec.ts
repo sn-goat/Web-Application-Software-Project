@@ -45,7 +45,10 @@ describe('FormDialogComponent', () => {
     });
 
     it('should set errors if name or description is whitespace-only', () => {
-        component.data = { name: '   ', description: '  ', size: 10, isCTF: false };
+        component.data.name = '    ';
+        component.data.description = '     ';
+        component.data.size = 10;
+        component.data.isCTF = false;
 
         const mockForm = {
             valid: true,
@@ -67,8 +70,10 @@ describe('FormDialogComponent', () => {
     });
 
     it('should close the dialog with trimmed data when form is valid', () => {
-        component.data = { name: ' Valid Name ', description: 'Valid Description', size: 10, isCTF: false };
-
+        component.data.name = ' Valid Name ';
+        component.data.description = 'Valid Description';
+        component.data.size = 10;
+        component.data.isCTF = false;
         const mockForm = {
             valid: true,
             control: {

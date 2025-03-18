@@ -1,22 +1,21 @@
 <div class="player-section">
     @for (player of players; track player) {
-        <div class="player" [class.active-player]="activePlayer && player.name === activePlayer.name">
-            <div class="player-image">
-                <img draggable="false" [src]="player.avatar" [alt]="player.name" />
-                <h3 [class.player-not-in-game]="!playerIsInGame(player)">{{ player.name }}</h3>
-            </div>
-            <div class="player-info">
-                @if (player.id === gameService.getOrganizerId()) {
-                    <h3 class="admin">Admin</h3>
-                } @else {
-                    <h3 class="admin">Joueur</h3>
-                }
-                @if (activePlayer && player.name === activePlayer.name) {
-                    <h3 class="active">Actif</h3>
-                }
-                <h3>Victoires:</h3>
-                <h3>{{ player.wins }}</h3>
-            </div>
+    <div class="player" [class.active-player]="activePlayer && player.name === activePlayer.name">
+        <div class="player-image">
+            <img draggable="false" [src]="player.avatar" [alt]="player.name" />
+            <h3 [class.player-not-in-game]="!playerIsInGame(player)">{{ player.name }}</h3>
         </div>
+        <div class="player-info">
+            @if (player.id === getOrganizerId()) {
+            <h3 class="admin">Admin</h3>
+            } @else {
+            <h3 class="admin">Joueur</h3>
+            } @if (activePlayer && player.name === activePlayer.name) {
+            <h3 class="active">Actif</h3>
+            }
+            <h3>Victoires:</h3>
+            <h3>{{ player.wins }}</h3>
+        </div>
+    </div>
     }
 </div>

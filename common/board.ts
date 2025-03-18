@@ -42,3 +42,5 @@ export const TILE_COST = new Map<Tile, number>([
 
 export const LEFT_CLICK = 0;
 export const RIGHT_CLICK = 2;
+export const KEYPRESS_D = 'd';
+export const DEFAULT_STORAGE_KEY = 'firstBoardValue';

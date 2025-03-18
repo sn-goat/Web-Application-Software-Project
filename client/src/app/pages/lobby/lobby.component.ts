@@ -26,27 +26,22 @@ export class LobbyComponent implements OnInit, OnDestroy {
     isRoomLocked: boolean = false;
     isAdmin: boolean = false;
     maxPlayers: number = 0;
-    diceToImageLink = diceToImageLink;
+    readonly diceToImageLink = diceToImageLink;
 
     private readonly dialog = inject(MatDialog);
+    private readonly socketService = inject(SocketService);
+    private readonly router = inject(Router);
+    private readonly gameService = inject(GameService);
     private subscriptions: Subscription[] = [];
 
-    constructor(
-        private socketService: SocketService,
-        private router: Router,
-        private gameService: GameService,
-    ) {}
-
     ngOnInit() {
-        const gameSize = this.socketService.getGameSize();
-        this.maxPlayers = getLobbyLimit(gameSize);
+        this.maxPlayers = getLobbyLimit(this.socketService.getGameSize());
 
         if (history.state && history.state.accessCode) {
             this.accessCode = history.state.accessCode;
         }
 
-        // Utiliser la méthode addSubscription pour chaque souscription
-        this.addSubscription(
+        this.subscriptions.push(
             this.socketService
                 .onPlayerJoined()
                 .pipe(map((response: { room: Room } | Room) => ('room' in response ? response.room : response)))
@@ -55,9 +50,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
                     this.accessCode = room.accessCode;
                     this.checkIfAdmin();
                 }),
-        );
-
-        this.addSubscription(
             this.socketService.onPlayersList().subscribe((players: PlayerStats[]) => {
                 this.players = players;
                 if (this.players.length === this.maxPlayers && !this.isRoomLocked) {
@@ -68,15 +60,9 @@ export class LobbyComponent implements OnInit, OnDestroy {
                     this.isRoomLocked = false;
                 }
             }),
-        );
-
-        this.addSubscription(
             this.socketService.onRoomLocked().subscribe(() => {
                 this.isRoomLocked = true;
             }),
-        );
-
-        this.addSubscription(
             this.socketService.onPlayerRemoved().subscribe(async (players: PlayerStats[]) => {
                 this.players = players;
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
@@ -89,9 +75,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
                     }
                 }
             }),
-        );
-
-        this.addSubscription(
             this.socketService.onPlayerDisconnected().subscribe(async (players: PlayerStats[]) => {
                 this.players = players;
                 if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
@@ -104,9 +87,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
                     }
                 }
             }),
-        );
-
-        this.addSubscription(
             this.socketService.onAdminDisconnected().subscribe(async () => {
                 const message = this.isAdmin
                     ? "Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil"
@@ -117,9 +97,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.socketService.resetSocketState();
                 this.router.navigate(['/home']);
             }),
-        );
-
-        this.addSubscription(
             this.socketService.onBroadcastStartGame().subscribe((game: Game) => {
                 this.gameService.setGame(game);
                 this.router.navigate(['/game']);
@@ -158,7 +135,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
     }
 
     disconnect() {
-        // Afficher la confirmation pour l'admin
         this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
 
         const currentId = this.socketService.getCurrentPlayerId();
@@ -180,10 +156,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
     async warning(message: string): Promise<void> {
         await this.openDialog(message, Alert.WARNING);
-    }
-
-    private addSubscription(subscription: Subscription): void {
-        this.subscriptions.push(subscription);
     }
 
     private async openDialog(message: string, type: Alert): Promise<boolean> {

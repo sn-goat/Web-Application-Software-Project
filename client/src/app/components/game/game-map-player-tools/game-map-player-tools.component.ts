@@ -1,5 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackbarComponent } from '@app/components/common/snack-bar/snack-bar.component';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { GameService } from '@app/services/code/game.service';
 import { PlayerService } from '@app/services/code/player.service';
@@ -7,7 +8,6 @@ import { SocketService } from '@app/services/code/socket.service';
 import { Item } from '@common/enums';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
-import { SnackbarComponent } from '@app/components/common/snack-bar/snack-bar.component';
 
 @Component({
     selector: 'app-game-map-player-tools',
@@ -15,27 +15,23 @@ import { SnackbarComponent } from '@app/components/common/snack-bar/snack-bar.co
     styleUrls: ['./game-map-player-tools.component.scss'],
 })
 export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
-    items: Item[];
+    items: Item[] = [];
     players: PlayerStats[];
-    timer: string;
+    timer: string = '';
     activePlayer: PlayerStats | null = null;
     isActivePlayer: boolean = false;
     playerHasAction: boolean = false;
     isActionEnabled: boolean = false;
     debugMode: boolean = false;
-
+    performAction: () => void;
+    endTurn: () => void;
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
-
-    private playerService: PlayerService = inject(PlayerService);
-    private gameService: GameService = inject(GameService);
-    private socketService: SocketService = inject(SocketService);
+    private readonly gameService: GameService = inject(GameService);
+    private readonly playerService: PlayerService = inject(PlayerService);
+    private readonly socketService: SocketService = inject(SocketService);
+    private readonly snackBar: MatSnackBar = inject(MatSnackBar);
     private subscriptions: Subscription[] = [];
-
-    constructor(private snackBar: MatSnackBar) {
-        this.items = [];
-        this.timer = '';
-    }
 
     ngOnInit() {
         this.subscriptions.push(
@@ -107,17 +103,12 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 });
             }),
         );
+
+        this.performAction = this.gameService.toggleActionMode;
+        this.endTurn = this.gameService.endTurn;
     }
 
     ngOnDestroy() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
-    }
-
-    endTurn(): void {
-        this.gameService.endTurn();
-    }
-
-    performAction(): void {
-        this.gameService.toggleActionMode();
     }
 }

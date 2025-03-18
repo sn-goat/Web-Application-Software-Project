@@ -1,17 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { AppMaterialModule } from '@app/modules/material.module';
 import { Board } from '@common/board';
-import { Visibility } from '@common/enums';
-
-interface GameFormData {
-    name: string;
-    description: string;
-    size: number;
-    isCTF: boolean;
-}
+import { Size, Visibility } from '@common/enums';
+import { GameFormData } from '@common/game';
 
 @Component({
     selector: 'app-form-dialog',
@@ -20,16 +14,13 @@ interface GameFormData {
     styleUrl: './form-dialog.component.scss',
 })
 export class FormDialogComponent {
-    data: GameFormData;
-
-    constructor(public dialogRef: MatDialogRef<FormDialogComponent>) {
-        this.data = {
-            name: '',
-            description: '',
-            size: 10,
-            isCTF: false,
-        };
-    }
+    readonly data: GameFormData = {
+        name: '',
+        description: '',
+        size: Size.SMALL,
+        isCTF: false,
+    };
+    private readonly dialogRef: MatDialogRef<FormDialogComponent> = inject(MatDialogRef);
 
     submitForm(gameForm: NgForm): void {
         const nameControl = gameForm.controls['name'];

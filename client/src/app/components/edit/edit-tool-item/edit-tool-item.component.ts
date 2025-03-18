@@ -13,7 +13,6 @@ import { Subject, takeUntil } from 'rxjs';
     selector: 'app-edit-tool-item',
     templateUrl: './edit-tool-item.component.html',
     styleUrls: ['./edit-tool-item.component.scss'],
-    standalone: true,
     imports: [MatBadgeModule, CommonModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
@@ -26,12 +25,9 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     showTooltip = false;
 
     private readonly mapService = inject(MapService);
+    private readonly toolSelectionService = inject(ToolSelectionService);
+    private readonly itemSelectionService = inject(ItemApplicatorService);
     private destroy$ = new Subject<void>();
-
-    constructor(
-        private toolSelection: ToolSelectionService,
-        private itemApplicator: ItemApplicatorService,
-    ) {}
 
     ngOnInit() {
         if (this.type === Item.SPAWN) {
@@ -60,16 +56,16 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     }
 
     onDragStart() {
-        this.toolSelection.updateSelectedItem(this.type);
+        this.toolSelectionService.updateSelectedItem(this.type);
     }
 
     onDragEnter(event: MouseEvent) {
         event.preventDefault();
-        this.itemApplicator.setBackToContainer(this.type);
+        this.itemSelectionService.setBackToContainer(this.type);
     }
     onDragLeave(event: MouseEvent) {
         event.preventDefault();
-        this.itemApplicator.setBackToContainer();
+        this.itemSelectionService.setBackToContainer();
     }
 
     getDescription(type: Item): string {

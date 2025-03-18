@@ -42,6 +42,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     showInfo = false;
     debugMode = false;
 
+    private subscriptions: Subscription[] = [];
     private quitGameSubscription: Subscription;
     private gameService = inject(GameService);
     private fightLogicService = inject(FightLogicService);
@@ -69,20 +70,21 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         if (myPlayerId) {
             this.socketService.readyUp(this.gameService.getAccessCode(), myPlayerId);
         }
-        this.fightLogicService.fightStarted.subscribe((show) => {
-            this.showFightInterface = show;
-        });
 
-        this.quitGameSubscription = this.socketService.onQuitGame().subscribe(async (game: { game: Game; lastPlayer: PlayerStats }) => {
-            if (!game.game.players.length && game.lastPlayer.id === this.playerService.getPlayer().id) {
-                await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
-                this.socketService.resetSocketState();
-            }
-        });
-
-        this.gameService.isDebugMode.subscribe((isDebugMode) => {
-            this.debugMode = isDebugMode;
-        });
+        this.subscriptions.push(
+            this.fightLogicService.fightStarted.subscribe((show) => {
+                this.showFightInterface = show;
+            }),
+            (this.quitGameSubscription = this.socketService.onQuitGame().subscribe(async (game: { game: Game; lastPlayer: PlayerStats }) => {
+                if (!game.game.players.length && game.lastPlayer.id === this.playerService.getPlayer().id) {
+                    await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
+                    this.socketService.resetSocketState();
+                }
+            })),
+            this.gameService.isDebugMode.subscribe((isDebugMode) => {
+                this.debugMode = isDebugMode;
+            }),
+        );
     }
 
     ngAfterViewInit(): void {

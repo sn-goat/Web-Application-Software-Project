@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS, DEFAULT_PATH_DICE } from '@app/constants/path';
+import { DEFAULT_FILE_TYPE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { PlayerService } from '@app/services/code/player.service';
-import { Dice, PlayerStats } from '@common/player';
+import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,10 +13,8 @@ import { Subscription } from 'rxjs';
     styleUrl: './game-map-player-detailed.component.scss',
 })
 export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
-    readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
-    readonly srcDice: string = DEFAULT_PATH_DICE;
     readonly fileType: string = DEFAULT_FILE_TYPE;
-    readonly diceToImageLink: (dice: Dice) => string = diceToImageLink;
+    readonly diceToImageLink = diceToImageLink;
 
     maxHealth: number = 0;
     myPlayer: PlayerStats | null;
@@ -37,9 +35,5 @@ export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
-    }
-
-    roundHealth(health: number): number {
-        return Math.round(health);
     }
 }

@@ -1,5 +1,5 @@
-import { Cell, Vec2 } from '@common/board';
-import { PlayerStats } from '@common/player';
+import { Cell, Vec2 } from './board';
+import { PlayerStats } from './player';
 
 export interface Room {
     accessCode: string;
@@ -18,6 +18,13 @@ export interface Game {
     isDebugMode: boolean;
 }
 
+export interface GameFormData {
+    name: string;
+    description: string;
+    size: number;
+    isCTF: boolean;
+}
+
 export interface FightInfo {
     fleeAttempts: number;
     currentLife: number;
@@ -34,6 +41,7 @@ export interface Fight {
 
 export const ASSET_PATH = './assets/portraits/portrait';
 export const ASSET_EXT = '.png';
+export const ACCESS_CODE_REGEX = /^\d{4}$/;
 
 export enum Avatar {
     Dwarf = ASSET_PATH + '1' + ASSET_EXT,

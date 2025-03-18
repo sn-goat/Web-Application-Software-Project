@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { FormCharacterComponent } from '@app/components/form-character/form-character.component';
 import { SocketService } from '@app/services/code/socket.service';
-import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
+import { ACCESS_CODE_REGEX } from '@common/game';
 
 @Component({
     selector: 'app-join-room',
@@ -16,12 +17,10 @@ export class JoinRoomComponent {
     joinResult: string = '';
     showCharacterForm: boolean = false;
     isValidCode: boolean = false;
-
-    constructor(private readonly socketService: SocketService) {}
+    private readonly socketService: SocketService = inject(SocketService);
 
     validateCode(): void {
-        const codePattern = /^\d{4}$/;
-        this.isValidCode = codePattern.test(this.accessCode);
+        this.isValidCode = ACCESS_CODE_REGEX.test(this.accessCode);
     }
 
     joinRoom() {
