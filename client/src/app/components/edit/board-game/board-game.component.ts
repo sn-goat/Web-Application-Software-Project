@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
-import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
-import { EditEventHandlerService } from '@app/services/code/edit-event-handler.service';
-import { MapService } from '@app/services/code/map.service';
+import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
+import { EditEventHandlerService } from '@app/services/edit-event-handler/edit-event-handler.service';
+import { MapService } from '@app/services/map/map.service';
 import { Board } from '@common/board';
 import { Subscription } from 'rxjs';
 

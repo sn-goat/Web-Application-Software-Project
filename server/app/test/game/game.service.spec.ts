@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines */
 import { BoardService } from '@app/services/board/board.service';
-import { GameService } from '@app/services/game.service';
+import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';

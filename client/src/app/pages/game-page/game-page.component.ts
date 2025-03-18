@@ -11,10 +11,10 @@ import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-playe
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { Alert } from '@app/constants/enums';
-import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
+import { GameService } from '@app/services/game/game.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { Game } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { firstValueFrom, Subscription } from 'rxjs';

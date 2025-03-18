@@ -1,6 +1,6 @@
 import { THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
-import { FightService } from '@app/services/fight.service';
-import { GameService } from '@app/services/game.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';

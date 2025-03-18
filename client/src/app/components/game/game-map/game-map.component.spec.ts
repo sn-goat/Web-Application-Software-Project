@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
-import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
+import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
+import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
+import { GameService } from '@app/services/game/game.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { Board, Cell } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';

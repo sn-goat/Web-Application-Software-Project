@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
-import { PlayerService } from '@app/services/code/player.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 

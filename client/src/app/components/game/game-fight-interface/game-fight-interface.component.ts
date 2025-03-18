@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { FightInfo } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';

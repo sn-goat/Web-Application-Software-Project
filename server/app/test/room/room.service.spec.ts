@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
-import { RoomService } from '@app/services/room.service';
+import { RoomService } from '@app/services/room/room.service';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';

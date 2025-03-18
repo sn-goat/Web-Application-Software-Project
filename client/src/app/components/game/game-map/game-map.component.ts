@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
-import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
-import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
+import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
+import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
+import { GameService } from '@app/services/game/game.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { Cell, KEYPRESS_D } from '@common/board';
 import { Tile } from '@common/enums';
 import { PathInfo } from '@common/game';

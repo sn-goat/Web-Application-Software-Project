@@ -1,4 +1,4 @@
-import { RoomService } from '@app/services/room.service';
+import { RoomService } from '@app/services/room/room.service';
 import { Room } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';

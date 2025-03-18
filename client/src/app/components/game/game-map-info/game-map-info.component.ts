@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { GameService } from '@app/services/code/game.service';
+import { GameService } from '@app/services/game/game.service';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 
