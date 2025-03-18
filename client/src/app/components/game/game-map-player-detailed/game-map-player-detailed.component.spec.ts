@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DEFAULT_FILE_TYPE } from '@app/constants/path';
@@ -43,7 +44,7 @@ describe('GameMapPlayerDetailedComponent', () => {
 
         // Création du mock pour PlayerService avec la propriété myPlayer$
         playerServiceMock = jasmine.createSpyObj('PlayerService', [], {
-            myPlayer: myPlayerSubject.asObservable()
+            myPlayer: myPlayerSubject.asObservable(),
         });
 
         await TestBed.configureTestingModule({
@@ -83,7 +84,7 @@ describe('GameMapPlayerDetailedComponent', () => {
     it('should handle case where player is undefined during initialization', async () => {
         const emptyPlayerSubject = new BehaviorSubject<PlayerStats | null>(null);
         const newPlayerServiceMock = jasmine.createSpyObj('PlayerService', [], {
-            myPlayer: emptyPlayerSubject.asObservable()
+            myPlayer: emptyPlayerSubject.asObservable(),
         });
 
         TestBed.resetTestingModule();

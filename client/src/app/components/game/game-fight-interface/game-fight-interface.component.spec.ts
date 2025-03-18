@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -14,7 +15,13 @@ describe('GameFightInterfaceComponent', () => {
     let playerService: jasmine.SpyObj<PlayerService>;
 
     beforeEach(async () => {
-        const fightLogicSpy = jasmine.createSpyObj('FightLogicService', ['flee', 'attack'], { fight: new BehaviorSubject<Fight>({ player1: { id: '1', name: 'Player1', currentLife: 80, life: 100 }, player2: { id: '2', name: 'Player2', currentLife: 50, life: 100 }, currentPlayer: { name: 'Player1' } } as Fight) });
+        const fightLogicSpy = jasmine.createSpyObj('FightLogicService', ['flee', 'attack'], {
+            fight: new BehaviorSubject<Fight>({
+                player1: { id: '1', name: 'Player1', currentLife: 80, life: 100 },
+                player2: { id: '2', name: 'Player2', currentLife: 50, life: 100 },
+                currentPlayer: { name: 'Player1' },
+            } as Fight),
+        });
         const playerSpy = jasmine.createSpyObj('PlayerService', ['getPlayer']);
         // Ensuite, définissez la valeur de retour par défaut :
         playerSpy.getPlayer.and.returnValue({ id: '1', name: 'Player1' });
@@ -54,7 +61,7 @@ describe('GameFightInterfaceComponent', () => {
         fightLogicService.fight.next({
             player1: { id: '1', name: 'Player1', currentLife: 80, life: 100 },
             player2: { id: '2', name: 'Player2', currentLife: 50, life: 100 },
-            currentPlayer: { name: 'Player2' }
+            currentPlayer: { name: 'Player2' },
         } as Fight);
         fixture.detectChanges();
 
@@ -89,7 +96,7 @@ describe('GameFightInterfaceComponent', () => {
         fightLogicService.fight.next({
             player1: { id: '1', name: 'Player1', avatar: 'defaultAvatar', currentLife: undefined, life: 4 } as unknown as PlayerStats,
             player2: { id: '2', name: 'Player2', avatar: 'defaultAvatar', currentLife: undefined, life: 4 } as unknown as PlayerStats,
-            currentPlayer: { name: 'Player2' }
+            currentPlayer: { name: 'Player2' },
         } as Fight);
         fixture.detectChanges();
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -24,7 +25,7 @@ describe('GamePageComponent', () => {
         confirmAndAbandonGame: jasmine.createSpy('confirmAndAbandonGame').and.returnValue(Promise.resolve(true)),
         isDebugMode: isDebugModeSubject,
         playingPlayers: playingPlayersSubject,
-        activePlayer: new BehaviorSubject<PlayerStats>({id: 'player1', name: 'testPlayer'} as PlayerStats),
+        activePlayer: new BehaviorSubject<PlayerStats>({ id: 'player1', name: 'testPlayer' } as PlayerStats),
         getOrganizerId: jasmine.createSpy('getOrganizerId').and.returnValue('player1'),
         map: new BehaviorSubject<Cell[][]>([]),
         isActionSelected: new BehaviorSubject<boolean>(false),
@@ -41,7 +42,7 @@ describe('GamePageComponent', () => {
     const playerServiceMock = {
         getPlayer: jasmine.createSpy('getPlayer').and.returnValue({ id: 'player1', position: { x: 0, y: 0 } }),
         isActivePlayer: new BehaviorSubject<boolean>(true),
-        path: new BehaviorSubject<Map<string, any> | null>(null),
+        path: new BehaviorSubject<Map<string, unknown> | null>(null),
         sendMove: jasmine.createSpy('sendMove'),
         myPlayer: new BehaviorSubject<PlayerStats | null>({ id: 'player1', position: { x: 0, y: 0 }, life: 100 } as PlayerStats),
     };
@@ -146,10 +147,10 @@ describe('GamePageComponent', () => {
             // Définir la méthode getBack originale avec un spy retournant "ORIGINAL"
             const originalGetBack = jasmine.createSpy('originalGetBack').and.returnValue(Promise.resolve('ORIGINAL'));
             headerBarStub.getBack = originalGetBack;
-            
+
             // Appeler ngAfterViewInit qui surcharge getBack
             component.ngAfterViewInit();
-            
+
             // Simuler l'appel à la méthode surchargée
             await component.headerBar.getBack();
             tick(); // simuler l'attente dans les promises
@@ -171,7 +172,7 @@ describe('GamePageComponent', () => {
             const warningSpy = spyOn<any>(component, 'warning').and.callThrough();
             component.onPageShow();
             tick();
-            expect(warningSpy).toHaveBeenCalledWith('Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d\'accueil.');
+            expect(warningSpy).toHaveBeenCalledWith("Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.");
         }));
     });
 

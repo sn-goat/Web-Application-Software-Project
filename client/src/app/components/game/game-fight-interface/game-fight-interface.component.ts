@@ -16,7 +16,6 @@ import { Subscription } from 'rxjs';
 })
 export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     readonly perCent = 100;
-    Math = Math;
     timer: string = '00 s';
     currentNameTurn: string = '';
     myPlayer: (PlayerStats & FightInfo) | null;
@@ -37,8 +36,8 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
                 this.myPlayer = isMyPlayer ? fight.player1 : fight.player2;
                 this.opponentPlayer = !isMyPlayer ? fight.player1 : fight.player2;
                 this.currentNameTurn = fight.currentPlayer.name;
-                this.lifePercentMyPlayer = ((this.myPlayer?.currentLife ?? 0) / (this.myPlayer?.life ?? 1)) * this.perCent;
-                this.lifePercentOpponent = ((this.opponentPlayer?.currentLife ?? 0) / (this.opponentPlayer?.life ?? 1)) * this.perCent;
+                this.lifePercentMyPlayer = Math.floor(((this.myPlayer?.currentLife ?? 0) / (this.myPlayer?.life ?? 1)) * 100);
+                this.lifePercentOpponent = Math.floor(((this.opponentPlayer?.currentLife ?? 0) / (this.opponentPlayer?.life ?? 1)) * 100);
             }),
 
             this.socketService.onFightTimerUpdate().subscribe((remainingTime) => {

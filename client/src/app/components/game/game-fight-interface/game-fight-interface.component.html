@@ -16,7 +16,7 @@
                 <h3>{{ myPlayer?.name }}</h3>
                 <div class="health-bar">
                     <div class="health-fill" [style.width.%]="lifePercentMyPlayer"></div>
-                    <span>{{ Math.floor(lifePercentMyPlayer) }}%</span>
+                    <span>{{(lifePercentMyPlayer) }}%</span>
                 </div>
                 <div class="flee-attempts">
                     <span>Fuites: {{ myPlayer?.fleeAttempts || 0 }}/2</span>
@@ -36,7 +36,7 @@
                 <h3>{{ opponentPlayer?.name }}</h3>
                 <div class="health-bar">
                     <div class="health-fill" [style.width.%]="lifePercentOpponent"></div>
-                    <span>{{ Math.floor(lifePercentOpponent) }}%</span>
+                    <span>{{ (lifePercentOpponent) }}%</span>
                 </div>
                 <div class="flee-attempts">
                     <span>Fuites: {{ opponentPlayer?.fleeAttempts || 0 }}/2</span>
