@@ -38,10 +38,14 @@
         </div>
         }
     </div>
-    <!-- Empty State -->
-    @if (getFilteredAndSortedItems().length === 0) {
-    <div class="empty-state">
-        <p>Aucunes parties trouvées</p>
-    </div>
-    } }
+    } @else {
+        <div class="empty-state">
+            <p>Aucunes parties trouvées</p>
+        </div>
+        @if (!isCreationPage) {
+            <div class="list-item new-map-card" (click)="createNewMap()">
+                <div class="add-icon">+</div>
+                <p class="add-text">Create New Map</p>
+            </div>
+        } }
 </div>
