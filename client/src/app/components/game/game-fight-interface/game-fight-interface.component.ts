@@ -44,8 +44,8 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
                 this.timer = `${remainingTime.toString()} s`;
             }),
         );
-        this.flee = this.fightLogicService.flee;
-        this.attack = this.fightLogicService.attack;
+        this.flee = this.fightLogicService.flee.bind(this.fightLogicService);
+        this.attack = this.fightLogicService.attack.bind(this.fightLogicService);
     }
 
     ngOnDestroy(): void {

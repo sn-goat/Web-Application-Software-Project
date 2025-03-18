@@ -104,8 +104,8 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
             }),
         );
 
-        this.performAction = this.gameService.toggleActionMode;
-        this.endTurn = this.gameService.endTurn;
+        this.performAction = this.gameService.toggleActionMode.bind(this.gameService);
+        this.endTurn = this.gameService.endTurn.bind(this.gameService);
     }
 
     ngOnDestroy() {
