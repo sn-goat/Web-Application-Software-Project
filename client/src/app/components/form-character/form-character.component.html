@@ -15,7 +15,7 @@
         <p style="color: red">Avatar déjà sélectionné par un autre joueur</p>
         }
         <div class="name-container">
-            <label for="player-name">Who are you ?</label>
+            <label for="player-name">Qui êtes vous ?</label>
             <input type="text" id="player-name" [(ngModel)]="playerStats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
         </div>
         <div class="stat-container">
@@ -29,7 +29,7 @@
                     <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
                         Rapidité: {{ playerStats.speed }}
                     </button>
-                    <span class="tooltiptext">déterminer l’ordre des tours et points de mouvement par tour</span>
+                    <span class="tooltiptext">déterminer l'ordre des tours et points de mouvement par tour</span>
                 </div>
             </div>
             <div class="stat-column">
