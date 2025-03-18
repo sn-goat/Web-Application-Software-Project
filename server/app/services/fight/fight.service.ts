@@ -1,5 +1,4 @@
 import { FIGHT_TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
-import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';

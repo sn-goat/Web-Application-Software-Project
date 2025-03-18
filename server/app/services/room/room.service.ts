@@ -3,7 +3,7 @@ import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameService } from './game.service';
+import { GameService } from '@app/services/game/game.service';
 
 const minNumber = 1000;
 const maxNumber = 9000;
