@@ -7,6 +7,7 @@ import { SocketService } from '@app/services/code/socket.service';
 import { Item } from '@common/enums';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
+import { SnackbarComponent } from '@app/components/common/snack-bar/snack-bar.component';
 
 @Component({
     selector: 'app-game-map-player-tools',
@@ -62,23 +63,24 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 this.activePlayer = turnInfo.player;
 
                 if (!this.isActivePlayer && this.activePlayer) {
-                    this.snackBar.dismiss();
-                    this.snackBar.open(`C'est au tour de ${this.activePlayer.name} de jouer`, 'Fermer', {
+                    this.snackBar.openFromComponent(SnackbarComponent, {
                         duration: 3000,
                         horizontalPosition: 'center',
                         verticalPosition: 'bottom',
                         panelClass: ['custom-snackbar'],
+                        data: { message: `C'est au tour de ${this.activePlayer.name} de jouer` },
                     });
                 }
             }),
 
             this.socketService.onWinner().subscribe((player: PlayerStats) => {
                 if (this.playerService.getPlayer().id === player.id) {
-                    this.snackBar.open('Tu as gagner le combat!', 'Fermer', {
+                    this.snackBar.openFromComponent(SnackbarComponent, {
                         duration: 3000,
                         horizontalPosition: 'center',
                         verticalPosition: 'top',
                         panelClass: ['custom-snackbar'],
+                        data: { message: 'Tu as gagné le combat!' },
                     });
                 }
             }),
@@ -86,11 +88,12 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
             this.socketService.onLoser().subscribe((player: PlayerStats) => {
                 console.log('Y a eu un perdant');
                 if (this.playerService.getPlayer().id === player.id) {
-                    this.snackBar.open('Tu as perdu le combat!', 'Fermer', {
+                    this.snackBar.openFromComponent(SnackbarComponent, {
                         duration: 3000,
                         horizontalPosition: 'center',
                         verticalPosition: 'top',
                         panelClass: ['custom-snackbar'],
+                        data: { message: 'Tu as perdu le combat!' },
                     });
                 }
             }),
