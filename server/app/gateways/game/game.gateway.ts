@@ -36,12 +36,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @OnEvent(TimerEvents.End)
-    handleTimerEnd(roomId: string) {
-        const fight = this.fightService.getFight(roomId);
+    handleTimerEnd(accessCode: string) {
+        const fight = this.fightService.getFight(accessCode);
         if (fight) {
-            this.fightService.nextTurn(roomId);
+            this.fightService.playerAttack(accessCode, this.gameService.isGameDebugMode(accessCode));
         } else {
-            this.gameService.endTurnRequested(roomId);
+            this.gameService.endTurnRequested(accessCode);
         }
     }
 

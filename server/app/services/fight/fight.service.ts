@@ -1,4 +1,4 @@
-import { FIGHT_TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { FIGHT_TURN_DURATION_IN_S, FIGHT_TURN_DURATION_NO_FLEE_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';
@@ -59,7 +59,11 @@ export class FightService {
         }
         this.switchPlayer(fight);
         this.eventEmitter.emit(FightEvents.SwitchTurn, accessCode);
-        this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
+        if (fight.currentPlayer.fleeAttempts === 0) {
+            this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_NO_FLEE_IN_S, 'combat');
+        } else {
+            this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
+        }
     }
 
     playerFlee(accessCode: string) {
