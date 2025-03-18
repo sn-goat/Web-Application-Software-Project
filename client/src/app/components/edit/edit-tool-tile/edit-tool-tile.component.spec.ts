@@ -74,3 +74,4 @@ describe('EditToolTileComponent', () => {
         expect(component.shouldShowAbove(Tile.WALL)).toBe(false);
     });
 });
+
