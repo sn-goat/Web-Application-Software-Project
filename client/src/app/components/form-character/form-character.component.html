@@ -15,7 +15,7 @@
         <p style="color: red">Avatar déjà sélectionné par un autre joueur</p>
         }
         <div class="name-container">
-            <label for="player-name">Who are you ?</label>
+            <label for="player-name">Qui êtes vous ?</label>
             <input type="text" id="player-name" [(ngModel)]="playerStats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
         </div>
         <div class="stat-container">
@@ -29,7 +29,7 @@
                     <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
                         Rapidité: {{ playerStats.speed }}
                     </button>
-                    <span class="tooltiptext">déterminer l’ordre des tours et points de mouvement par tour</span>
+                    <span class="tooltiptext">déterminer l'ordre des tours et points de mouvement par tour</span>
                 </div>
             </div>
             <div class="stat-column">
@@ -60,7 +60,7 @@
         } } } @else {
         <p style="color: red">L'admin a verrouillé la partie. Cette partie n'accepte plus de joueuers.</p>
         <p style="color: red">Veuillez vous diriger vers le menu principal ou soumettre un nouveau code d'accès.</p>
-        <button class="close-popup-button" routerLink="/home" (click)="onClose()">Retour au menu principal</button>
+        <button class="close-popup-button" routerLink="/accueil" (click)="onClose()">Retour au menu principal</button>
         }
     </div>
 </div>

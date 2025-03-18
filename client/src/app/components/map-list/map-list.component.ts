@@ -117,7 +117,7 @@ export class MapListComponent implements OnInit {
     onEdit(map: Board): void {
         this.boardService.getBoard(map.name).subscribe((fullMap) => {
             this.mapService.setMapData(fullMap);
-            this.router.navigate(['/edit']);
+            this.router.navigate(['/edition']);
         });
     }
 
@@ -143,7 +143,7 @@ export class MapListComponent implements OnInit {
         dialogRef.afterClosed().subscribe((result) => {
             if (result) {
                 this.mapService.setMapData(result);
-                this.router.navigate(['/edit']);
+                this.router.navigate(['/edition']);
             }
         });
     }

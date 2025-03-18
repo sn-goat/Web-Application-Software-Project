@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom } from 'rxjs';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { Router } from '@angular/router';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { Alert } from '@app/constants/enums';
+import { firstValueFrom } from 'rxjs';
 @Component({
     selector: 'app-header-bar',
     imports: [MatIconModule, MatButtonModule, MatToolbarModule],
@@ -14,7 +14,7 @@ import { Alert } from '@app/constants/enums';
     styleUrl: './header-bar.component.scss',
 })
 export class HeaderBarComponent {
-    @Input() backUrl: string = 'home';
+    @Input() backUrl: string = 'accueil';
     @Input() showDialog: boolean = false;
     @Input() message: string = 'Êtes-vous sûre de vouloir revenir en arrière?';
 

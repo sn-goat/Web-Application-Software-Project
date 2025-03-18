@@ -71,7 +71,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
                         this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                         this.subscriptions = [];
                         this.socketService.resetSocketState();
-                        this.router.navigate(['/home']);
+                        this.router.navigate(['/acceuil']);
                     }
                 }
             }),
@@ -83,7 +83,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
                         this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                         this.subscriptions = [];
                         this.socketService.resetSocketState();
-                        this.router.navigate(['/home']);
+                        this.router.navigate(['/acceuil']);
                     }
                 }
             }),
@@ -95,11 +95,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                 this.subscriptions = [];
                 this.socketService.resetSocketState();
-                this.router.navigate(['/home']);
+                this.router.navigate(['/acceuil']);
             }),
             this.socketService.onBroadcastStartGame().subscribe((game: Game) => {
                 this.gameService.setGame(game);
-                this.router.navigate(['/game']);
+                this.router.navigate(['/jeu']);
             }),
         );
     }
@@ -147,7 +147,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
         this.socketService.resetSocketState();
 
-        this.router.navigate(['/home']);
+        this.router.navigate(['/acceuil']);
     }
 
     getCurrentPlayerId(): string {

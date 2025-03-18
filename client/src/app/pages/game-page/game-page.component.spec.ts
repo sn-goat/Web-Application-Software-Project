@@ -100,11 +100,6 @@ describe('GamePageComponent', () => {
         fixture.detectChanges();
     });
 
-    afterEach(() => {
-        // Réinitialiser les spies en les réassignant si nécessaire.
-        // (Ici Jasmine gère les spies, il suffit de recréer le composant dans beforeEach)
-    });
-
     it('should create the component', () => {
         expect(component).toBeTruthy();
     });

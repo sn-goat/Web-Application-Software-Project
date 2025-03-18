@@ -1,7 +1,6 @@
 <div class="container justified">
     <div class="access-code-container">
-        <h1>Organizer Waiting Room</h1>
-        <p>Your Access Code: {{ accessCode }}</p>
+        <h1>Lobby de partie: {{ accessCode }}</h1>
         @if (isAdmin) {
         <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
             {{ isRoomLocked ? 'Unlock' : 'Lock' }}
@@ -11,12 +10,14 @@
         <button (click)="disconnect()">Disconnect</button>
 
         @if (isAdmin) {
-        <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()">Start Game</button>
+        <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()">
+            Démarrer partie!
+        </button>
         }
     </div>
 
     <div class="players-list">
-        <h2>Room Players</h2>
+        <h2>Liste de joueurs</h2>
         <ul>
             @for (player of players; track player.id) {
             <li>
@@ -34,7 +35,7 @@
     </div>
 
     <div class="chat-box">
-        <h2>Chat Room</h2>
+        <h2>Zone de chat</h2>
         <div class="chat-messages">
             <div class="message"><strong>[Admin]</strong>: Bonjour à tous!</div>
         </div>

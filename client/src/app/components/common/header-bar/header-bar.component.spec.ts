@@ -39,10 +39,10 @@ describe('HeaderBarComponent', () => {
     });
 
     it('should navigate to backUrl when getBack is called', () => {
-        component.backUrl = 'home';
+        component.backUrl = 'accueil';
         component.showDialog = false; // S'assurer que le dialog n'est pas affiché
         component.getBack();
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
+        expect(routerSpy.navigate).toHaveBeenCalledWith(['/accueil']);
     });
 
     // Test pour les lignes 27-29 : Dialogue avec confirmation
