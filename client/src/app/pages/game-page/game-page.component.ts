@@ -15,8 +15,6 @@ import { FightLogicService } from '@app/services/fight-logic/fight-logic.service
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketService } from '@app/services/socket/socket.service';
-import { Game } from '@common/game';
-import { PlayerStats } from '@common/player';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 @Component({
@@ -42,6 +40,9 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     showInfo = false;
     debugMode = false;
 
+    private readonly quitGameMessage = "Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.";
+    private readonly notEnoughPlayersMessage = "Pas assez de joueurs pour continuer la partie. Vous allez être redirigé vers la page d'accueil.";
+
     private subscriptions: Subscription[] = [];
     private quitGameSubscription: Subscription;
     private gameService = inject(GameService);
@@ -49,8 +50,8 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     private playerService = inject(PlayerService);
     private socketService = inject(SocketService);
     private router = inject(Router);
-    private readonly dialog = inject(MatDialog);
 
+    private readonly dialog = inject(MatDialog);
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
         if (this.socketService.getGameRoom().organizerId === this.playerService.getPlayer().id) {
@@ -61,7 +62,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     @HostListener('window:pageshow', ['$event'])
     async onPageShow(): Promise<void> {
-        await this.warning("Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.");
+        this.warning(this.quitGameMessage);
     }
 
     ngOnInit(): void {
@@ -71,14 +72,21 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
             this.socketService.readyUp(this.gameService.getAccessCode(), myPlayerId);
         }
 
+        this.fightLogicService.fightStarted.subscribe((show) => {
+            this.showFightInterface = show;
+        });
+
+        this.gameService.isDebugMode.subscribe((isDebugMode) => {
+            this.debugMode = isDebugMode;
+        });
+
         this.subscriptions.push(
             this.fightLogicService.fightStarted.subscribe((show) => {
                 this.showFightInterface = show;
             }),
-            (this.quitGameSubscription = this.socketService.onQuitGame().subscribe(async (game: { game: Game; lastPlayer: PlayerStats }) => {
-                if (!game.game.players.length && game.lastPlayer.id === this.playerService.getPlayer().id) {
-                    await this.warning("Il n'y a plus de joueurs dans la partie, vous allez être redirigé vers la page d'accueil.");
-                    this.socketService.resetSocketState();
+            (this.quitGameSubscription = this.gameService.playingPlayers.subscribe((players) => {
+                if (players && players.length < 2) {
+                    this.warning(this.notEnoughPlayersMessage);
                 }
             })),
             this.gameService.isDebugMode.subscribe((isDebugMode) => {
@@ -110,14 +118,14 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showChat = !this.showChat;
     }
 
-    async warning(message: string): Promise<void> {
-        await this.openDialog(message, Alert.WARNING);
-        this.router.navigate(['/home']);
-    }
-
     ngOnDestroy(): void {
         this.quitGameSubscription.unsubscribe();
         this.socketService.resetSocketState();
+    }
+    private warning(message: string): void {
+        this.openDialog(message, Alert.WARNING).then(() => {
+            this.router.navigate(['/home']);
+        });
     }
 
     private async openDialog(message: string, type: Alert): Promise<boolean> {

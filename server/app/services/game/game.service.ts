@@ -1,5 +1,8 @@
 /* eslint-disable max-lines */
-import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { InternalEvents, MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { BoardService } from '@app/services/board/board.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
@@ -10,12 +13,11 @@ import {
     DEFAULT_DEFENSE_VALUE,
     DEFAULT_MOVEMENT_DIRECTIONS,
     DEFENSE_ICE_DECREMENT,
+    DIAGONAL_MOVEMENT_DIRECTIONS,
     PlayerStats,
 } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { BoardService } from '@app/services/board/board.service';
-import { TimerService } from '@app/services/timer/timer.service';
 
 @Injectable()
 export class GameService {
@@ -28,6 +30,7 @@ export class GameService {
     constructor(
         private boardService: BoardService,
         private timerService: TimerService,
+        private fightService: FightService,
         private eventEmitter: EventEmitter2,
     ) {
         this.currentGames = new Map();
@@ -60,7 +63,7 @@ export class GameService {
     decrementAction(accessCode: string, player: PlayerStats) {
         const activePlayer = this.getPlayer(accessCode, player.id);
         activePlayer.actions--;
-        if (this.isPlayerTurnEnded(accessCode, activePlayer)) {
+        if (this.isPlayerTurnEnded(accessCode, activePlayer) || this.updatePlayerPathTurn(accessCode, player).size === 0) {
             this.eventEmitter.emit(TurnEvents.End, accessCode);
         }
     }
@@ -68,7 +71,11 @@ export class GameService {
     decrementMovement(accessCode: string, player: PlayerStats, cost: number) {
         const activePlayer = this.getPlayer(accessCode, player.id);
         activePlayer.movementPts -= cost;
-        if (this.pendingEndTurn.get(accessCode) || this.isPlayerTurnEnded(accessCode, activePlayer)) {
+        if (
+            this.pendingEndTurn.get(accessCode) ||
+            this.isPlayerTurnEnded(accessCode, activePlayer) ||
+            this.updatePlayerPathTurn(accessCode, player).size === 0
+        ) {
             this.eventEmitter.emit(TurnEvents.End, accessCode);
             this.pendingEndTurn.set(accessCode, false);
         }
@@ -102,11 +109,12 @@ export class GameService {
         };
     }
 
-    updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats) {
+    updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats): Map<string, PathInfo> {
         const player = this.getPlayer(accessCode, playerToUpdate.id);
         const map = this.getMap(accessCode);
         const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
         this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+        return updatedPath;
     }
 
     async createGame(accessCode: string, organizerId: string, map: string) {
@@ -127,36 +135,25 @@ export class GameService {
         }
     }
 
-    async quitGame(accessCode: string, playerId: string) {
+    removePlayer(accessCode: string, playerId: string) {
+        this.logger.log(`Removing player ${playerId} from game ${accessCode}`);
         const game = this.currentGames.get(accessCode);
-        let lastPlayer: PlayerStats;
-        if (game) {
-            const index = game.players.findIndex((playerFound: PlayerStats) => playerFound.id === playerId);
-            if (index >= 0) {
-                const player = game.players[index];
-                game.isDebugMode = false;
-
-                if (game.players.length === 2) {
-                    lastPlayer = game.players.find((playerFound: PlayerStats) => playerFound.id !== playerId);
-                    for (let i = game.players.length - 1; i >= 0; i--) {
-                        game.map[player.position.y][player.position.x].player = Avatar.Default;
-                        game.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
-                        game.players.splice(i, 1);
-                        this.logger.log(`Player ${playerId} quit the game`);
-                    }
-                    this.timerService.stopTimer(accessCode);
-                    this.currentGames.delete(accessCode);
-                    this.logger.log(`Game ${accessCode} deleted`);
-                } else {
-                    game.map[player.position.y][player.position.x].player = Avatar.Default;
-                    game.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
-                    game.players.splice(index, 1);
-                    this.logger.log(`Player ${playerId} quit the game`);
-                }
-            }
-            return { game, lastPlayer };
+        if (this.fightService.getFight(accessCode) ?? false) {
+            const loser = this.fightService.getFighter(accessCode, playerId);
+            const winner = this.fightService.getOpponent(accessCode, playerId);
+            this.fightService.endFight(accessCode, winner, loser);
         }
-        return null;
+        const player = this.getPlayer(accessCode, playerId);
+        game.map[player.position.y][player.position.x].player = Avatar.Default;
+        game.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
+        game.players = game.players.filter((p) => p.id !== playerId);
+        this.eventEmitter.emit(InternalEvents.PlayerRemoved, { accessCode, game });
+    }
+
+    deleteGame(accessCode: string) {
+        this.timerService.stopTimer(accessCode);
+        this.currentGames.delete(accessCode);
+        this.logger.log(`Game ${accessCode} deleted`);
     }
 
     processPath(accessCode: string, pathInfo: PathInfo, player: PlayerStats) {
@@ -182,6 +179,20 @@ export class GameService {
                 }
             }, MOVEMENT_TIMEOUT_IN_MS);
         }
+    }
+
+    movePlayerToSpawn(accessCode: string, player: PlayerStats): void {
+        const map = this.getMap(accessCode);
+        if (
+            map[player.spawnPosition.y][player.spawnPosition.x].player !== Avatar.Default &&
+            map[player.spawnPosition.y][player.spawnPosition.x].player !== player.avatar
+        ) {
+            const alternateSpawn = this.findValidSpawn(accessCode, player.spawnPosition);
+            if (alternateSpawn) this.movePlayer(accessCode, alternateSpawn, player);
+            return;
+        }
+
+        this.movePlayer(accessCode, player.spawnPosition, player);
     }
 
     movePlayer(accessCode: string, direction: Vec2, player: PlayerStats): void {
@@ -251,7 +262,6 @@ export class GameService {
         const map = this.getMap(accessCode);
         if (map) {
             if (player.movementPts > 0 || (player.actions > 0 && this.isPlayerCanMakeAction(map, player.position))) {
-                this.updatePlayerPathTurn(accessCode, player);
                 return false;
             }
             return true;
@@ -370,6 +380,7 @@ export class GameService {
                 this.eventEmitter.emit(GameEvents.AssignSpawn, { playerId: player.id, position: shuffledSpawnPoints[index] });
                 player.spawnPosition = shuffledSpawnPoints[index];
                 player.position = shuffledSpawnPoints[index];
+                this.logger.log(`Player ${player.name} assigned to spawn point ${shuffledSpawnPoints[index].x},${shuffledSpawnPoints[index].y}`);
 
                 // Placer l'avatar du joueur dans la cellule
                 const x = shuffledSpawnPoints[index].x;
@@ -425,5 +436,46 @@ export class GameService {
 
         // Si le coût n'est pas défini pour cette tuile, utiliser le coût par défaut de la cellule
         return cost !== undefined ? cost : cell.cost;
+    }
+
+    private findValidSpawn(accessCode: string, start: Vec2): Vec2 | null {
+        const map = this.getMap(accessCode);
+        const rows = map.length;
+        const cols = map[0].length;
+
+        const queue: Vec2[] = [start];
+        const visited = new Set<string>();
+        visited.add(`${start.x},${start.y}`);
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+
+            const cell = map[current.y][current.x];
+            if (cell && this.isValidSpawn(cell)) {
+                return cell.position;
+            }
+
+            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
+                const newX = current.x + dir.x;
+                const newY = current.y + dir.y;
+                const key = `${newX},${newY}`;
+
+                if (newX >= 0 && newX < cols && newY >= 0 && newY < rows && !visited.has(key)) {
+                    visited.add(key);
+                    queue.push({ x: newX, y: newY });
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private isValidSpawn(cell: Cell): boolean {
+        return (
+            cell.tile !== Tile.WALL &&
+            cell.tile !== Tile.CLOSED_DOOR &&
+            cell.tile !== Tile.OPENED_DOOR &&
+            (cell.player === Avatar.Default || cell.player === undefined)
+        );
     }
 }

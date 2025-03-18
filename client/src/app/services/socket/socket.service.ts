@@ -136,7 +136,6 @@ export class SocketService {
     }
 
     quitGame(accessCode: string, playerId: string) {
-        this.socket.emit(GameEvents.Quit, { accessCode, playerId });
         this.socket.emit(RoomEvents.QuitGame, { accessCode, playerId });
     }
 
@@ -278,9 +277,9 @@ export class SocketService {
         });
     }
 
-    onQuitGame(): Observable<{ game: Game; lastPlayer: PlayerStats }> {
+    onQuitGame(): Observable<Game> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.BroadcastQuitGame, (game: { game: Game; lastPlayer: PlayerStats }) => observer.next(game));
+            this.socket.on(GameEvents.BroadcastQuitGame, (game) => observer.next(game));
         });
     }
 
@@ -305,6 +304,12 @@ export class SocketService {
             this.socket.on(GameEvents.End, (winner) => {
                 observer.next(winner);
             });
+        });
+    }
+
+    onNotEnoughPlayers(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.NotEnoughPlayer, (data) => observer.next(data));
         });
     }
 
@@ -335,7 +340,6 @@ export class SocketService {
     }
 
     resetSocketState(): void {
-        // Déconnexion de tous les écouteurs d'événements
         this.socket.removeAllListeners();
 
         this.gameRoom = undefined as unknown as Room;

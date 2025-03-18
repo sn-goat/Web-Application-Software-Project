@@ -157,7 +157,7 @@ describe('FightService', () => {
     describe('playerAttack', () => {
         it('devrait logger une erreur si fight introuvable', () => {
             const loggerErrorSpy = jest.spyOn(fightService['logger'], 'error').mockImplementation();
-            fightService.playerAttack('missingFight');
+            fightService.playerAttack('missingFight', false);
             expect(loggerErrorSpy).toHaveBeenCalledWith('Aucun combat actif pour accessCode missingFight');
             loggerErrorSpy.mockRestore();
         });
@@ -171,7 +171,7 @@ describe('FightService', () => {
             // On force les jets de dés
             jest.spyOn(global.Math, 'random').mockReturnValue(0); // dice = 1
             const nextTurnSpy = jest.spyOn(fightService, 'nextTurn');
-            fightService.playerAttack('roomAttack');
+            fightService.playerAttack('roomAttack', false);
 
             // Dégâts calculés = (2 + 1) - (1 + 1) => 1
             expect(defender.currentLife).toBe(9);
@@ -187,7 +187,7 @@ describe('FightService', () => {
 
             jest.spyOn(global.Math, 'random').mockReturnValue(0); // forcer un roll = 1
             const endFightSpy = jest.spyOn(fightService, 'endFight');
-            fightService.playerAttack('roomKO');
+            fightService.playerAttack('roomKO', false);
 
             // Dégâts = (5+1) - (1+1) = 4 => le défenseur a 2 PV => 2 - 4 = 0 => KO
             expect(endFightSpy).toHaveBeenCalledWith('roomKO', attacker, defender);
@@ -203,7 +203,7 @@ describe('FightService', () => {
 
             jest.spyOn(global.Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0);
 
-            fightService.playerAttack('roomNegativeDamage');
+            fightService.playerAttack('roomNegativeDamage', false);
             expect(defender.life).toBe(4);
 
             jest.spyOn(global.Math, 'random').mockRestore();

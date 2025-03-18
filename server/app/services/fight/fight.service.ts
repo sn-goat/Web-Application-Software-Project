@@ -16,13 +16,29 @@ export class FightService {
     private activeFights: Map<string, Fight> = new Map();
 
     constructor(
-        private gameService: GameService,
         private timerService: TimerService,
         private eventEmitter: EventEmitter2,
     ) {}
 
     getFight(accessCode: string): Fight | null {
         return this.activeFights.get(accessCode) ?? null;
+    }
+
+    getFighter(accessCode: string, playerId: string): (PlayerStats & FightInfo) | null {
+        const fight = this.getFight(accessCode);
+        if (!fight) {
+            return null;
+        }
+        return fight.player1.id === playerId ? fight.player1 : fight.player2;
+    }
+
+    getOpponent(accessCode: string, playerId: string): (PlayerStats & FightInfo) | null {
+        const fight = this.getFight(accessCode);
+        const firstPlayer = this.getFighter(accessCode, playerId);
+        if (!fight || !firstPlayer) {
+            return null;
+        }
+        return firstPlayer.id === fight.player1.id ? fight.player2 : fight.player1;
     }
 
     initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
@@ -70,7 +86,7 @@ export class FightService {
         this.activeFights.delete(accessCode);
     }
 
-    playerAttack(accessCode: string) {
+    playerAttack(accessCode: string, isDebugMode: boolean) {
         const fight = this.activeFights.get(accessCode);
         if (!fight) {
             this.logger.error(`Aucun combat actif pour accessCode ${accessCode}`);
@@ -79,7 +95,7 @@ export class FightService {
         const attacker: PlayerStats & FightInfo = fight.currentPlayer.id === fight.player1.id ? fight.player1 : fight.player2;
         const defender: PlayerStats & FightInfo = fight.player1.id === attacker.id ? fight.player2 : fight.player1;
 
-        if (!this.gameService.isGameDebugMode(accessCode)) {
+        if (!isDebugMode) {
             attacker.diceResult = Math.floor(Math.random() * this.diceToNumber(attacker.attackDice)) + 1;
             defender.diceResult = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
         } else {

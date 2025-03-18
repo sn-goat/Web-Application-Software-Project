@@ -27,6 +27,7 @@ describe('GameGateway', () => {
     beforeEach(async () => {
         gameService = {
             createGame: jest.fn(),
+            isGameDebugMode: jest.fn(),
             configureGame: jest.fn().mockResolvedValue('configuredGame'),
             toggleDebugState: jest.fn(),
             isActivePlayerReady: jest.fn().mockReturnValue(false),
@@ -41,6 +42,7 @@ describe('GameGateway', () => {
             getPlayer: jest.fn(),
             getPlayerTurn: jest.fn().mockReturnValue({ id: 'p1', name: 'Alice', avatar: 'a.png', spawnPosition: { x: 0, y: 0 } } as PlayerStats),
             incrementWins: jest.fn(),
+            movePlayerToSpawn: jest.fn(),
         };
 
         timerService = {
@@ -219,7 +221,10 @@ describe('GameGateway', () => {
                 player2: { id: 'p2', name: 'Bob', avatar: 'b.png', spawnPosition: { x: 1, y: 1 } } as PlayerStats,
             } as Fight;
             (fightService.getFight as jest.Mock).mockReturnValue(fight);
-            (gameService.getPlayer as jest.Mock).mockReturnValueOnce(fight.player1).mockReturnValueOnce(fight.player2);
+            (gameService.getPlayer as jest.Mock)
+                .mockReturnValueOnce(fight.player1)
+                .mockReturnValueOnce(fight.player2)
+                .mockReturnValueOnce(fight.player2);
             // On simule également d'autres méthodes de gameService
             gameService.decrementAction = jest.fn();
             const payload = { accessCode: 'roomFight', winner: fight.player1, loser: fight.player2 };
@@ -227,7 +232,7 @@ describe('GameGateway', () => {
             expect(toMock.mock.results[0].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Winner, fight.player1);
             expect(toMock.mock.results[1].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Loser, fight.player2);
             // Vérification d'un appel à gameService.movePlayer et decrementAction
-            expect(gameService.movePlayer).toHaveBeenCalledWith(payload.accessCode, fight.player2.spawnPosition, fight.player2);
+            expect(gameService.movePlayerToSpawn).toHaveBeenCalledWith(payload.accessCode, fight.player2);
             expect(gameService.decrementAction).toHaveBeenCalled();
             // Vérification de l'émission de l'event End
             expect(toMock).toHaveBeenCalledWith(fight.player1.id);
@@ -331,7 +336,7 @@ describe('GameGateway', () => {
         it('handlePlayerAttack should call fightService.playerAttack with accessCode', () => {
             const accessCode = 'FIGHT3';
             gateway.handlePlayerAttack(client as Socket, accessCode);
-            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode);
+            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode, undefined);
         });
 
         it('handleConnection should emit welcome message', () => {

@@ -244,6 +244,36 @@ app-game-map-player {
     }
 }
 
+.debug-indicator {
+    width: 100%;
+    height: 35px;
+    background: rgba(255, 0, 0, 0.8);
+    border-radius: 5px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    animation: flash 1s infinite alternate;
+}
+
+@keyframes flash {
+    0% {
+        background: rgba(255, 0, 0, 0.8);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+    100% {
+        background: rgba(255, 0, 0, 0.4);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+    }
+}
+
+
 @keyframes fadeIn {
     from {
         opacity: 0;
