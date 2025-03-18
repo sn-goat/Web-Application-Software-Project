@@ -340,6 +340,8 @@ export class SocketService {
     }
 
     resetSocketState(): void {
+        this.socket.removeAllListeners();
+
         this.gameRoom = undefined as unknown as Room;
         this.currentPlayer = undefined as unknown as PlayerStats;
 

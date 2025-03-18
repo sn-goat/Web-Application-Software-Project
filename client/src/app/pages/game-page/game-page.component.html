@@ -15,8 +15,9 @@
     <div class="bottom-rectangle">
         <div class="chat-info-container">
             @if (debugMode) {
-                <span>Debug Actif</span>
+            <div class="debug-indicator">Debug Actif</div>
             }
+
             <button (click)="toggleChat()" class="toggle-button">Chat</button>
             <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
         </div>
@@ -24,25 +25,24 @@
     </div>
 
     @if(showFightInterface){
-        <div class="fight-overlay">
-            <app-game-fight-interface></app-game-fight-interface>
+    <div class="fight-overlay">
+        <app-game-fight-interface></app-game-fight-interface>
+    </div>
+    } @if(showChat) {
+    <div class="popup">
+        <div class="popup-header">
+            <span>Zone de messages</span>
+            <button (click)="toggleChat()" class="close-popup">X</button>
         </div>
-    }
-    @if(showChat) {
-        <div class="popup">
-            <div class="popup-header">
-                <span>Zone de messages</span>
-                <button (click)="toggleChat()" class="close-popup">X</button>
-            </div>
-            <div class="chat-content"></div>
-        </div>
+        <div class="chat-content"></div>
+    </div>
     } @if (showInfo) {
-        <div class="popup">
-            <div class="popup-header">
-                <span>Infos Partie</span>
-                <button (click)="toggleInfo()" class="close-popup">X</button>
-            </div>
-            <app-game-map-info></app-game-map-info>
+    <div class="popup">
+        <div class="popup-header">
+            <span>Infos Partie</span>
+            <button (click)="toggleInfo()" class="close-popup">X</button>
         </div>
+        <app-game-map-info></app-game-map-info>
+    </div>
     }
 </div>
