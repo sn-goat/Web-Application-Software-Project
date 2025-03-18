@@ -38,3 +38,9 @@ export const DEFAULT_MOVEMENT_POINTS = 0;
 export const DEFAULT_ACTIONS = 1;
 export const DEFAULT_WINS = 0;
 export const DEFAULT_POSITION: Vec2 = { x: 0, y: 0 };
+export const DEFAULT_MOVEMENT_DIRECTIONS: Vec2[] = [
+    { x: 0, y: 1 }, // Down
+    { x: 1, y: 0 }, // Right
+    { x: 0, y: -1 }, // Up
+    { x: -1, y: 0 }, // Left
+];
