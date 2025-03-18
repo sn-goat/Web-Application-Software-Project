@@ -171,7 +171,6 @@ export class SocketService {
     onBroadcastStartGame(): Observable<Game> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.BroadcastStartGame, (game: Game) => observer.next(game));
-            this.socket.on(GameEvents.BroadcastStartGame, (game: Game) => observer.next(game));
         });
     }
 
@@ -340,12 +339,7 @@ export class SocketService {
     }
 
     resetSocketState(): void {
-        this.socket.removeAllListeners();
-
-        this.gameRoom = undefined as unknown as Room;
-        this.currentPlayer = undefined as unknown as PlayerStats;
-
-        this.socket.disconnect();
+        this.socket = io(this.url);
         this.socket.connect();
     }
 }
