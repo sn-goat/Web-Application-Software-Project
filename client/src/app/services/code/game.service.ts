@@ -51,10 +51,6 @@ export class GameService {
             this.onEndDebugState();
         });
 
-        // this.socketService.onQuitGame().subscribe(() => {
-        //     this.socketService.resetSocketState();
-        // });
-
         this.socketService.onBroadcastDoor().subscribe((payload) => {
             console.log('Changement de la porte à la position', payload.position, 'avec le nouvel état', payload.newState);
             const newMap = this.map.value;

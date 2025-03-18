@@ -335,7 +335,6 @@ export class SocketService {
     }
 
     resetSocketState(): void {
-        // Déconnexion de tous les écouteurs d'événements
         this.socket.removeAllListeners();
 
         this.gameRoom = undefined as unknown as Room;
