@@ -1,5 +1,5 @@
 import { Directive, EventEmitter, HostListener, Input, Output } from '@angular/core';
-import { Cell } from '@common/board';
+import { Cell, LEFT_CLICK, RIGHT_CLICK } from '@common/board';
 
 @Directive({
     selector: '[appMouseHandler]',
@@ -11,9 +11,9 @@ export class MouseHandlerDirective {
 
     @HostListener('mousedown', ['$event'])
     onClick(event: MouseEvent): void {
-        if (event.button === 0) {
+        if (event.button === LEFT_CLICK) {
             this.leftClicked.emit(this.cell);
-        } else if (event.button === 2) {
+        } else if (event.button === RIGHT_CLICK) {
             this.rightClicked.emit(this.cell);
         }
     }
