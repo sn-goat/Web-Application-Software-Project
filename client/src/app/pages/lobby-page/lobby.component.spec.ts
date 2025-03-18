@@ -81,7 +81,7 @@ describe('LobbyComponent', () => {
         socketService.triggerPlayerRemoved([]);
         component.disconnect();
         tick();
-        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+        expect(router.navigate).toHaveBeenCalledWith(['/acceuil']);
     }));
 
     it('should navigate home if current player disconnects', fakeAsync(() => {
@@ -89,7 +89,7 @@ describe('LobbyComponent', () => {
         socketService.triggerPlayerDisconnected([]);
         component.disconnect();
         tick();
-        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+        expect(router.navigate).toHaveBeenCalledWith(['/acceuil']);
     }));
 
     it('checkIfAdmin should set isAdmin true if current player is first in list', () => {
@@ -104,7 +104,7 @@ describe('LobbyComponent', () => {
         socketService.triggerOnAdminDisconect([]);
         component.disconnect();
         tick();
-        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+        expect(router.navigate).toHaveBeenCalledWith(['/acceuil']);
     }));
 
     it('toggleRoomLock should call unlockRoom if room is locked', () => {
@@ -183,7 +183,7 @@ describe('LobbyComponent', () => {
         tick();
 
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
-        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+        expect(router.navigate).toHaveBeenCalledWith(['/acceuil']);
     }));
 
     it('disconnect should call socketService.disconnect and navigate home without reloading', fakeAsync(() => {
@@ -194,7 +194,7 @@ describe('LobbyComponent', () => {
         tick();
 
         expect(socketService.disconnect).toHaveBeenCalledWith('ABC', 'current-player');
-        expect(router.navigate).toHaveBeenCalledWith(['/home']);
+        expect(router.navigate).toHaveBeenCalledWith(['/acceuil']);
     }));
 
     it('should set accessCode from history state if available', () => {
@@ -246,7 +246,7 @@ describe('LobbyComponent', () => {
 
         // Assert
         expect(component['gameService'].setGame).toHaveBeenCalledWith(mockGame);
-        expect(router.navigate).toHaveBeenCalledWith(['/game']);
+        expect(router.navigate).toHaveBeenCalledWith(['/jeu']);
     }));
 
     it('should automatically unlock room if players count drops below maxPlayers and room is locked', fakeAsync(() => {
