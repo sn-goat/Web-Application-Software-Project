@@ -73,8 +73,8 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 }
             }),
 
-            this.socketService.onWinner().subscribe((player: PlayerStats) => {
-                if (this.playerService.getPlayer().id === player.id) {
+            this.socketService.onWinner().subscribe((winner: PlayerStats) => {
+                if (this.playerService.getPlayer().id === winner.id) {
                     this.snackBar.openFromComponent(SnackbarComponent, {
                         duration: 3000,
                         horizontalPosition: 'center',
@@ -85,9 +85,8 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 }
             }),
 
-            this.socketService.onLoser().subscribe((player: PlayerStats) => {
-                console.log('Y a eu un perdant');
-                if (this.playerService.getPlayer().id === player.id) {
+            this.socketService.onLoser().subscribe((loser: PlayerStats) => {
+                if (this.playerService.getPlayer().id === loser.id) {
                     this.snackBar.openFromComponent(SnackbarComponent, {
                         duration: 3000,
                         horizontalPosition: 'center',
@@ -96,6 +95,16 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                         data: { message: 'Tu as perdu le combat!' },
                     });
                 }
+            }),
+
+            this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
+                this.snackBar.openFromComponent(SnackbarComponent, {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'top',
+                    panelClass: ['custom-snackbar'],
+                    data: { message: `${winner.name} a gagné la partie avec 3 victoires!` },
+                });
             }),
         );
     }
