@@ -7,7 +7,7 @@ import { SocketService } from '@app/services/code/socket.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Game, getAvatarName } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { DEFAULT_MOVEMENT_DIRECTIONS, PlayerStats } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { PlayerService } from './player.service';
 
@@ -58,13 +58,13 @@ export class GameService {
             this.map.next(newMap);
         });
 
-        this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
-            this.playingPlayers.next(game.game.players);
-            this.map.next(game.game.map);
+        this.socketService.onQuitGame().subscribe((game) => {
+            console.log('Quitting game', game.players);
+            this.playingPlayers.next(game.players);
+            this.map.next(game.map);
         });
 
         this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
-            // End the game
             console.log(winner);
         });
     }
@@ -73,7 +73,7 @@ export class GameService {
         const myPlayer = this.playerService.getPlayer();
         const findDefender: PlayerStats | null = this.findDefender(avatar);
         if (findDefender && myPlayer) {
-            this.socketService.initFight(this.accessCode, myPlayer, findDefender);
+            this.socketService.initFight(this.accessCode, myPlayer.id, findDefender.id);
         }
     }
 
@@ -178,6 +178,17 @@ export class GameService {
         this.socketService.endTurn(this.accessCode);
     }
 
+    resetGame(): void {
+        this.map.next([]);
+        this.playingPlayers.next([]);
+        this.activePlayer.next(null);
+        this.isDebugMode.next(false);
+        this.isActionSelected.next(false);
+        this.initialPlayers = [];
+        this.accessCode = '';
+        this.organizerId = '';
+    }
+
     async confirmAndAbandonGame(): Promise<boolean> {
         return new Promise((resolve) => {
             const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -234,12 +245,7 @@ export class GameService {
 
     findPossibleActions(position: Vec2): Set<string> {
         const possibleActions = new Set<string>();
-        const directions: Vec2[] = [
-            { x: 0, y: 1 }, // Down
-            { x: 1, y: 0 }, // Right
-            { x: 0, y: -1 }, // Up
-            { x: -1, y: 0 }, // Left
-        ];
+        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
         for (const dir of directions) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
             if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {

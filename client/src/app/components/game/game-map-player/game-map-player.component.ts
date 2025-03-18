@@ -15,15 +15,13 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly fileType: string = DEFAULT_FILE_TYPE;
 
-    players: PlayerStats[];
+    players: PlayerStats[] = [];
     playersInGame: PlayerStats[];
     activePlayer: PlayerStats | null;
-    gameService: GameService = inject(GameService);
-    socketService: SocketService = inject(SocketService);
+    getOrganizerId: () => string;
+    private readonly gameService: GameService = inject(GameService);
+    private readonly socketService: SocketService = inject(SocketService);
     private subscriptions: Subscription[] = [];
-    constructor() {
-        this.players = [];
-    }
 
     ngOnInit() {
         this.subscriptions.push(
@@ -36,13 +34,11 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
             }),
 
             this.socketService.onWinner().subscribe((winner: PlayerStats) => {
-                for (let index = 0; index < this.players.length; index++) {
-                    if (this.players[index].id === winner.id) {
-                        this.players[index] = winner;
-                    }
-                }
+                const playerToUpdate = this.playersInGame.findIndex((player) => winner.id === player.id);
+                this.playersInGame[playerToUpdate] = winner;
             }),
         );
+        this.getOrganizerId = this.gameService.getOrganizerId;
     }
 
     ngAfterViewInit(): void {

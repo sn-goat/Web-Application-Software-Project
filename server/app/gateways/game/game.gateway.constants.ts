@@ -10,3 +10,7 @@ export enum TimerEvents {
     FightUpdate = 'fightUpdate',
     FightEnd = 'fightEnd',
 }
+
+export enum InternalEvents {
+    PlayerRemoved = 'playerRemoved',
+}

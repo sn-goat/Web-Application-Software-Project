@@ -36,7 +36,6 @@ Cette tuile est accessible et permet au joueur de passer librement.`,
 C'est une tuile de terrain qui peut être parcourue par le joueur. Le coût pour la traverser s'élève à 1 pt.`,
     ],
 
-    // Descriptions for items
     [Item.BOW, 'Arc : Une arme à distance utilisée pour attaquer les ennemis de loin.'],
     [Item.FLAG, 'Drapeau : Un symbole de victoire ou de capture dans le jeu.'],
     [Item.LEATHER_BOOT, 'Bottes en cuir : Augmente la vitesse de déplacement du joueur.'],

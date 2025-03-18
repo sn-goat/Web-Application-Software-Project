@@ -3,18 +3,18 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, In
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.component';
 import { MapCardComponent } from '@app/components/map-card/map-card.component';
+import { Alert } from '@app/constants/enums';
 import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
 import { BoardService } from '@app/services/code/board.service';
 import { GameMapService } from '@app/services/code/game-map.service';
 import { MapService } from '@app/services/code/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
-import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { firstValueFrom } from 'rxjs';
-import { AlertComponent } from '@app/components/common/alert/alert.component';
-import { Alert } from '@app/constants/enums';
 
 type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
 
@@ -23,7 +23,6 @@ type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
     templateUrl: './map-list.component.html',
     styleUrls: ['./map-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
     imports: [CommonModule, FormsModule, MapCardComponent, HeaderBarComponent],
 })
 export class MapListComponent implements OnInit {
@@ -38,14 +37,11 @@ export class MapListComponent implements OnInit {
     sortBy: SortingCategories = 'updatedAt';
 
     private readonly mapService = inject(MapService);
-
-    constructor(
-        private readonly router: Router,
-        private readonly cdr: ChangeDetectorRef,
-        private readonly dialog: MatDialog,
-        private readonly boardService: BoardService,
-        private readonly gameMapService: GameMapService,
-    ) {}
+    private readonly router: Router = inject(Router);
+    private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+    private readonly dialog: MatDialog = inject(MatDialog);
+    private readonly boardService: BoardService = inject(BoardService);
+    private readonly gameMapService: GameMapService = inject(GameMapService);
 
     onDivClick(map: Board): void {
         this.boardService.getAllBoards().subscribe(async (serverMaps) => {
@@ -75,6 +71,10 @@ export class MapListComponent implements OnInit {
             this.isLoading = false;
             this.cdr.detectChanges();
         });
+    }
+
+    isAllMapsHidden(): boolean {
+        return this.isCreationPage && this.items.every((map) => map.visibility !== Visibility.PUBLIC);
     }
 
     getFilteredAndSortedItems(): Board[] {
@@ -157,7 +157,7 @@ export class MapListComponent implements OnInit {
         if (mapSize <= Size.SMALL) return 'size-small';
         if (mapSize <= Size.MEDIUM) return 'size-medium';
         if (mapSize <= Size.LARGE) return 'size-large';
-        return 'size-default'; // Fallback for undefined sizes
+        return 'size-default';
     }
 
     async warning(message: string): Promise<void> {

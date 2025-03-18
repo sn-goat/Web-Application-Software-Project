@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TEAM_MEMBERS } from '@app/constants/team-members';
+import { GameService } from '@app/services/code/game.service';
+import { SocketService } from '@app/services/code/socket.service';
 
 @Component({
     selector: 'app-main-page',
@@ -8,13 +10,19 @@ import { TEAM_MEMBERS } from '@app/constants/team-members';
     styleUrls: ['./main-page.component.scss'],
     imports: [RouterLink],
 })
-export class MainPageComponent {
+export class MainPageComponent implements OnInit {
     readonly title: string = 'POLYTOPIA';
     readonly teamMembers: string[] = TEAM_MEMBERS;
     readonly gameLogoPath: string = './assets/POLYTOPIA_game_logo.png';
     gameLogoError: boolean = false;
-
+    private socketService = inject(SocketService);
+    private gameService = inject(GameService);
     handleGameLogoError(): void {
         this.gameLogoError = true;
+    }
+
+    ngOnInit() {
+        this.socketService.resetSocketState();
+        this.gameService.resetGame();
     }
 }

@@ -37,12 +37,9 @@ import { firstValueFrom } from 'rxjs';
 export class MapMakerComponent implements OnInit {
     private readonly mapService = inject(MapService);
     private readonly dialog = inject(MatDialog);
-
-    constructor(
-        private readonly router: Router,
-        private mouseEditor: MouseEditorService,
-        private boardService: BoardService,
-    ) {}
+    private readonly router: Router = inject(Router);
+    private readonly mouseEditor: MouseEditorService = inject(MouseEditorService);
+    private readonly boardService: BoardService = inject(BoardService);
 
     get name() {
         return this.mapService.getBoardToSave().value.name;

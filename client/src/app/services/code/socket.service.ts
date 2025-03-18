@@ -136,7 +136,6 @@ export class SocketService {
     }
 
     quitGame(accessCode: string, playerId: string) {
-        this.socket.emit(GameEvents.Quit, { accessCode, playerId });
         this.socket.emit(RoomEvents.QuitGame, { accessCode, playerId });
     }
 
@@ -144,7 +143,7 @@ export class SocketService {
         this.socket.emit(TurnEvents.ChangeDoorState, { accessCode, position, player });
     }
 
-    initFight(accessCode: string, player1: PlayerStats, player2: PlayerStats) {
+    initFight(accessCode: string, player1: string, player2: string) {
         this.socket.emit(FightEvents.Init, { accessCode, player1, player2 });
     }
 
@@ -278,9 +277,9 @@ export class SocketService {
         });
     }
 
-    onQuitGame(): Observable<{ game: Game; lastPlayer: PlayerStats }> {
+    onQuitGame(): Observable<Game> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.BroadcastQuitGame, (game: { game: Game; lastPlayer: PlayerStats }) => observer.next(game));
+            this.socket.on(GameEvents.BroadcastQuitGame, (game) => observer.next(game));
         });
     }
 
@@ -305,6 +304,12 @@ export class SocketService {
             this.socket.on(GameEvents.End, (winner) => {
                 observer.next(winner);
             });
+        });
+    }
+
+    onNotEnoughPlayers(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.NotEnoughPlayer, (data) => observer.next(data));
         });
     }
 

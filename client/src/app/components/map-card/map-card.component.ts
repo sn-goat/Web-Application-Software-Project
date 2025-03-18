@@ -1,24 +1,23 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Board } from '@common/board';
-import { firstValueFrom } from 'rxjs';
-import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { Alert } from '@app/constants/enums';
 import {
-    DEFAULT_PATH_ITEMS,
-    DEFAULT_PATH_TILES,
     DEFAULT_PATH_DELETE,
     DEFAULT_PATH_EDIT,
-    DEFAULT_PATH_VISIBLE,
+    DEFAULT_PATH_ITEMS,
     DEFAULT_PATH_NOT_VISIBLE,
+    DEFAULT_PATH_TILES,
+    DEFAULT_PATH_VISIBLE,
 } from '@app/constants/path';
+import { Board } from '@common/board';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-map-card',
     templateUrl: './map-card.component.html',
     styleUrls: ['./map-card.component.scss'],
-    standalone: true,
     imports: [CommonModule],
 })
 export class MapCardComponent {

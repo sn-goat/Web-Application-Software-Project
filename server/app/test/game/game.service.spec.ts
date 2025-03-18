@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines */
 import { BoardService } from '@app/services/board/board.service';
+import { FightService } from '@app/services/fight.service';
 import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
@@ -18,6 +19,7 @@ describe('GameService', () => {
     let gameService: GameService;
     let boardService: Partial<BoardService>;
     let timerService: Partial<TimerService>;
+    let fightService: Partial<FightService>;
     let eventEmitter: EventEmitter2;
     let dummyMap: Cell[][];
     const accessCode = 'GAME123';
@@ -51,6 +53,7 @@ describe('GameService', () => {
                 GameService,
                 { provide: BoardService, useValue: boardService },
                 { provide: TimerService, useValue: timerService },
+                { provide: FightService, useValue: fightService },
                 { provide: EventEmitter2, useValue: eventEmitter },
             ],
         }).compile();
@@ -477,6 +480,20 @@ describe('GameService', () => {
 
                 const result = (gameService as any).isPlayerTurnEnded(accessCode, player);
                 expect(result).toBe(true);
+            });
+
+            it("incrementWins should correcly increment a player's wins count", () => {
+                const player = { id: 'p1', name: 'Player1', movementPts: 0, actions: 0, position: { x: 0, y: 0 }, wins: 0 } as PlayerStats;
+                setupTestGame({ players: [player] });
+                gameService.incrementWins(accessCode, player.id);
+                expect(gameService.getPlayer(accessCode, player.id).wins).toEqual(1);
+            });
+
+            it("incrementWins should not correcly increment a player's wins count if the player is not found", () => {
+                const player = { id: 'p1', name: 'Player1', movementPts: 0, actions: 0, position: { x: 0, y: 0 }, wins: 0 } as PlayerStats;
+                setupTestGame({ players: [player] });
+                gameService.incrementWins(accessCode, 'incorrect_id');
+                expect(gameService.getPlayer(accessCode, player.id).wins).toEqual(0);
             });
         });
 

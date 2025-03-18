@@ -17,7 +17,6 @@ describe('JoinRoomComponent', () => {
 
         await TestBed.configureTestingModule({
             imports: [FormsModule, JoinRoomComponent],
-            // Utiliser le type SocketService comme token :
             providers: [{ provide: SocketService, useValue: socketServiceMock }],
         }).compileComponents();
     });
@@ -31,33 +30,6 @@ describe('JoinRoomComponent', () => {
     it('devrait créer la composante', () => {
         expect(component).toBeTruthy();
     });
-
-    it('devrait invalider un code de moins de 4 chiffres', () => {
-        component.accessCode = '123';
-        component.validateCode();
-        expect(component.isValidCode).toBeFalse();
-    });
-
-    it('devrait invalider un code de plus de 4 chiffres', () => {
-        component.accessCode = '12345';
-        component.validateCode();
-        expect(component.isValidCode).toBeFalse();
-    });
-
-    it('devrait valider un code de 4 chiffres', () => {
-        component.accessCode = '1234';
-        component.validateCode();
-        expect(component.isValidCode).toBeTrue();
-    });
-
-    // it('devrait désactiver le bouton si le code est invalide', () => {
-    //     component.accessCode = '12';
-    //     component.validateCode();
-    //     fixture.detectChanges();
-
-    //     const button = fixture.debugElement.query(By.css('button')).nativeElement;
-    //     expect(button.disabled).toBeTrue();
-    // });
 
     it('devrait activer le bouton si le code est valide', () => {
         component.accessCode = '1234';

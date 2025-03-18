@@ -189,7 +189,7 @@ describe('MapListComponent', () => {
     });
 
     it('should display a preview image of the game', async () => {
-        component.mapsLoaded = true; // Ensure maps are loaded
+        component.mapsLoaded = true;
 
         const previewImage = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container img.base-image'));
 

@@ -58,7 +58,7 @@ h2 {
 
 .form-container {
     width: 100%;
-    padding: 10px; // Ajoute un padding interne pour éviter que les champs touchent les bords
+    padding: 10px;
 }
 
 input,
@@ -99,11 +99,11 @@ button:hover {
 }
 
 .editor-panel {
-    width: 30%; // Augmente la largeur de la boîte
-    max-width: 400px; // Fixe une largeur maximale
+    width: 30%;
+    max-width: 400px;
     border: 2px solid $glow-teal;
     border-radius: 10px;
-    padding: 30px; // Ajoute du padding pour espacer les éléments
+    padding: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;

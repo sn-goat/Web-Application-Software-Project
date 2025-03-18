@@ -1,7 +1,7 @@
 <div class="map-list-container">
     @if(isLoading) {
     <div class="circ">
-        <div class="load">Loading . . .</div>
+        <div class="load">Attente . . .</div>
         <div class="hands"></div>
         <div class="body"></div>
         <div class="head">
@@ -22,30 +22,34 @@
     </div>
     <div class="grid-container">
         @for (map of getFilteredAndSortedItems(); track map) {
-            <app-map-card
-                [map]="map"
-                [isCreationPage]="isCreationPage"
-                (click)="onDivClick(map)"
-                (edit)="onEdit($event)"
-                (delete)="onDelete($event)"
-                (toggleVisibility)="toggleVisibility($event)"
-            >
+        <app-map-card
+            [map]="map"
+            [isCreationPage]="isCreationPage"
+            (click)="onDivClick(map)"
+            (edit)="onEdit($event)"
+            (delete)="onDelete($event)"
+            (toggleVisibility)="toggleVisibility($event)"
+        >
         </app-map-card>
         } @if (!isCreationPage) {
         <div class="list-item new-map-card" (click)="createNewMap()">
             <div class="add-icon">+</div>
-            <p class="add-text">Create New Map</p>
+            <p class="add-text">Créer une partie</p>
+        </div>
+        } @else if (isCreationPage && isAllMapsHidden()) {
+        <div class="empty-state">
+            <p>Aucunes partie disponible, changez la visibilité de vos parties</p>
         </div>
         }
     </div>
     } @else {
-        <div class="empty-state">
-            <p>Aucunes parties trouvées</p>
-        </div>
-        @if (!isCreationPage) {
-            <div class="list-item new-map-card" (click)="createNewMap()">
-                <div class="add-icon">+</div>
-                <p class="add-text">Create New Map</p>
-            </div>
-        } }
+    <div class="empty-state">
+        <p>Aucunes parties trouvées</p>
+    </div>
+    @if (!isCreationPage) {
+    <div class="list-item new-map-card" (click)="createNewMap()">
+        <div class="add-icon">+</div>
+        <p class="add-text">Créer une partie</p>
+    </div>
+    } }
 </div>

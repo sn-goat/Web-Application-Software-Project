@@ -27,6 +27,7 @@ describe('GameGateway', () => {
     beforeEach(async () => {
         gameService = {
             createGame: jest.fn(),
+            isGameDebugMode: jest.fn(),
             configureGame: jest.fn().mockResolvedValue('configuredGame'),
             toggleDebugState: jest.fn(),
             isActivePlayerReady: jest.fn().mockReturnValue(false),
@@ -38,7 +39,9 @@ describe('GameGateway', () => {
             configureTurn: jest.fn().mockReturnValue({ player: { id: 'player1', avatar: 'avatar.png' } }),
             startTimer: jest.fn(),
             endTurnRequested: jest.fn(),
+            getPlayer: jest.fn(),
             getPlayerTurn: jest.fn().mockReturnValue({ id: 'p1', name: 'Alice', avatar: 'a.png', spawnPosition: { x: 0, y: 0 } } as PlayerStats),
+            incrementWins: jest.fn(),
         };
 
         timerService = {
@@ -217,21 +220,21 @@ describe('GameGateway', () => {
                 player2: { id: 'p2', name: 'Bob', avatar: 'b.png', spawnPosition: { x: 1, y: 1 } } as PlayerStats,
             } as Fight;
             (fightService.getFight as jest.Mock).mockReturnValue(fight);
+            (gameService.getPlayer as jest.Mock).mockReturnValueOnce(fight.player1).mockReturnValueOnce(fight.player2);
             // On simule également d'autres méthodes de gameService
             gameService.decrementAction = jest.fn();
             const payload = { accessCode: 'roomFight', winner: fight.player1, loser: fight.player2 };
             gateway.sendFightEnd(payload);
-            expect(toMock).toHaveBeenCalledWith(fight.player1.id);
             expect(toMock.mock.results[0].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Winner, fight.player1);
-            expect(toMock).toHaveBeenCalledWith(fight.player2.id);
+            expect(toMock.mock.results[1].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.Loser, fight.player2);
             // Vérification d'un appel à gameService.movePlayer et decrementAction
             expect(gameService.movePlayer).toHaveBeenCalledWith(payload.accessCode, fight.player2.spawnPosition, fight.player2);
             expect(gameService.decrementAction).toHaveBeenCalled();
             // Vérification de l'émission de l'event End
             expect(toMock).toHaveBeenCalledWith(fight.player1.id);
-            expect(toMock.mock.results[1].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
-            expect(toMock).toHaveBeenCalledWith(fight.player2.id);
             expect(toMock.mock.results[2].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
+            expect(toMock).toHaveBeenCalledWith(fight.player2.id);
+            expect(toMock.mock.results[3].value.emit as jest.Mock).toHaveBeenCalledWith(FightEvents.End);
             expect(timerService.resumeTimer).toHaveBeenCalledWith(payload.accessCode);
         });
     });
@@ -312,9 +315,10 @@ describe('GameGateway', () => {
         it('handleFightInit should call fightService.initFight and emit Fight Init to defender', () => {
             const payload = {
                 accessCode: 'FIGHT1',
-                player1: { id: 'player1', name: 'Alice', avatar: 'a.png' } as PlayerStats,
-                player2: { id: 'player2', name: 'Bob', avatar: 'b.png' } as PlayerStats,
+                player1: 'player1',
+                player2: 'player2',
             };
+            (gameService.getPlayer as jest.Mock).mockReturnValueOnce(payload.player1).mockReturnValueOnce(payload.player2);
             gateway.handleFightInit(client as Socket, payload);
             expect(fightService.initFight).toHaveBeenCalledWith(payload.accessCode, payload.player1, payload.player2);
         });
@@ -328,7 +332,7 @@ describe('GameGateway', () => {
         it('handlePlayerAttack should call fightService.playerAttack with accessCode', () => {
             const accessCode = 'FIGHT3';
             gateway.handlePlayerAttack(client as Socket, accessCode);
-            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode);
+            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode, undefined);
         });
 
         it('handleConnection should emit welcome message', () => {
