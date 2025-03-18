@@ -114,7 +114,12 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.QuitGame)
     handleQuitGame(client: Socket, payload: { accessCode: string; playerId: string }) {
-        this.roomService.quitGame(payload.accessCode, payload.playerId);
+        const lastPlayerId = this.roomService.quitGame(payload.accessCode, payload.playerId);
+        this.logger.log(`LastPlayer ${lastPlayerId} quit game in room`);
+        if (lastPlayerId) {
+            this.logger.log(`LastPlayer ${lastPlayerId} send quit`);
+            this.server.to(lastPlayerId).emit(RoomEvents.NotEnoughPlayer);
+        }
     }
 
     afterInit(server: Server) {

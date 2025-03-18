@@ -27,6 +27,7 @@ describe('GameGateway', () => {
     beforeEach(async () => {
         gameService = {
             createGame: jest.fn(),
+            isGameDebugMode: jest.fn(),
             configureGame: jest.fn().mockResolvedValue('configuredGame'),
             toggleDebugState: jest.fn(),
             isActivePlayerReady: jest.fn().mockReturnValue(false),
@@ -331,7 +332,7 @@ describe('GameGateway', () => {
         it('handlePlayerAttack should call fightService.playerAttack with accessCode', () => {
             const accessCode = 'FIGHT3';
             gateway.handlePlayerAttack(client as Socket, accessCode);
-            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode);
+            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode, undefined);
         });
 
         it('handleConnection should emit welcome message', () => {

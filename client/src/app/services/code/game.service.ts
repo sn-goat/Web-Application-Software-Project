@@ -51,10 +51,6 @@ export class GameService {
             this.onEndDebugState();
         });
 
-        // this.socketService.onQuitGame().subscribe(() => {
-        //     this.socketService.resetSocketState();
-        // });
-
         this.socketService.onBroadcastDoor().subscribe((payload) => {
             console.log('Changement de la porte à la position', payload.position, 'avec le nouvel état', payload.newState);
             const newMap = this.map.value;
@@ -62,13 +58,13 @@ export class GameService {
             this.map.next(newMap);
         });
 
-        this.socketService.onQuitGame().subscribe((game: { game: Game; lastPlayer: PlayerStats }) => {
-            this.playingPlayers.next(game.game.players);
-            this.map.next(game.game.map);
+        this.socketService.onQuitGame().subscribe((game) => {
+            console.log('Quitting game', game.players);
+            this.playingPlayers.next(game.players);
+            this.map.next(game.map);
         });
 
         this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
-            // End the game
             console.log(winner);
         });
     }
@@ -180,6 +176,17 @@ export class GameService {
     endTurn(): void {
         this.toggleActionMode();
         this.socketService.endTurn(this.accessCode);
+    }
+
+    resetGame(): void {
+        this.map.next([]);
+        this.playingPlayers.next([]);
+        this.activePlayer.next(null);
+        this.isDebugMode.next(false);
+        this.isActionSelected.next(false);
+        this.initialPlayers = [];
+        this.accessCode = '';
+        this.organizerId = '';
     }
 
     async confirmAndAbandonGame(): Promise<boolean> {

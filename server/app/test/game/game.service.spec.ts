@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines */
 import { BoardService } from '@app/services/board/board.service';
+import { FightService } from '@app/services/fight.service';
 import { GameService } from '@app/services/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
@@ -18,6 +19,7 @@ describe('GameService', () => {
     let gameService: GameService;
     let boardService: Partial<BoardService>;
     let timerService: Partial<TimerService>;
+    let fightService: Partial<FightService>;
     let eventEmitter: EventEmitter2;
     let dummyMap: Cell[][];
     const accessCode = 'GAME123';
@@ -51,6 +53,7 @@ describe('GameService', () => {
                 GameService,
                 { provide: BoardService, useValue: boardService },
                 { provide: TimerService, useValue: timerService },
+                { provide: FightService, useValue: fightService },
                 { provide: EventEmitter2, useValue: eventEmitter },
             ],
         }).compile();
