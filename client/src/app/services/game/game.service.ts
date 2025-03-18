@@ -177,7 +177,8 @@ export class GameService {
     }
 
     endTurn(): void {
-        this.toggleActionMode();
+        this.isActionSelected.next(false);
+        this.playerService.setPlayerActive(false);
         this.socketService.endTurn(this.accessCode);
     }
 

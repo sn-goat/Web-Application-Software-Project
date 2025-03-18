@@ -234,6 +234,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(accessCode).emit(TurnEvents.PlayerTurn, turn);
         setTimeout(() => {
             this.gameService.startTimer(accessCode);
+            this.server.to(turn.player.id).emit(TurnEvents.Start, {});
         }, THREE_SECONDS_IN_MS);
     }
 }

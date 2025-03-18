@@ -37,7 +37,7 @@ describe('GameService', () => {
         });
         socketServiceMock = new MockSocketService();
         dialogMock = jasmine.createSpyObj('MatDialog', ['open']);
-        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'isActive', 'setPlayer', 'isPlayerAdmin']);
+        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'isActive', 'setPlayer', 'isPlayerAdmin', 'setPlayerActive']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -146,14 +146,13 @@ describe('GameService', () => {
         expect(service.map.value[1][1].player).toBe('Wizard');
     });
 
-    it('should end turn and toggle action mode', () => {
+    it('should end turn and force no action mode', () => {
         service.activePlayer.next({ id: 'p1', actions: 1 } as PlayerStats);
         spyOn(socketServiceMock, 'endTurn');
-        const oldValue = service.isActionSelected.value;
 
         service.endTurn();
 
-        expect(service.isActionSelected.value).toBe(!oldValue);
+        expect(service.isActionSelected.value).toBe(false);
         // Vérifie que la méthode endTurn du MockSocketService a été appelée
         expect(socketServiceMock.endTurn).toHaveBeenCalled();
     });

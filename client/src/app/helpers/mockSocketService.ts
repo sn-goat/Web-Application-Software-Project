@@ -84,7 +84,7 @@ export class MockSocketService {
         return this.broadcastDebugStateSubject.asObservable();
     }
 
-    onStartTurn() {
+    onTurnStart() {
         return this.startTurnSubject.asObservable();
     }
 
