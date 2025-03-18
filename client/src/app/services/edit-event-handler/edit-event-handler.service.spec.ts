@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { EditEventHandlerService } from '@app/services/edit-event-handler/edit-event-handler.service';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
 import { MapService } from '@app/services/map/map.service';

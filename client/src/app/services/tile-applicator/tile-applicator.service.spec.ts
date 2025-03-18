@@ -3,7 +3,7 @@
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { MapService } from '@app/services/map/map.service';
 import { MouseEditorService } from '@app/services/mouse-editor/mouse-editor.service';
 import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
