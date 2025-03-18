@@ -28,9 +28,9 @@ describe('CreatePageComponent', () => {
     });
 
     it('should open and close popup', () => {
-        component.openPopup();
+        component.togglePopup();
         expect(component.isPopupVisible).toBeTrue();
-        component.closePopup();
+        component.togglePopup();
         expect(component.isPopupVisible).toBeFalse();
     });
 });

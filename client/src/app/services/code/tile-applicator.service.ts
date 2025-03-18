@@ -7,6 +7,7 @@ import { ToolSelectionService } from './tool-selection.service';
 
 import { Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
+import { DEFAULT_POSITION_BEFORE_GAME } from '@common/player';
 
 @Injectable({
     providedIn: 'root',
@@ -16,13 +17,13 @@ export class TileApplicatorService {
     private toolSelection = inject(ToolSelectionService);
     private mapService = inject(MapService);
 
-    private previousCoord: Vec2 = { x: -1, y: -1 };
+    private previousCoord: Vec2 = DEFAULT_POSITION_BEFORE_GAME;
 
     private isTilesBeingApplied: boolean = false;
     private isTilesBeingDeleted: boolean = false;
 
     private selectedTile: Tile | null;
-    private currentCoord: Vec2 = { x: -1, y: -1 };
+    private currentCoord: Vec2 = DEFAULT_POSITION_BEFORE_GAME;
 
     constructor() {
         this.mouseEditorService.currentCoord$.pipe(takeUntilDestroyed()).subscribe((coord) => {

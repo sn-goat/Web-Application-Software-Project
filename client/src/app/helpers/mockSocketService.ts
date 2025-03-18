@@ -41,7 +41,7 @@ export class MockSocketService {
     private quitGameSubject = new Subject<unknown>();
 
     getGameSize() {
-        return 15; // Retourne une taille numérique appropriée
+        return 15;
     }
 
     getCurrentPlayerId(): string {
@@ -72,7 +72,6 @@ export class MockSocketService {
         return this.gameSubject.asObservable();
     }
 
-    // Méthodes manquantes des observables
     onRoomCreated() {
         return this.roomCreatedSubject.asObservable();
     }
@@ -193,7 +192,6 @@ export class MockSocketService {
         this.gameSubject.next(game);
     }
 
-    // Méthodes pour déclencher les événements dans les tests
     triggerRoomCreated(data: unknown) {
         this.roomCreatedSubject.next(data);
     }

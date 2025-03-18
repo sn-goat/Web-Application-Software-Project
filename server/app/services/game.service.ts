@@ -4,7 +4,14 @@ import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
 import { GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { ATTACK_ICE_DECREMENT, DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFENSE_ICE_DECREMENT, PlayerStats } from '@common/player';
+import {
+    ATTACK_ICE_DECREMENT,
+    DEFAULT_ATTACK_VALUE,
+    DEFAULT_DEFENSE_VALUE,
+    DEFAULT_MOVEMENT_DIRECTIONS,
+    DEFENSE_ICE_DECREMENT,
+    PlayerStats,
+} from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { BoardService } from './board/board.service';
@@ -245,12 +252,7 @@ export class GameService {
     }
 
     private isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
-        const directions: Vec2[] = [
-            { x: 0, y: 1 }, // Down
-            { x: 1, y: 0 }, // Right
-            { x: 0, y: -1 }, // Up
-            { x: -1, y: 0 }, // Left
-        ];
+        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
         for (const dir of directions) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
             if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
@@ -267,12 +269,7 @@ export class GameService {
     }
 
     private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
-        const directions: Vec2[] = [
-            { x: 0, y: 1 }, // Down
-            { x: 1, y: 0 }, // Right
-            { x: 0, y: -1 }, // Up
-            { x: -1, y: 0 }, // Left
-        ];
+        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
 
         const visited = new Map<string, PathInfo>();
         // La file initiale contient l'état de départ avec un chemin vide et un coût nul.

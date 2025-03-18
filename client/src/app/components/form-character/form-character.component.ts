@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
@@ -19,6 +19,7 @@ import {
     DEFAULT_WINS,
     PlayerStats,
 } from '@common/player';
+import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 type DiceBonus = 'attack' | 'defense';
@@ -30,7 +31,7 @@ type StatBonus = 'life' | 'speed';
     styleUrls: ['./form-character.component.scss'],
     imports: [CommonModule, FormsModule, RouterLink],
 })
-export class FormCharacterComponent implements OnInit {
+export class FormCharacterComponent implements OnInit, OnDestroy {
     @Output() closePopup: EventEmitter<void> = new EventEmitter<void>();
     @Input() isCreationPage: boolean = false;
     @Input() accessCode: string = '';
@@ -47,7 +48,7 @@ export class FormCharacterComponent implements OnInit {
     playerStats: PlayerStats = {
         id: ' ',
         name: '',
-        avatar: this.getCurrentPortraitImage(),
+        avatar: this.currentPortraitImage,
         life: DEFAULT_LIFE_VALUE,
         attack: DEFAULT_ATTACK_VALUE,
         defense: DEFAULT_DEFENSE_VALUE,
@@ -64,46 +65,51 @@ export class FormCharacterComponent implements OnInit {
     takenAvatars: string[] = [];
     isRoomLocked: boolean = false;
 
+    private subscriptions: Subscription[] = [];
     private readonly gameMapService = inject(GameMapService);
     private readonly playerService = inject(PlayerService);
     private readonly socketService = inject(SocketService);
-
-    constructor(private router: Router) {}
+    private readonly router = inject(Router);
 
     get isCurrentAvatarTaken(): boolean {
-        return this.takenAvatars.includes(this.getCurrentPortraitImage());
+        return this.takenAvatars.includes(this.currentPortraitImage);
+    }
+
+    get currentPortraitImage(): string {
+        return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
     }
 
     ngOnInit(): void {
         if (!this.isCreationPage) {
             this.takenAvatars = this.socketService.gameRoom?.players.map((player) => player.avatar);
         }
+        this.subscriptions.push(
+            this.socketService.onPlayerJoined().subscribe((data) => {
+                if (!this.isCreationPage) {
+                    this.takenAvatars = data.room.players.map((player) => player.avatar);
+                }
+            }),
 
-        this.socketService.onPlayerJoined().subscribe((data) => {
-            if (!this.isCreationPage) {
-                this.takenAvatars = data.room.players.map((player) => player.avatar);
-            }
-        });
+            this.socketService.onPlayerRemoved().subscribe((data) => {
+                if (!this.isCreationPage) {
+                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
+                }
+            }),
 
-        this.socketService.onPlayerRemoved().subscribe((data) => {
-            if (!this.isCreationPage) {
-                this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
-            }
-        });
+            this.socketService.onPlayerDisconnected().subscribe((data) => {
+                if (!this.isCreationPage) {
+                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
+                }
+            }),
 
-        this.socketService.onPlayerDisconnected().subscribe((data) => {
-            if (!this.isCreationPage) {
-                this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
-            }
-        });
-
-        this.socketService.onRoomLocked().subscribe(() => {
-            this.isRoomLocked = true;
-        });
+            this.socketService.onRoomLocked().subscribe(() => {
+                this.isRoomLocked = true;
+            }),
+        );
     }
 
-    getCurrentPortraitImage(): string {
-        return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
+    ngOnDestroy(): void {
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -112,7 +118,7 @@ export class FormCharacterComponent implements OnInit {
         } else if (direction === 'next') {
             this.currentPortraitIndex = (this.currentPortraitIndex + 1) % this.totalPortraits;
         }
-        this.playerStats.avatar = this.getCurrentPortraitImage();
+        this.playerStats.avatar = this.currentPortraitImage;
     }
 
     selectStat(stat: StatBonus) {
@@ -153,6 +159,7 @@ export class FormCharacterComponent implements OnInit {
     }
 
     onClose(): void {
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
         this.closePopup.emit();
     }
 

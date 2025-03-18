@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { Board, TILE_COST, Validation } from '@common/board';
+import { Board, DEFAULT_STORAGE_KEY, TILE_COST, Validation } from '@common/board';
 import { Item, Size, Tile, Visibility } from '@common/enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -12,7 +12,7 @@ export class MapService {
     nbrItemsToPlace$: Observable<number>;
     hasFlagOnBoard$: Observable<boolean>;
 
-    private readonly storageKey = 'firstBoardValue';
+    private readonly storageKey = DEFAULT_STORAGE_KEY;
 
     private firstBoardValue: Board;
     private boardToSave: BehaviorSubject<Board>;

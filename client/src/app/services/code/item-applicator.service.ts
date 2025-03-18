@@ -48,9 +48,11 @@ export class ItemApplicatorService {
         }
         this.oldItemPos = { x: -1, y: -1 };
     }
+
     setBackToContainer(item: Item = Item.DEFAULT) {
         this.isBackToContainer = item === this.selectedItem;
     }
+
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
         if (
             this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.WALL &&

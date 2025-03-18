@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { FightLogicService } from '@app/services/code/fight-logic.service';
 import { PlayerService } from '@app/services/code/player.service';
 import { SocketService } from '@app/services/code/socket.service';
@@ -11,30 +10,26 @@ import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-fight-interface',
-    standalone: true,
     imports: [CommonModule, MatButtonModule],
     templateUrl: './game-fight-interface.component.html',
     styleUrl: './game-fight-interface.component.scss',
 })
-export class GameFightInterfaceComponent implements OnDestroy {
-    readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
-    readonly fileType: string = DEFAULT_FILE_TYPE;
+export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     readonly perCent = 100;
-
     timer: string = '00 s';
     currentNameTurn: string = '';
     myPlayer: (PlayerStats & FightInfo) | null;
     opponentPlayer: (PlayerStats & FightInfo) | null;
     lifePercentMyPlayer: number;
     lifePercentOpponent: number;
-
+    flee: () => void;
+    attack: () => void;
+    private readonly fightLogicService = inject(FightLogicService);
+    private readonly playerService = inject(PlayerService);
+    private readonly socketService = inject(SocketService);
     private subscriptions: Subscription[] = [];
 
-    private fightLogicService = inject(FightLogicService);
-    private playerService = inject(PlayerService);
-    private socketService = inject(SocketService);
-
-    constructor() {
+    ngOnInit() {
         this.subscriptions.push(
             this.fightLogicService.fight.subscribe((fight) => {
                 const isMyPlayer = fight.player1.id === this.playerService.getPlayer().id;
@@ -49,6 +44,8 @@ export class GameFightInterfaceComponent implements OnDestroy {
                 this.timer = `${remainingTime.toString()} s`;
             }),
         );
+        this.flee = this.fightLogicService.flee.bind(this.fightLogicService);
+        this.attack = this.fightLogicService.attack.bind(this.fightLogicService);
     }
 
     ngOnDestroy(): void {
@@ -57,13 +54,5 @@ export class GameFightInterfaceComponent implements OnDestroy {
 
     isMyTurn(): boolean {
         return this.currentNameTurn === this.playerService.getPlayer().name;
-    }
-
-    flee(): void {
-        this.fightLogicService.flee();
-    }
-
-    attack(): void {
-        this.fightLogicService.attack();
     }
 }

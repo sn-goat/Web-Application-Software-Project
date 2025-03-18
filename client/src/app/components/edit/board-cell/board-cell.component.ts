@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import { Component, inject, Input, ViewEncapsulation } from '@angular/core';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS, DEFAULT_PATH_TILES } from '@app/constants/path';
 import { ToolSelectionService } from '@app/services/code/tool-selection.service';
 import { Cell } from '@common/board';
 import { Item } from '@common/enums';
@@ -22,18 +22,18 @@ export class BoardCellComponent {
 
     readonly srcTiles = DEFAULT_PATH_TILES;
     readonly srcItem = DEFAULT_PATH_ITEMS;
-    readonly fileType = '.png';
+    readonly fileType = DEFAULT_FILE_TYPE;
     showTooltip = false;
-
-    constructor(private toolSelection: ToolSelectionService) {}
+    private readonly toolSelectionService = inject(ToolSelectionService);
 
     get isSmallRow(): boolean {
         return this.cell.position.y < BoardCellComponent.smallRowThreshhold;
     }
 
     onDrag() {
-        this.toolSelection.updateSelectedItem(this.cell.item);
+        this.toolSelectionService.updateSelectedItem(this.cell.item);
     }
+
     onDrop(event: DragEvent) {
         event.preventDefault();
     }

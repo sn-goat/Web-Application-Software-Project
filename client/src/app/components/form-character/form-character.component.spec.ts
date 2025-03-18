@@ -194,7 +194,7 @@ describe('FormCharacterComponent', () => {
         // Test wrapping around at the end
         // Set to last portrait
         component.currentPortraitIndex = component.totalPortraits - 1;
-        component.playerStats.avatar = component.getCurrentPortraitImage();
+        component.playerStats.avatar = component.currentPortraitImage;
 
         // Move forward should wrap to beginning
         component.navigatePortrait('next');
@@ -202,7 +202,7 @@ describe('FormCharacterComponent', () => {
 
         // Test wrapping around at the beginning
         component.currentPortraitIndex = 0;
-        component.playerStats.avatar = component.getCurrentPortraitImage();
+        component.playerStats.avatar = component.currentPortraitImage;
 
         // Move backward should wrap to end
         component.navigatePortrait('prev');
