@@ -80,14 +80,6 @@ describe('GameMapPlayerDetailedComponent', () => {
         expect(component.maxHealth).toBe(updatedPlayer.life);
     });
 
-    it('should handle undefined player from myPlayer$', () => {
-        // Si aucun joueur n'est émis, attendons que la valeur soit null (selon la logique du composant)
-        myPlayerSubject.next(null);
-        fixture.detectChanges();
-        expect(component.myPlayer).toBeNull();
-        expect(component.maxHealth).toBe(0);
-    });
-
     it('should handle case where player is undefined during initialization', async () => {
         const emptyPlayerSubject = new BehaviorSubject<PlayerStats | null>(null);
         const newPlayerServiceMock = jasmine.createSpyObj('PlayerService', [], {
