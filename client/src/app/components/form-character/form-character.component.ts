@@ -3,9 +3,9 @@ import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } fro
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
 import {
     DEFAULT_ACTIONS,

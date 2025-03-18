@@ -1,6 +1,6 @@
 import { THREE_SECONDS_IN_MS, TimerEvents, InternalEvents } from '@app/gateways/game/game.gateway.constants';
-import { FightService } from '@app/services/fight.service';
-import { GameService } from '@app/services/game.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
@@ -33,7 +33,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         } else {
             this.server.to(payload.roomId).emit(TurnEvents.UpdateTimer, { remainingTime: payload.remainingTime });
         }
-        // this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
     }
 
     @OnEvent(TimerEvents.End)

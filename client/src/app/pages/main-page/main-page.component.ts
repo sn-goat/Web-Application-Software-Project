@@ -1,8 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TEAM_MEMBERS } from '@app/constants/team-members';
-import { GameService } from '@app/services/code/game.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { GameService } from '@app/services/game/game.service';
+import { SocketService } from '@app/services/socket/socket.service';
 
 @Component({
     selector: 'app-main-page',

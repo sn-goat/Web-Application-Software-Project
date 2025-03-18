@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
-import { GameService } from '@app/services/code/game.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { GameService } from '@app/services/game/game.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { PlayerStats } from '@common/player';
 import { Subscription } from 'rxjs';
 

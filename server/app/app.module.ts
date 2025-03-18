@@ -8,10 +8,10 @@ import { BoardController } from './controllers/board/board.controller';
 import { GameGateway } from './gateways/game/game.gateway';
 import { RoomGateway } from './gateways/room/room.gateway';
 import { BoardService } from './services/board/board.service';
-import { GameService } from './services/game.service';
-import { RoomService } from './services/room.service';
+import { FightService } from './services/fight/fight.service';
+import { GameService } from './services/game/game.service';
+import { RoomService } from './services/room/room.service';
 import { TimerService } from './services/timer/timer.service';
-import { FightService } from './services/fight.service';
 
 @Module({
     imports: [

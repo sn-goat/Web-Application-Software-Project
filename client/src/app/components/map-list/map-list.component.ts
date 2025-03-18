@@ -9,9 +9,9 @@ import { FormDialogComponent } from '@app/components/form-dialog/form-dialog.com
 import { MapCardComponent } from '@app/components/map-card/map-card.component';
 import { Alert } from '@app/constants/enums';
 import { LOADING_INTERVAL } from '@app/constants/magic-numbers';
-import { BoardService } from '@app/services/code/board.service';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { MapService } from '@app/services/code/map.service';
+import { BoardService } from '@app/services/board/board.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { MapService } from '@app/services/map/map.service';
 import { Board } from '@common/board';
 import { Size, Visibility } from '@common/enums';
 import { firstValueFrom } from 'rxjs';

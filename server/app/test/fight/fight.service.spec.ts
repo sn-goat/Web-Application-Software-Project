@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { FightService } from '@app/services/fight.service';
-import { GameService } from '@app/services/game.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';

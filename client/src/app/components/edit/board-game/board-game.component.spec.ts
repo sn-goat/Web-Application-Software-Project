@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EditEventHandlerService } from '@app/services/code/edit-event-handler.service';
-import { MapService } from '@app/services/code/map.service';
+import { EditEventHandlerService } from '@app/services/edit-event-handler/edit-event-handler.service';
+import { MapService } from '@app/services/map/map.service';
 import { Board } from '@common/board';
 import { BehaviorSubject } from 'rxjs';
 import { BoardGameComponent } from './board-game.component';
