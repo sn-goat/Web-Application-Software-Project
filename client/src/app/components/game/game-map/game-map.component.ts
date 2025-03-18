@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
-import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
-import { FightLogicService } from '@app/services/code/fight-logic.service';
-import { GameService } from '@app/services/code/game.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { Cell } from '@common/board';
+import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
+import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
+import { GameService } from '@app/services/game/game.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { Cell, KEYPRESS_D } from '@common/board';
 import { Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { Subscription } from 'rxjs';
@@ -28,17 +28,16 @@ export class GameMapComponent implements OnInit, OnDestroy {
     pathCells: Set<string> = new Set();
     actionCells: Set<string> = new Set();
     highlightedPathCells: Set<string> = new Set();
-
-    private gameService: GameService = inject(GameService);
-    private fightLogicService = inject(FightLogicService);
-    private playerService = inject(PlayerService);
-
+    getTooltipContent: (cell: Cell) => string;
+    private readonly gameService: GameService = inject(GameService);
+    private readonly fightLogicService = inject(FightLogicService);
+    private readonly playerService = inject(PlayerService);
+    private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
     private subscriptions: Subscription[] = [];
-    constructor(private readonly cdr: ChangeDetectorRef) {}
 
     @HostListener('window:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
-        if (event.key.toLowerCase() === 'd') {
+        if (event.key.toLowerCase() === KEYPRESS_D) {
             event.preventDefault();
             this.gameService.toggleDebugMode();
         }
@@ -78,6 +77,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.isDebugMode = isDebugMode;
             }),
         );
+        this.getTooltipContent = this.gameService.getCellDescription.bind(this.gameService);
     }
 
     onLeftClicked(cell: Cell) {
@@ -115,10 +115,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.rightSelectedCell = cell;
             }
         }
-    }
-
-    getTooltipContent(cell: Cell): string {
-        return this.gameService.getCellDescription(cell);
     }
 
     getCellTooltip(cell: Cell): string | null {

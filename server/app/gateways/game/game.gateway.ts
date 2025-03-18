@@ -1,10 +1,10 @@
-import { THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
-import { FightService } from '@app/services/fight.service';
-import { GameService } from '@app/services/game.service';
+import { InternalEvents, THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
+import { FightService } from '@app/services/fight/fight.service';
+import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
-import { Fight, PathInfo } from '@common/game';
+import { Fight, Game, MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -33,7 +33,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         } else {
             this.server.to(payload.roomId).emit(TurnEvents.UpdateTimer, { remainingTime: payload.remainingTime });
         }
-        // this.logger.log(`Timer Update for room ${payload.roomId}: ${payload.remainingTime} seconds left.`);
     }
 
     @OnEvent(TimerEvents.End)
@@ -65,7 +64,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(TurnEvents.UpdateTurn)
     handleUpdateTurn(turn: { player: PlayerStats; path: Record<string, PathInfo> }) {
-        this.logger.log('Updating turn for player: ' + turn.player.name);
+        this.logger.log('Updating turn for player: ' + turn.player.name + turn.player.id);
         this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
     }
 
@@ -105,14 +104,29 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Ending fight');
         if (payload.winner && payload.loser) {
             this.logger.log(`The winner is: ${payload.winner.name} and the loser is: ${payload.loser.name}`);
-            this.server.to(payload.winner.id).emit(FightEvents.Winner);
-            this.server.to(payload.loser.id).emit(FightEvents.Loser);
-            this.gameService.movePlayer(payload.accessCode, payload.loser.spawnPosition, payload.loser);
+            this.gameService.incrementWins(payload.accessCode, payload.winner.id);
+            if (payload.winner && payload.winner.wins >= MAX_FIGHT_WINS) {
+                this.server.to(payload.accessCode).emit(GameEvents.End, payload.winner);
+            }
+            this.server.to(payload.accessCode).emit(FightEvents.Winner, this.gameService.getPlayer(payload.accessCode, payload.winner.id));
+            this.server.to(payload.accessCode).emit(FightEvents.Loser, this.gameService.getPlayer(payload.accessCode, payload.loser.id));
+            this.gameService.movePlayerToSpawn(payload.accessCode, this.gameService.getPlayer(payload.accessCode, payload.loser.id));
         }
         this.gameService.decrementAction(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
         this.server.to(fight.player1.id).emit(FightEvents.End);
         this.server.to(fight.player2.id).emit(FightEvents.End);
-        this.timerService.resumeTimer(payload.accessCode);
+        if (payload.loser && this.gameService.getPlayerTurn(payload.accessCode).id === payload.loser.id) {
+            this.endTurn(payload.accessCode);
+        } else {
+            this.timerService.resumeTimer(payload.accessCode);
+            this.gameService.updatePlayerPathTurn(payload.accessCode, this.gameService.getPlayerTurn(payload.accessCode));
+        }
+    }
+
+    @OnEvent(InternalEvents.PlayerRemoved)
+    handlePlayerRemoved(payload: { accessCode: string; game: Game }) {
+        this.logger.log('Player removed from game');
+        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, payload.game);
     }
 
     @SubscribeMessage(GameEvents.Create)
@@ -121,8 +135,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(GameEvents.Configure)
-    async handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
-        const game = await this.gameService.configureGame(payload.accessCode, payload.players);
+    handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
+        const game = this.gameService.configureGame(payload.accessCode, payload.players);
         this.logger.log('Game configured');
         this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, game);
         this.logger.log('Game started');
@@ -133,6 +147,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log('Toggling debug mode');
         this.gameService.toggleDebugState(accessCode);
         this.server.to(accessCode).emit(GameEvents.BroadcastDebugState);
+    }
+
+    @SubscribeMessage(GameEvents.EndDebug)
+    handleEndDebug(client: Socket, accessCode: string) {
+        this.logger.log('End debug mode');
+        this.gameService.endDebugMode(accessCode);
+        this.server.to(accessCode).emit(GameEvents.BroadcastEndDebugState);
     }
 
     @SubscribeMessage(GameEvents.Ready)
@@ -153,12 +174,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.gameService.processPath(payload.accessCode, payload.path, payload.player);
     }
 
-    @SubscribeMessage(GameEvents.Quit)
-    async handleGameQuit(client: Socket, payload: { accessCode: string; playerId: string }) {
-        const game = await this.gameService.quitGame(payload.accessCode, payload.playerId);
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, { game: game.game, lastPlayer: game.lastPlayer });
-    }
-
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; player: PlayerStats }) {
         this.gameService.movePlayer(payload.accessCode, payload.direction, payload.player);
@@ -171,10 +186,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(FightEvents.Init)
-    handleFightInit(client: Socket, payload: { accessCode: string; player1: PlayerStats; player2: PlayerStats }) {
-        this.logger.log('Initiating fight between ' + payload.player1.name + ' and ' + payload.player2.name);
+    handleFightInit(client: Socket, payload: { accessCode: string; player1: string; player2: string }) {
+        const player1 = this.gameService.getPlayer(payload.accessCode, payload.player1);
+        const player2 = this.gameService.getPlayer(payload.accessCode, payload.player2);
+        this.logger.log('Initiating fight between ' + player1 + ' and ' + player2);
         this.logger.log('Access code: ' + payload.accessCode);
-        this.fightService.initFight(payload.accessCode, payload.player1, payload.player2);
+        this.fightService.initFight(payload.accessCode, player1, player2);
     }
 
     @SubscribeMessage(FightEvents.Flee)
@@ -185,7 +202,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(FightEvents.Attack)
     handlePlayerAttack(client: Socket, accessCode: string) {
-        this.fightService.playerAttack(accessCode);
+        this.fightService.playerAttack(accessCode, this.gameService.isGameDebugMode(accessCode));
     }
 
     afterInit(server: Server) {

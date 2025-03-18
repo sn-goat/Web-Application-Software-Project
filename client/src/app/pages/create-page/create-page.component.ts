@@ -14,11 +14,7 @@ import { MapListComponent } from '@app/components/map-list/map-list.component';
 export class CreatePageComponent {
     isPopupVisible = false;
 
-    openPopup() {
-        this.isPopupVisible = true;
-    }
-
-    closePopup() {
-        this.isPopupVisible = false;
+    togglePopup() {
+        this.isPopupVisible = !this.isPopupVisible;
     }
 }

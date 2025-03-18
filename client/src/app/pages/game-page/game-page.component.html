@@ -1,32 +1,48 @@
-<div class="outer-container">
-  <div class="header-container">
-    <app-header-bar></app-header-bar>
-  </div>
-  <div class="game-grid">
+<div class="game-grid">
     <div class="left-rectangle">
-      Zone de messages
+        <app-header-bar></app-header-bar>
+        <app-game-map-player></app-game-map-player>
     </div>
-    
-    <div class="top-rectangle">
-      <app-game-map-player></app-game-map-player>
-    </div>
-    
+
     <div class="map-container">
-      <app-game-map></app-game-map>
+        <app-game-map></app-game-map>
     </div>
-    
+
     <div class="right-rectangle">
-      <app-game-map-player-detailed></app-game-map-player-detailed>
-      <app-game-map-info></app-game-map-info>
+        <app-game-map-player-detailed></app-game-map-player-detailed>
     </div>
 
     <div class="bottom-rectangle">
-      <app-game-map-player-tools></app-game-map-player-tools>
+        <div class="chat-info-container">
+            @if (debugMode) {
+            <div class="debug-indicator">Debug Actif</div>
+            }
+
+            <button (click)="toggleChat()" class="toggle-button">Chat</button>
+            <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
+        </div>
+        <app-game-map-player-tools></app-game-map-player-tools>
     </div>
-  </div>
-  @if (showFightInterface) {
+
+    @if(showFightInterface){
     <div class="fight-overlay">
-      <app-game-fight-interface></app-game-fight-interface>
+        <app-game-fight-interface></app-game-fight-interface>
     </div>
-  }
+    } @if(showChat) {
+    <div class="popup">
+        <div class="popup-header">
+            <span>Zone de messages</span>
+            <button (click)="toggleChat()" class="close-popup">X</button>
+        </div>
+        <div class="chat-content"></div>
+    </div>
+    } @if (showInfo) {
+    <div class="popup">
+        <div class="popup-header">
+            <span>Infos Partie</span>
+            <button (click)="toggleInfo()" class="close-popup">X</button>
+        </div>
+        <app-game-map-info></app-game-map-info>
+    </div>
+    }
 </div>

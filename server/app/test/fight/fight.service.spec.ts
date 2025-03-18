@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { FightService } from '@app/services/fight.service';
+import { FightService } from '@app/services/fight/fight.service';
+import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Fight, FightInfo } from '@common/game';
 import { FightEvents } from '@common/game.gateway.events';
@@ -12,6 +13,7 @@ describe('FightService', () => {
     let fightService: FightService;
     let timerService: Partial<TimerService>;
     let eventEmitter: Partial<EventEmitter2>;
+    let gameService: Partial<GameService>;
 
     beforeEach(async () => {
         timerService = {
@@ -25,8 +27,17 @@ describe('FightService', () => {
             emit: jest.fn(),
         };
 
+        gameService = {
+            isGameDebugMode: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
-            providers: [FightService, { provide: TimerService, useValue: timerService }, { provide: EventEmitter2, useValue: eventEmitter }],
+            providers: [
+                FightService,
+                { provide: GameService, useValue: gameService },
+                { provide: TimerService, useValue: timerService },
+                { provide: EventEmitter2, useValue: eventEmitter },
+            ],
         }).compile();
 
         fightService = module.get<FightService>(FightService);
@@ -145,7 +156,7 @@ describe('FightService', () => {
     describe('playerAttack', () => {
         it('should log an error if the fight is not found', () => {
             const loggerErrorSpy = jest.spyOn(fightService['logger'], 'error').mockImplementation();
-            fightService.playerAttack('missingFight');
+            fightService.playerAttack('missingFight', false);
             expect(loggerErrorSpy).toHaveBeenCalledWith('Aucun combat actif pour accessCode missingFight');
             loggerErrorSpy.mockRestore();
         });
@@ -159,7 +170,7 @@ describe('FightService', () => {
             // Force dice roll
             jest.spyOn(global.Math, 'random').mockReturnValue(0); // dice = 1
             const nextTurnSpy = jest.spyOn(fightService, 'nextTurn');
-            fightService.playerAttack('roomAttack');
+            fightService.playerAttack('roomAttack', false);
 
             // Calculated damage = (2 + 1) - (1 + 1) => 1
             expect(defender.currentLife).toBe(9);
@@ -175,7 +186,7 @@ describe('FightService', () => {
 
             jest.spyOn(global.Math, 'random').mockReturnValue(0); // force roll = 1
             const endFightSpy = jest.spyOn(fightService, 'endFight');
-            fightService.playerAttack('roomKO');
+            fightService.playerAttack('roomKO', false);
 
             // Damage = (5+1) - (1+1) = 4 => 2 - 4 = 0 => KO
             expect(endFightSpy).toHaveBeenCalledWith('roomKO', attacker, defender);
@@ -191,7 +202,7 @@ describe('FightService', () => {
 
             jest.spyOn(global.Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(0);
 
-            fightService.playerAttack('roomNegativeDamage');
+            fightService.playerAttack('roomNegativeDamage', false);
             expect(defender.life).toBe(4);
 
             jest.spyOn(global.Math, 'random').mockRestore();

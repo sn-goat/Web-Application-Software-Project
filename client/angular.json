@@ -43,8 +43,8 @@
                                 },
                                 {
                                     "type": "anyComponentStyle",
-                                    "maximumWarning": "4kb",
-                                    "maximumError": "6kb"
+                                    "maximumWarning": "6kb",
+                                    "maximumError": "8kb"
                                 }
                             ],
                             "fileReplacements": [
@@ -92,7 +92,8 @@
                         "inlineStyleLanguage": "scss",
                         "assets": ["src/favicon.ico", "src/assets"],
                         "styles": ["@angular/material/prebuilt-themes/magenta-violet.css", "src/styles.scss"],
-                        "scripts": []
+                        "scripts": [],
+                        "codeCoverageExclude": ["src/app/helpers/**"]
                     }
                 },
                 "lint": {

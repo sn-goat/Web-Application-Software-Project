@@ -31,6 +31,8 @@ export class MockSocketService {
     private broadcastMoveSubject = new Subject<unknown>();
     private broadcastItemSubject = new Subject<unknown>();
     private broadcastDoorSubject = new Subject<unknown>();
+    private adminDisconnected = new Subject<unknown>();
+    private endOfGame = new Subject<unknown>();
 
     private switchTurnSubject = new Subject<unknown>();
     private turnUpdateSubject = new Subject<unknown>();
@@ -39,7 +41,7 @@ export class MockSocketService {
     private quitGameSubject = new Subject<unknown>();
 
     getGameSize() {
-        return 15; // Retourne une taille numérique appropriée
+        return 15;
     }
 
     getCurrentPlayerId(): string {
@@ -70,7 +72,6 @@ export class MockSocketService {
         return this.gameSubject.asObservable();
     }
 
-    // Méthodes manquantes des observables
     onRoomCreated() {
         return this.roomCreatedSubject.asObservable();
     }
@@ -131,6 +132,18 @@ export class MockSocketService {
         return this.quitGameSubject.asObservable();
     }
 
+    onAdminDisconnected() {
+        return this.adminDisconnected.asObservable();
+    }
+
+    onEndGame() {
+        return this.endOfGame.asObservable();
+    }
+
+    onBroadcastDebugEndState() {
+        return this.broadcastDebugStateSubject.asObservable();
+    }
+
     createRoom(_size: number): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
@@ -145,6 +158,7 @@ export class MockSocketService {
     playerFlee(_accessCode: string, _playerId: string): void {}
     playerAttack(_accessCode: string, _playerId: string): void {}
     quitGame(_accessCode: string): void {}
+    resetSocketState(): void {}
 
     endTurn(_accessCode: string): void {
         // On peut laisser vide ou ajouter une logique de mock ici
@@ -178,7 +192,6 @@ export class MockSocketService {
         this.gameSubject.next(game);
     }
 
-    // Méthodes pour déclencher les événements dans les tests
     triggerRoomCreated(data: unknown) {
         this.roomCreatedSubject.next(data);
     }
@@ -233,5 +246,9 @@ export class MockSocketService {
 
     triggerAssignSpawn(data: unknown) {
         this.assignSpawnSubject.next(data);
+    }
+
+    triggerOnAdminDisconect(data: unknown) {
+        this.adminDisconnected.next(data);
     }
 }

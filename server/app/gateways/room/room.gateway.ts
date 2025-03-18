@@ -1,4 +1,4 @@
-import { RoomService } from '@app/services/room.service';
+import { RoomService } from '@app/services/room/room.service';
 import { Room } from '@common/game';
 import { PlayerStats } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
@@ -87,6 +87,12 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.DisconnectPlayer)
     handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
+        // Vérifier si le joueur déconnecté est l'admin et émettre l'événement avant toute modification de la salle
+        const currentRoom = this.roomService.getRoom(payload.accessCode);
+        if (currentRoom && payload.playerId === currentRoom.organizerId) {
+            this.server.to(payload.accessCode).emit(RoomEvents.AdminDisconnected);
+        }
+
         const room = this.roomService.disconnectPlayer(payload.accessCode, payload.playerId);
         if (!room) {
             client.emit(RoomEvents.DisconnectError, { message: 'Impossible de déconnecter le joueur.' });
@@ -108,12 +114,12 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.QuitGame)
     handleQuitGame(client: Socket, payload: { accessCode: string; playerId: string }) {
-        const room = this.roomService.quitGame(payload.accessCode, payload.playerId);
-        if (!room) {
-            client.emit(RoomEvents.QuitGame, { message: 'Impossible de quitter la partie.' });
-            return;
+        const lastPlayerId = this.roomService.quitGame(payload.accessCode, payload.playerId);
+        this.logger.log(`LastPlayer ${lastPlayerId} quit game in room`);
+        if (lastPlayerId) {
+            this.logger.log(`LastPlayer ${lastPlayerId} send quit`);
+            this.server.to(lastPlayerId).emit(RoomEvents.NotEnoughPlayer);
         }
-        this.server.to(payload.accessCode).emit(RoomEvents.QuitGame, room.players);
     }
 
     afterInit(server: Server) {

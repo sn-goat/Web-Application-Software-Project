@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Tile } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -20,11 +20,10 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     styleClass: string = 'unselected';
     description: string = '';
     private destroy$ = new Subject<void>();
-
-    constructor(private toolSelection: ToolSelectionService) {}
+    private readonly toolSelectionService: ToolSelectionService = inject(ToolSelectionService);
 
     ngOnInit() {
-        this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
+        this.toolSelectionService.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
             this.styleClass = tile === this.type ? 'selected' : 'unselected';
         });
         this.getDescription(this.type);
@@ -36,7 +35,7 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     }
 
     onClick() {
-        this.toolSelection.updateSelectedTile(this.type);
+        this.toolSelectionService.updateSelectedTile(this.type);
     }
 
     getDescription(type: Tile): string {

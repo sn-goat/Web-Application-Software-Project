@@ -3,6 +3,7 @@ import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
 import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
 import { Cell, Vec2 } from '@common/board';
 import { Tile, Visibility } from '@common/enums';
+import { DEFAULT_MOVEMENT_DIRECTIONS } from '@common/player';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -185,12 +186,7 @@ export class BoardService {
     }
 
     private dfs(board: Cell[][], x: number, y: number, visited: Set<string>) {
-        const directions: Vec2[] = [
-            { x: 0, y: 1 },
-            { x: 1, y: 0 },
-            { x: 0, y: -1 },
-            { x: -1, y: 0 },
-        ];
+        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
 
         const rows = board.length;
         const cols = board[0]?.length || 0;

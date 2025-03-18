@@ -7,8 +7,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MockRouter } from '@app/helpers/mockRouter';
 import { MockSocketService } from '@app/helpers/mockSocketService';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
 import { ASSET_EXT, ASSET_PATH, Avatar } from '@common/game';
@@ -194,7 +194,7 @@ describe('FormCharacterComponent', () => {
         // Test wrapping around at the end
         // Set to last portrait
         component.currentPortraitIndex = component.totalPortraits - 1;
-        component.playerStats.avatar = component.getCurrentPortraitImage();
+        component.playerStats.avatar = component.currentPortraitImage;
 
         // Move forward should wrap to beginning
         component.navigatePortrait('next');
@@ -202,7 +202,7 @@ describe('FormCharacterComponent', () => {
 
         // Test wrapping around at the beginning
         component.currentPortraitIndex = 0;
-        component.playerStats.avatar = component.getCurrentPortraitImage();
+        component.playerStats.avatar = component.currentPortraitImage;
 
         // Move backward should wrap to end
         component.navigatePortrait('prev');

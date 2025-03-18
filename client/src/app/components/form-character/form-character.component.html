@@ -4,9 +4,9 @@
             <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
             <div class="portrait-display">
                 @if (isCurrentAvatarTaken) {
-                <img [src]="getCurrentPortraitImage()" alt="Portrait" class="portrait-image taken" />
+                <img [src]="currentPortraitImage" alt="Portrait" class="portrait-image taken" />
                 } @else {
-                <img [src]="getCurrentPortraitImage()" alt="Portrait" class="portrait-image" />
+                <img [src]="currentPortraitImage" alt="Portrait" class="portrait-image" />
                 }
             </div>
             <button class="arrow-button" (click)="navigatePortrait('next')">→</button>

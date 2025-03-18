@@ -1,26 +1,27 @@
-html {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
 $primary-bg: #1a1625;
 $primary-text: #7ee0d0;
 $glow-teal: rgba(126, 224, 208, 0.2);
 $glow-gold: rgba(255, 215, 0, 0.2);
 $rectangle-border: 1px solid $primary-text;
 
-.outer-container {
+html,
+body {
+    margin: 0;
+    padding: 0;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+}
+
+.outer-container {
+    width: 100vw;
+    height: 100vh;
     background-color: $primary-bg;
-    box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
-    
+    box-sizing: border-box;
 }
 
 .header-container {
@@ -34,85 +35,182 @@ $rectangle-border: 1px solid $primary-text;
 
 .game-grid {
     display: grid;
-    grid-template-columns: minmax(150px, 28%) 1fr minmax(100px, 20%);
-    grid-template-rows: minmax(100px, 20%) 1fr minmax(100px, 20%);
-    grid-template-areas:
-        "left top right"
-        "left map right"
-        "left bottom bottom";
-    gap: 2px;
-    width: 100%;
-    height: 100%;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 1fr 1fr 1fr 1fr 0.7fr; /* Increased from 0.5fr to 0.7fr */
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: $primary-bg !important;
 }
 
 .left-rectangle,
+.bottom-rectangle,
 .right-rectangle,
-.top-rectangle,
-.bottom-rectangle {
-    box-sizing: border-box;
-    border: 2px solid $glow-teal;
-    border-radius: 10px;
-    overflow: hidden;
-    background-color: $primary-bg;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .map-container {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-area: map;
-    background-color: $primary-bg;
+    border-radius: 12px;
+    border: $rectangle-border;
 }
 
 .left-rectangle {
-    color: $primary-text;
-    grid-area: left;
-    overflow-y: auto;
-}
-
-.top-rectangle {
-    grid-area: top;
-    background-color: $primary-bg;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.right-rectangle {
-    grid-area: right;
-    overflow-y: auto;
+    grid-area: 1 / 1 / 6 / 2;
+    text-align: center;
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    height: 100%;
+    justify-content: flex-start; /* Changed from center to flex-start */
+    background-color: $primary-bg;
+    color: $primary-text;
+    border: $rectangle-border;
+    border-radius: 10px;
+    padding: 5px 0; /* Add padding top/bottom, remove left/right */
+    overflow: hidden; /* Hide overflow */
 }
 
 .bottom-rectangle {
-    grid-area: bottom;
-    background-color: $primary-bg;
-    padding: 0;
+    grid-area: 5 / 2 / 6 / 6;
     display: flex;
-    align-items: stretch;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
+    // padding: 5px; /* Reduced padding from 10px to 5px */
+    padding-left: 5px;
+    padding-right: 5px;
+    background-color: $primary-bg;
+    border: $rectangle-border;
+    border-radius: 10px;
+    gap: 5px; /* Reduced gap from 10px to 5px */
+    height: 100%; /* Ensure it takes full height of the row */
+    min-height: 0; /* Allow content to shrink */
 }
-  
+
+.chat-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+
+.toggle-button {
+    width: 100%;
+    height: 35px; /* Restored original height */
+    background: $primary-text;
+    border: none;
+    border-radius: 5px;
+    color: #000;
+    font-size: 0.75rem; /* Restored original font size */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px $glow-teal;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px; /* Add minimal padding */
+}
+
+/* Hover Effect */
+.toggle-button:hover {
+    background: color-mix(in srgb, $primary-text, white 20%);
+    box-shadow: 0 0 15px $glow-teal;
+    transform: translateY(-2px);
+}
+
+/* Active (Click) Effect */
+.toggle-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+    background: color-mix(in srgb, $primary-text, black 15%);
+}
+
+.right-rectangle {
+    grid-area: 1 / 6 / 6 / 7;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    background-color: $primary-bg;
+    color: $primary-text;
+    border: $rectangle-border;
+    border-radius: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.map-container {
+    grid-area: 1 / 2 / 5 / 6; /* Keep same grid area but the 5th row is now smaller */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background-color: $primary-bg;
+    border: $rectangle-border;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.popup {
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    width: 300px;
+    min-height: 400px;
+    background: rgba(0, 0, 0, 0.9);
+    border: $rectangle-border;
+    color: $primary-text;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px $primary-text;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 5px;
+    border-bottom: 1px solid $primary-text;
+}
+
+.close-popup {
+    background: transparent;
+    border: none;
+    color: $primary-text;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* 🔹 Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
 app-game-map-player-detailed,
 app-game-map-info {
     width: 100%;
     box-sizing: border-box;
 }
-  
+
 app-game-map-player-detailed {
-    flex: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     min-height: 0;
+    box-sizing: border-box;
 }
-  
+
 app-game-map-info {
     flex: 1;
     min-height: 0;
@@ -121,14 +219,12 @@ app-game-map-info {
 app-game-map-player {
     width: 100%;
     height: 100%;
-    display: block;
-    flex: 1;
+    display: block; /* Changed from flex: 1 */
+    overflow: hidden; /* Explicitly hide overflow */
 }
 
 .fight-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
     display: flex;
@@ -140,20 +236,60 @@ app-game-map-player {
     padding: 20px;
     box-sizing: border-box;
     animation: fadeIn 0.3s ease-in-out;
-    
+
     app-game-fight-interface {
-      width: 100%;
-      max-width: 800px;
-      animation: slideIn 0.4s ease-out;
+        width: 100%;
+        max-width: 800px;
+        animation: slideIn 0.4s ease-out;
     }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes slideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
+}
+
+.debug-indicator {
+    width: 100%;
+    height: 35px;
+    background: rgba(255, 0, 0, 0.8);
+    border-radius: 5px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    animation: flash 1s infinite alternate;
+}
+
+@keyframes flash {
+    0% {
+        background: rgba(255, 0, 0, 0.8);
+        box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    }
+    100% {
+        background: rgba(255, 0, 0, 0.4);
+        box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+    }
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

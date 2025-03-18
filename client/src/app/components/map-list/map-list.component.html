@@ -34,14 +34,22 @@
         } @if (!isCreationPage) {
         <div class="list-item new-map-card" (click)="createNewMap()">
             <div class="add-icon">+</div>
-            <p class="add-text">Créer une carte</p>
+            <p class="add-text">Créer une partie</p>
+        </div>
+        } @else if (isCreationPage && isAllMapsHidden()) {
+        <div class="empty-state">
+            <p>Aucunes partie disponible, changez la visibilité de vos parties</p>
         </div>
         }
     </div>
-    <!-- Empty State -->
-    @if (getFilteredAndSortedItems().length === 0) {
+    } @else {
     <div class="empty-state">
         <p>Aucunes parties trouvées</p>
+    </div>
+    @if (!isCreationPage) {
+    <div class="list-item new-map-card" (click)="createNewMap()">
+        <div class="add-icon">+</div>
+        <p class="add-text">Créer une partie</p>
     </div>
     } }
 </div>

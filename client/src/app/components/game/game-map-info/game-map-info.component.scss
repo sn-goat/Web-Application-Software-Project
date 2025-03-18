@@ -5,15 +5,25 @@ $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
-$map-color: #7ee0d0;;
+$map-color: #7ee0d0;
 $player-color: #ff9800;
 $game-color: #7ee0d0;
+$rectangle-border: 1px solid $primary-text;
 
 .game-map-info {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    width: 400px;
+    height: 500px;
+    background: rgba(0, 0, 0, 0.9);
+    border: $rectangle-border;
+    color: $primary-text;
+    // padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px $primary-text;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 :host {
@@ -21,126 +31,139 @@ $game-color: #7ee0d0;
     height: 100%;
     width: 100%;
 }
-
+.close-popup {
+    background: transparent;
+    border: none;
+    color: $primary-text;
+    cursor: pointer;
+    font-size: 18px;
+}
 .container {
-  background-color: $secondary-bg;
-  border-radius: $border-radius;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), 0 0 10px $glow-teal;
-  color: $primary-text;
-  font-family: 'Rajdhani', sans-serif;
-  
-  .header {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid $glow-teal;
-    padding: 12px 15px;
-    
-    h2 {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 600;
-      text-align: center;
-      color: $primary-text;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-shadow: 0 0 10px $glow-teal;
-    }
-  }
-  
-  .content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 10px 15px;
+    background-color: $secondary-bg;
+    border-radius: $border-radius;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: rgba(0, 0, 0, 0.3);
-    gap: 15px;
-    
-    &::-webkit-scrollbar {
-      width: 5px;
+    overflow: hidden;
+    box-shadow:
+        0 0 15px rgba(0, 0, 0, 0.5),
+        0 0 10px $glow-teal;
+    color: $primary-text;
+    font-family: 'Rajdhani', sans-serif;
+
+    .header {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid $glow-teal;
+        padding: 12px 15px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+
+        h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            color: $primary-text;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px $glow-teal;
+        }
     }
-    
-    &::-webkit-scrollbar-track {
-      background: $secondary-bg;
+
+    .content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 10px 15px;
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(0, 0, 0, 0.3);
+        gap: 15px;
+
+        &::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: $secondary-bg;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: $glow-teal;
+            border-radius: 20px;
+        }
+
+        .info {
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition:
+                transform 0.2s,
+                box-shadow 0.2s;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            &:nth-child(1) {
+                border-left: 3px solid $map-color;
+
+                h3 {
+                    color: color-mix(in srgb, $map-color, white 10%);
+                }
+
+                p {
+                    color: $map-color;
+                    text-shadow: 0 0 5px rgba($map-color, 0.5);
+                }
+            }
+
+            &:nth-child(2) {
+                border-left: 3px solid $player-color;
+
+                h3 {
+                    color: color-mix(in srgb, $player-color, white 10%);
+                }
+
+                p {
+                    color: $player-color;
+                    text-shadow: 0 0 5px rgba($player-color, 0.5);
+                }
+            }
+
+            &:nth-child(3) {
+                border-left: 3px solid $game-color;
+
+                h3 {
+                    color: color-mix(in srgb, $game-color, white 10%);
+                }
+
+                p {
+                    color: $game-color;
+                    text-shadow: 0 0 5px rgba($game-color, 0.5);
+                }
+            }
+
+            h3 {
+                margin: 0 0 8px 0;
+                font-size: 1.1rem;
+                color: $secondary-text;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid rgba($primary-text, 0.3);
+                padding-bottom: 5px;
+            }
+
+            p {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-shadow: 0 0 5px $glow-teal;
+            }
+        }
     }
-    
-    &::-webkit-scrollbar-thumb {
-      background-color: $glow-teal;
-      border-radius: 20px;
-    }
-    
-    .info {
-      padding: 10px;
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      }
-      
-      &:nth-child(1) {
-        border-left: 3px solid $map-color;
-        
-        h3 {
-          color: color-mix(in srgb, $map-color, white 10%);
-        }
-        
-        p {
-          color: $map-color;
-          text-shadow: 0 0 5px rgba($map-color, 0.5);
-        }
-      }
-      
-      &:nth-child(2) {
-        border-left: 3px solid $player-color;
-        
-        h3 {
-          color: color-mix(in srgb, $player-color, white 10%);
-        }
-        
-        p {
-          color: $player-color;
-          text-shadow: 0 0 5px rgba($player-color, 0.5);
-        }
-      }
-      
-      &:nth-child(3) {
-        border-left: 3px solid $game-color;
-        
-        h3 {
-          color: color-mix(in srgb, $game-color, white 10%);
-        }
-        
-        p {
-          color: $game-color;
-          text-shadow: 0 0 5px rgba($game-color, 0.5);
-        }
-      }
-      
-      h3 {
-        margin: 0 0 8px 0;
-        font-size: 1.1rem;
-        color: $secondary-text;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid rgba($primary-text, 0.3);
-        padding-bottom: 5px;
-      }
-      
-      p {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: bold;
-        text-shadow: 0 0 5px $glow-teal;
-      }
-    }
-  }
 }

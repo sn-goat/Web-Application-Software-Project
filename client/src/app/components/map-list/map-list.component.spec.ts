@@ -7,8 +7,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { BoardService } from '@app/services/code/board.service';
-import { MapService } from '@app/services/code/map.service';
+import { BoardService } from '@app/services/board/board.service';
+import { MapService } from '@app/services/map/map.service';
 import { Board, Cell, Vec2 } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { of } from 'rxjs';
@@ -189,7 +189,7 @@ describe('MapListComponent', () => {
     });
 
     it('should display a preview image of the game', async () => {
-        component.mapsLoaded = true; // Ensure maps are loaded
+        component.mapsLoaded = true;
 
         const previewImage = fixture.debugElement.query(By.css('.list-item:not(.new-map-card) .image-container img.base-image'));
 

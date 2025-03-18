@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { RoomGateway } from '@app/gateways/room/room.gateway';
-import { RoomService } from '@app/services/room.service';
+import { RoomService } from '@app/services/room/room.service';
 import { PlayerStats } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Socket } from 'socket.io';

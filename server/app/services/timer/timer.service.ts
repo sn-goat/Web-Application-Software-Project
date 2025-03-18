@@ -36,7 +36,6 @@ export class TimerService {
 
             if (this.timers[roomId].remainingTime <= 0) {
                 clearInterval(intervalId);
-                delete this.timers[roomId];
                 this.eventEmitter.emit('timerEnded', roomId);
 
                 return;

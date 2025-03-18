@@ -1,13 +1,25 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
-import { GameMapService } from '@app/services/code/game-map.service';
-import { PlayerService } from '@app/services/code/player.service';
-import { SocketService } from '@app/services/code/socket.service';
+import { GameMapService } from '@app/services/game-map/game-map.service';
+import { PlayerService } from '@app/services/player/player.service';
+import { SocketService } from '@app/services/socket/socket.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
-import { PlayerStats } from '@common/player';
+import {
+    DEFAULT_ACTIONS,
+    DEFAULT_ATTACK_VALUE,
+    DEFAULT_DEFENSE_VALUE,
+    DEFAULT_DICE,
+    DEFAULT_LIFE_VALUE,
+    DEFAULT_MOVEMENT_POINTS,
+    DEFAULT_POSITION,
+    DEFAULT_SPEED_VALUE,
+    DEFAULT_WINS,
+    PlayerStats,
+} from '@common/player';
+import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 type DiceBonus = 'attack' | 'defense';
@@ -19,7 +31,7 @@ type StatBonus = 'life' | 'speed';
     styleUrls: ['./form-character.component.scss'],
     imports: [CommonModule, FormsModule, RouterLink],
 })
-export class FormCharacterComponent implements OnInit {
+export class FormCharacterComponent implements OnInit, OnDestroy {
     @Output() closePopup: EventEmitter<void> = new EventEmitter<void>();
     @Input() isCreationPage: boolean = false;
     @Input() accessCode: string = '';
@@ -36,51 +48,68 @@ export class FormCharacterComponent implements OnInit {
     playerStats: PlayerStats = {
         id: ' ',
         name: '',
-        avatar: this.getCurrentPortraitImage(),
-        life: 4,
-        attack: 4,
-        defense: 4,
-        speed: 4,
-        attackDice: 'D4',
-        defenseDice: 'D4',
-        movementPts: 0,
-        actions: 1,
-        position: { x: 0, y: 0 },
-        spawnPosition: { x: 0, y: 0 },
-        wins: 0,
+        avatar: this.currentPortraitImage,
+        life: DEFAULT_LIFE_VALUE,
+        attack: DEFAULT_ATTACK_VALUE,
+        defense: DEFAULT_DEFENSE_VALUE,
+        speed: DEFAULT_SPEED_VALUE,
+        attackDice: DEFAULT_DICE,
+        defenseDice: DEFAULT_DICE,
+        movementPts: DEFAULT_MOVEMENT_POINTS,
+        actions: DEFAULT_ACTIONS,
+        position: DEFAULT_POSITION,
+        spawnPosition: DEFAULT_POSITION,
+        wins: DEFAULT_WINS,
     };
 
     takenAvatars: string[] = [];
     isRoomLocked: boolean = false;
 
+    private subscriptions: Subscription[] = [];
     private readonly gameMapService = inject(GameMapService);
     private readonly playerService = inject(PlayerService);
     private readonly socketService = inject(SocketService);
-
-    constructor(private router: Router) {}
+    private readonly router = inject(Router);
 
     get isCurrentAvatarTaken(): boolean {
-        return this.takenAvatars.includes(this.getCurrentPortraitImage());
+        return this.takenAvatars.includes(this.currentPortraitImage);
+    }
+
+    get currentPortraitImage(): string {
+        return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
     }
 
     ngOnInit(): void {
         if (!this.isCreationPage) {
             this.takenAvatars = this.socketService.gameRoom?.players.map((player) => player.avatar);
         }
+        this.subscriptions.push(
+            this.socketService.onPlayerJoined().subscribe((data) => {
+                if (!this.isCreationPage) {
+                    this.takenAvatars = data.room.players.map((player) => player.avatar);
+                }
+            }),
 
-        this.socketService.onPlayerJoined().subscribe((data) => {
-            if (!this.isCreationPage) {
-                this.takenAvatars = data.room.players.map((player) => player.avatar);
-            }
-        });
+            this.socketService.onPlayerRemoved().subscribe((data) => {
+                if (!this.isCreationPage) {
+                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
+                }
+            }),
 
-        this.socketService.onRoomLocked().subscribe(() => {
-            this.isRoomLocked = true;
-        });
+            this.socketService.onPlayerDisconnected().subscribe((data) => {
+                if (!this.isCreationPage) {
+                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
+                }
+            }),
+
+            this.socketService.onRoomLocked().subscribe(() => {
+                this.isRoomLocked = true;
+            }),
+        );
     }
 
-    getCurrentPortraitImage(): string {
-        return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
+    ngOnDestroy(): void {
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -89,7 +118,7 @@ export class FormCharacterComponent implements OnInit {
         } else if (direction === 'next') {
             this.currentPortraitIndex = (this.currentPortraitIndex + 1) % this.totalPortraits;
         }
-        this.playerStats.avatar = this.getCurrentPortraitImage();
+        this.playerStats.avatar = this.currentPortraitImage;
     }
 
     selectStat(stat: StatBonus) {
@@ -130,6 +159,7 @@ export class FormCharacterComponent implements OnInit {
     }
 
     onClose(): void {
+        this.subscriptions.forEach((sub) => sub.unsubscribe());
         this.closePopup.emit();
     }
 

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
-import { MapService } from '@app/services/code/map.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
+import { MapService } from '@app/services/map/map.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Item } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
 import { EditToolItemComponent } from './edit-tool-item.component';

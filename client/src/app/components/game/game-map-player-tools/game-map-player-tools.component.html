@@ -1,27 +1,33 @@
 <div class="player-tools">
     <div class="left-side">
         <div class="inventory">
-            <h2>Inventaire</h2>
-            <div class="items">
-                @for (item of items; track item) {
-                <div class="item-slot">
-                    <img draggable="false" [src]="src + item + fileType" [alt]="item" class="item-image" />
-                </div>
-                } @if (items.length === 1) {
-                <div class="item-slot empty"></div>
-                } @else if (!items.length) {
-                <div class="item-slot empty"></div>
-                <div class="item-slot empty"></div>
-                <p>Vous n'avez pas d'items</p>
+            <div class="inventory-header">
+                <h2>Inventaire</h2>
+            </div>
 
-                }
+            <div class="inventory-container">
+                <div class="items">
+                    @for (item of items; track item) {
+                    <div class="item-slot">
+                        <img draggable="false" [src]="src + item + fileType" [alt]="item" class="item-image" />
+                    </div>
+                    } @if (items.length === 1) {
+                    <div class="item-slot empty"></div>
+                    } @else if (!items.length) {
+                    <div class="item-slot empty"></div>
+                    <div class="item-slot empty"></div>
+                    <p>Vous n'avez pas d'items</p>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
     <div class="right-side">
         <div class="timer">
-            <h2>Minuterie</h2>
+            <div class="timer-header">
+                <h2>Minuterie</h2>
+            </div>
             <div class="timer-container">
                 <p>{{ timer }}</p>
             </div>

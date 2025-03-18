@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines */
 import { BoardService } from '@app/services/board/board.service';
-import { GameService } from '@app/services/game.service';
+import { GameService } from '@app/services/game/game.service';
+import { FightService } from '@app/services/fight/fight.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
@@ -18,6 +19,7 @@ describe('GameService', () => {
     let gameService: GameService;
     let boardService: Partial<BoardService>;
     let timerService: Partial<TimerService>;
+    let fightService: Partial<FightService>;
     let eventEmitter: EventEmitter2;
     let dummyMap: Cell[][];
     const accessCode = 'GAME123';
@@ -25,12 +27,12 @@ describe('GameService', () => {
     beforeEach(async () => {
         dummyMap = [
             [
-                { tile: Tile.CLOSED_DOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: Infinity, player: null },
-                { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 1, y: 0 }, cost: 1, player: null },
+                { tile: Tile.CLOSED_DOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: Infinity, player: undefined },
+                { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 1, y: 0 }, cost: 1, player: undefined },
             ],
             [
-                { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 1 }, cost: 1, player: null },
-                { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: null },
+                { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 1 }, cost: 1, player: undefined },
+                { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: undefined },
             ],
         ];
 
@@ -51,6 +53,7 @@ describe('GameService', () => {
                 GameService,
                 { provide: BoardService, useValue: boardService },
                 { provide: TimerService, useValue: timerService },
+                { provide: FightService, useValue: fightService },
                 { provide: EventEmitter2, useValue: eventEmitter },
             ],
         }).compile();
@@ -129,7 +132,65 @@ describe('GameService', () => {
             expect(eventEmitter.emit).toHaveBeenCalledWith(TurnEvents.Move, expect.any(Object));
         });
 
-        it('toggleDebugState - should toggle debug mode', () => {
+        it('movePlayerToSpawn should move a player to the closest available spot', () => {
+            setupTestGame({
+                players: [{ id: 'p1', position: { x: 0, y: 0 }, avatar: Avatar.Cleric } as PlayerStats],
+                map: [
+                    [
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 }, cost: Infinity, player: Avatar.Berserker },
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 1, y: 0 }, cost: 1, player: undefined },
+                    ],
+                    [
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 1 }, cost: 1, player: undefined },
+                        { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: undefined },
+                    ],
+                ],
+            });
+            const spyMove = jest.spyOn(gameService, 'movePlayer');
+            gameService.movePlayerToSpawn(accessCode, {
+                id: 'p1',
+                position: { x: 0, y: 0 },
+                avatar: 'avatar1',
+                spawnPosition: { x: 0, y: 0 },
+            } as PlayerStats);
+            expect(spyMove).toHaveBeenCalledWith(accessCode, { x: 0, y: 1 }, {
+                id: 'p1',
+                position: { x: 0, y: 0 },
+                avatar: 'avatar1',
+                spawnPosition: { x: 0, y: 0 },
+            } as PlayerStats);
+        });
+
+        it('movePlayerToSpawn should move a player to its spawn when available', () => {
+            setupTestGame({
+                players: [{ id: 'p1', position: { x: 0, y: 0 }, avatar: Avatar.Cleric } as PlayerStats],
+                map: [
+                    [
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 }, cost: Infinity, player: undefined },
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 1, y: 0 }, cost: 1, player: undefined },
+                    ],
+                    [
+                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 1 }, cost: 1, player: undefined },
+                        { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: undefined },
+                    ],
+                ],
+            });
+            const spyMove = jest.spyOn(gameService, 'movePlayer');
+            gameService.movePlayerToSpawn(accessCode, {
+                id: 'p1',
+                position: { x: 0, y: 0 },
+                avatar: 'avatar1',
+                spawnPosition: { x: 0, y: 0 },
+            } as PlayerStats);
+            expect(spyMove).toHaveBeenCalledWith(accessCode, { x: 0, y: 0 }, {
+                id: 'p1',
+                position: { x: 0, y: 0 },
+                avatar: 'avatar1',
+                spawnPosition: { x: 0, y: 0 },
+            } as PlayerStats);
+        });
+
+        it('toggleDebugState - devrait basculer le mode debug', () => {
             setupTestGame({ isDebugMode: false });
             gameService.toggleDebugState(accessCode);
             expect(gameService['currentGames'].get(accessCode).isDebugMode).toBe(true);
@@ -250,6 +311,44 @@ describe('GameService', () => {
 
             const paths = (gameService as any).findPossiblePaths(grid, { x: 0, y: 0 }, 2);
             expect(paths.has('0,1')).toBeFalsy(); // Ne traverse pas les murs
+        });
+
+        it('findValidSpawn should find a valid spawn point near the starting position', () => {
+            jest.spyOn(gameService as any, 'getMap').mockReturnValue([
+                [{ tile: Tile.FLOOR, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Berserker, item: Item.DEFAULT }],
+                [{ tile: Tile.FLOOR, position: { x: 0, y: 1 }, cost: Infinity, player: undefined, item: Item.DEFAULT }],
+            ]);
+
+            const paths = (gameService as any).findValidSpawn(accessCode, { x: 0, y: 0 });
+
+            expect(paths).toEqual({ x: 0, y: 1 });
+        });
+
+        it('should return null when no valid spawn points are available', () => {
+            jest.spyOn(gameService as any, 'getMap').mockReturnValue([
+                [{ tile: Tile.FLOOR, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Berserker, item: Item.DEFAULT }],
+                [{ tile: Tile.WALL, position: { x: 1, y: 0 }, cost: Infinity, player: undefined, item: Item.DEFAULT }],
+                [{ tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 }, cost: Infinity, player: undefined, item: Item.DEFAULT }],
+                [{ tile: Tile.FLOOR, position: { x: 2, y: 1 }, cost: Infinity, player: Avatar.Elf, item: Item.DEFAULT }],
+            ]);
+
+            const paths = (gameService as any).findValidSpawn(accessCode, { x: 0, y: 0 });
+
+            expect(paths).toEqual(null);
+        });
+
+        it('should explore multiple cells before finding a valid spawn', () => {
+            jest.spyOn(gameService as any, 'getMap').mockReturnValue([
+                [{ tile: Tile.FLOOR, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Berserker, item: Item.DEFAULT }],
+                [{ tile: Tile.WALL, position: { x: 1, y: 0 }, cost: Infinity, player: undefined, item: Item.DEFAULT }],
+                [{ tile: Tile.CLOSED_DOOR, position: { x: 2, y: 0 }, cost: Infinity, player: undefined, item: Item.DEFAULT }],
+                [{ tile: Tile.FLOOR, position: { x: 3, y: 0 }, cost: Infinity, player: Avatar.Elf, item: Item.DEFAULT }],
+                [{ tile: Tile.FLOOR, position: { x: 4, y: 0 }, cost: Infinity, player: Avatar.Default, item: Item.DEFAULT }],
+            ]);
+
+            const paths = (gameService as any).findValidSpawn(accessCode, { x: 0, y: 0 });
+
+            expect(paths).toEqual({ x: 4, y: 0 });
         });
     });
     // Configuration du jeu
@@ -477,6 +576,20 @@ describe('GameService', () => {
 
                 const result = (gameService as any).isPlayerTurnEnded(accessCode, player);
                 expect(result).toBe(true);
+            });
+
+            it("incrementWins should correcly increment a player's wins count", () => {
+                const player = { id: 'p1', name: 'Player1', movementPts: 0, actions: 0, position: { x: 0, y: 0 }, wins: 0 } as PlayerStats;
+                setupTestGame({ players: [player] });
+                gameService.incrementWins(accessCode, player.id);
+                expect(gameService.getPlayer(accessCode, player.id).wins).toEqual(1);
+            });
+
+            it("incrementWins should not correcly increment a player's wins count if the player is not found", () => {
+                const player = { id: 'p1', name: 'Player1', movementPts: 0, actions: 0, position: { x: 0, y: 0 }, wins: 0 } as PlayerStats;
+                setupTestGame({ players: [player] });
+                gameService.incrementWins(accessCode, 'incorrect_id');
+                expect(gameService.getPlayer(accessCode, player.id).wins).toEqual(0);
             });
         });
 

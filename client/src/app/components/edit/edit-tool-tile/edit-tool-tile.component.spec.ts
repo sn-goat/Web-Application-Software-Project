@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 // import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Tile } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
 import { EditToolTileComponent } from './edit-tool-tile.component';

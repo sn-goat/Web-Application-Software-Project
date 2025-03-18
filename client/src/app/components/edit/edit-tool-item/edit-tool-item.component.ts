@@ -3,9 +3,9 @@ import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
-import { ItemApplicatorService } from '@app/services/code/item-applicator.service';
-import { MapService } from '@app/services/code/map.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
+import { MapService } from '@app/services/map/map.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Item } from '@common/enums';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -13,7 +13,6 @@ import { Subject, takeUntil } from 'rxjs';
     selector: 'app-edit-tool-item',
     templateUrl: './edit-tool-item.component.html',
     styleUrls: ['./edit-tool-item.component.scss'],
-    standalone: true,
     imports: [MatBadgeModule, CommonModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
@@ -26,12 +25,9 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     showTooltip = false;
 
     private readonly mapService = inject(MapService);
+    private readonly toolSelectionService = inject(ToolSelectionService);
+    private readonly itemSelectionService = inject(ItemApplicatorService);
     private destroy$ = new Subject<void>();
-
-    constructor(
-        private toolSelection: ToolSelectionService,
-        private itemApplicator: ItemApplicatorService,
-    ) {}
 
     ngOnInit() {
         if (this.type === Item.SPAWN) {
@@ -60,16 +56,16 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     }
 
     onDragStart() {
-        this.toolSelection.updateSelectedItem(this.type);
+        this.toolSelectionService.updateSelectedItem(this.type);
     }
 
     onDragEnter(event: MouseEvent) {
         event.preventDefault();
-        this.itemApplicator.setBackToContainer(this.type);
+        this.itemSelectionService.setBackToContainer(this.type);
     }
     onDragLeave(event: MouseEvent) {
         event.preventDefault();
-        this.itemApplicator.setBackToContainer();
+        this.itemSelectionService.setBackToContainer();
     }
 
     getDescription(type: Item): string {

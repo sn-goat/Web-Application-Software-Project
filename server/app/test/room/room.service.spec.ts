@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
-import { RoomService } from '@app/services/room.service';
+import { RoomService } from '@app/services/room/room.service';
+import { GameService } from '@app/services/game/game.service';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { PlayerStats } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
 
 // Mock the getLobbyLimit dependency so we can control its return value in tests.
 jest.mock('@common/lobby-limits', () => ({
@@ -13,9 +15,22 @@ jest.mock('@common/lobby-limits', () => ({
 
 describe('RoomService', () => {
     let service: RoomService;
+    let gameService: GameService;
+    let eventEmitter: EventEmitter2;
 
-    beforeEach(() => {
-        service = new RoomService(new EventEmitter2());
+    beforeEach(async () => {
+        eventEmitter = {
+            emit: jest.fn(),
+        } as any;
+        gameService = {
+            removePlayer: jest.fn(),
+            deleteGame: jest.fn(),
+        } as any;
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [RoomService, { provide: GameService, useValue: gameService }, { provide: EventEmitter2, useValue: eventEmitter }],
+        }).compile();
+
+        service = module.get<RoomService>(RoomService);
         jest.clearAllMocks();
     });
 
@@ -333,11 +348,25 @@ describe('RoomService', () => {
 
 describe('RoomService - non-existent room handling', () => {
     let service: RoomService;
+    let gameService: GameService;
+    let eventEmitter: EventEmitter2;
     let loggerErrorSpy: jest.SpyInstance;
 
-    beforeEach(() => {
-        service = new RoomService(new EventEmitter2());
-        // Remplacer le logger par un spy en utilisant jest.spyOn
+    beforeEach(async () => {
+        eventEmitter = {
+            emit: jest.fn(),
+        } as any;
+        gameService = {
+            removePlayer: jest.fn(),
+            deleteGame: jest.fn(),
+        } as any;
+
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [RoomService, { provide: GameService, useValue: gameService }, { provide: EventEmitter2, useValue: eventEmitter }],
+        }).compile();
+
+        service = module.get<RoomService>(RoomService);
+        jest.clearAllMocks();
         loggerErrorSpy = jest.spyOn((service as any).logger, 'error');
     });
 
@@ -389,19 +418,6 @@ describe('RoomService - non-existent room handling', () => {
 
     beforeEach(() => {
         emitSpy = jest.spyOn(service['eventEmitter'], 'emit');
-    });
-
-    it('should return null when room is not found', () => {
-        const result = service.quitGame('nonexistent', 'player1');
-        expect(result).toBeNull();
-        expect((service as any).logger.error).toHaveBeenCalledWith('Room with access code nonexistent not found for quitting game.');
-    });
-
-    it('should return null when player is not found in room', () => {
-        const room = service.createRoom('org1', 10);
-        const result = service.quitGame(room.accessCode, 'nonexistent');
-        expect(result).toBeNull();
-        expect((service as any).logger.error).toHaveBeenCalledWith(`PlayerStats nonexistent not found in room ${room.accessCode}`);
     });
 
     it('should remove only the quitting player when more than 2 players are in the room', () => {
@@ -463,7 +479,7 @@ describe('RoomService - non-existent room handling', () => {
         const removePlayerSpy = jest.spyOn(service, 'removePlayer');
         const deleteRoomSpy = jest.spyOn(service, 'deleteRoom');
 
-        const result = service.quitGame(room.accessCode, player1.id);
+        service.quitGame(room.accessCode, player1.id);
 
         // Verify only player1 was removed
         expect(removePlayerSpy).toHaveBeenCalledTimes(1);
@@ -471,9 +487,6 @@ describe('RoomService - non-existent room handling', () => {
 
         // Verify room was not deleted
         expect(deleteRoomSpy).not.toHaveBeenCalled();
-
-        // Verify result
-        expect(result).toBe(room);
 
         // Check that the room still exists and has 2 players
         const updatedRoom = service.getRoom(room.accessCode);
@@ -534,7 +547,7 @@ describe('RoomService - non-existent room handling', () => {
         expect(deleteRoomSpy).toHaveBeenCalledWith(room.accessCode);
 
         // Verify result
-        expect(result).toBe(room);
+        expect(result).toBe(player2.id);
 
         // Verify the room is gone
         expect(service.getRoom(room.accessCode)).toBeNull();

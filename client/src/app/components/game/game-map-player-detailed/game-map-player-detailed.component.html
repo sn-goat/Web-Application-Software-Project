@@ -1,67 +1,72 @@
 <div class="container">
-    <h2> Information du Joueur </h2>
-    @if(myPlayer){
-        <div class="myPlayer"> 
-            <img draggable="false" [src]="myPlayer.avatar" [alt]="myPlayer.name" class="myPlayer-image">
-            <p>{{ myPlayer.name }}</p>
-        </div>
-        <div class="info">
+    <div class="header">
+        @if (myPlayer) { <img class="player-image" [src]="myPlayer.avatar" alt="Avatar du Joueur" />}
+        <h2>Mes informations</h2>
+    </div>
+
+    <div class="info">
+        <div class="stats-grid">
             <div class="life">
-                <h3>Vie</h3>
-                <div class="health-bar-container">
-                <div class="health-bar" [style.width]="roundHealth((myPlayer.life / maxHealth) * 100)+ '%'"
-                    [ngClass]="getHealthBar()">
-                    <span class="health-text">{{roundHealth((myPlayer.life / maxHealth) * 100) + '%' }}</span>
-                </div>
-                </div>
-                <div class="life-left">
-                <h4>Points de vie restants:</h4>
-                <p>{{ myPlayer.life }}</p>
-                </div>
-                <div class="max-life">
-                <h4>Points de vie maximal:</h4>
-                <p>{{ maxHealth }}</p>
+                <h3>Santé</h3>
+                <div class="life-details">
+                    <div class="life-left">
+                        <h4>Points de vie restants:</h4>
+                        <p>{{ myPlayer?.life || 0 }}</p>
+                    </div>
+                    <div class="max-life">
+                        <h4>Points de vie maximal:</h4>
+                        <p>{{ maxHealth }}</p>
+                    </div>
                 </div>
             </div>
+
             <div class="attribute">
                 <h3>Attributs</h3>
-                <div class="speed">
-                    <h4>Rapidité:</h4>
-                    <p>{{ myPlayer.speed }}</p>
-                </div>
-                <div class="attack">
-                    <h4>Attaque:</h4>
-                    <p>{{ myPlayer.attack }}</p>
-                </div>
-                <div class="defense">
-                    <h4>Défense:</h4>
-                    <p>{{ myPlayer.defense }}</p>
-                </div>
-            </div>
-            <div class="dices">
-                <h3>Dés</h3>
-                <div class="attack-dice">
-                    <h4>Dé d'attaque:</h4>
-                    <img draggable="false" [src]="diceToImageLink(myPlayer.attackDice)" [alt]="'dice' + myPlayer.attackDice" class="dice-image">
-                </div>
-                <div class="defense-dice">
-                    <h4>Dé de défense:</h4>
-                    <img draggable="false" [src]="diceToImageLink(myPlayer.defenseDice)" [alt]="'dice' + myPlayer.defenseDice" class="dice-image">
+                <div class="attributes-container">
+                    <div class="speed">
+                        <h4>Vitesse:</h4>
+                        <p>{{ myPlayer?.speed || 0 }}</p>
+                    </div>
+                    <div class="attack">
+                        <h4>Attaque:</h4>
+                        <p>{{ myPlayer?.attack || 0 }}</p>
+                    </div>
+                    <div class="defense">
+                        <h4>Défense:</h4>
+                        <p>{{ myPlayer?.defense || 0 }}</p>
+                    </div>
                 </div>
             </div>
+
             <div class="skills">
                 <h3>Compétences</h3>
-                <div class="mouvements">
-                    <h4>Points de mouvements:</h4>
-                    <p>{{ myPlayer.movementPts }}</p>
+                <div class="skills-container">
+                    <div class="mouvements">
+                        <h4>Mouvement:</h4>
+                        <p>{{ myPlayer?.movementPts || 0 }}</p>
+                    </div>
+                    <div class="actions">
+                        <h4>Actions:</h4>
+                        <p>{{ myPlayer?.actions || 0 }}</p>
+                    </div>
                 </div>
-                <div class="actions">
-                    <h4>Nombre d'actions:</h4>
-                    <p>{{ myPlayer.actions}}</p>
+            </div>
+
+            <div class="dices">
+                <h3>Dés</h3>
+                <div class="dice-container">
+                    <div class="dice-label">
+                        <h4>Attaque:</h4>
+                        @if (myPlayer) {
+                        <img class="dice-image" [src]="diceToImageLink(myPlayer.attackDice)" alt="Dé d'Attaque" />}
+                    </div>
+                    <div class="dice-label">
+                        <h4>Défense:</h4>
+                        @if (myPlayer) {
+                        <img class="dice-image" [src]="diceToImageLink(myPlayer.defenseDice)" alt="Dé de Défense" />}
+                    </div>
                 </div>
             </div>
         </div>
-    } @else {
-        <p>Vous n'êtes pas dans la partie</p>
-    }
+    </div>
 </div>

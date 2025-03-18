@@ -5,193 +5,157 @@ $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #ff6b93;
 $accent-color: #ff6b93;
 $border-radius: 10px;
+$active-player-color: #ff9800;
 
 :host {
     display: block;
-    width: 100%;
     height: 100%;
+    width: 100%;
+    overflow: hidden;
+    --base-font-size: min(0.9rem, 3.2vw);
+    --small-font-size: min(0.75rem, 2.4vw);
 }
 
 .player-section {
     display: flex;
-    flex-direction: row;
-    gap: 5px;
+    flex-direction: column;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    align-items: center;
     box-sizing: border-box;
-    justify-content: space-evenly;
-        
-    .player {
-        height: 95%;
-        width: auto;
-        min-width: 0;
-        max-width: 150px;
-        flex: 1;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: 8px;
-        border-left: 2px solid $primary-text;
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.5), 0 0 6px $glow-teal;
-        padding: 3px;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    justify-content: space-between;
+    padding: 4px;
+    gap: 5px;
+    overflow: hidden;
+}
+
+.player {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border-left: 2px solid $primary-text;
+    box-shadow:
+        0 0 8px rgba(0, 0, 0, 0.5),
+        0 0 6px $glow-teal;
+    padding: 4px;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    &.active-player {
+        box-shadow: 0 0 10px rgba($primary-text, 0.6); 
+        border-left: 3px solid $primary-text;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .player-image {
         display: flex;
-        flex-direction: row;
         align-items: center;
-        justify-content: space-between;
         gap: 6px;
-      
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 10px $glow-teal;
-      }
-      
-      .player-image {
-        display: flex;
-        flex-direction: column;
-        width: 60%;
-        align-items: center;
-        margin-bottom: 2px;
-        
+        width: 45%;
+        min-width: 0;
+        overflow: hidden;
+
         img {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          border: 1px solid $primary-text;
-          box-shadow: 0 0 6px $glow-teal;
-          object-fit: cover;
-          background-color: $secondary-bg;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border: 1px solid $primary-text;
+            box-shadow: 0 0 6px $glow-teal;
+            object-fit: cover;
+            background-color: $secondary-bg;
         }
-        
-        .empty-player {
-          width: 34px;
-          height: 34px;
-          border-radius: 50%;
-          border: 1px dashed rgba($primary-text, 0.4);
-          background-color: rgba(0, 0, 0, 0.2);
-          position: relative;
-          
-          &::after {
-            content: '+';
-            font-size: 20px;
-            color: rgba($primary-text, 0.4);
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-          }
-        }
-        
+
         h3 {
-          margin: 2px 0 0 0;
-          font-size: 0.55rem;
-          color: $primary-text;
-          text-shadow: 0 0 5px $glow-teal;
-          font-weight: 600;
-          text-align: center;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          max-width: 100%;
+            font-size: min(0.9rem, 3.2vw);
+            color: $primary-text;
+            text-shadow: 0 0 5px $glow-teal;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin: 0;
+            max-width: calc(100% - 36px);
         }
-      }
-      
-      .player-info {
-        border-radius: 4px;
+    }
+
+    .player-info {
+        width: 50%;
         padding: 2px;
         text-align: center;
-        flex: 1 1 auto;
-        height: 100%;
-        width: 40%;
-        overflow: hidden;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        
+        align-items: center;
+        gap: 2px;
+        overflow: hidden;
+
         h3 {
-          margin: 0;
-          font-size: 0.35rem;
-          color: $secondary-text;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          text-align: center;
+            margin: 10px;
+            font-size: min(0.8rem, 2.7vw);
+            line-height: 1.1;
+            color: $secondary-text;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            width: 100%;
+            height: fit-content;
         }
 
-        h3.admin, h3.active {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        h3.admin,
+        h3.active {
+            font-size: min(0.75rem, 2.5vw);
+            padding: 1px 3px;
             margin-bottom: 2px;
+            border-radius: 3px;
+            display: inline-block;
             width: auto;
             height: auto;
+            max-width: 100%;
             line-height: 1;
-            box-sizing: border-box;
-            vertical-align: middle;
-          }
+        }
 
         h3.admin {
             color: $accent-color;
-            font-weight: bold;
-            border-radius: 3px;
-            
             border: 1px solid rgba($accent-color, 0.4);
             text-shadow: 0 0 4px rgba($accent-color, 0.6);
         }
 
         h3.active {
-            color: #ff9800;
-            font-weight: bold;
-            border-radius: 3px;
-            border: 1px solid rgba(#ff9800, 0.4);
-            text-shadow: 0 0 4px rgba($primary-text, 0.6);
-            position: relative;
-            padding: 1px 3px;
+            color: $active-player-color;
+            border: 1px solid rgba($active-player-color, 0.4);
+            text-shadow: 0 0 4px rgba($active-player-color, 0.6);
             animation: text-pulse 2s ease-in-out infinite;
-            overflow: visible;
-            
+            font-weight: bold;
         }
-
-        h3 + h3 {
-            margin-top: 2px;
-          }
-        
-        p {
-          margin: 1px 0 0 0;
-          font-size: 0.6rem;
-          color: $accent-color;
-          font-weight: bold;
-          line-height: 1.2; 
-          text-shadow: 0 0 5px rgba($accent-color, 0.5);
-        }
-      }
     }
 }
 
+/* Player states */
 .player-not-in-game {
     text-decoration: line-through;
+    text-decoration-thickness: 3px;
     opacity: 0.3;
     color: #7a7a7a;
-    
-    &::after {
-      content: none;
-    }
 }
 
-
-.player-image:has(.player-not-in-game) {
-    img {
-        opacity: 0.3;
-        filter: grayscale(100%);
-    }
+.player-image:has(.player-not-in-game) img {
+    opacity: 0.3;
+    filter: grayscale(100%);
 }
 
 .player:has(.player-not-in-game) {
     background-color: rgba(0, 0, 0, 0.4);
     border-left: 2px solid #4a4a4a;
+
     h3,
     p {
         opacity: 0.3;
@@ -199,21 +163,128 @@ $border-radius: 10px;
     }
 }
 
-
 @keyframes text-pulse {
-    0% { 
-        opacity: 0.9; 
-        border-color: rgba(#ff9800, 0.9); 
-        box-shadow: 0 0 5px rgba(#ff9800, 0.6);
+    0%,
+    100% {
+        opacity: 0.9;
+        border-color: rgba($active-player-color, 0.9);
+        box-shadow: 0 0 5px rgba($active-player-color, 0.6);
     }
-    50% { 
-        opacity: 0.6; 
-        border-color: rgba(#ff9800, 0.2);
-        box-shadow: 0 0 2px rgba(#ff9800, 0.2);
+    50% {
+        opacity: 0.6;
+        border-color: rgba($active-player-color, 0.2);
+        box-shadow: 0 0 2px rgba($active-player-color, 0.2);
     }
-    100% { 
-        opacity: 0.9; 
-        border-color: rgba(#ff9800, 0.9);
-        box-shadow: 0 0 5px rgba(#ff9800, 0.6);
+}
+
+:host[style*="--player-count='1'"] .player-section,
+:host[style*="--player-count='2'"] .player-section {
+    height: 100%;
+}
+
+:host[style*="--player-count='3'"] .player-section,
+:host[style*="--player-count='4'"] .player-section {
+    height: 100%;
+}
+
+:host[style*="--player-count='5'"] .player-section,
+:host[style*="--player-count='6'"] .player-section,
+:host[style*="--player-count='7'"] .player-section,
+:host[style*="--player-count='8'"] .player-section {
+    height: 100%;
+}
+
+:host[style*="--player-count='1'"] .player {
+    height: 100%;
+}
+:host[style*="--player-count='2'"] .player {
+    height: 50%;
+}
+:host[style*="--player-count='3'"] .player {
+    height: 33.3%;
+}
+:host[style*="--player-count='4'"] .player {
+    height: 25%;
+}
+:host[style*="--player-count='5'"] .player {
+    height: 20%;
+}
+:host[style*="--player-count='6'"] .player {
+    height: 16.6%;
+}
+:host[style*="--player-count='7'"] .player {
+    height: 14.3%;
+}
+:host[style*="--player-count='8'"] .player {
+    height: 12.5%;
+}
+
+:host[style*="--player-count='1'"] .player,
+:host[style*="--player-count='2'"] .player {
+    padding: 8px;
+    margin-bottom: 5px;
+
+    .player-image img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .player-image h3 {
+        font-size: min(1.1rem, 3.7vw); 
+    }
+
+    .player-info h3 {
+        font-size: min(0.95rem, 3.2vw);
+    }
+}
+
+:host[style*="--player-count='3'"] .player,
+:host[style*="--player-count='4'"] .player {
+    padding: 5px;
+
+    .player-image img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .player-image h3 {
+        font-size: min(0.9rem, 3vw);
+    }
+
+    .player-info h3 {
+        font-size: min(0.8rem, 2.7vw);
+    }
+}
+
+:host[style*="--player-count='5'"],
+:host[style*="--player-count='6'"],
+:host[style*="--player-count='7'"],
+:host[style*="--player-count='8'"] {
+    .player {
+        padding: 4px;
+
+        .player-image {
+            gap: 4px;
+
+            img {
+                width: 24px;
+                height: 24px;
+            }
+
+            h3 {
+                font-size: min(0.8rem, 2.7vw);
+            }
+        }
+
+        .player-info h3 {
+            font-size: min(0.75rem, 2.5vw);
+            margin-bottom: 0;
+        }
+
+        .player-info h3.admin,
+        .player-info h3.active {
+            font-size: min(0.7rem, 2.4vw);
+            padding: 1px 2px;
+        }
     }
 }

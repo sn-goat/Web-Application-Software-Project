@@ -1,18 +1,29 @@
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
 $primary-text: #7ee0d0;
-$glow-teal: rgba(126, 224, 208, 0.3);
+$glow-teal: rgba(126, 224, 208, 0.2);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
-$border-radius: 10px;
-$inventory-color: #7ee0d0;
-$timer-color: #7ee0d0;
-$buttons-color: #7ee0d0;
+$border-radius: 5px;
 
 :host {
     display: block;
     height: 100%;
     width: 100%;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5px;
+    box-sizing: border-box;
+    gap: 5px;
 }
 
 .player-tools {
@@ -24,22 +35,22 @@ $buttons-color: #7ee0d0;
     flex-direction: row;
     overflow: hidden;
     box-shadow:
-        0 0 15px rgba(0, 0, 0, 0.5),
-        0 0 10px $glow-teal;
+        0 0 10px rgba(0, 0, 0, 0.5),
+        0 0 8px $glow-teal;
     color: $primary-text;
     font-family: 'Rajdhani', sans-serif;
-    padding: 2px;
+    padding: 1px;
 
     h2 {
-        margin: 0 0 1px 0;
+        margin: 0;
         font-size: 0.7rem;
         font-weight: 600;
         color: $primary-text;
         text-transform: uppercase;
         letter-spacing: 1px;
-        text-shadow: 0 0 10px $glow-teal;
+        text-shadow: 0 0 5px $glow-teal;
         border-bottom: 1px solid rgba($primary-text, 0.3);
-        padding-bottom: 1px;
+        padding-bottom: 0;
     }
 
     .left-side {
@@ -47,8 +58,8 @@ $buttons-color: #7ee0d0;
         height: 100%;
         display: flex;
         flex-direction: column;
-        padding: 2px;
-        gap: 2px;
+        padding: 1px;
+        gap: 1px;
         box-sizing: border-box;
     }
 
@@ -57,178 +68,189 @@ $buttons-color: #7ee0d0;
         height: 100%;
         display: flex;
         flex-direction: row;
-        gap: 2px;
-        padding: 2px;
+        gap: 1px;
+        padding: 1px;
         box-sizing: border-box;
     }
 
     .inventory {
-        padding: 1px;
-        border-radius: 8px;
+        padding: 0;
+        border-radius: 4px;
         background: rgba(0, 0, 0, 0.2);
-        border-left: 3px solid $inventory-color;
-        height: calc(100% - 2px);
-        max-height: none;
+        border-left: 2px solid $primary-text;
         display: flex;
         flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        text-align: center;
+        height: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-        h2 {
-            color: color-mix(in srgb, $inventory-color, white 5%);
-            font-size: 0.85rem;
-            margin: 5px;
-            padding: 0;
-            height: 25%;
-            line-height: 12px;
-            text-shadow: none;
-            letter-spacing: 0.5px;
-            opacity: 0.8;
-            margin-left: 2px;
-            border-bottom: none;
+    .inventory-header {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 2px 0;
+        border-bottom: 1px solid rgba($primary-text, 0.4);
+        display: flex;
+        justify-content: center;
+        height: 25%;
+        align-items: center;
+    }
+
+    .inventory-header h2 {
+        color: color-mix(in srgb, $primary-text, white 5%);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-shadow: 0 0 5px $glow-teal;
+        margin: 0;
+        padding: 1px 0;
+        width: 100%;
+    }
+
+    .inventory-container {
+        flex: 1;
+        width: 100%;
+        padding: 3px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-top: 1px solid rgba($primary-text, 0.4);
+    }
+
+    .items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 3px;
+        width: 100%;
+        padding: 2px 0;
+    }
+
+    .item-slot {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 3px;
+        border: 1px solid $primary-text;
+        background: rgba(0, 0, 0, 0.3);
+        box-shadow: 0 0 3px rgba($primary-text, 0.2);
+        width: 5vh;
+        height: 5vh;
+    }
+
+    .item-slot.empty {
+        border: 1px dashed rgba($primary-text, 0.4);
+        opacity: 0.7;
+    }
+
+    .inventory p {
+        font-size: 0.7rem;
+        font-weight: bold;
+        padding: 10px;
+        color: $primary-text;
+        text-shadow: 0 0 5px rgba($primary-text, 0.6);
+        margin: 2px 0 0 0;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    .button {
+        background-color: rgba(0, 0, 0, 0.3);
+        color: $primary-text;
+        border: 1px solid $primary-text;
+        border-radius: $border-radius;
+        padding: 2px 8px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 5px $glow-teal;
+        white-space: nowrap;
+
+        &:hover {
+            background-color: rgba(126, 224, 208, 0.1);
         }
 
-        .items {
-            flex: 1;
-            display: flex;
-            flex-direction: row;
-            gap: 2px;
-            padding: 1px 0;
-            overflow: hidden;
-            max-height: none;
-            align-content: flex-start;
-            justify-content: flex-start;
-
-            .item-slot {
-                height: 0;
-                width: calc(15.5% - 8px);
-                padding-bottom: calc(15.5% - 8px);
-                position: relative;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border-radius: 4px;
-                border: 1px solid $inventory-color;
-                background-color: rgba(0, 0, 0, 0.3);
-                box-shadow: 0 0 5px rgba($inventory-color, 0.2);
-                transition: transform 0.2s ease;
-                flex-shrink: 0;
-                margin: 3px;
-
-                &::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-
-                &:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 0 8px rgba($inventory-color, 0.5);
-                }
-
-                &.empty {
-                    border: 1px dashed rgba($inventory-color, 0.4);
-                    box-shadow: none;
-                }
-            }
-
-            .item-image {
-                position: absolute;
-                top: 10%;
-                left: 10%;
-                width: 80%;
-                height: 80%;
-                object-fit: contain;
-            }
-
-            .item-slot.empty {
-                width: calc(15.5% - 8px);
-                padding-bottom: calc(15.5% - 8px);
-                height: 0;
-                margin: 3px;
-                border: 1px dashed rgba($inventory-color, 0.4);
-                box-shadow: none;
-            }
-
-            p {
-                margin: 0;
-                color: rgba($primary-text, 0.7);
-                font-style: italic;
-                font-size: 0.6rem;
-                flex-basis: 100%;
-                text-align: center;
-            }
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     }
 
     .timer {
-        width: 50%;
-        padding: 3px;
-        border-radius: 8px;
+        padding: 0;
+        border-radius: 4px;
         background: rgba(0, 0, 0, 0.2);
-        border-left: 3px solid $timer-color;
+        border-left: 2px solid $primary-text;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
+        align-items: center;
+        text-align: center;
         height: 100%;
+        width: 50%;
         box-sizing: border-box;
 
-        h2 {
-            color: color-mix(in srgb, $timer-color, white 5%);
-            text-align: center;
-            height: 45%;
-            margin-bottom: 2px;
-            font-size: 0.85rem;
+        .timer-header {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 0;
+            height: 25%;
+            border-bottom: 1px solid rgba($primary-text, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-header h2 {
+            color: color-mix(in srgb, $primary-text, white 5%);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px $glow-teal;
+            margin: 0;
+            padding: 1px 0;
+            width: 100%;
         }
 
         .timer-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100% - 15px);
-            min-height: 30px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
+            height: calc(100% - 10px);
+            min-height: 10px;
+            border-radius: 3px;
             position: relative;
-            border: 1px solid rgba($timer-color, 0.4);
+        }
 
-            p {
-                font-size: 1.2rem;
-                font-weight: bold;
-                font-family: 'Digital-7', 'Orbitron', monospace;
-                color: $timer-color;
-                text-shadow: 0 0 10px rgba($timer-color, 0.6);
-                margin: 0;
-                letter-spacing: 1px;
-
-                &::after {
-                    content: '';
-                    display: inline-block;
-                    width: 6px;
-                    height: 6px;
-                    background-color: $timer-color;
-                    border-radius: 50%;
-                    margin: 0 3px;
-                    vertical-align: middle;
-                    animation: blink 1s infinite;
-                }
-            }
+        p {
+            font-size: 0.9rem;
+            font-weight: bold;
+            font-family: 'Digital-7', 'Orbitron', monospace;
+            color: $primary-text;
+            text-shadow: 0 0 5px rgba($primary-text, 0.6);
+            margin: 0;
+            letter-spacing: 1px;
 
             &::after {
                 content: '';
-                position: absolute;
-                top: -2px;
-                left: -2px;
-                right: -2px;
-                bottom: -2px;
-                border-radius: 8px;
-                background: transparent;
-                box-shadow: 0 0 15px rgba($timer-color, 0.3);
-                z-index: -1;
+                display: inline-block;
+                width: 3px;
+                height: 3px;
+                background-color: $primary-text;
+                border-radius: 50%;
+                margin: 0 2px;
+                vertical-align: middle;
+                animation: blink 1s infinite;
             }
         }
     }
@@ -238,98 +260,144 @@ $buttons-color: #7ee0d0;
         padding: 3px;
         border-radius: 8px;
         background: rgba(0, 0, 0, 0.2);
-        border-left: 3px solid $buttons-color;
+        border-left: 3px solid $primary-text;
         display: flex;
         flex-direction: column;
         justify-content: space-around;
         gap: 5px;
         height: 100%;
         box-sizing: border-box;
+    }
 
-        .button {
-            padding: 0px 10px;
-            height: 35%;
-            min-height: 25px;
-            background: $buttons-color;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
-            color: $secondary-bg;
-            font-weight: bold;
-            font-size: 0.7rem;
-            font-family: 'Rajdhani', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba($buttons-color, 0.3);
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    .button {
+        padding: 0 10px;
+        height: 35%;
+        min-height: 25px;
+        background: $primary-text;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        color: $secondary-bg;
+        font-weight: bold;
+        font-size: 1rem;
+        font-family: 'Rajdhani', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 10px rgba($primary-text, 0.3);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-            &::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 40%;
-                background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
-                border-radius: 4px 4px 0 0;
-            }
+    .button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(0, 0, 0, 0.4);
+    }
 
-            &::after {
-                content: '';
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                height: 2px;
-                background: rgba(0, 0, 0, 0.4);
-            }
+    .button:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 0 15px rgba($primary-text, 0.5);
+    }
 
-            &:hover {
-                transform: translateY(-2px);
-                box-shadow:
-                    0 4px 8px rgba(0, 0, 0, 0.3),
-                    0 0 15px rgba($buttons-color, 0.5);
-            }
+    .button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+        background: color-mix(in srgb, $primary-text, black 15%);
+    }
 
-            &:active {
-                transform: translateY(1px);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
-                background: color-mix(in srgb, $buttons-color, black 15%);
-            }
+    .button:first-of-type {
+        background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, white 5%), color-mix(in srgb, $accent-color, black 10%));
+        box-shadow: 0 0 10px rgba($accent-color, 0.3);
+    }
 
-            &:first-of-type {
-                background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, white 5%), color-mix(in srgb, $accent-color, black 10%));
-                box-shadow: 0 0 10px rgba($accent-color, 0.3);
+    .button:first-of-type:hover {
+        box-shadow:
+            0 4px 8px rgba(0, 0, 0, 0.3),
+            0 0 15px rgba($accent-color, 0.5);
+    }
 
-                &:hover {
-                    box-shadow:
-                        0 4px 8px rgba(0, 0, 0, 0.3),
-                        0 0 15px rgba($accent-color, 0.5);
-                }
+    .button:first-of-type:active {
+        background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, black 10%), $accent-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
+    }
 
-                &:active {
-                    background: linear-gradient(to bottom, color-mix(in srgb, $accent-color, black 10%), $accent-color);
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) inset;
-                }
-            }
-        }
+    .button.selected {
+        background: color-mix(in srgb, crimson, black 40%);
+        border: 3px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 0 12px rgba($primary-text, 0.6);
+        color: white;
+    }
 
-        .button.selected {
-            background: color-mix(in srgb, crimson, black 40%);
-            border: 3px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 0 12px rgba($buttons-color, 0.6);
-            color: white;
-        }
+    .button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .item-image {
+        width: 80%;
+        height: 80%;
+        object-fit: contain;
+    }
+}
+
+.tools-section {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    gap: 8px;
+}
+
+.timer {
+    font-size: 0.9rem;
+    color: $primary-text;
+    font-weight: bold;
+    text-shadow: 0 0 5px $glow-teal;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba($primary-text, 0.5);
+}
+
+.items {
+    display: flex;
+    gap: 5px;
+    height: 100%;
+    align-items: center;
+
+    .item {
+        width: 24px;
+        height: 24px;
+        border-radius: $border-radius;
+        border: 1px solid $primary-text;
+        box-shadow: 0 0 5px $glow-teal;
+        object-fit: contain;
+        background-color: rgba(0, 0, 0, 0.2);
     }
 }
 
 @keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
     0%,
     100% {
         opacity: 1;
