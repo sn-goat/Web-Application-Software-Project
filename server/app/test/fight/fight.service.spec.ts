@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+import { InternalFightEvents } from '@app/constants/internal-events';
 import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
@@ -77,7 +78,7 @@ describe('FightService', () => {
             const fight = fightService.getFight('roomFight');
             expect(fight).toBeDefined();
             expect(fight?.currentPlayer).toEqual(player1);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(FightEvents.Init, fight);
+            expect(eventEmitter.emit).toHaveBeenCalledWith(InternalFightEvents.Init, fight);
             expect(timerService.startTimer).toHaveBeenCalledWith('roomFight', expect.any(Number), 'combat');
         });
     });

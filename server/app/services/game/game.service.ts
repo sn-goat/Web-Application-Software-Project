@@ -1,12 +1,12 @@
 /* eslint-disable max-lines */
-import { InternalEvents, MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { InternalEvents, InternalGameEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { BoardService } from '@app/services/board/board.service';
 import { FightService } from '@app/services/fight/fight.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
-import { GameEvents, TurnEvents } from '@common/game.gateway.events';
 import {
     ATTACK_ICE_DECREMENT,
     DEFAULT_ATTACK_VALUE,
@@ -56,7 +56,7 @@ export class GameService {
         const activePlayer = this.getPlayer(accessCode, player.id);
         const cell: Cell = this.getMap(accessCode)[position.y][position.x];
         cell.tile = cell.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
-        this.eventEmitter.emit(TurnEvents.BroadcastDoor, { accessCode, position, newState: cell.tile });
+        this.eventEmitter.emit(InternalTurnEvents.BroadcastDoor, { accessCode, position, newState: cell.tile });
         this.decrementAction(accessCode, activePlayer);
     }
 
@@ -64,7 +64,7 @@ export class GameService {
         const activePlayer = this.getPlayer(accessCode, player.id);
         activePlayer.actions--;
         if (this.isPlayerTurnEnded(accessCode, activePlayer) || this.updatePlayerPathTurn(accessCode, player).size === 0) {
-            this.eventEmitter.emit(TurnEvents.End, accessCode);
+            this.eventEmitter.emit(InternalTurnEvents.End, accessCode);
         }
     }
 
@@ -76,7 +76,7 @@ export class GameService {
             this.isPlayerTurnEnded(accessCode, activePlayer) ||
             this.updatePlayerPathTurn(accessCode, player).size === 0
         ) {
-            this.eventEmitter.emit(TurnEvents.End, accessCode);
+            this.eventEmitter.emit(InternalTurnEvents.End, accessCode);
             this.pendingEndTurn.set(accessCode, false);
         }
     }
@@ -113,7 +113,7 @@ export class GameService {
         const player = this.getPlayer(accessCode, playerToUpdate.id);
         const map = this.getMap(accessCode);
         const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
-        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
+        this.eventEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(updatedPath) });
         return updatedPath;
     }
 
@@ -209,7 +209,7 @@ export class GameService {
             movingPlayer.attack = DEFAULT_ATTACK_VALUE;
             movingPlayer.defense = DEFAULT_DEFENSE_VALUE;
         }
-        this.eventEmitter.emit(TurnEvents.Move, { accessCode, previousPosition, player: movingPlayer });
+        this.eventEmitter.emit(InternalTurnEvents.Move, { accessCode, previousPosition, player: movingPlayer });
     }
 
     getPlayer(accessCode: string, playerId: string): PlayerStats {
@@ -245,7 +245,7 @@ export class GameService {
         if (this.movementInProgress.get(accessCode)) {
             this.pendingEndTurn.set(accessCode, true);
         } else {
-            this.eventEmitter.emit(TurnEvents.End, accessCode);
+            this.eventEmitter.emit(InternalTurnEvents.End, accessCode);
         }
     }
 
@@ -375,7 +375,7 @@ export class GameService {
         const usedSpawnPoints: Vec2[] = [];
         players.forEach((player, index) => {
             if (index < shuffledSpawnPoints.length) {
-                this.eventEmitter.emit(GameEvents.AssignSpawn, { playerId: player.id, position: shuffledSpawnPoints[index] });
+                this.eventEmitter.emit(InternalGameEvents.AssignSpawn, { playerId: player.id, position: shuffledSpawnPoints[index] });
                 player.spawnPosition = shuffledSpawnPoints[index];
                 player.position = shuffledSpawnPoints[index];
                 this.logger.log(`Player ${player.name} assigned to spawn point ${shuffledSpawnPoints[index].x},${shuffledSpawnPoints[index].y}`);

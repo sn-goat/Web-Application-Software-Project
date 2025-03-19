@@ -1,4 +1,5 @@
-import { InternalEvents, THREE_SECONDS_IN_MS, TimerEvents } from '@app/gateways/game/game.gateway.constants';
+import { InternalEvents, InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { THREE_SECONDS_IN_MS } from '@app/gateways/game/game.gateway.constants';
 import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
@@ -24,7 +25,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         private readonly fightService: FightService,
     ) {}
 
-    @OnEvent(TimerEvents.Update)
+    @OnEvent(InternalTimerEvents.Update)
     handleTimerUpdate(payload: { roomId: string; remainingTime: number }) {
         const fight = this.fightService.getFight(payload.roomId);
         if (fight) {
@@ -35,7 +36,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
-    @OnEvent(TimerEvents.End)
+    @OnEvent(InternalTimerEvents.End)
     handleTimerEnd(accessCode: string) {
         const fight = this.fightService.getFight(accessCode);
         if (fight) {
@@ -45,43 +46,43 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
-    @OnEvent(GameEvents.AssignSpawn)
+    @OnEvent(InternalGameEvents.AssignSpawn)
     handleAssignSpawn(payload: { playerId: string; position: Vec2 }) {
         this.server.to(payload.playerId).emit(GameEvents.AssignSpawn, payload.position);
     }
 
-    @OnEvent(TurnEvents.Move)
+    @OnEvent(InternalTurnEvents.Move)
     handleBroadcastMove(payload: { accessCode: string; previousPosition: Vec2; player: PlayerStats }) {
         this.logger.log('Moving player' + payload.player.name + 'to: ' + payload.previousPosition);
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastMove, { previousPosition: payload.previousPosition, player: payload.player });
     }
 
-    @OnEvent(TurnEvents.BroadcastDoor)
+    @OnEvent(InternalTurnEvents.BroadcastDoor)
     sendDoorState(payload: { accessCode: string; position: Vec2; newState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR }) {
         this.logger.log('Changing door state at position: ' + payload.position + ' to: ' + payload.newState);
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastDoor, { position: payload.position, newState: payload.newState });
     }
 
-    @OnEvent(TurnEvents.UpdateTurn)
+    @OnEvent(InternalTurnEvents.Update)
     handleUpdateTurn(turn: { player: PlayerStats; path: Record<string, PathInfo> }) {
         this.logger.log('Updating turn for player: ' + turn.player.name + turn.player.id);
         this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
     }
 
-    @OnEvent(TurnEvents.End)
+    @OnEvent(InternalTurnEvents.End)
     handleEndTurn(accessCode: string) {
         this.logger.log('Ending turn early');
         this.endTurn(accessCode);
     }
 
-    @OnEvent(FightEvents.Init)
+    @OnEvent(InternalFightEvents.Init)
     sendFightInit(fight: Fight) {
         this.logger.log('Initiating fight between ' + fight.player1.name + ' and ' + fight.player2.name);
         this.server.to(fight.player1.id).emit(FightEvents.Init, fight);
         this.server.to(fight.player2.id).emit(FightEvents.Init, fight);
     }
 
-    @OnEvent(FightEvents.SwitchTurn)
+    @OnEvent(InternalFightEvents.SwitchTurn)
     sendFightSwitchTurn(accessCode: string) {
         const fight = this.fightService.getFight(accessCode);
         if (!fight) {
@@ -94,7 +95,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
-    @OnEvent(FightEvents.End)
+    @OnEvent(InternalFightEvents.End)
     sendFightEnd(payload: { accessCode: string; winner?: PlayerStats; loser?: PlayerStats }) {
         const fight = this.fightService.getFight(payload.accessCode);
         if (!fight) {

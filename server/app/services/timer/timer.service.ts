@@ -1,3 +1,4 @@
+import { InternalTimerEvents } from '@app/constants/internal-events';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -32,11 +33,11 @@ export class TimerService {
         this.timers[roomId] = { currentTimerType: type, remainingTime: duration, pausedTime };
 
         const intervalId = setInterval(() => {
-            this.eventEmitter.emit('timerUpdate', { roomId, remainingTime: this.timers[roomId].remainingTime });
+            this.eventEmitter.emit(InternalTimerEvents.Update, { roomId, remainingTime: this.timers[roomId].remainingTime });
 
             if (this.timers[roomId].remainingTime <= 0) {
                 clearInterval(intervalId);
-                this.eventEmitter.emit('timerEnded', roomId);
+                this.eventEmitter.emit(InternalTimerEvents.End, roomId);
 
                 return;
             }

@@ -1,7 +1,7 @@
+import { InternalFightEvents } from '@app/constants/internal-events';
 import { FIGHT_TURN_DURATION_IN_S, FIGHT_TURN_DURATION_NO_FLEE_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Fight, FightInfo } from '@common/game';
-import { FightEvents } from '@common/game.gateway.events';
 import { Dice, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -47,7 +47,7 @@ export class FightService {
         const currentPlayer = player1.speed >= player2.speed ? player1Info : player2Info;
         const newFight: Fight = { player1: player1Info, player2: player2Info, currentPlayer };
         this.activeFights.set(accessCode, newFight);
-        this.eventEmitter.emit(FightEvents.Init, newFight);
+        this.eventEmitter.emit(InternalFightEvents.Init, newFight);
         this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_IN_S, 'combat');
     }
 
@@ -58,7 +58,7 @@ export class FightService {
             return;
         }
         this.switchPlayer(fight);
-        this.eventEmitter.emit(FightEvents.SwitchTurn, accessCode);
+        this.eventEmitter.emit(InternalFightEvents.SwitchTurn, accessCode);
         if (fight.currentPlayer.fleeAttempts === 0) {
             this.timerService.startTimer(accessCode, FIGHT_TURN_DURATION_NO_FLEE_IN_S, 'combat');
         } else {
@@ -85,7 +85,7 @@ export class FightService {
     }
 
     endFight(accessCode: string, winner?: PlayerStats, loser?: PlayerStats) {
-        this.eventEmitter.emit(FightEvents.End, { accessCode, winner, loser });
+        this.eventEmitter.emit(InternalFightEvents.End, { accessCode, winner, loser });
         this.activeFights.delete(accessCode);
     }
 
