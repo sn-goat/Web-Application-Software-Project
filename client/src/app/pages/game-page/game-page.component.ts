@@ -15,7 +15,7 @@ import { FightLogicService } from '@app/services/fight-logic/fight-logic.service
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketService } from '@app/services/socket/socket.service';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, Subscription, timer } from 'rxjs';
 
 @Component({
     selector: 'app-game-page',
@@ -42,7 +42,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private readonly quitGameMessage = "Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.";
     private readonly notEnoughPlayersMessage = "Pas assez de joueurs pour continuer la partie. Vous allez être redirigé vers la page d'accueil.";
-
+    private readonly endGameTimeoutInS = 5000;
     private subscriptions: Subscription[] = [];
     private quitGameSubscription: Subscription;
     private gameService = inject(GameService);
@@ -96,6 +96,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.socketService.onEndGame().subscribe((winner) => {
             this.warning(`${winner.name} a remporté la partie avec 3 victoires!`);
+            timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/acceuil']));
         });
     }
 

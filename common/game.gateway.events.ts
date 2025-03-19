@@ -1,44 +1,42 @@
 export enum GameEvents {
-    Create = 'createGame', // Client envoi la map
-    Configure = 'configureGame', // Client qui envoi l'état du jeu
-    Ready = 'readyForStart', // Client
-    Debug = 'toggleDebug', // Client
-    EndDebug = 'endDebug', // Client
+    Create = 'createGame',
+    Configure = 'configureGame',
+    Ready = 'readyForStart',
+    Debug = 'toggleDebug',
+    EndDebug = 'endDebug',
     AssignSpawn = 'assignSpawn',
-    Quit = 'quitGame', // Client
-    End = 'endGame', // Serveur
-    BroadcastStartGame = 'startGame', // Serveur
-    BroadcastDebugState = 'debug', // Serveur
-    BroadcastEndDebugState = 'endDebug', // Serveur
-    BroadcastEndGame = 'endGame', // Serveur
-    BroadcastQuitGame = 'playerQuit', // Serveur
+    BroadcastStartGame = 'startGame',
+    BroadcastDebugState = 'debug',
+    BroadcastEndDebugState = 'endDebug',
+    End = 'endGame',
+    BroadcastEndGame = 'endGame',
+    BroadcastQuitGame = 'playerQuit',
 }
 
 export enum TurnEvents {
-    Start = 'startTurn', // Serveur
-    UpdateTimer = 'timeUpdate', // Server
-    UpdateTurn = 'updateTurn', // Server
-    End = 'endTurn', // Serveur (timer / plus déplacement et action inutile / plus de déplacement et plus d'action )
-    BroadcastEnd = 'endPlayerTurn', // Serveur
-    PlayerTurn = 'nextPlayerTurn', // Serveur
-    FullInventory = 'fullInventoryAck', // Serveur (pop généré, et attend choix user ne met pas en pause le Timer)
-    Move = 'moveAck', // Client (return New Path)
-    DebugMove = 'debugMove', // Client (return New Path)
-    ChangeDoorState = 'changeDoorState', // Client
-    BroadcastMove = 'playerMove', // Serveur (pos_debut, pos_fin) x nombre de mouvements
-    BroadcastItem = 'eventItem', // Serveur (type, pos, Item?)
-    BroadcastDoor = 'eventOnDoor', // Serveur (type, pos)
-    UpdateActions = 'updateActions', // Client <-> Serveur
+    Start = 'startTurn',
+    UpdateTimer = 'timeUpdate',
+    UpdateTurn = 'updateTurn',
+    End = 'endTurn',
+    BroadcastEnd = 'endPlayerTurn',
+    PlayerTurn = 'nextPlayerTurn',
+    Move = 'moveAck',
+    DebugMove = 'debugMove',
+    ChangeDoorState = 'changeDoorState',
+    BroadcastMove = 'playerMove',
+    BroadcastItem = 'eventItem',
+    BroadcastDoor = 'eventOnDoor',
+    UpdateActions = 'updateActions',
 }
 
 export enum FightEvents {
-    Init = 'initFightAck', // Client
-    SwitchTurn = 'switchTurn', // Serveur (id du joueur dont c'est le tour & met fin à celui de l'autre)
-    End = 'endFight', // Server (fuite réussite)
+    Init = 'initFightAck',
+    SwitchTurn = 'switchTurn',
+    End = 'endFight',
     Winner = 'winner',
     Loser = 'loser',
-    Flee = 'fleeAck', // Client
-    FailedFlee = 'failedFlee', // Serveur
-    Attack = 'attackAck', // Client
-    UpdateTimer = 'fightTimeUpdate', // Server
+    Flee = 'fleeAck',
+    FailedFlee = 'failedFlee',
+    Attack = 'attackAck',
+    UpdateTimer = 'fightTimeUpdate',
 }

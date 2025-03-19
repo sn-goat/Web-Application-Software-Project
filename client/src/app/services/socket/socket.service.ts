@@ -238,12 +238,6 @@ export class SocketService {
         });
     }
 
-    onFullInventory(): Observable<unknown> {
-        return new Observable((observer) => {
-            this.socket.on(TurnEvents.FullInventory, (data) => observer.next(data));
-        });
-    }
-
     onBroadcastEnd(): Observable<TurnEvents> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.BroadcastEnd, (data) => observer.next(data));
@@ -304,7 +298,7 @@ export class SocketService {
 
     onEndGame(): Observable<PlayerStats> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.End, (winner) => {
+            this.socket.on(GameEvents.BroadcastEndGame, (winner) => {
                 observer.next(winner);
             });
         });

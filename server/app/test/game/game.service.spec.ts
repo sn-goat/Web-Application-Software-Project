@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-lines */
+import { InternalTurnEvents } from '@app/constants/internal-events';
 import { BoardService } from '@app/services/board/board.service';
 import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
@@ -129,7 +130,7 @@ describe('GameService', () => {
             });
 
             gameService.movePlayer(accessCode, { x: 1, y: 0 }, { id: 'p1' } as any);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(TurnEvents.Move, expect.any(Object));
+            expect(eventEmitter.emit).toHaveBeenCalledWith(InternalTurnEvents.Move, expect.any(Object));
         });
 
         it('movePlayerToSpawn should move a player to the closest available spot', () => {

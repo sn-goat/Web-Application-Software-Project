@@ -354,17 +354,6 @@ describe('SocketService', () => {
         }
     });
 
-    it('onFullInventory should receive inventory data', (done) => {
-        const data = { full: true };
-        service.onFullInventory().subscribe((received) => {
-            expect(received).toEqual(data);
-            done();
-        });
-        if (fakeSocket.callbacks[TurnEvents.FullInventory]) {
-            fakeSocket.callbacks[TurnEvents.FullInventory](data);
-        }
-    });
-
     it('onBroadcastEnd should receive broadcast end data', (done) => {
         const data = 'broadcastEnd';
         service.onBroadcastEnd().subscribe((received) => {
