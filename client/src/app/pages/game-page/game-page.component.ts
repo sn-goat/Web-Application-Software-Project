@@ -93,6 +93,10 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.debugMode = isDebugMode;
             }),
         );
+
+        this.socketService.onEndGame().subscribe((winner) => {
+            this.warning(`${winner.name} a remporté la partie avec 3 victoires!`);
+        });
     }
 
     ngAfterViewInit(): void {
@@ -122,6 +126,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.quitGameSubscription.unsubscribe();
         this.socketService.resetSocketState();
     }
+
     private warning(message: string): void {
         this.openDialog(message, Alert.WARNING).then(() => {
             this.router.navigate(['/acceuil']);

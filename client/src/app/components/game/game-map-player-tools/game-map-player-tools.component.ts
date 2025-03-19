@@ -92,16 +92,6 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                     });
                 }
             }),
-
-            this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
-                this.snackBar.openFromComponent(SnackbarComponent, {
-                    duration: 3000,
-                    horizontalPosition: 'center',
-                    verticalPosition: 'top',
-                    panelClass: ['custom-snackbar'],
-                    data: { message: `${winner.name} a gagné la partie avec 3 victoires!` },
-                });
-            }),
         );
 
         this.performAction = this.gameService.toggleActionMode.bind(this.gameService);

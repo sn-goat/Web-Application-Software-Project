@@ -105,7 +105,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         if (payload.winner && payload.loser) {
             this.logger.log(`The winner is: ${payload.winner.name} and the loser is: ${payload.loser.name}`);
             this.gameService.incrementWins(payload.accessCode, payload.winner.id);
-            if (payload.winner && payload.winner.wins >= MAX_FIGHT_WINS) {
+            if (payload.winner && this.gameService.getPlayer(payload.accessCode, payload.winner.id).wins >= MAX_FIGHT_WINS) {
                 this.server.to(payload.accessCode).emit(GameEvents.End, payload.winner);
             }
             this.server.to(payload.accessCode).emit(FightEvents.Winner, this.gameService.getPlayer(payload.accessCode, payload.winner.id));
