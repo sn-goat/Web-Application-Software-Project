@@ -224,6 +224,7 @@ describe('GameGateway', () => {
             (fightService.getFight as jest.Mock).mockReturnValue(fight);
             (gameService.getPlayer as jest.Mock)
                 .mockReturnValueOnce(fight.player1)
+                .mockReturnValueOnce(fight.player1)
                 .mockReturnValueOnce(fight.player2)
                 .mockReturnValueOnce(fight.player2);
             // On simule également d'autres méthodes de gameService

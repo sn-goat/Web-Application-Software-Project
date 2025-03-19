@@ -134,11 +134,6 @@ describe('GameMapPlayerToolsComponent', () => {
         expect(snackBarMock.openFromComponent).toHaveBeenCalled();
     });
 
-    it('should show end game snackbar', () => {
-        endGameSubject.next(mockPlayer);
-        expect(snackBarMock.openFromComponent).toHaveBeenCalled();
-    });
-
     it('should bind performAction to gameService.toggleActionMode', () => {
         component.performAction();
         expect(gameServiceMock.toggleActionMode).toHaveBeenCalled();
@@ -153,7 +148,6 @@ describe('GameMapPlayerToolsComponent', () => {
         const unsubscribeSpy = spyOn(Subscription.prototype, 'unsubscribe');
         component.ngOnDestroy();
 
-        // Should have 9 subscriptions (one for each observed subject)
-        expect(unsubscribeSpy).toHaveBeenCalledTimes(9);
+        expect(unsubscribeSpy).toHaveBeenCalledTimes(8);
     });
 });
