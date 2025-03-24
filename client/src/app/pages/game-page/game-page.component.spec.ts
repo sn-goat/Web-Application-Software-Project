@@ -19,12 +19,14 @@ describe('GamePageComponent', () => {
     const fightStartedSubject = new Subject<boolean>();
     const isDebugModeSubject = new BehaviorSubject<boolean>(false);
     const playingPlayersSubject = new BehaviorSubject<PlayerStats[]>([]);
+    const initialPlayersSubject = new BehaviorSubject<PlayerStats[]>([]);
 
     const gameServiceMock = {
         getAccessCode: jasmine.createSpy('getAccessCode').and.returnValue('ACCESS123'),
         confirmAndAbandonGame: jasmine.createSpy('confirmAndAbandonGame').and.returnValue(Promise.resolve(true)),
         isDebugMode: isDebugModeSubject,
         playingPlayers: playingPlayersSubject,
+        initialPlayers: initialPlayersSubject,
         activePlayer: new BehaviorSubject<PlayerStats>({ id: 'player1', name: 'testPlayer' } as PlayerStats),
         getOrganizerId: jasmine.createSpy('getOrganizerId').and.returnValue('player1'),
         map: new BehaviorSubject<Cell[][]>([]),

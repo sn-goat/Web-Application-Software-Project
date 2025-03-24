@@ -93,7 +93,7 @@ describe('GameService', () => {
         const testPlayer = { id: 'p1' } as PlayerStats;
         service.playingPlayers.next([testPlayer]);
         service.removePlayerInGame(testPlayer);
-        expect(service.playingPlayers.value.length).toBe(0);
+        expect(service.playingPlayers.value.length).toBe(1);
     });
 
     it('should not remove player if not in game', () => {

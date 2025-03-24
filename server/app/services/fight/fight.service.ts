@@ -11,6 +11,7 @@ export class FightService {
     private readonly fleeThreshold = 0.3;
     private readonly dice4 = 4;
     private readonly dice6 = 6;
+    private readonly minDiceValue = 1;
     private logger: Logger = new Logger(FightService.name);
     private activeFights: Map<string, Fight> = new Map();
 
@@ -103,7 +104,7 @@ export class FightService {
             defender.diceResult = Math.floor(Math.random() * this.diceToNumber(defender.defenseDice)) + 1;
         } else {
             attacker.diceResult = this.diceToNumber(attacker.attackDice);
-            defender.diceResult = this.diceToNumber(defender.defenseDice);
+            defender.diceResult = this.minDiceValue;
         }
 
         let damage = attacker.attack + attacker.diceResult - (defender.defense + defender.diceResult);

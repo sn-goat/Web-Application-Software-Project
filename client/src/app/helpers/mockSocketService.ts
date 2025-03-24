@@ -88,14 +88,6 @@ export class MockSocketService {
         return this.startTurnSubject.asObservable();
     }
 
-    onEndTurn() {
-        return this.endTurnSubject.asObservable();
-    }
-
-    onFullInventory() {
-        return this.fullInventorySubject.asObservable();
-    }
-
     onBroadcastMove() {
         return this.broadcastMoveSubject.asObservable();
     }
