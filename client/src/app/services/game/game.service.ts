@@ -17,11 +17,11 @@ import { BehaviorSubject } from 'rxjs';
 export class GameService {
     map: BehaviorSubject<Cell[][]> = new BehaviorSubject<Cell[][]>([]);
     playingPlayers: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
+    initialPlayers: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
     activePlayer: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-    private initialPlayers: PlayerStats[] = [];
     private accessCode: string;
     private organizerId: string;
 
@@ -52,7 +52,6 @@ export class GameService {
         });
 
         this.socketService.onBroadcastDoor().subscribe((payload) => {
-            console.log('Changement de la porte à la position', payload.position, 'avec le nouvel état', payload.newState);
             const newMap = this.map.value;
             newMap[payload.position.y][payload.position.x].tile = payload.newState;
             this.map.next(newMap);
@@ -60,13 +59,8 @@ export class GameService {
         });
 
         this.socketService.onQuitGame().subscribe((game) => {
-            console.log('Quitting game', game.players);
             this.playingPlayers.next(game.players);
             this.map.next(game.map);
-        });
-
-        this.socketService.onEndGame().subscribe((winner: PlayerStats) => {
-            console.log(winner);
         });
     }
 
@@ -102,11 +96,11 @@ export class GameService {
     }
 
     isPlayerInGame(player: PlayerStats): boolean {
-        return this.playingPlayers.value.some((currentPlayer) => currentPlayer.id === player.id);
+        return this.initialPlayers.value.some((currentPlayer) => currentPlayer.id === player.id);
     }
 
     getInitialPlayers(): PlayerStats[] {
-        return this.initialPlayers;
+        return this.initialPlayers.value;
     }
 
     removePlayerInGame(player: PlayerStats): void {
@@ -122,7 +116,7 @@ export class GameService {
         this.activePlayer.next(game.players[game.currentTurn]);
         this.isDebugMode.next(false);
 
-        this.initialPlayers = game.players;
+        this.initialPlayers.next(game.players);
         this.accessCode = game.accessCode;
         this.organizerId = game.organizerId;
     }
@@ -188,7 +182,7 @@ export class GameService {
         this.activePlayer.next(null);
         this.isDebugMode.next(false);
         this.isActionSelected.next(false);
-        this.initialPlayers = [];
+        this.initialPlayers.next([]);
         this.accessCode = '';
         this.organizerId = '';
     }

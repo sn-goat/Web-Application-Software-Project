@@ -15,6 +15,7 @@ describe('GameMapPlayerComponent', () => {
     let gameServiceMock: any;
     let socketServiceMock: any;
     let currentPlayersSubject: BehaviorSubject<PlayerStats[]>;
+    let initialPlayersSubject: BehaviorSubject<PlayerStats[]>;
     let activePlayerSubject: BehaviorSubject<PlayerStats | null>;
     let unsubscribeSpy: jasmine.Spy;
 
@@ -57,12 +58,14 @@ describe('GameMapPlayerComponent', () => {
 
     beforeEach(async () => {
         currentPlayersSubject = new BehaviorSubject<PlayerStats[]>([]);
+        initialPlayersSubject = new BehaviorSubject<PlayerStats[]>([]);
         activePlayerSubject = new BehaviorSubject<PlayerStats | null>(null);
 
         unsubscribeSpy = jasmine.createSpy('unsubscribe');
 
         gameServiceMock = {
             playingPlayers: currentPlayersSubject.asObservable(),
+            initialPlayers: initialPlayersSubject.asObservable(),
             activePlayer: activePlayerSubject.asObservable(),
             getOrganizerId: () => 'organizer1',
         };
@@ -97,18 +100,6 @@ describe('GameMapPlayerComponent', () => {
         expect(component.srcAvatar).toBe(DEFAULT_PATH_AVATARS);
         expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
     });
-
-    it('should update players when currentPlayers$ emits', fakeAsync(() => {
-        // Si la souscription se fait dans ngAfterViewInit, l'appeler explicitement
-        component.ngAfterViewInit();
-        // Émettre la nouvelle valeur
-        currentPlayersSubject.next(mockPlayers);
-        tick();
-        fixture.detectChanges();
-        expect(component.players.length).toBe(2);
-        expect(component.players[0]).toEqual(mockPlayers[0]);
-        expect(component.players[1]).toEqual(mockPlayers[1]);
-    }));
 
     it('should update activePlayer when activePlayer$ emits', fakeAsync(() => {
         activePlayerSubject.next(mockActivePlayer);

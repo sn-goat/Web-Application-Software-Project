@@ -1,21 +1,14 @@
-/* eslint-disable max-lines */
-import { InternalEvents, InternalGameEvents, InternalTurnEvents } from '@app/constants/internal-events';
-import { MOVEMENT_TIMEOUT_IN_MS, RANDOM_SORT_OFFSET, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { MOVEMENT_TIMEOUT_IN_MS, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
+import { InternalEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { BoardService } from '@app/services/board/board.service';
 import { FightService } from '@app/services/fight/fight.service';
+import { GameUtils } from '@app/services/game/game-utils';
 import { TimerService } from '@app/services/timer/timer.service';
-import { Cell, TILE_COST, Vec2 } from '@common/board';
+import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, Fight, Game, PathInfo } from '@common/game';
-import {
-    ATTACK_ICE_DECREMENT,
-    DEFAULT_ATTACK_VALUE,
-    DEFAULT_DEFENSE_VALUE,
-    DEFAULT_MOVEMENT_DIRECTIONS,
-    DEFENSE_ICE_DECREMENT,
-    DIAGONAL_MOVEMENT_DIRECTIONS,
-    PlayerStats,
-} from '@common/player';
+import { TurnEvents } from '@common/game.gateway.events';
+import { ATTACK_ICE_DECREMENT, DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFENSE_ICE_DECREMENT, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -84,9 +77,9 @@ export class GameService {
     configureGame(accessCode: string, players: PlayerStats[]) {
         const game: Game = this.currentGames.get(accessCode);
         if (game) {
-            game.players = this.sortPlayersBySpeed(players);
-            const usedSpawnPoints = this.assignSpawnPoints(game.players, this.getAllSpawnPoints(game.map), game.map);
-            this.removeUnusedSpawnPoints(game.map, usedSpawnPoints);
+            game.players = GameUtils.sortPlayersBySpeed(players);
+            const usedSpawnPoints = GameUtils.assignSpawnPoints(game.players, GameUtils.getAllSpawnPoints(game.map), game.map);
+            GameUtils.removeUnusedSpawnPoints(game.map, usedSpawnPoints);
             return game;
         }
         return null;
@@ -97,12 +90,9 @@ export class GameService {
         const playerTurn = this.getPlayerTurn(accessCode);
         this.logger.log(`Configuring turn for game ${playerTurn.id}`);
 
-        if (!playerTurn) {
-            this.logger.log('No player turn found');
-        }
         playerTurn.movementPts = playerTurn.speed;
         playerTurn.actions = 1;
-        const path = this.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts);
+        const path = GameUtils.findPossiblePaths(this.currentGames.get(accessCode).map, playerTurn.position, playerTurn.movementPts);
         return {
             player: playerTurn,
             path: Object.fromEntries(path),
@@ -112,8 +102,8 @@ export class GameService {
     updatePlayerPathTurn(accessCode: string, playerToUpdate: PlayerStats): Map<string, PathInfo> {
         const player = this.getPlayer(accessCode, playerToUpdate.id);
         const map = this.getMap(accessCode);
-        const updatedPath = this.findPossiblePaths(map, player.position, player.movementPts);
-        this.eventEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(updatedPath) });
+        const updatedPath = GameUtils.findPossiblePaths(map, player.position, player.movementPts);
+        this.eventEmitter.emit(TurnEvents.UpdateTurn, { player, path: Object.fromEntries(updatedPath) });
         return updatedPath;
     }
 
@@ -187,7 +177,7 @@ export class GameService {
             map[player.spawnPosition.y][player.spawnPosition.x].player !== Avatar.Default &&
             map[player.spawnPosition.y][player.spawnPosition.x].player !== player.avatar
         ) {
-            const alternateSpawn = this.findValidSpawn(accessCode, player.spawnPosition);
+            const alternateSpawn = GameUtils.findValidSpawn(map, player.spawnPosition);
             if (alternateSpawn) this.movePlayer(accessCode, alternateSpawn, player);
             return;
         }
@@ -259,221 +249,10 @@ export class GameService {
     private isPlayerTurnEnded(accessCode: string, player: PlayerStats) {
         const map = this.getMap(accessCode);
         if (map) {
-            if (player.movementPts > 0 || (player.actions > 0 && this.isPlayerCanMakeAction(map, player.position))) {
+            if (player.movementPts > 0 || (player.actions > 0 && GameUtils.isPlayerCanMakeAction(map, player.position))) {
                 return false;
             }
             return true;
         }
-    }
-
-    private isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
-        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
-        for (const dir of directions) {
-            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
-                if (this.isValidCellForAction(map[newPos.y][newPos.x])) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private isValidCellForAction(cell: Cell): boolean {
-        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
-    }
-
-    private findPossiblePaths(game: Cell[][], playerPosition: Vec2, movementPoints: number): Map<string, PathInfo> {
-        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
-
-        const visited = new Map<string, PathInfo>();
-        // La file initiale contient l'état de départ avec un chemin vide et un coût nul.
-        const queue: { position: Vec2; path: Vec2[]; cost: number }[] = [{ position: playerPosition, path: [], cost: 0 }];
-
-        while (queue.length > 0) {
-            const { position, path, cost } = queue.shift();
-            // Si le coût dépasse, ne plus explorer.
-            if (cost > movementPoints) continue;
-            const key = this.vec2Key(position);
-
-            // On stocke ou met à jour le chemin pour cette position si nous avons trouvé un meilleur moyen.
-            if (!visited.has(key) || visited.get(key).cost > cost || (visited.get(key).cost === cost && visited.get(key).path.length > path.length)) {
-                visited.set(key, { path, cost });
-            }
-
-            // Explorer les positions adjacentes
-            for (const dir of directions) {
-                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-
-                if (!this.isValidPosition(game.length, newPos)) {
-                    continue;
-                }
-
-                const tileCost = this.getTileCost(game[newPos.y][newPos.x]);
-                if (tileCost === Infinity) {
-                    continue;
-                }
-
-                const newCost = cost + tileCost;
-                if (newCost > movementPoints) {
-                    continue;
-                }
-
-                const newKey = this.vec2Key(newPos);
-                const newPath = [...path, newPos];
-
-                // N'ajouter dans la queue que si ce chemin améliore celui trouvé pour newPos
-                if (
-                    !visited.has(newKey) ||
-                    visited.get(newKey).cost > newCost ||
-                    (visited.get(newKey).cost === newCost && visited.get(newKey).path.length > newPath.length)
-                ) {
-                    queue.push({
-                        position: newPos,
-                        path: newPath,
-                        cost: newCost,
-                    });
-                }
-            }
-        }
-
-        // Optionnel : retirer la position de départ des résultats (on considère qu'on ne se déplace pas si aucun mouvement n'est réalisé)
-        visited.delete(this.vec2Key(playerPosition));
-        return visited;
-    }
-
-    private sortPlayersBySpeed(players: PlayerStats[]): PlayerStats[] {
-        return players.sort((a, b) => {
-            if (a.speed === b.speed) {
-                return Math.random() - RANDOM_SORT_OFFSET;
-            }
-            return b.speed - a.speed;
-        });
-    }
-
-    private getAllSpawnPoints(map: Cell[][]): Vec2[] {
-        const spawnPoints: Vec2[] = [];
-        map.forEach((row, y) => {
-            row.forEach((cell, x) => {
-                if (cell.item === Item.SPAWN) {
-                    spawnPoints.push({ x, y });
-                }
-            });
-        });
-        return spawnPoints;
-    }
-
-    private assignSpawnPoints(players: PlayerStats[], spawnPoints: Vec2[], map: Cell[][]): Vec2[] {
-        // Mélanger les points de spawn
-        const shuffledSpawnPoints = [...spawnPoints];
-        for (let i = shuffledSpawnPoints.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * i);
-            [shuffledSpawnPoints[i], shuffledSpawnPoints[j]] = [shuffledSpawnPoints[j], shuffledSpawnPoints[i]];
-        }
-
-        // Assigner les points et retourner ceux utilisés
-        const usedSpawnPoints: Vec2[] = [];
-        players.forEach((player, index) => {
-            if (index < shuffledSpawnPoints.length) {
-                this.eventEmitter.emit(InternalGameEvents.AssignSpawn, { playerId: player.id, position: shuffledSpawnPoints[index] });
-                player.spawnPosition = shuffledSpawnPoints[index];
-                player.position = shuffledSpawnPoints[index];
-                this.logger.log(`Player ${player.name} assigned to spawn point ${shuffledSpawnPoints[index].x},${shuffledSpawnPoints[index].y}`);
-
-                // Placer l'avatar du joueur dans la cellule
-                const x = shuffledSpawnPoints[index].x;
-                const y = shuffledSpawnPoints[index].y;
-                map[y][x].player = player.avatar as Avatar;
-
-                usedSpawnPoints.push(shuffledSpawnPoints[index]);
-            }
-        });
-
-        return usedSpawnPoints;
-    }
-
-    private removeUnusedSpawnPoints(map: Cell[][], usedSpawnPoints: Vec2[]): void {
-        // Parcourir la carte et supprimer les points de spawn non utilisés
-        map.forEach((row, y) => {
-            row.forEach((cell, x) => {
-                if (cell.item === Item.SPAWN) {
-                    // Vérifier si ce spawn point est utilisé
-                    const isUsed = usedSpawnPoints.some((point) => point.x === x && point.y === y);
-                    if (!isUsed) {
-                        cell.item = Item.DEFAULT;
-                    }
-                }
-            });
-        });
-    }
-
-    private vec2Key(vec: Vec2): string {
-        return `${vec.x},${vec.y}`;
-    }
-
-    private isValidPosition(size: number, position: Vec2): boolean {
-        return position.y >= 0 && position.y < size && position.x >= 0 && position.x < size;
-    }
-
-    private isOccupiedByPlayer(cell: Cell): boolean {
-        return cell && cell.player !== undefined && cell.player !== Avatar.Default;
-    }
-
-    private getTileCost(cell: Cell): number {
-        // Si la cellule n'existe pas, retourner un coût infini
-        if (!cell) {
-            return Infinity;
-        }
-        // Si la cellule est occupée par un joueur, elle est infranchissable
-        if (this.isOccupiedByPlayer(cell)) {
-            return Infinity;
-        }
-
-        // Utiliser la valeur de la constante TILE_COST pour le type de tuile
-        const cost = TILE_COST.get(cell.tile);
-
-        // Si le coût n'est pas défini pour cette tuile, utiliser le coût par défaut de la cellule
-        return cost !== undefined ? cost : cell.cost;
-    }
-
-    private findValidSpawn(accessCode: string, start: Vec2): Vec2 | null {
-        const map = this.getMap(accessCode);
-        const rows = map.length;
-        const cols = map[0].length;
-
-        const queue: Vec2[] = [start];
-        const visited = new Set<string>();
-        visited.add(`${start.x},${start.y}`);
-
-        while (queue.length > 0) {
-            const current = queue.shift();
-
-            const cell = map[current.y][current.x];
-            if (cell && this.isValidSpawn(cell)) {
-                return cell.position;
-            }
-
-            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
-                const newX = current.x + dir.x;
-                const newY = current.y + dir.y;
-                const key = `${newX},${newY}`;
-
-                if (newX >= 0 && newX < cols && newY >= 0 && newY < rows && !visited.has(key)) {
-                    visited.add(key);
-                    queue.push({ x: newX, y: newY });
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private isValidSpawn(cell: Cell): boolean {
-        return (
-            cell.tile !== Tile.WALL &&
-            cell.tile !== Tile.CLOSED_DOOR &&
-            cell.tile !== Tile.OPENED_DOOR &&
-            (cell.player === Avatar.Default || cell.player === undefined)
-        );
     }
 }

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable max-lines */
 import { GameGateway } from '@app/gateways/game/game.gateway';
 import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
-import { Fight, FightInfo, PathInfo } from '@common/game';
+import { Fight, FightInfo, MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerStats } from '@common/player';
 import { Logger } from '@nestjs/common';
@@ -25,9 +26,10 @@ describe('GameGateway', () => {
     let toMock: jest.Mock;
 
     beforeEach(async () => {
+        jest.useFakeTimers();
         gameService = {
             createGame: jest.fn(),
-            isGameDebugMode: jest.fn(),
+            isGameDebugMode: jest.fn().mockReturnValue(false),
             configureGame: jest.fn().mockResolvedValue('configuredGame'),
             toggleDebugState: jest.fn(),
             isActivePlayerReady: jest.fn().mockReturnValue(false),
@@ -36,13 +38,18 @@ describe('GameGateway', () => {
             movePlayer: jest.fn(),
             updatePlayerPathTurn: jest.fn(),
             switchTurn: jest.fn(),
-            configureTurn: jest.fn().mockReturnValue({ player: { id: 'player1', avatar: 'avatar.png' } }),
+            configureTurn: jest.fn().mockReturnValue({
+                player: { id: 'p1', name: 'Alice', avatar: 'a.png' },
+                path: new Map<string, any>(),
+            }),
             startTimer: jest.fn(),
             endTurnRequested: jest.fn(),
-            getPlayer: jest.fn(),
-            getPlayerTurn: jest.fn().mockReturnValue({ id: 'p1', name: 'Alice', avatar: 'a.png', spawnPosition: { x: 0, y: 0 } } as PlayerStats),
+            getPlayer: jest.fn().mockReturnValue({ id: 'p1', name: 'Alice', avatar: 'a.png' } as PlayerStats),
+            getPlayerTurn: jest.fn().mockReturnValue({ id: 'p1', name: 'Alice', avatar: 'a.png' } as PlayerStats),
             incrementWins: jest.fn(),
             movePlayerToSpawn: jest.fn(),
+            decrementAction: jest.fn(),
+            endDebugMode: jest.fn(),
         };
 
         timerService = {
@@ -271,7 +278,6 @@ describe('GameGateway', () => {
         it('handleReady should call startTurn if active player is ready', () => {
             const payload = { accessCode: 'GAME_READY', playerId: 'player1' };
             (gameService.isActivePlayerReady as jest.Mock).mockReturnValue(true);
-            // Espionner startTurn (méthode privée)
             const startTurnSpy = jest.spyOn<any, any>(gateway as any, 'startTurn').mockImplementation(() => {});
             gateway.handleReady(client as Socket, payload);
             expect(gameService.isActivePlayerReady).toHaveBeenCalledWith(payload.accessCode, payload.playerId);
@@ -336,7 +342,7 @@ describe('GameGateway', () => {
         it('handlePlayerAttack should call fightService.playerAttack with accessCode', () => {
             const accessCode = 'FIGHT3';
             gateway.handlePlayerAttack(client as Socket, accessCode);
-            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode, undefined);
+            expect(fightService.playerAttack).toHaveBeenCalledWith(accessCode, false);
         });
 
         it('handleConnection should emit welcome message', () => {
@@ -399,5 +405,78 @@ describe('GameGateway', () => {
         expect(startTimerSpy).toHaveBeenCalledWith(accessCode);
 
         jest.useRealTimers();
+    });
+    describe('sendFightEnd additional branches', () => {
+        const accessCode = 'roomTest';
+        let fight: any;
+        let payload: any;
+
+        beforeEach(() => {
+            // On définit un fight existant par défaut
+            fight = {
+                player1: { id: 'p1', name: 'Alice', avatar: 'a.png', spawnPosition: { x: 0, y: 0 } },
+                player2: { id: 'p2', name: 'Bob', avatar: 'b.png', spawnPosition: { x: 1, y: 1 } },
+            };
+            (fightService.getFight as jest.Mock).mockReturnValue(fight);
+
+            // On configure gameService.getPlayer et getPlayerTurn pour renvoyer les joueurs
+            (gameService.getPlayer as jest.Mock).mockImplementation((code: string, id: string) => {
+                return id === fight.player1.id ? fight.player1 : fight.player2;
+            });
+            (gameService.getPlayerTurn as jest.Mock).mockReturnValue(fight.player2);
+        });
+
+        it('should log error and return if no active fight exists', () => {
+            (fightService.getFight as jest.Mock).mockReturnValue(undefined);
+            const logErrorSpy = jest.spyOn(logger, 'error');
+            payload = { accessCode };
+            gateway.sendFightEnd(payload);
+            expect(logErrorSpy).toHaveBeenCalledWith('No active fight found for access code: ' + accessCode);
+        });
+
+        it('should emit GameEvents.End if winner wins >= MAX_FIGHT_WINS', () => {
+            const winner = { id: 'p1', name: 'Alice', wins: MAX_FIGHT_WINS, avatar: 'a.png' };
+            const loser = fight.player2;
+            payload = { accessCode, winner, loser };
+            const toSpy = jest.spyOn(server, 'to').mockReturnValue({ emit: jest.fn() } as any);
+            gateway.sendFightEnd(payload);
+            expect(toSpy).toHaveBeenCalledWith(accessCode);
+        });
+
+        it('should call endTurn if the loser is the current player turn', () => {
+            const winner = fight.player1;
+            const loser = fight.player2;
+            payload = { accessCode, winner, loser };
+            const endTurnSpy = jest.spyOn<any, any>(gateway as any, 'endTurn').mockImplementation(() => {});
+
+            gateway.sendFightEnd(payload);
+            expect(endTurnSpy).toHaveBeenCalledWith(accessCode);
+        });
+    });
+    describe('handlePlayerRemoved and handleEndDebug', () => {
+        it('handlePlayerRemoved should log and emit BroadcastQuitGame event', () => {
+            const payload = { accessCode: 'testRoom', game: { id: 'game1', players: [] } as any };
+            // On simule server.to() pour récupérer l'objet avec méthode emit
+            const emitMock = jest.fn();
+            jest.spyOn(server, 'to').mockReturnValue({ emit: emitMock } as any);
+
+            gateway.handlePlayerRemoved(payload);
+
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(emitMock).toHaveBeenCalledWith(GameEvents.BroadcastQuitGame, payload.game);
+        });
+
+        it('handleEndDebug should log, call gameService.endDebugMode and emit BroadcastEndDebugState', () => {
+            const accessCode = 'testRoom';
+            const endDebugModeSpy = jest.spyOn(gameService, 'endDebugMode');
+            const emitMock = jest.fn();
+            jest.spyOn(server, 'to').mockReturnValue({ emit: emitMock } as any);
+            const clientMock = {} as Socket; // pas utilisé ici
+
+            gateway.handleEndDebug(clientMock, accessCode);
+            expect(endDebugModeSpy).toHaveBeenCalledWith(accessCode);
+            expect(server.to).toHaveBeenCalledWith(accessCode);
+            expect(emitMock).toHaveBeenCalledWith(GameEvents.BroadcastEndDebugState);
+        });
     });
 });

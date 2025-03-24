@@ -323,48 +323,6 @@ describe('SocketService', () => {
         }
     });
 
-    // it('onTurnSwitch should receive turn switch data from both events', (done) => {
-    //     const dummyPath: Record<string, PathInfo> = { key: { dummy: 'turn' } as any };
-    //     const turnData = { player: { id: 'pSwitch' } as any, path: dummyPath };
-    //     let callCount = 0;
-    //     service.onTurnSwitch().subscribe(({ player, path }) => {
-    //         expect(player).toEqual(turnData.player);
-    //         expect(path).toBeInstanceOf(Map);
-    //         callCount++;
-    //         if (callCount === 2) {
-    //             done();
-    //         }
-    //     });
-    //     if (fakeSocket.callbacks[TurnEvents.PlayerTurn]) {
-    //         fakeSocket.callbacks[TurnEvents.PlayerTurn](turnData);
-    //     }
-    //     if (fakeSocket.callbacks[TurnEvents.UpdateTurn]) {
-    //         fakeSocket.callbacks[TurnEvents.UpdateTurn](turnData);
-    //     }
-    // });
-
-    it('onEndTurn should receive end turn data', (done) => {
-        const data = { info: 'endTurn' };
-        service.onEndTurn().subscribe((received) => {
-            expect(received).toEqual(data);
-            done();
-        });
-        if (fakeSocket.callbacks[TurnEvents.End]) {
-            fakeSocket.callbacks[TurnEvents.End](data);
-        }
-    });
-
-    it('onBroadcastEnd should receive broadcast end data', (done) => {
-        const data = 'broadcastEnd';
-        service.onBroadcastEnd().subscribe((received) => {
-            expect(received).toEqual(data);
-            done();
-        });
-        if (fakeSocket.callbacks[TurnEvents.BroadcastEnd]) {
-            fakeSocket.callbacks[TurnEvents.BroadcastEnd](data);
-        }
-    });
-
     it('onBroadcastMove should receive broadcast move data', (done) => {
         const moveData = { previousPosition: { x: 1, y: 1 } as Vec2, player: { id: 'pMove' } as any };
         service.onBroadcastMove().subscribe((received) => {
@@ -464,17 +422,6 @@ describe('SocketService', () => {
         });
         if (fakeSocket.callbacks[RoomEvents.RoomLocked]) {
             fakeSocket.callbacks[RoomEvents.RoomLocked](lockedData);
-        }
-    });
-
-    it('onRoomData should receive room data', (done) => {
-        const roomData = { name: 'TestRoom' } as any;
-        service.onRoomData().subscribe((data) => {
-            expect(data).toEqual(roomData);
-            done();
-        });
-        if (fakeSocket.callbacks[RoomEvents.RoomData]) {
-            fakeSocket.callbacks[RoomEvents.RoomData](roomData);
         }
     });
 

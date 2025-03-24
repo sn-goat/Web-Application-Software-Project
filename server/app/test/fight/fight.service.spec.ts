@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { InternalFightEvents } from '@app/constants/internal-events';
+import { FIGHT_TURN_DURATION_NO_FLEE_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { FightService } from '@app/services/fight/fight.service';
 import { GameService } from '@app/services/game/game.service';
 import { TimerService } from '@app/services/timer/timer.service';
@@ -106,6 +108,45 @@ describe('FightService', () => {
             expect(eventEmitter.emit).toHaveBeenCalledWith(FightEvents.SwitchTurn, 'roomTurn');
             expect(timerService.startTimer).toHaveBeenCalledWith('roomTurn', expect.any(Number), 'combat');
         });
+
+        it('should restart timer with FIGHT_TURN_DURATION_NO_FLEE_IN_S when currentPlayer.fleeAttempts is 0', () => {
+            // Create two players. Set player2.fleeAttempts to 0 so that after switching, the current player has no fleeAttempts left.
+            const player1: PlayerStats & FightInfo = {
+                id: 'p1',
+                name: 'Alice',
+                speed: 10,
+                fleeAttempts: 2,
+                currentLife: 50,
+                diceResult: 0,
+                attackDice: 'D6',
+                defenseDice: 'D4',
+            } as any;
+            const player2: PlayerStats & FightInfo = {
+                id: 'p2',
+                name: 'Bob',
+                speed: 5,
+                fleeAttempts: 0, // No flee attempts for player2
+                currentLife: 50,
+                diceResult: 0,
+                attackDice: 'D6',
+                defenseDice: 'D4',
+            } as any;
+            // Set player1 as the current player initially.
+            const fight: Fight = {
+                player1,
+                player2,
+                currentPlayer: player1,
+            };
+            fightService['activeFights'].set('roomFleeZero', fight);
+
+            // Spy on timerService.startTimer before invoking nextTurn.
+            const startTimerSpy = jest.spyOn(timerService, 'startTimer');
+
+            // Call nextTurn. Internally, switchPlayer will change currentPlayer to player2.
+            fightService.nextTurn('roomFleeZero');
+
+            expect(startTimerSpy).toHaveBeenCalledWith('roomFleeZero', FIGHT_TURN_DURATION_NO_FLEE_IN_S, 'combat');
+        });
     });
 
     describe('playerFlee', () => {
@@ -209,89 +250,106 @@ describe('FightService', () => {
             jest.spyOn(global.Math, 'random').mockRestore();
         });
     });
-});
 
-describe('FightService - getFighter and getOpponent', () => {
-    let fightService: FightService;
-    let timerService: Partial<TimerService>;
-    let eventEmitter: Partial<EventEmitter2>;
-
-    beforeEach(() => {
-        timerService = {
-            startTimer: jest.fn(),
-            stopTimer: jest.fn(),
-            resumeTimer: jest.fn(),
-            getRemainingTime: jest.fn(),
+    describe('FightService - getFighter and getOpponent', () => {
+        const accessCode = 'room1';
+        const fighter1: PlayerStats & FightInfo = {
+            id: 'p1',
+            name: 'Alice',
+            life: 100,
+            attack: 10,
+            defense: 5,
+            speed: 7,
+            fleeAttempts: 2,
+            currentLife: 100,
+            diceResult: 0,
+            // Ajoutez d'autres propriétés nécessaires selon votre interface
+        } as PlayerStats & FightInfo;
+        const fighter2: PlayerStats & FightInfo = {
+            id: 'p2',
+            name: 'Bob',
+            life: 100,
+            attack: 8,
+            defense: 6,
+            speed: 5,
+            fleeAttempts: 2,
+            currentLife: 100,
+            diceResult: 0,
+            // Ajoutez d'autres propriétés nécessaires selon votre interface
+        } as PlayerStats & FightInfo;
+        const fight: Fight = {
+            player1: fighter1,
+            player2: fighter2,
+            currentPlayer: fighter1,
         };
-        eventEmitter = {
-            emit: jest.fn(),
-        };
 
-        fightService = new FightService(timerService as TimerService, eventEmitter as EventEmitter2);
-        // S'assurer de partir d'un contexte propre
-        (fightService as any)['activeFights'].clear();
-    });
+        describe('getFighter', () => {
+            it('should return null if no fight exists for the given accessCode', () => {
+                expect(fightService.getFighter('nonexistent', 'p1')).toBeNull();
+            });
 
-    const accessCode = 'room1';
-    const fighter1: PlayerStats & FightInfo = {
-        id: 'p1',
-        name: 'Alice',
-        life: 100,
-        attack: 10,
-        defense: 5,
-        speed: 7,
-        fleeAttempts: 2,
-        currentLife: 100,
-        diceResult: 0,
-        // Ajoutez d'autres propriétés nécessaires selon votre interface
-    } as PlayerStats & FightInfo;
-    const fighter2: PlayerStats & FightInfo = {
-        id: 'p2',
-        name: 'Bob',
-        life: 100,
-        attack: 8,
-        defense: 6,
-        speed: 5,
-        fleeAttempts: 2,
-        currentLife: 100,
-        diceResult: 0,
-        // Ajoutez d'autres propriétés nécessaires selon votre interface
-    } as PlayerStats & FightInfo;
-    const fight: Fight = {
-        player1: fighter1,
-        player2: fighter2,
-        currentPlayer: fighter1,
-    };
+            it('should return fighter1 when the given playerId matches fighter1 id', () => {
+                (fightService as any)['activeFights'].set(accessCode, fight);
+                expect(fightService.getFighter(accessCode, 'p1')).toEqual(fighter1);
+            });
 
-    describe('getFighter', () => {
-        it('should return null if no fight exists for the given accessCode', () => {
-            expect(fightService.getFighter('nonexistent', 'p1')).toBeNull();
+            it('should return fighter2 when the given playerId does not match fighter1 id', () => {
+                (fightService as any)['activeFights'].set(accessCode, fight);
+                expect(fightService.getFighter(accessCode, 'p2')).toEqual(fighter2);
+            });
         });
 
-        it('should return fighter1 when the given playerId matches fighter1 id', () => {
-            (fightService as any)['activeFights'].set(accessCode, fight);
-            expect(fightService.getFighter(accessCode, 'p1')).toEqual(fighter1);
-        });
+        describe('getOpponent', () => {
+            it('should return null if no fight exists for the given accessCode', () => {
+                expect(fightService.getOpponent('nonexistent', 'p1')).toBeNull();
+            });
 
-        it('should return fighter2 when the given playerId does not match fighter1 id', () => {
-            (fightService as any)['activeFights'].set(accessCode, fight);
-            expect(fightService.getFighter(accessCode, 'p2')).toEqual(fighter2);
+            it('should return fighter2 as opponent for fighter1', () => {
+                (fightService as any)['activeFights'].set(accessCode, fight);
+                expect(fightService.getOpponent(accessCode, 'p1')).toEqual(fighter2);
+            });
+
+            it('should return fighter1 as opponent for fighter2', () => {
+                (fightService as any)['activeFights'].set(accessCode, fight);
+                expect(fightService.getOpponent(accessCode, 'p2')).toEqual(fighter1);
+            });
         });
     });
 
-    describe('getOpponent', () => {
-        it('should return null if no fight exists for the given accessCode', () => {
-            expect(fightService.getOpponent('nonexistent', 'p1')).toBeNull();
-        });
-
-        it('should return fighter2 as opponent for fighter1', () => {
-            (fightService as any)['activeFights'].set(accessCode, fight);
-            expect(fightService.getOpponent(accessCode, 'p1')).toEqual(fighter2);
-        });
-
-        it('should return fighter1 as opponent for fighter2', () => {
-            (fightService as any)['activeFights'].set(accessCode, fight);
-            expect(fightService.getOpponent(accessCode, 'p2')).toEqual(fighter1);
+    describe('FightService - playerAttack (debug mode)', () => {
+        it('should use diceToNumber for both attacker and defender when isDebugMode is true', () => {
+            // Create attacker and defender with dice defined
+            const attacker: PlayerStats & FightInfo = {
+                id: 'p1',
+                name: 'Attacker',
+                attack: 5,
+                attackDice: 'D6',
+                defenseDice: 'D4',
+                defense: 1,
+                currentLife: 10,
+                diceResult: 0,
+            } as any;
+            const defender: PlayerStats & FightInfo = {
+                id: 'p2',
+                name: 'Defender',
+                attack: 4,
+                attackDice: 'D4',
+                defenseDice: 'D6',
+                defense: 2,
+                currentLife: 10,
+                diceResult: 0,
+            } as any;
+            // Assemble fight object with attacker as currentPlayer
+            const fight: Fight = {
+                player1: attacker,
+                player2: defender,
+                currentPlayer: attacker,
+            };
+            (fightService as any)['activeFights'].set('roomDebug', fight);
+            jest.spyOn(fightService, 'nextTurn').mockImplementation(() => {});
+            fightService.playerAttack('roomDebug', true);
+            expect(attacker.diceResult).toBe(6);
+            expect(defender.diceResult).toBe(1);
         });
     });
 });

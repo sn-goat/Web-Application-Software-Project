@@ -99,14 +99,6 @@ export class SocketService {
         });
     }
 
-    onRoomData(): Observable<Room> {
-        return new Observable((observer) => {
-            this.socket.on(RoomEvents.RoomData, (data) => observer.next(data));
-        });
-    }
-
-    // Game events
-    // Send
     createGame(accessCode: string, mapName: string) {
         this.socket.emit(GameEvents.Create, { accessCode, mapName, organizerId: this.socket.id });
     }
@@ -301,12 +293,6 @@ export class SocketService {
             this.socket.on(GameEvents.BroadcastEndGame, (winner) => {
                 observer.next(winner);
             });
-        });
-    }
-
-    onNotEnoughPlayers(): Observable<void> {
-        return new Observable((observer) => {
-            this.socket.on(RoomEvents.NotEnoughPlayer, (data) => observer.next(data));
         });
     }
 

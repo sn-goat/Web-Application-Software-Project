@@ -27,6 +27,9 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
         this.subscriptions.push(
             this.gameService.playingPlayers.subscribe((gamePlayers: PlayerStats[]) => {
                 this.playersInGame = gamePlayers;
+            }),
+
+            this.gameService.initialPlayers.subscribe((gamePlayers: PlayerStats[]) => {
                 this.players = gamePlayers;
             }),
 
@@ -35,8 +38,8 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
             }),
 
             this.socketService.onWinner().subscribe((winner: PlayerStats) => {
-                const playerToUpdate = this.playersInGame.findIndex((player) => winner.id === player.id);
-                this.playersInGame[playerToUpdate] = winner;
+                const playerToUpdate = this.players.findIndex((player) => winner.id === player.id);
+                this.players[playerToUpdate] = winner;
             }),
         );
         this.getOrganizerId = this.gameService.getOrganizerId.bind(this.gameService);
@@ -47,7 +50,7 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
     }
 
     playerIsInGame(player: PlayerStats): boolean {
-        return this.playersInGame.some((p) => p.id === player.id);
+        return player && this.playersInGame.some((playerInGame) => playerInGame.id === player.id);
     }
 
     ngOnDestroy() {

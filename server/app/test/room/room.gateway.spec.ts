@@ -4,6 +4,7 @@
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { RoomService } from '@app/services/room/room.service';
 import { PlayerStats } from '@common/player';
+import { RoomEvents } from '@common/room.gateway.events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Socket } from 'socket.io';
 
@@ -26,6 +27,7 @@ describe('RoomGateway', () => {
             removePlayer: jest.fn(),
             disconnectPlayer: jest.fn(),
             getRoom: jest.fn(),
+            quitGame: jest.fn(),
         };
         eventEmitter = new EventEmitter2();
 
@@ -297,6 +299,52 @@ describe('RoomGateway', () => {
             gateway.handleDisconnectPlayer(client as Socket, payload);
 
             expect(client.emit).toHaveBeenCalledWith('disconnectError', { message: 'Impossible de déconnecter le joueur.' });
+        });
+    });
+
+    describe('handleDisconnectPlayer - admin disconnect', () => {
+        it('should emit AdminDisconnected when the disconnected player is the room organizer', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'admin1' };
+            const room = { organizerId: 'admin1', players: [] };
+            (roomService.getRoom as jest.Mock).mockReturnValue(room);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
+            gateway.handleDisconnectPlayer(client as Socket, payload);
+            expect(server.to).toHaveBeenCalledWith(payload.accessCode);
+            expect(roomEmitMock).toHaveBeenCalledWith(RoomEvents.AdminDisconnected);
+        });
+    });
+
+    describe('handleQuitGame', () => {
+        it('should log and emit NotEnoughPlayer when lastPlayerId exists', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'player1' };
+            const lastPlayerId = 'lastPlayer';
+            // Simulate that quitGame returns a truthy lastPlayerId
+            (roomService.quitGame as jest.Mock).mockReturnValue(lastPlayerId);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
+
+            gateway.handleQuitGame(client as Socket, payload);
+
+            expect(logger.log).toHaveBeenCalledWith(`LastPlayer ${lastPlayerId} quit game in room`);
+            expect(logger.log).toHaveBeenCalledWith(`LastPlayer ${lastPlayerId} send quit`);
+            expect(server.to).toHaveBeenCalledWith(lastPlayerId);
+            expect(roomEmitMock).toHaveBeenCalledWith(RoomEvents.NotEnoughPlayer);
+        });
+
+        it('should log and not emit when lastPlayerId is falsy', () => {
+            const payload = { accessCode: 'ROOM123', playerId: 'player1' };
+            // Simulate quitGame returns a falsy value (e.g., null)
+            (roomService.quitGame as jest.Mock).mockReturnValue(null);
+            const roomEmitMock = jest.fn();
+            (server.to as jest.Mock).mockReturnValue({ emit: roomEmitMock });
+
+            gateway.handleQuitGame(client as Socket, payload);
+
+            expect(logger.log).toHaveBeenCalledWith('LastPlayer null quit game in room');
+            // No subsequent log for sending quit and no event emitted
+            expect(server.to).not.toHaveBeenCalledWith(null);
+            expect(roomEmitMock).not.toHaveBeenCalled();
         });
     });
 
