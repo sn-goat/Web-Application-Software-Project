@@ -10,7 +10,7 @@
         <button (click)="disconnect()">Disconnect</button>
 
         @if (isAdmin) {
-        <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()">
+        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="configureGame()">
             Démarrer partie!
         </button>
         }

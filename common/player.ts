@@ -9,8 +9,8 @@ export interface PlayerInfo {
 export type Dice = 'D4' | 'D6';
 
 export interface PlayerAttributes {
-    attack: number;
-    defense: number;
+    attackPower: number;
+    defensePower: number;
     speed: number;
     life: number;
     attackDice: Dice;
@@ -25,7 +25,7 @@ export interface GameStats {
     spawnPosition: Vec2;
 }
 
-export type PlayerStats = PlayerInfo & PlayerAttributes & GameStats;
+export type IPlayer = PlayerInfo & PlayerAttributes & GameStats;
 
 export const DEFAULT_ATTACK_VALUE = 4;
 export const ATTACK_ICE_DECREMENT = 2;

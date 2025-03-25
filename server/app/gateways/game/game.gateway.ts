@@ -1,7 +1,7 @@
 import { InternalEvents, InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
-import { THREE_SECONDS_IN_MS } from '@app/gateways/game/game.gateway.constants';
+import { THREE_SECONDS_IN_MS, TURN_DURATION_IN_S } from '@app/gateways/game/game.gateway.constants';
 import { FightService } from '@app/services/fight/fight.service';
-import { GameService } from '@app/services/game/game.service';
+import { GameManagerService } from '@app/services/game/games-manager.service';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
@@ -20,7 +20,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private logger: Logger = new Logger(GameGateway.name);
 
     constructor(
-        private readonly gameService: GameService,
+        private readonly gameManager: GameManagerService,
         private readonly timerService: TimerService,
         private readonly fightService: FightService,
     ) {}
@@ -130,17 +130,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, payload.game);
     }
 
-    @SubscribeMessage(GameEvents.Create)
-    handleGameCreation(client: Socket, payload: { accessCode: string; mapName: string; organizerId: string }) {
-        this.gameService.createGame(payload.accessCode, payload.organizerId, payload.mapName);
-    }
-
-    @SubscribeMessage(GameEvents.Configure)
-    handleGameConfigure(client: Socket, payload: { accessCode: string; players: PlayerStats[] }) {
-        const game = this.gameService.configureGame(payload.accessCode, payload.players);
-        this.logger.log('Game configured');
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastStartGame, game);
-        this.logger.log('Game started');
+    @SubscribeMessage(GameEvents.Start)
+    handleGameStart(client: Socket, accessCode: string) {
+        let game = this.gameManager.getGame(accessCode);
+        if (!game) {
+            this.logger.error('Game not found for access code: ' + accessCode);
+            return;
+        }
+        game = game.configureGame();
+        this.server.to(accessCode).emit(GameEvents.GameStarted, game);
+        this.startTurn(accessCode, game);
     }
 
     @SubscribeMessage(GameEvents.Debug)
@@ -228,13 +227,12 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.startTurn(accessCode);
     }
 
-    private startTurn(accessCode: string) {
-        this.logger.log('Starting turn');
-        const turn = this.gameService.configureTurn(accessCode);
+    private startTurn(accessCode: string, game: Game) {
+        const turn = game.configureTurn();
         this.logger.log(`Next player turn id: ${turn.player.id}`);
         this.server.to(accessCode).emit(TurnEvents.PlayerTurn, turn);
         setTimeout(() => {
-            this.gameService.startTimer(accessCode);
+            game.getTimer().startTimer(TURN_DURATION_IN_S);
             this.server.to(turn.player.id).emit(TurnEvents.Start, {});
         }, THREE_SECONDS_IN_MS);
     }

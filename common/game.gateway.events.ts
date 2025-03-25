@@ -1,11 +1,12 @@
 export enum GameEvents {
+    Start = 'startGame',
     Create = 'createGame',
     Configure = 'configureGame',
     Ready = 'readyForStart',
     Debug = 'toggleDebug',
     EndDebug = 'endDebug',
     AssignSpawn = 'assignSpawn',
-    BroadcastStartGame = 'startGame',
+    GameStarted = 'gameStarted',
     BroadcastDebugState = 'debug',
     BroadcastEndDebugState = 'endDebug',
     End = 'endGame',

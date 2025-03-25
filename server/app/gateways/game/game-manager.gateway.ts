@@ -7,7 +7,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Player } from '@app/class/player';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -27,6 +26,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage(RoomEvents.CreateRoom)
     handleCreateRoom(client: Socket, map: Cell[][]) {
         const room: Room = this.gameManager.createRoom(client.id, map);
+
         client.join(room.accessCode);
         client.emit(RoomEvents.RoomCreated, room);
         this.logger.log(`Salle de jeu créée avec le code ${room.accessCode}`);
@@ -41,6 +41,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
         client.join(payload.accessCode);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.game.players);
     }
 
     @SubscribeMessage(RoomEvents.LockRoom)
@@ -65,41 +66,46 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage(RoomEvents.ShareCharacter)
     handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerStats }) {
-        const player = new Player(client.id, payload.player);
-        const room = this.gameManager.shareCharacter(payload.accessCode, player);
+        const room = this.gameManager.shareCharacter(payload.accessCode, payload.player);
         if (!room) {
             client.emit(RoomEvents.CharacterError, { message: 'Impossible de partager le personnage.' });
             return;
         }
-        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, { room });
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.RemovePlayer)
     handleRemovePlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
-        const room = this.gameManager.removePlayer(payload.accessCode, payload.playerId);
+        const room = this.roomService.removePlayer(payload.accessCode, payload.playerId);
         if (!room) {
             client.emit(RoomEvents.RemoveError, { message: 'Impossible de supprimer le joueur.' });
             return;
         }
-        this.server.to(payload.accessCode).emit(RoomEvents.PlayerRemoved, room.game.players);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerRemoved, room.players);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.DisconnectPlayer)
     handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
-        let room = this.gameManager.getRoom(payload.accessCode);
+        // Vérifier si le joueur déconnecté est l'admin et émettre l'événement avant toute modification de la salle
+        const currentRoom = this.roomService.getRoom(payload.accessCode);
+        if (currentRoom && payload.playerId === currentRoom.organizerId) {
+            this.server.to(payload.accessCode).emit(RoomEvents.AdminDisconnected);
+        }
+
+        const room = this.roomService.disconnectPlayer(payload.accessCode, payload.playerId);
         if (!room) {
             client.emit(RoomEvents.DisconnectError, { message: 'Impossible de déconnecter le joueur.' });
             return;
-        } else if (room && room.isPlayerAdmin(payload.playerId)) {
-            this.server.to(payload.accessCode).emit(RoomEvents.AdminDisconnected);
         }
-        room = this.gameManager.disconnectPlayer(payload.accessCode, payload.playerId);
-        this.server.to(payload.accessCode).emit(RoomEvents.PlayerDisconnected, room.game.players);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerDisconnected, room.players);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerList, room.players);
     }
 
     @SubscribeMessage(RoomEvents.GetRoom)
     handleGetRoom(client: Socket, payload: { accessCode: string }) {
-        const room = this.gameManager.getRoom(payload.accessCode);
+        const room = this.roomService.getRoom(payload.accessCode);
         if (!room) {
             client.emit(RoomEvents.RoomError, { message: 'Salle introuvable.' });
             return;
@@ -128,10 +134,6 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     handleDisconnect(client: Socket) {
         this.logger.log(`Client déconnecté : ${client.id}`);
-        client.rooms.forEach((room) => {
-            this.gameManager.removePlayer(room, client.id);
-            this.server.to(room).emit(RoomEvents.PlayerDisconnected, this.gameManager.getPlayers(room));
-        });
     }
 
     private handleRoomDeletion(accessCode: string): void {

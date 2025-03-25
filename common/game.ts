@@ -1,17 +1,14 @@
 import { Cell, Vec2 } from './board';
 import { PlayerStats } from './player';
 
-export interface Room {
+export interface IRoom {
     accessCode: string;
     organizerId: string;
-    players: PlayerStats[];
     isLocked: boolean;
-    mapSize: number;
+    game: IGame;
 }
 
-export interface Game {
-    organizerId: string;
-    accessCode: string;
+export interface IGame {
     players: PlayerStats[];
     map: Cell[][];
     currentTurn: number;

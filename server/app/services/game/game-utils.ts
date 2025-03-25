@@ -1,8 +1,9 @@
+import { Player } from '@app/class/player';
 import { RANDOM_SORT_OFFSET } from '@app/gateways/game/game.gateway.constants';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';
-import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, PlayerStats } from '@common/player';
+import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS } from '@common/player';
 
 export class GameUtils {
     static isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
@@ -101,7 +102,7 @@ export class GameUtils {
         return null;
     }
 
-    static sortPlayersBySpeed(players: PlayerStats[]): PlayerStats[] {
+    static sortPlayersBySpeed(players: Player[]): Player[] {
         return players.sort((a, b) => {
             if (a.speed === b.speed) {
                 return Math.random() - RANDOM_SORT_OFFSET;
@@ -122,7 +123,7 @@ export class GameUtils {
         return spawnPoints;
     }
 
-    static assignSpawnPoints(players: PlayerStats[], spawnPoints: Vec2[], map: Cell[][]): Vec2[] {
+    static assignSpawnPoints(players: Player[], spawnPoints: Vec2[], map: Cell[][]): Vec2[] {
         const shuffledSpawnPoints = [...spawnPoints];
         for (let i = shuffledSpawnPoints.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * i);
