@@ -8,18 +8,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
-import {
-    DEFAULT_ACTIONS,
-    DEFAULT_ATTACK_VALUE,
-    DEFAULT_DEFENSE_VALUE,
-    DEFAULT_DICE,
-    DEFAULT_LIFE_VALUE,
-    DEFAULT_MOVEMENT_POINTS,
-    DEFAULT_POSITION,
-    DEFAULT_SPEED_VALUE,
-    DEFAULT_WINS,
-    IPlayer,
-} from '@common/player';
+import { DEFAULT_DICE, DEFAULT_LIFE_VALUE, DEFAULT_SPEED_VALUE, PlayerInput } from '@common/player';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -46,21 +35,13 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     attackSelected: boolean = false;
     defenseSelected: boolean = false;
 
-    playerStats: IPlayer = {
-        id: ' ',
+    playerStats: PlayerInput = {
         name: '',
         avatar: this.currentPortraitImage,
         life: DEFAULT_LIFE_VALUE,
-        attackPower: DEFAULT_ATTACK_VALUE,
-        defensePower: DEFAULT_DEFENSE_VALUE,
         speed: DEFAULT_SPEED_VALUE,
         attackDice: DEFAULT_DICE,
         defenseDice: DEFAULT_DICE,
-        movementPts: DEFAULT_MOVEMENT_POINTS,
-        actions: DEFAULT_ACTIONS,
-        position: DEFAULT_POSITION,
-        spawnPosition: DEFAULT_POSITION,
-        wins: DEFAULT_WINS,
     };
 
     takenAvatars: string[] = [];
@@ -172,8 +153,6 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     }
 
     shareCharacter(): void {
-        this.playerService.setPlayer(this.playerStats);
-        this.playerService.setAccessCode(this.accessCode);
         this.socketEmitter.shareCharacter(this.playerStats);
     }
 
@@ -187,9 +166,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
                 this.socketReceiver.onRoomCreated().subscribe((data) => {
                     this.accessCode = data.accessCode;
                     this.socketEmitter.shareCharacter(this.playerStats);
-                    this.playerService.setPlayer(this.playerStats);
                     this.playerService.setAdmin(true);
-                    this.playerService.setAccessCode(data.accessCode);
                     this.router.navigate(['/lobby'], { state: { accessCode: data.accessCode } });
                 });
             });

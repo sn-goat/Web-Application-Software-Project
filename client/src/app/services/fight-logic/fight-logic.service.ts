@@ -1,37 +1,39 @@
 import { Injectable, inject } from '@angular/core';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { Cell } from '@common/board';
-import { Avatar, Fight } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { Avatar, IFight } from '@common/game';
+import { IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class FightLogicService {
-    fight: BehaviorSubject<Fight> = new BehaviorSubject<Fight>({} as Fight);
+    fight: BehaviorSubject<IFight> = new BehaviorSubject<IFight>({} as IFight);
     fightStarted: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-    private socketService = inject(SocketService);
+    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
+    private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
     private gameService = inject(GameService);
     private playerService = inject(PlayerService);
 
     constructor() {
-        this.socketService.onFightInit().subscribe((data) => {
+        this.socketReceiver.onFightInit().subscribe((data) => {
             this.fight.next(data);
             this.fightStarted.next(true);
         });
-        this.socketService.onSwitchTurn().subscribe((data) => {
+        this.socketReceiver.onFighterTurnChanged().subscribe((data) => {
             this.fight.next(data);
         });
-        this.socketService.onEndFight().subscribe(() => {
+        this.socketReceiver.onEndFight().subscribe(() => {
             this.endFight();
         });
     }
 
-    getOpponent(): PlayerStats {
+    getOpponent(): IPlayer {
         return this.fight.value.player1.id === this.playerService.getPlayer().id ? this.fight.value.player2 : this.fight.value.player1;
     }
 
@@ -40,15 +42,15 @@ export class FightLogicService {
     }
 
     flee(): void {
-        this.socketService.playerFlee(this.gameService.getAccessCode());
+        this.socketEmitter.flee();
     }
 
     attack(): void {
-        this.socketService.playerAttack(this.gameService.getAccessCode());
+        this.socketEmitter.attack();
     }
 
     endFight(): void {
-        this.fight.next({} as Fight);
+        this.fight.next({} as IFight);
         this.fightStarted.next(false);
         this.gameService.isActionSelected.next(false);
     }

@@ -4,11 +4,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { PlayerService } from '@app/services/player/player.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Game, getAvatarName } from '@common/game';
-import { DEFAULT_MOVEMENT_DIRECTIONS, PlayerStats } from '@common/player';
+import { Avatar, IGame, getAvatarName } from '@common/game';
+import { DEFAULT_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -16,49 +17,43 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class GameService {
     map: BehaviorSubject<Cell[][]> = new BehaviorSubject<Cell[][]>([]);
-    playingPlayers: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
-    initialPlayers: BehaviorSubject<PlayerStats[]> = new BehaviorSubject<PlayerStats[]>([]);
-    activePlayer: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    playingPlayers: BehaviorSubject<IPlayer[]> = new BehaviorSubject<IPlayer[]>([]);
+    initialPlayers: BehaviorSubject<IPlayer[]> = new BehaviorSubject<IPlayer[]>([]);
+    activePlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-    private accessCode: string;
-    private organizerId: string;
-
     private dialog = inject(MatDialog);
-    private socketService = inject(SocketService);
+    private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
+    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private playerService = inject(PlayerService);
 
     constructor() {
-        this.socketService.onTurnSwitch().subscribe((turn) => {
+        this.socketReceiver.onPlayerTurnChanged().subscribe((turn) => {
             this.updateTurn(turn.player);
             this.isActionSelected.next(false);
         });
 
-        this.socketService.onEndFight().subscribe(() => {
+        this.socketReceiver.onEndFight().subscribe(() => {
             this.toggleActionMode();
         });
 
-        this.socketService.onBroadcastMove().subscribe((payload) => {
+        this.socketReceiver.onPlayerMoved().subscribe((payload) => {
             this.onMove(payload.previousPosition, payload.player);
         });
 
-        this.socketService.onBroadcastDebugState().subscribe(() => {
-            this.onDebugStateChange();
+        this.socketReceiver.onDebugModeChanged().subscribe((isDebug) => {
+            this.setDebugMode(isDebug);
         });
 
-        this.socketService.onBroadcastDebugEndState().subscribe(() => {
-            this.onEndDebugState();
-        });
-
-        this.socketService.onBroadcastDoor().subscribe((payload) => {
+        this.socketReceiver.onDoorStateChanged().subscribe((payload) => {
             const newMap = this.map.value;
             newMap[payload.position.y][payload.position.x].tile = payload.newState;
             this.map.next(newMap);
             this.isActionSelected.next(false);
         });
 
-        this.socketService.onQuitGame().subscribe((game) => {
+        this.socketReceiver.onQuitGame().subscribe((game) => {
             this.playingPlayers.next(game.players);
             this.map.next(game.map);
         });
@@ -66,13 +61,13 @@ export class GameService {
 
     initFight(avatar: Avatar): void {
         const myPlayer = this.playerService.getPlayer();
-        const findDefender: PlayerStats | null = this.findDefender(avatar);
+        const findDefender: IPlayer | null = this.findDefender(avatar);
         if (findDefender && myPlayer) {
-            this.socketService.initFight(this.accessCode, myPlayer.id, findDefender.id);
+            this.socketEmitter.initFight(myPlayer.id, findDefender.id);
         }
     }
 
-    findDefender(avatar: Avatar): PlayerStats | null {
+    findDefender(avatar: Avatar): IPlayer | null {
         return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
     }
 
@@ -83,7 +78,7 @@ export class GameService {
     }
 
     toggleDoor(position: Vec2): void {
-        this.socketService.changeDoorState(this.accessCode, position, this.playerService.getPlayer());
+        this.socketEmitter.changeDoorState(position, this.playerService.getPlayer().id);
     }
 
     isWithinActionRange(cell: Cell): boolean {
@@ -95,39 +90,37 @@ export class GameService {
         return dx + dy === 1;
     }
 
-    isPlayerInGame(player: PlayerStats): boolean {
+    isPlayerInGame(player: IPlayer): boolean {
         return this.initialPlayers.value.some((currentPlayer) => currentPlayer.id === player.id);
     }
 
-    getInitialPlayers(): PlayerStats[] {
+    getInitialPlayers(): IPlayer[] {
         return this.initialPlayers.value;
     }
 
-    removePlayerInGame(player: PlayerStats): void {
+    removePlayerInGame(player: IPlayer): void {
         if (this.isPlayerInGame(player)) {
             const updatePlayers = this.playingPlayers.value.filter((currentPlayer) => currentPlayer.id !== player.id);
             this.playingPlayers.next(updatePlayers);
         }
     }
 
-    setGame(game: Game): void {
+    setGame(game: IGame): void {
         this.map.next(game.map);
         this.playingPlayers.next(game.players);
         this.activePlayer.next(game.players[game.currentTurn]);
         this.isDebugMode.next(false);
 
         this.initialPlayers.next(game.players);
-        this.accessCode = game.accessCode;
-        this.organizerId = game.organizerId;
     }
 
-    updateTurn(player: PlayerStats): void {
+    updateTurn(player: IPlayer): void {
         this.activePlayer.next(player);
     }
 
     debugMovePlayer(cell: Cell): void {
         if (this.canTeleport(cell)) {
-            this.socketService.debugMove(this.accessCode, cell.position, this.playerService.getPlayer());
+            this.socketEmitter.debugMove(cell.position, this.playerService.getPlayer());
         }
     }
 
@@ -142,19 +135,15 @@ export class GameService {
 
     toggleDebugMode(): void {
         if (this.playerService.isPlayerAdmin()) {
-            this.socketService.toggleDebugMode(this.accessCode);
+            this.socketEmitter.toggleDebug();
         }
     }
 
-    onDebugStateChange(): void {
-        this.isDebugMode.next(!this.isDebugMode.value);
+    setDebugMode(isDebugMode: boolean): void {
+        this.isDebugMode.next(isDebugMode);
     }
 
-    onEndDebugState(): void {
-        this.isDebugMode.next(false);
-    }
-
-    onMove(previousPosition: Vec2, player: PlayerStats): void {
+    onMove(previousPosition: Vec2, player: IPlayer): void {
         const map: Cell[][] = this.map.value;
         if (player) {
             map[previousPosition.y][previousPosition.x].player = Avatar.Default;
@@ -173,7 +162,7 @@ export class GameService {
     endTurn(): void {
         this.isActionSelected.next(false);
         this.playerService.setPlayerActive(false);
-        this.socketService.endTurn(this.accessCode);
+        this.socketEmitter.endTurn();
     }
 
     resetGame(): void {
@@ -183,8 +172,6 @@ export class GameService {
         this.isDebugMode.next(false);
         this.isActionSelected.next(false);
         this.initialPlayers.next([]);
-        this.accessCode = '';
-        this.organizerId = '';
     }
 
     async confirmAndAbandonGame(): Promise<boolean> {
@@ -207,10 +194,6 @@ export class GameService {
                 }
             });
         });
-    }
-
-    getAccessCode(): string {
-        return this.accessCode;
     }
 
     getCellDescription(cell: Cell): string {

@@ -10,12 +10,9 @@ import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { SocketService } from '@app/services/socket/socket.service';
 import { IGame, IRoom } from '@common/game';
-import { getLobbyLimit } from '@common/lobby-limits';
 import { IPlayer } from '@common/player';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'app-lobby',
@@ -40,6 +37,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
+        this.isAdmin = this.playerService.isPlayerAdmin();
+
         if (history.state && history.state.accessCode) {
             this.accessCode = history.state.accessCode;
         }
@@ -49,7 +48,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.players = room.game.players;
                 this.isRoomLocked = room.isLocked;
                 this.accessCode = room.accessCode;
-                this.checkIfAdmin();
             }),
 
             this.socketReceiver.onRoomLocked().subscribe(() => {
@@ -90,7 +88,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.router.navigate(['/acceuil']);
             }),
 
-            this.socketReceiver.onBroadcastStartGame().subscribe((game: IGame) => {
+            this.socketReceiver.onGameStarted().subscribe((game: IGame) => {
                 this.gameService.setGame(game);
                 this.router.navigate(['/jeu']);
             }),
@@ -102,8 +100,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.subscriptions = [];
     }
 
-    checkIfAdmin() {
-        this.isAdmin = this.players.length > 0 && this.players[0].id === this.socketService.getCurrentPlayerId();
+    getPlayerId(): string {
+        return this.playerService.getPlayer().id;
     }
 
     toggleRoomLock() {
@@ -131,9 +129,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
 
         const currentId = this.playerService.getPlayer().id;
-        const currentAccessCode = this.accessCode;
 
-        this.socketEmitter.disconnect(currentAccessCode, currentId);
+        this.socketEmitter.disconnect(currentId);
 
         this.subscriptions.forEach((subscription) => subscription.unsubscribe());
         this.subscriptions = [];

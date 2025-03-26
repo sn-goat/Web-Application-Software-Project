@@ -1,10 +1,7 @@
-import { InternalTimerEvents } from '@app/constants/internal-events';
+import { InternalEvents } from '@app/constants/internal-events';
+import { TimerType } from '@app/gateways/game/game.gateway.constants';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-enum TimerType {
-    Movement = 'movement',
-    Combat = 'combat',
-}
 const ONE_SECOND_IN_MS = 1000;
 
 export class Timer {
@@ -12,12 +9,10 @@ export class Timer {
     remainingTime: number;
     pausedTime: number;
     intervalId: NodeJS.Timeout;
-
     private eventEmitter: EventEmitter2;
-    private accessCode: string;
 
-    constructor(accessCode: string) {
-        this.accessCode = accessCode;
+    constructor(eventEmitter: EventEmitter2) {
+        this.eventEmitter = eventEmitter;
     }
 
     startTimer(duration: number, newType: TimerType = TimerType.Movement) {
@@ -35,10 +30,10 @@ export class Timer {
         this.pausedTime = pausedTime;
 
         const intervalId = setInterval(() => {
-            this.eventEmitter.emit(InternalTimerEvents.Update, { accessCode: this.accessCode, remainingTime: this.remainingTime });
+            this.eventEmitter.emit(InternalEvents.UpdateTimer, this.remainingTime);
             if (this.remainingTime <= 0) {
                 clearInterval(intervalId);
-                this.eventEmitter.emit(InternalTimerEvents.End, this.accessCode);
+                this.eventEmitter.emit(InternalEvents.EndTimer);
                 return;
             }
 

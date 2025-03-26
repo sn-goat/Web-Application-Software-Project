@@ -1,8 +1,8 @@
 import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
-import { SocketService } from '@app/services/socket/socket.service';
-import { PlayerStats } from '@common/player';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
+import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -15,29 +15,29 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
     readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
     readonly fileType: string = DEFAULT_FILE_TYPE;
 
-    players: PlayerStats[] = [];
-    playersInGame: PlayerStats[];
-    activePlayer: PlayerStats | null;
+    players: IPlayer[] = [];
+    playersInGame: IPlayer[];
+    activePlayer: IPlayer | null;
     getOrganizerId: () => string;
     private readonly gameService: GameService = inject(GameService);
-    private readonly socketService: SocketService = inject(SocketService);
+    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.playingPlayers.subscribe((gamePlayers: PlayerStats[]) => {
+            this.gameService.playingPlayers.subscribe((gamePlayers: IPlayer[]) => {
                 this.playersInGame = gamePlayers;
             }),
 
-            this.gameService.initialPlayers.subscribe((gamePlayers: PlayerStats[]) => {
+            this.gameService.initialPlayers.subscribe((gamePlayers: IPlayer[]) => {
                 this.players = gamePlayers;
             }),
 
-            this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
+            this.gameService.activePlayer.subscribe((player: IPlayer | null) => {
                 this.activePlayer = player;
             }),
 
-            this.socketService.onWinner().subscribe((winner: PlayerStats) => {
+            this.socketReceiver.onWinner().subscribe((winner: IPlayer) => {
                 const playerToUpdate = this.players.findIndex((player) => winner.id === player.id);
                 this.players[playerToUpdate] = winner;
             }),
@@ -49,12 +49,11 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
         this.players = this.playersInGame;
     }
 
-    playerIsInGame(player: PlayerStats): boolean {
+    playerIsInGame(player: IPlayer): boolean {
         return player && this.playersInGame.some((playerInGame) => playerInGame.id === player.id);
     }
 
     ngOnDestroy() {
         this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-        this.socketService.resetSocketState();
     }
 }

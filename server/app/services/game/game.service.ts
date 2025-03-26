@@ -6,7 +6,7 @@ import { GameUtils } from '@app/services/game/game-utils';
 import { TimerService } from '@app/services/timer/timer.service';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, Fight, Game, PathInfo } from '@common/game';
+import { Avatar, IFight, IGame, PathInfo } from '@common/game';
 import { TurnEvents } from '@common/game.gateway.events';
 import { ATTACK_ICE_DECREMENT, DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFENSE_ICE_DECREMENT, PlayerStats } from '@common/player';
 import { Injectable, Logger } from '@nestjs/common';
@@ -14,9 +14,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class GameService {
-    private currentGames: Map<string, Game>;
+    private currentGames: Map<string, IGame>;
     private logger: Logger = new Logger(GameService.name);
-    private activeFights: Map<string, Fight> = new Map();
+    private activeFights: Map<string, IFight> = new Map();
     private movementInProgress: Map<string, boolean> = new Map();
     private pendingEndTurn: Map<string, boolean> = new Map();
 

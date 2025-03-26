@@ -14,7 +14,8 @@ import { Alert } from '@app/constants/enums';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { firstValueFrom, Subscription, timer } from 'rxjs';
 
 @Component({
@@ -44,20 +45,17 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly notEnoughPlayersMessage = "Pas assez de joueurs pour continuer la partie. Vous allez être redirigé vers la page d'accueil.";
     private readonly endGameTimeoutInS = 5000;
     private subscriptions: Subscription[] = [];
-    private quitGameSubscription: Subscription;
     private gameService = inject(GameService);
     private fightLogicService = inject(FightLogicService);
-    private playerService = inject(PlayerService);
-    private socketService = inject(SocketService);
+    private readonly playerService = inject(PlayerService);
+    private readonly socketEmitter = inject(SocketEmitterService);
+    private readonly socketReceiver = inject(SocketReceiverService);
     private router = inject(Router);
 
     private readonly dialog = inject(MatDialog);
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
-        if (this.socketService.getGameRoom().organizerId === this.playerService.getPlayer().id) {
-            this.socketService.endDebugMode(this.socketService.getGameRoom().accessCode);
-        }
-        this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.playerService.getPlayer().id);
+        this.socketEmitter.disconnect(this.playerService.getPlayer().id);
     }
 
     @HostListener('window:pageshow', ['$event'])
@@ -69,35 +67,36 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         const myPlayerId = this.playerService.getPlayer().id;
 
         if (myPlayerId) {
-            this.socketService.readyUp(this.gameService.getAccessCode(), myPlayerId);
+            this.socketEmitter.ready(myPlayerId);
         }
-
-        this.fightLogicService.fightStarted.subscribe((show) => {
-            this.showFightInterface = show;
-        });
-
-        this.gameService.isDebugMode.subscribe((isDebugMode) => {
-            this.debugMode = isDebugMode;
-        });
-
         this.subscriptions.push(
             this.fightLogicService.fightStarted.subscribe((show) => {
                 this.showFightInterface = show;
             }),
-            (this.quitGameSubscription = this.gameService.playingPlayers.subscribe((players) => {
-                if (players && players.length < 2) {
-                    this.warning(this.notEnoughPlayersMessage);
-                }
-            })),
+
             this.gameService.isDebugMode.subscribe((isDebugMode) => {
                 this.debugMode = isDebugMode;
             }),
-        );
 
-        this.socketService.onEndGame().subscribe((winner) => {
-            this.warning(`${winner.name} a remporté la partie avec 3 victoires!`);
-            timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/acceuil']));
-        });
+            this.fightLogicService.fightStarted.subscribe((show) => {
+                this.showFightInterface = show;
+            }),
+
+            this.gameService.playingPlayers.subscribe((players) => {
+                if (players && players.length < 2) {
+                    this.warning(this.notEnoughPlayersMessage);
+                }
+            }),
+
+            this.gameService.isDebugMode.subscribe((isDebugMode) => {
+                this.debugMode = isDebugMode;
+            }),
+
+            this.socketReceiver.onEndGame().subscribe((winner) => {
+                this.warning(`${winner.name} a remporté la partie avec 3 victoires!`);
+                timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/acceuil']));
+            }),
+        );
     }
 
     ngAfterViewInit(): void {
@@ -106,10 +105,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.headerBar.getBack = async () => {
             const confirmed = await this.gameService.confirmAndAbandonGame();
             if (confirmed) {
-                if (this.socketService.getGameRoom().organizerId === this.playerService.getPlayer().id) {
-                    this.socketService.endDebugMode(this.socketService.getGameRoom().accessCode);
-                }
-                this.socketService.quitGame(this.socketService.getGameRoom().accessCode, this.socketService.getCurrentPlayerId());
+                this.socketEmitter.disconnect(this.playerService.getPlayer().id);
                 return originalAbandonMethod.call(this.headerBar);
             }
         };
@@ -124,8 +120,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.quitGameSubscription.unsubscribe();
-        this.socketService.resetSocketState();
+        this.subscriptions.forEach((s) => s.unsubscribe());
     }
 
     private warning(message: string): void {

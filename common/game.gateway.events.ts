@@ -7,10 +7,10 @@ export enum GameEvents {
     EndDebug = 'endDebug',
     AssignSpawn = 'assignSpawn',
     GameStarted = 'gameStarted',
-    BroadcastDebugState = 'debug',
+    DebugStateChanged = 'debugStateChanged',
     BroadcastEndDebugState = 'endDebug',
     End = 'endGame',
-    BroadcastEndGame = 'endGame',
+    GameEnded = 'gameEnded',
     BroadcastQuitGame = 'playerQuit',
 }
 
@@ -24,15 +24,15 @@ export enum TurnEvents {
     Move = 'moveAck',
     DebugMove = 'debugMove',
     ChangeDoorState = 'changeDoorState',
-    BroadcastMove = 'playerMove',
+    PlayerMoved = 'playerMoved',
     BroadcastItem = 'eventItem',
-    BroadcastDoor = 'eventOnDoor',
+    DoorStateChanged = 'eventOnDoor',
     UpdateActions = 'updateActions',
 }
 
 export enum FightEvents {
     Init = 'initFightAck',
-    SwitchTurn = 'switchTurn',
+    ChangeFighter = 'changeFighter',
     End = 'endFight',
     Winner = 'winner',
     Loser = 'loser',

@@ -3,9 +3,9 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { FightInfo } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -18,15 +18,15 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     readonly perCent = 100;
     timer: string = '00 s';
     currentNameTurn: string = '';
-    myPlayer: (PlayerStats & FightInfo) | null;
-    opponentPlayer: (PlayerStats & FightInfo) | null;
+    myPlayer: (IPlayer & FightInfo) | null;
+    opponentPlayer: (IPlayer & FightInfo) | null;
     lifePercentMyPlayer: number;
     lifePercentOpponent: number;
     flee: () => void;
     attack: () => void;
     private readonly fightLogicService = inject(FightLogicService);
     private readonly playerService = inject(PlayerService);
-    private readonly socketService = inject(SocketService);
+    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
@@ -40,7 +40,7 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
                 this.lifePercentOpponent = Math.floor(((this.opponentPlayer?.currentLife ?? 0) / (this.opponentPlayer?.life ?? 1)) * this.perCent);
             }),
 
-            this.socketService.onFightTimerUpdate().subscribe((remainingTime) => {
+            this.socketReceiver.onFightTimerUpdate().subscribe((remainingTime) => {
                 this.timer = `${remainingTime.toString()} s`;
             }),
         );

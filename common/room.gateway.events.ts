@@ -26,4 +26,5 @@ export enum RoomEvents {
     QuitGame = 'quitRoomGame',
     AdminDisconnected = 'adminDisconnected',
     NotEnoughPlayer = 'NotEnoughPlayer',
+    SetCharacter = 'setCharacter'
 }

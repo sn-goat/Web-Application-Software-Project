@@ -3,7 +3,8 @@ import { Component, inject, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { FormCharacterComponent } from '@app/components/form-character/form-character.component';
-import { SocketService } from '@app/services/socket/socket.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { ACCESS_CODE_REGEX } from '@common/game';
 
 @Component({
@@ -17,7 +18,8 @@ export class JoinRoomComponent {
     joinResult: string = '';
     showCharacterForm: boolean = false;
     isValidCode: boolean = false;
-    private readonly socketService: SocketService = inject(SocketService);
+    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
+    private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
 
     validateCode(): void {
         this.isValidCode = ACCESS_CODE_REGEX.test(this.accessCode);
@@ -26,14 +28,14 @@ export class JoinRoomComponent {
     joinRoom() {
         if (!this.isValidCode) return;
 
-        this.socketService.joinRoom(this.accessCode);
+        this.socketEmitter.joinRoom();
 
-        this.socketService.onPlayerJoined().subscribe(() => {
+        this.socketReceiver.onPlayerJoined().subscribe(() => {
             this.joinResult = `Salle ${this.accessCode} rejointe`;
             this.showCharacterForm = true;
         });
 
-        this.socketService.onJoinError().subscribe((data: { message: string }) => {
+        this.socketReceiver.onJoinError().subscribe((data: { message: string }) => {
             this.joinResult = data.message;
             this.showCharacterForm = false;
         });

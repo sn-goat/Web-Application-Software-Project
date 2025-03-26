@@ -1,7 +1,7 @@
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { Cell } from '@common/board';
 import { Room } from '@app/class/room';
-import { PlayerStats } from '@common/player';
+import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -64,13 +64,14 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(RoomEvents.ShareCharacter)
-    handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerStats }) {
+    handleShareCharacter(client: Socket, payload: { accessCode: string; player: IPlayer }) {
         const player = new Player(client.id, payload.player);
         const room = this.gameManager.shareCharacter(payload.accessCode, player);
         if (!room) {
             client.emit(RoomEvents.CharacterError, { message: 'Impossible de partager le personnage.' });
             return;
         }
+        client.emit(RoomEvents.SetCharacter, player);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
     }
 
@@ -95,6 +96,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
         room = this.gameManager.disconnectPlayer(payload.accessCode, payload.playerId);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerDisconnected, room.game.players);
+        client.leave(payload.accessCode);
     }
 
     @SubscribeMessage(RoomEvents.GetRoom)

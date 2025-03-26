@@ -1,5 +1,5 @@
 import { Cell, Vec2 } from './board';
-import { PlayerStats } from './player';
+import { IPlayer } from './player';
 
 export interface IRoom {
     accessCode: string;
@@ -9,7 +9,7 @@ export interface IRoom {
 }
 
 export interface IGame {
-    players: PlayerStats[];
+    players: IPlayer[];
     map: Cell[][];
     currentTurn: number;
     isDebugMode: boolean;
@@ -22,18 +22,12 @@ export interface GameFormData {
     isCTF: boolean;
 }
 
-export interface FightInfo {
-    fleeAttempts: number;
-    currentLife: number;
-    diceResult: number;
-}
-
 export const MAX_FIGHT_WINS = 3;
 
-export interface Fight {
-    player1: PlayerStats & FightInfo;
-    player2: PlayerStats & FightInfo;
-    currentPlayer: PlayerStats & FightInfo;
+export interface IFight {
+    player1: IPlayer;
+    player2: IPlayer;
+    currentPlayer: IPlayer;
 }
 
 export const ASSET_PATH = './assets/portraits/portrait';
@@ -66,7 +60,7 @@ export function getAvatarName(avatar: Avatar): string {
 }
 
 export interface TurnInfo {
-    player: PlayerStats;
+    player: IPlayer;
     path: Map<string, PathInfo>;
 }
 

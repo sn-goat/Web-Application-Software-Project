@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { GameService } from '@app/services/game/game.service';
-import { PlayerStats } from '@common/player';
+import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -11,14 +11,14 @@ import { Subscription } from 'rxjs';
 })
 export class GameMapInfoComponent implements OnInit, OnDestroy {
     mapSize: number = 0;
-    activePlayer: PlayerStats | null = null;
+    activePlayer: IPlayer | null = null;
     playerCount: number = 0;
     private readonly gameService: GameService = inject(GameService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.activePlayer.subscribe((player: PlayerStats | null) => {
+            this.gameService.activePlayer.subscribe((player: IPlayer | null) => {
                 this.activePlayer = player;
             }),
             this.gameService.playingPlayers.subscribe((players) => {

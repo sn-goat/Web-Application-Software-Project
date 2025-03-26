@@ -1,7 +1,6 @@
 import { Room } from '@app/class/room';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameService } from '@app/services/game/game.service';
 import { Player } from '@app/class/player';
 import { Cell } from '@common/board';
 import { Game } from '@app/class/game';
@@ -15,14 +14,11 @@ export class GameManagerService {
     private readonly logger = new Logger(GameManagerService.name);
     private gameRooms: Map<string, Room> = new Map();
 
-    constructor(
-        private readonly eventEmitter: EventEmitter2,
-        private readonly gameService: GameService,
-    ) {}
+    constructor(private readonly globalEmitter: EventEmitter2) {}
 
     createRoom(organizerId: string, map: Cell[][]): Room {
         const accessCode = this.generateUniqueAccessCode();
-        const room: Room = new Room(accessCode, organizerId, map);
+        const room: Room = new Room(this.globalEmitter, accessCode, organizerId, map);
         this.gameRooms.set(accessCode, room);
         this.logger.log(`Room created with access code: ${accessCode} by organizer: ${organizerId}`);
         return room;
@@ -86,14 +82,12 @@ export class GameManagerService {
             return;
         }
         this.logger.log(`PlayerStats ${playerId} quit game in room ${accessCode}.`);
-        this.gameService.removePlayer(accessCode, playerId);
         this.removePlayer(accessCode, playerId);
 
         if (room.game.players.length === 1) {
             const lastPlayerId = room.game.players[0].id;
             this.logger.log(`LastPlayer ${room.game.players[0].name} quit game in room ${accessCode}.`);
             this.removePlayer(accessCode, room.game.players[0].id);
-            this.gameService.deleteGame(accessCode);
             this.deleteRoom(accessCode);
             return lastPlayerId;
         }
@@ -155,8 +149,6 @@ export class GameManagerService {
         room.game.addPlayer(player);
         this.logger.log(`PlayerStats ${player.id} joined room ${accessCode} with name ${player.name}`);
 
-        this.logger.log(`Room ${accessCode} has ${room.game.players.length} players. Max players allowed: ${maxPlayers}`);
-
         if (room.game.isGameFull()) {
             room.isLocked = true;
             this.logger.log(`Room ${accessCode} is now locked (max players reached).`);
@@ -169,7 +161,7 @@ export class GameManagerService {
         if (this.gameRooms.has(accessCode)) {
             this.gameRooms.delete(accessCode);
             this.logger.log(`Room with access code ${accessCode} has been deleted.`);
-            this.eventEmitter.emit('room.deleted', accessCode);
+            this.globalEmitter.emit('room.deleted', accessCode);
         } else {
             this.logger.error(`Room with access code ${accessCode} not found for deletion.`);
         }
