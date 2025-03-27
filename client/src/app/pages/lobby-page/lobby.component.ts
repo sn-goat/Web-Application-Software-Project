@@ -8,9 +8,10 @@ import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { RoomService } from '@app/services/room/room.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { IGame, IRoom } from '@common/game';
+import { IGame } from '@common/game';
 import { IPlayer } from '@common/player';
 import { firstValueFrom, Subscription } from 'rxjs';
 
@@ -32,26 +33,30 @@ export class LobbyComponent implements OnInit, OnDestroy {
     private readonly socketEmitter = inject(SocketEmitterService);
     private readonly socketReceiver = inject(SocketReceiverService);
     private readonly router = inject(Router);
+    private readonly roomService = inject(RoomService);
     private readonly gameService = inject(GameService);
     private readonly playerService = inject(PlayerService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
         this.isAdmin = this.playerService.isPlayerAdmin();
-
-        if (history.state && history.state.accessCode) {
-            this.accessCode = history.state.accessCode;
-        }
+        this.accessCode = this.socketEmitter.getAccessCode();
 
         this.subscriptions.push(
-            this.socketReceiver.onPlayerJoined().subscribe((room: IRoom) => {
-                this.players = room.game.players;
-                this.isRoomLocked = room.isLocked;
-                this.accessCode = room.accessCode;
+            this.roomService.connected.subscribe((players) => {
+                this.players = players;
             }),
 
-            this.socketReceiver.onRoomLocked().subscribe(() => {
-                this.isRoomLocked = true;
+            this.roomService.isRoomLocked.subscribe((isLocked) => {
+                this.isRoomLocked = isLocked;
+            }),
+
+            this.roomService.maxPlayer.subscribe((maxPlayers) => {
+                this.maxPlayers = maxPlayers;
+            }),
+
+            this.socketReceiver.onRoomUnlocked().subscribe(() => {
+                this.isRoomLocked = false;
             }),
 
             this.socketReceiver.onPlayersUpdated().subscribe((players: IPlayer[]) => {
@@ -103,7 +108,6 @@ export class LobbyComponent implements OnInit, OnDestroy {
     }
 
     disconnect() {
-        this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
         const currentId = this.playerService.getPlayer().id;
         this.socketEmitter.disconnect(currentId);
     }

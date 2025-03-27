@@ -15,6 +15,10 @@ export class SocketEmitterService {
 
     constructor(private sharedSocketService: SharedSocketService) {}
 
+    getAccessCode() {
+        return this.accessCode;
+    }
+
     setAccessCode(accessCode: string) {
         this.accessCode = accessCode;
     }
@@ -24,6 +28,7 @@ export class SocketEmitterService {
     }
 
     joinRoom(accessCode: string) {
+        this.setAccessCode(accessCode);
         this.socket.emit(RoomEvents.JoinRoom, accessCode);
     }
 

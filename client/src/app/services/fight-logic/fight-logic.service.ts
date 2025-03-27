@@ -29,7 +29,7 @@ export class FightLogicService {
             this.fight.next(fight);
         });
         this.socketReceiver.onEndFight().subscribe(() => {
-            this.endFight();
+            this.reset();
         });
     }
 
@@ -49,7 +49,7 @@ export class FightLogicService {
         this.socketEmitter.attack();
     }
 
-    endFight(): void {
+    reset(): void {
         this.fight.next({} as IFight);
         this.fightStarted.next(false);
         this.gameService.isActionSelected.next(false);

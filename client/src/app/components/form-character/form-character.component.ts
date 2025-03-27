@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { RoomService } from '@app/services/room/room.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
@@ -51,6 +52,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
     private subscriptions: Subscription[] = [];
     private readonly gameMapService = inject(GameMapService);
+    private readonly roomService = inject(RoomService);
     private readonly playerService = inject(PlayerService);
     private readonly socketEmitter = inject(SocketEmitterService);
     private readonly socketReceiver = inject(SocketReceiverService);
@@ -66,25 +68,14 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.subscriptions.push(
-            this.socketReceiver.onPlayerJoined().subscribe((room) => {
+            this.roomService.connected.subscribe((connectedPlayers) => {
                 if (!this.isCreationPage) {
-                    this.takenAvatars = room.game.players.map((player) => player.avatar);
-                    this.isRoomLocked = room.isLocked;
+                    this.takenAvatars = connectedPlayers.map((player) => player.avatar);
                 }
             }),
 
-            this.socketReceiver.onPlayersUpdated().subscribe((players) => {
-                if (!this.isCreationPage) {
-                    this.takenAvatars = players.map((player) => player.avatar);
-                }
-            }),
-
-            this.socketReceiver.onRoomLocked().subscribe(() => {
-                this.isRoomLocked = true;
-            }),
-
-            this.socketReceiver.onRoomUnLocked().subscribe(() => {
-                this.isRoomLocked = false;
+            this.roomService.isRoomLocked.subscribe((isLocked) => {
+                this.isRoomLocked = isLocked;
             }),
         );
     }

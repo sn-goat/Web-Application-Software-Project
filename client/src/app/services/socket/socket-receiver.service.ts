@@ -32,7 +32,6 @@ export class SocketReceiverService {
     onPlayerJoined(): Observable<IRoom> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.PlayerJoined, (room: IRoom) => {
-                this.socketEmitter.setAccessCode(room.accessCode);
                 observer.next(room);
             });
         });
@@ -78,7 +77,7 @@ export class SocketReceiverService {
         });
     }
 
-    onRoomUnLocked(): Observable<void> {
+    onRoomUnlocked(): Observable<void> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.RoomUnlocked, (data) => {
                 observer.next(data);
@@ -144,7 +143,9 @@ export class SocketReceiverService {
 
     onPlayerMoved(): Observable<{ previousPosition: Vec2; player: IPlayer }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.PlayerMoved, (movement: { previousPosition: Vec2; player: IPlayer }) => observer.next(movement));
+            this.socket.on(TurnEvents.PlayerMoved, (movement: { previousPosition: Vec2; player: IPlayer }) => {
+                observer.next(movement);
+            });
         });
     }
 

@@ -13,6 +13,7 @@ export interface IGame {
     map: Cell[][];
     currentTurn: number;
     isDebugMode: boolean;
+    maxPlayers: number;
 }
 
 export interface GameFormData {

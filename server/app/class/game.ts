@@ -16,6 +16,7 @@ import {
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
 import { Item, Tile } from '@common/enums';
+import { log } from 'console';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -28,6 +29,7 @@ export class Game implements IGame {
     timer: Timer;
     movementInProgress: boolean;
     pendingEndTurn: boolean;
+    maxPlayers: number;
 
     constructor(internalEmitter: EventEmitter2, map: Cell[][]) {
         this.internalEmitter = internalEmitter;
@@ -40,6 +42,7 @@ export class Game implements IGame {
         this.fight = new Fight(internalEmitter);
         this.movementInProgress = false;
         this.pendingEndTurn = false;
+        this.maxPlayers = getLobbyLimit(map.length);
 
         this.internalEmitter.on(InternalTimerEvents.End, () => {
             if (this.fight.hasFight()) {
@@ -63,12 +66,13 @@ export class Game implements IGame {
     }
 
     removePlayer(playerId: string, message: string): void {
+        log(`Player ${playerId} has been removed from the game`);
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             return;
         }
         this.players.splice(index, 1);
-        this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { playerId, message });
+        this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, playerId, message);
     }
 
     getMapSize(): number {
@@ -84,7 +88,7 @@ export class Game implements IGame {
     }
 
     isGameFull(): boolean {
-        return this.players.length >= getLobbyLimit(this.getMapSize());
+        return this.players.length >= this.maxPlayers;
     }
 
     configureGame(): Game {

@@ -4,6 +4,7 @@ import { Cell, Vec2 } from '@common/board';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 import { Player } from './player';
+
 const confirmDisconnectMessage = 'Vous avez quitté la partie avec succès';
 const adminDisconnectMessage = "La partie a été fermée dû à la déconnection de l'organisateur";
 const playerBanMessage = "Vous avez été expulsé de la partie par l'organisateur";

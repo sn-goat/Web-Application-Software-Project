@@ -34,6 +34,10 @@ export class GameService {
             this.playingPlayers.next(players);
         });
 
+        this.socketReceiver.onPlayerJoined().subscribe((room) => {
+            this.organizerId = room.organizerId;
+        });
+
         this.socketReceiver.onGameStarted().subscribe((game) => {
             this.setGame(game);
         });
