@@ -102,16 +102,6 @@ export class GameGateway {
         game.startTurn();
     }
 
-    @SubscribeMessage(GameEvents.Debug)
-    handleDebug(client: Socket, accessCode: string) {
-        const game: Game = this.gameManager.getGame(accessCode);
-        if (game) {
-            this.logger.log('Toggling debug mode');
-            const newDebugState = game.toggleDebug();
-            this.server.to(accessCode).emit(GameEvents.DebugStateChanged, newDebugState);
-        }
-    }
-
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
@@ -120,13 +110,14 @@ export class GameGateway {
         }
     }
 
-    @SubscribeMessage(TurnEvents.ChangeDoorState)
-    handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
-        const game: Game = this.gameManager.getGame(payload.accessCode);
-        const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
-        this.server
-            .to(payload.accessCode)
-            .emit(TurnEvents.DoorStateChanged, { doorPosition: sendingInfo.doorPosition, newDoorState: sendingInfo.newDoorState });
+    @SubscribeMessage(GameEvents.Debug)
+    handleDebug(client: Socket, accessCode: string) {
+        const game: Game = this.gameManager.getGame(accessCode);
+        if (game) {
+            this.logger.log('Toggling debug mode');
+            const newDebugState = game.toggleDebug();
+            this.server.to(accessCode).emit(GameEvents.DebugStateChanged, newDebugState);
+        }
     }
 
     @SubscribeMessage(TurnEvents.Move)
@@ -142,6 +133,15 @@ export class GameGateway {
         if (game.isDebugMode) {
             game.movePlayerDebug(payload.direction, payload.playerId);
         }
+    }
+
+    @SubscribeMessage(TurnEvents.ChangeDoorState)
+    handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
+        const game: Game = this.gameManager.getGame(payload.accessCode);
+        const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
+        this.server
+            .to(payload.accessCode)
+            .emit(TurnEvents.DoorStateChanged, { doorPosition: sendingInfo.doorPosition, newDoorState: sendingInfo.newDoorState });
     }
 
     @SubscribeMessage(TurnEvents.End)

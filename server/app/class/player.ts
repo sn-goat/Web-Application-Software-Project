@@ -3,8 +3,6 @@ import { Tile } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
     DEFAULT_ACTIONS,
-    DEFAULT_ATTACK_VALUE,
-    DEFAULT_DEFENSE_VALUE,
     DEFAULT_FLEE_ATTEMPTS,
     DEFAULT_WINS,
     DEFENSE_ICE_DECREMENT,
@@ -45,9 +43,9 @@ export class Player implements IPlayer {
         this.speed = player.speed;
         this.attackDice = player.attackDice;
         this.defenseDice = player.defenseDice;
+        this.attackPower = player.attackPower;
+        this.defensePower = player.defensePower;
 
-        this.attackPower = DEFAULT_ATTACK_VALUE;
-        this.defensePower = DEFAULT_DEFENSE_VALUE;
         this.wins = DEFAULT_WINS;
     }
 

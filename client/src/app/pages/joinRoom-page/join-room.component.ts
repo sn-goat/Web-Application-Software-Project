@@ -28,14 +28,14 @@ export class JoinRoomComponent {
     joinRoom() {
         if (!this.isValidCode) return;
 
-        this.socketEmitter.joinRoom();
+        this.socketEmitter.joinRoom(this.accessCode);
 
         this.socketReceiver.onPlayerJoined().subscribe(() => {
             this.joinResult = `Salle ${this.accessCode} rejointe`;
             this.showCharacterForm = true;
         });
 
-        this.socketReceiver.onJoinError().subscribe((message) => {
+        this.socketReceiver.onJoinError().subscribe((message: string) => {
             this.joinResult = message;
             this.showCharacterForm = false;
         });

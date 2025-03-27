@@ -7,6 +7,7 @@ export enum InternalTimerEvents {
 export enum InternalRoomEvents {
     CloseRoom = 'closeRoom',
     PlayerRemoved = 'playerRemoved',
+    PlayersUpdated = 'updatePlayers',
 }
 
 export enum InternalGameEvents {

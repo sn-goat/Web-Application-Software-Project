@@ -30,28 +30,43 @@ export class GameService {
     private playerService = inject(PlayerService);
 
     constructor() {
-        this.socketReceiver.onPlayerTurnChanged().subscribe((turn) => {
-            this.updateTurn(turn.player);
-            this.isActionSelected.next(false);
+        this.socketReceiver.onPlayersUpdated().subscribe((players) => {
+            this.playingPlayers.next(players);
         });
 
-        this.socketReceiver.onEndFight().subscribe(() => {
-            this.toggleActionMode();
-        });
-
-        this.socketReceiver.onPlayerMoved().subscribe((payload) => {
-            this.onMove(payload.previousPosition, payload.player);
+        this.socketReceiver.onGameStarted().subscribe((game) => {
+            this.setGame(game);
         });
 
         this.socketReceiver.onDebugModeChanged().subscribe((isDebug) => {
             this.setDebugMode(isDebug);
         });
 
-        this.socketReceiver.onDoorStateChanged().subscribe((payload) => {
+        this.socketReceiver.onPlayerTurnChanged().subscribe((turn) => {
+            this.updateTurn(turn.player);
+            this.isActionSelected.next(false);
+        });
+
+        this.socketReceiver.onPlayerMoved().subscribe((movement) => {
+            this.onMove(movement.previousPosition, movement.player);
+        });
+
+        this.socketReceiver.onDoorStateChanged().subscribe((door) => {
             const newMap = this.map.value;
-            newMap[payload.position.y][payload.position.x].tile = payload.newState;
+            newMap[door.position.y][door.position.x].tile = door.newState;
             this.map.next(newMap);
             this.isActionSelected.next(false);
+        });
+
+        this.socketReceiver.onEndFight().subscribe((players: IPlayer[] | null) => {
+            if (players !== null) {
+                this.playingPlayers.next(players);
+            }
+            this.toggleActionMode();
+        });
+
+        this.socketReceiver.onGameEnded().subscribe(() => {
+            this.resetGame();
         });
     }
 
@@ -61,10 +76,6 @@ export class GameService {
         if (findDefender && myPlayer) {
             this.socketEmitter.initFight(myPlayer.id, findDefender.id);
         }
-    }
-
-    findDefender(avatar: Avatar): IPlayer | null {
-        return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
     }
 
     toggleActionMode(): void {
@@ -106,7 +117,6 @@ export class GameService {
         this.playingPlayers.next(game.players);
         this.activePlayer.next(game.players[game.currentTurn]);
         this.isDebugMode.next(false);
-
         this.initialPlayers.next(game.players);
     }
 
@@ -234,6 +244,9 @@ export class GameService {
         return this.organizerId;
     }
 
+    private findDefender(avatar: Avatar): IPlayer | null {
+        return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
+    }
     private isValidCellForAction(cell: Cell): boolean {
         return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
     }

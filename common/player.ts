@@ -5,6 +5,8 @@ export interface PlayerInput {
     avatar: string,
     life: number,
     speed: number,
+    attackPower: number,
+    defensePower: number,
     attackDice: Dice,
     defenseDice: Dice,
 }

@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
-import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -20,7 +19,6 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
     activePlayer: IPlayer | null;
     getOrganizerId: () => string;
     private readonly gameService: GameService = inject(GameService);
-    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
@@ -35,11 +33,6 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
 
             this.gameService.activePlayer.subscribe((player: IPlayer | null) => {
                 this.activePlayer = player;
-            }),
-
-            this.socketReceiver.onWinner().subscribe((winner: IPlayer) => {
-                const playerToUpdate = this.players.findIndex((player) => winner.id === player.id);
-                this.players[playerToUpdate] = winner;
             }),
         );
         this.getOrganizerId = this.gameService.getOrganizerId.bind(this.gameService);

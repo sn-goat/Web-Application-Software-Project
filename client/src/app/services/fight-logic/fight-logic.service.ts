@@ -21,12 +21,12 @@ export class FightLogicService {
     private playerService = inject(PlayerService);
 
     constructor() {
-        this.socketReceiver.onFightInit().subscribe((data) => {
-            this.fight.next(data);
+        this.socketReceiver.onFightInit().subscribe((fight: IFight) => {
+            this.fight.next(fight);
             this.fightStarted.next(true);
         });
-        this.socketReceiver.onFighterTurnChanged().subscribe((data) => {
-            this.fight.next(data);
+        this.socketReceiver.onFighterTurnChanged().subscribe((fight: IFight) => {
+            this.fight.next(fight);
         });
         this.socketReceiver.onEndFight().subscribe(() => {
             this.endFight();

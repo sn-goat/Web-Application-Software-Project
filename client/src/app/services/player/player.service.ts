@@ -2,7 +2,7 @@ import { Injectable, OnDestroy, inject } from '@angular/core';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Vec2 } from '@common/board';
-import { PathInfo } from '@common/game';
+import { PathInfo, TurnInfo } from '@common/game';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject, Subscription } from 'rxjs';
 
@@ -21,10 +21,18 @@ export class PlayerService implements OnDestroy {
 
     constructor() {
         this.subscriptions.push(
-            this.socketReceiver.onPlayerTurnChanged().subscribe((data) => {
-                if (data.player.id === this.getPlayer().id) {
-                    this.setPath(data.path);
-                    this.setPlayer(data.player);
+            this.socketReceiver.onSetCharacter().subscribe((player: IPlayer) => {
+                this.setPlayer(player);
+            }),
+
+            this.socketReceiver.onPlayerRemoved().subscribe(() => {
+                this.resetPlayers();
+            }),
+
+            this.socketReceiver.onPlayerTurnChanged().subscribe((turn: TurnInfo) => {
+                if (turn.player.id === this.getPlayer().id) {
+                    this.setPath(turn.path);
+                    this.setPlayer(turn.player);
                 } else {
                     this.setPlayerActive(false);
                     this.setPath(new Map());

@@ -1,17 +1,14 @@
-import { ChatGateway } from '@app/gateways/chat/chat.gateway';
-import { Board, boardSchema } from '@app/model/database/board';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BoardController } from './controllers/board/board.controller';
-import { GameGateway } from './gateways/game/game.gateway';
-import { RoomGateway } from './gateways/room/room.gateway';
-import { BoardService } from './services/board/board.service';
-import { FightService } from './services/fight/fight.service';
-import { GameService } from './services/game/game.service';
-import { RoomService } from './services/room/room.service';
-import { TimerService } from './services/timer/timer.service';
+import { Board, boardSchema } from '@app/model/database/board';
+import { BoardController } from '@app/controllers/board/board.controller';
+import { ChatGateway } from '@app/gateways/chat/chat.gateway';
+import { GameGateway } from '@app/gateways/game/game.gateway';
+import { RoomGateway } from '@app/gateways/room/room.gateway';
+import { BoardService } from '@app/services/board/board.service';
+import { GameManagerService } from '@app/services/game/games-manager.service';
 
 @Module({
     imports: [
@@ -27,6 +24,6 @@ import { TimerService } from './services/timer/timer.service';
         EventEmitterModule.forRoot(),
     ],
     controllers: [BoardController],
-    providers: [ChatGateway, BoardService, Logger, RoomService, RoomGateway, TimerService, GameService, GameGateway, FightService],
+    providers: [ChatGateway, BoardService, Logger, RoomGateway, GameGateway, GameManagerService],
 })
 export class AppModule {}

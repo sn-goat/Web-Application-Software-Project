@@ -8,7 +8,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
-import { DEFAULT_DICE, DEFAULT_LIFE_VALUE, DEFAULT_SPEED_VALUE, PlayerInput } from '@common/player';
+import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFAULT_DICE, DEFAULT_LIFE_VALUE, DEFAULT_SPEED_VALUE, PlayerInput } from '@common/player';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -35,11 +35,13 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     attackSelected: boolean = false;
     defenseSelected: boolean = false;
 
-    playerStats: PlayerInput = {
+    playerInput: PlayerInput = {
         name: '',
         avatar: this.currentPortraitImage,
         life: DEFAULT_LIFE_VALUE,
         speed: DEFAULT_SPEED_VALUE,
+        attackPower: DEFAULT_ATTACK_VALUE,
+        defensePower: DEFAULT_DEFENSE_VALUE,
         attackDice: DEFAULT_DICE,
         defenseDice: DEFAULT_DICE,
     };
@@ -67,18 +69,13 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             this.socketReceiver.onPlayerJoined().subscribe((room) => {
                 if (!this.isCreationPage) {
                     this.takenAvatars = room.game.players.map((player) => player.avatar);
+                    this.isRoomLocked = room.isLocked;
                 }
             }),
 
-            this.socketReceiver.onPlayerRemoved().subscribe((players) => {
+            this.socketReceiver.onPlayersUpdated().subscribe((players) => {
                 if (!this.isCreationPage) {
                     this.takenAvatars = players.map((player) => player.avatar);
-                }
-            }),
-
-            this.socketReceiver.onPlayerDisconnected().subscribe((data) => {
-                if (!this.isCreationPage) {
-                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
                 }
             }),
 
@@ -102,7 +99,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
         } else if (direction === 'next') {
             this.currentPortraitIndex = (this.currentPortraitIndex + 1) % this.totalPortraits;
         }
-        this.playerStats.avatar = this.currentPortraitImage;
+        this.playerInput.avatar = this.currentPortraitImage;
     }
 
     selectStat(stat: StatBonus) {
@@ -112,13 +109,13 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
         if (this[otherSelectedStat]) {
             this[otherSelectedStat] = false;
-            this.playerStats[otherStat] = 4;
+            this.playerInput[otherStat] = 4;
         }
         this[selectedStat] = !this[selectedStat];
         if (this[selectedStat]) {
-            this.playerStats[stat] += 2;
+            this.playerInput[stat] += 2;
         } else {
-            this.playerStats[stat] -= 2;
+            this.playerInput[stat] -= 2;
         }
     }
 
@@ -129,16 +126,16 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
         if (this[selectedStat]) {
             this[selectedStat] = false;
-            this.playerStats[`${stat}Dice`] = 'D4';
-            this.playerStats[`${otherStat}Dice`] = 'D4';
+            this.playerInput[`${stat}Dice`] = 'D4';
+            this.playerInput[`${otherStat}Dice`] = 'D4';
         } else {
             this[selectedStat] = true;
-            this.playerStats[`${stat}Dice`] = 'D6';
+            this.playerInput[`${stat}Dice`] = 'D6';
 
             if (this[otherSelectedStat]) {
                 this[otherSelectedStat] = false;
             }
-            this.playerStats[`${otherStat}Dice`] = 'D4';
+            this.playerInput[`${otherStat}Dice`] = 'D4';
         }
     }
 
@@ -149,11 +146,11 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.speedSelected, this.attackSelected, this.defenseSelected];
-        return this.playerStats.name.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
+        return this.playerInput.name.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
 
     shareCharacter(): void {
-        this.socketEmitter.shareCharacter(this.playerStats);
+        this.socketEmitter.shareCharacter(this.playerInput);
     }
 
     createGame(): void {
@@ -163,11 +160,11 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             .subscribe((map) => {
                 const selectedMap = map.board;
                 this.socketEmitter.createRoom(selectedMap);
-                this.socketReceiver.onRoomCreated().subscribe((data) => {
-                    this.accessCode = data.accessCode;
-                    this.socketEmitter.shareCharacter(this.playerStats);
+                this.socketReceiver.onRoomCreated().subscribe((room) => {
+                    this.accessCode = room.accessCode;
+                    this.socketEmitter.shareCharacter(this.playerInput);
                     this.playerService.setAdmin(true);
-                    this.router.navigate(['/lobby'], { state: { accessCode: data.accessCode } });
+                    this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
                 });
             });
     }

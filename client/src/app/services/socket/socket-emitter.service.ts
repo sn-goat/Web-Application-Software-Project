@@ -4,20 +4,16 @@ import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerInput } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
-import { io, Socket } from 'socket.io-client';
-import { environment } from 'src/environments/environment';
+import { SharedSocketService } from '@app/services/socket/shared-socket.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SocketEmitterService {
     private accessCode: string;
-    private socket: Socket;
-    private readonly url: string = environment.serverUrl;
+    private socket = this.sharedSocketService.socket;
 
-    constructor() {
-        this.socket = io(this.url);
-    }
+    constructor(private sharedSocketService: SharedSocketService) {}
 
     setAccessCode(accessCode: string) {
         this.accessCode = accessCode;
@@ -27,8 +23,8 @@ export class SocketEmitterService {
         this.socket.emit(RoomEvents.CreateRoom, map);
     }
 
-    joinRoom() {
-        this.socket.emit(RoomEvents.JoinRoom, this.accessCode);
+    joinRoom(accessCode: string) {
+        this.socket.emit(RoomEvents.JoinRoom, accessCode);
     }
 
     shareCharacter(player: PlayerInput) {
@@ -43,8 +39,8 @@ export class SocketEmitterService {
         this.socket.emit(RoomEvents.UnlockRoom, this.accessCode);
     }
 
-    removePlayer(playerId: string) {
-        this.socket.emit(RoomEvents.RemovePlayer, { accessCode: this.accessCode, playerId });
+    expelPlayer(playerId: string) {
+        this.socket.emit(RoomEvents.ExpelPlayer, { accessCode: this.accessCode, playerId });
     }
 
     disconnect(playerId: string) {

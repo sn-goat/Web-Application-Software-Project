@@ -1,41 +1,52 @@
 export enum GameEvents {
     Start = 'startGame',
-    Create = 'createGame',
-    Configure = 'configureGame',
-    Ready = 'readyForStart',
-    Debug = 'toggleDebug',
-    EndDebug = 'endDebug',
-    AssignSpawn = 'assignSpawn',
     GameStarted = 'gameStarted',
+    Ready = 'readyForStart',
+
+    Debug = 'toggleDebug',
     DebugStateChanged = 'debugStateChanged',
-    BroadcastEndDebugState = 'endDebug',
+    
     GameEnded = 'gameEnded',
+    
+    // Create = 'createGame',
+    // Configure = 'configureGame',
+    // EndDebug = 'endDebug',
+    // AssignSpawn = 'assignSpawn',
+    // BroadcastEndDebugState = 'endDebug',
 }
 
 export enum TurnEvents {
+    PlayerTurn = 'nextPlayerTurn',
     Start = 'startTurn',
-    UpdateTimer = 'timeUpdate',
     UpdateTurn = 'updateTurn',
     End = 'endTurn',
-    BroadcastEnd = 'endPlayerTurn',
-    PlayerTurn = 'nextPlayerTurn',
+    
+    UpdateTimer = 'timeUpdate',
+    
     Move = 'moveAck',
     DebugMove = 'debugMove',
-    ChangeDoorState = 'changeDoorState',
     PlayerMoved = 'playerMoved',
-    BroadcastItem = 'eventItem',
+    
+    ChangeDoorState = 'changeDoorState',
     DoorStateChanged = 'eventOnDoor',
-    UpdateActions = 'updateActions',
+    
+    // BroadcastEnd = 'endPlayerTurn',
+    // BroadcastItem = 'eventItem',
+    // UpdateActions = 'updateActions',
 }
 
 export enum FightEvents {
     Init = 'initFightAck',
     ChangeFighter = 'changeFighter',
+    
+    UpdateTimer = 'fightTimeUpdate',
+    
+    Flee = 'fleeAck',
+    Attack = 'attackAck',
+    
     End = 'endFight',
     Winner = 'winner',
     Loser = 'loser',
-    Flee = 'fleeAck',
-    FailedFlee = 'failedFlee',
-    Attack = 'attackAck',
-    UpdateTimer = 'fightTimeUpdate',
+    
+    // FailedFlee = 'failedFlee',
 }

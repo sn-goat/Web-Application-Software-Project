@@ -2,29 +2,27 @@ import { Injectable } from '@angular/core';
 import { RoomEvents } from '@common/room.gateway.events';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { Observable } from 'rxjs';
-import { io, Socket } from 'socket.io-client';
-import { environment } from 'src/environments/environment';
 import { SocketEmitterService } from './socket-emitter.service';
 import { IRoom, IGame, PathInfo, TurnInfo, IFight } from '@common/game';
 import { IPlayer } from '@common/player';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
+import { SharedSocketService } from './shared-socket.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class SocketReceiverService {
-    private socket: Socket;
-    private readonly url: string = environment.serverUrl;
-    private socketEmitter: SocketEmitterService;
+    private socket = this.sharedSocketService.socket;
 
-    constructor() {
-        this.socket = io(this.url);
-    }
+    constructor(
+        private sharedSocketService: SharedSocketService,
+        private socketEmitter: SocketEmitterService,
+    ) {}
 
     onRoomCreated(): Observable<IRoom> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.RoomCreated, (room: IRoom) => {
+            this.socket.on(RoomEvents.RoomCreated, (room) => {
                 this.socketEmitter.setAccessCode(room.accessCode);
                 observer.next(room);
             });
@@ -34,6 +32,7 @@ export class SocketReceiverService {
     onPlayerJoined(): Observable<IRoom> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.PlayerJoined, (room: IRoom) => {
+                this.socketEmitter.setAccessCode(room.accessCode);
                 observer.next(room);
             });
         });
@@ -55,17 +54,17 @@ export class SocketReceiverService {
         });
     }
 
-    onPlayerRemoved(): Observable<IPlayer[]> {
+    onPlayerRemoved(): Observable<string> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.PlayerRemoved, (players: IPlayer[]) => {
-                observer.next(players);
+            this.socket.on(RoomEvents.PlayerRemoved, (message: string) => {
+                observer.next(message);
             });
         });
     }
 
-    onPlayerDisconnected(): Observable<IPlayer[]> {
+    onPlayersUpdated(): Observable<IPlayer[]> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.PlayerDisconnected, (players: IPlayer[]) => {
+            this.socket.on(RoomEvents.PlayersUpdated, (players: IPlayer[]) => {
                 observer.next(players);
             });
         });
@@ -82,14 +81,6 @@ export class SocketReceiverService {
     onRoomUnLocked(): Observable<void> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.RoomUnlocked, (data) => {
-                observer.next(data);
-            });
-        });
-    }
-
-    onAdminDisconnected(): Observable<void> {
-        return new Observable((observer) => {
-            this.socket.on(RoomEvents.AdminDisconnected, (data) => {
                 observer.next(data);
             });
         });
@@ -185,7 +176,7 @@ export class SocketReceiverService {
         });
     }
 
-    onEndFight(): Observable<IPlayer | null> {
+    onEndFight(): Observable<IPlayer[] | null> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.End, (data) => observer.next(data));
         });

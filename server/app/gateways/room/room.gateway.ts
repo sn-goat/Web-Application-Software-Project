@@ -32,6 +32,11 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         clientSock.leave(payload.accessCode);
     }
 
+    @OnEvent(InternalRoomEvents.PlayersUpdated)
+    handleUpdatePlayers(payload: { accessCode: string; players: Player[] }): void {
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayersUpdated, payload.players);
+    }
+
     @SubscribeMessage(RoomEvents.CreateRoom)
     handleCreateRoom(client: Socket, map: Cell[][]) {
         const room: Room = this.gameManager.openRoom(client.id, map);
@@ -53,6 +58,15 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
+    @SubscribeMessage(RoomEvents.ShareCharacter)
+    handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerInput }) {
+        const player: Player = new Player(client.id, payload.player);
+        const room: Room = this.gameManager.getRoom(payload.accessCode);
+        room.addPlayer(player);
+        client.emit(RoomEvents.SetCharacter, player);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+    }
+
     @SubscribeMessage(RoomEvents.LockRoom)
     handleLockRoom(client: Socket, payload: { accessCode: string }) {
         const room = this.gameManager.getRoom(payload.accessCode);
@@ -65,15 +79,6 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const room = this.gameManager.getRoom(payload.accessCode);
         room.setLock(false);
         this.server.to(payload.accessCode).emit(RoomEvents.RoomUnlocked);
-    }
-
-    @SubscribeMessage(RoomEvents.ShareCharacter)
-    handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerInput }) {
-        const player = new Player(client.id, payload.player);
-        const room = this.gameManager.getRoom(payload.accessCode);
-        room.addPlayer(player);
-        client.emit(RoomEvents.SetCharacter, player);
-        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
     }
 
     @SubscribeMessage(RoomEvents.ExpelPlayer)

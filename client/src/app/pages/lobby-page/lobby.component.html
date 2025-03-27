@@ -27,7 +27,7 @@
                 </span>
 
                 @if (isAdmin && player.id !== getPlayerId()) {
-                <button (click)="removePlayer(player.id)">Bannir</button>
+                <button (click)="expelPlayer(player.id)">Bannir</button>
                 }
             </li>
             }

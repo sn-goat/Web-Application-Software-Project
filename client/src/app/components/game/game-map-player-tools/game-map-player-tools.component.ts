@@ -18,7 +18,6 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     items: Item[] = [];
     players: IPlayer[];
     timer: string = '';
-    activePlayer: IPlayer | null = null;
     isActivePlayer: boolean = false;
     playerHasAction: boolean = false;
     isActionEnabled: boolean = false;
@@ -47,50 +46,38 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
                 this.isActionEnabled = isActive;
             }),
 
-            this.gameService.activePlayer.subscribe((player: IPlayer | null) => {
-                this.activePlayer = player;
-            }),
-
             this.socketReceiver.onTimerUpdate().subscribe((remainingTime) => {
                 this.timer = `${remainingTime.toString()} s`;
             }),
 
             this.socketReceiver.onPlayerTurnChanged().subscribe((turnInfo) => {
-                this.activePlayer = turnInfo.player;
-
-                if (!this.isActivePlayer && this.activePlayer) {
-                    this.snackBar.openFromComponent(SnackbarComponent, {
-                        duration: 3000,
-                        horizontalPosition: 'center',
-                        verticalPosition: 'bottom',
-                        panelClass: ['custom-snackbar'],
-                        data: { message: `C'est au tour de ${this.activePlayer.name} de jouer` },
-                    });
-                }
+                this.snackBar.openFromComponent(SnackbarComponent, {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'bottom',
+                    panelClass: ['custom-snackbar'],
+                    data: { message: `C'est au tour de ${turnInfo.player.name} de jouer` },
+                });
             }),
 
-            this.socketReceiver.onWinner().subscribe((winner: IPlayer) => {
-                if (this.playerService.getPlayer().id === winner.id) {
-                    this.snackBar.openFromComponent(SnackbarComponent, {
-                        duration: 3000,
-                        horizontalPosition: 'center',
-                        verticalPosition: 'top',
-                        panelClass: ['custom-snackbar'],
-                        data: { message: 'Tu as gagné le combat!' },
-                    });
-                }
+            this.socketReceiver.onWinner().subscribe(() => {
+                this.snackBar.openFromComponent(SnackbarComponent, {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'top',
+                    panelClass: ['custom-snackbar'],
+                    data: { message: 'Tu as gagné le combat!' },
+                });
             }),
 
-            this.socketReceiver.onLoser().subscribe((loser: IPlayer) => {
-                if (this.playerService.getPlayer().id === loser.id) {
-                    this.snackBar.openFromComponent(SnackbarComponent, {
-                        duration: 3000,
-                        horizontalPosition: 'center',
-                        verticalPosition: 'top',
-                        panelClass: ['custom-snackbar'],
-                        data: { message: 'Tu as perdu le combat!' },
-                    });
-                }
+            this.socketReceiver.onLoser().subscribe(() => {
+                this.snackBar.openFromComponent(SnackbarComponent, {
+                    duration: 3000,
+                    horizontalPosition: 'center',
+                    verticalPosition: 'top',
+                    panelClass: ['custom-snackbar'],
+                    data: { message: 'Tu as perdu le combat!' },
+                });
             }),
         );
 

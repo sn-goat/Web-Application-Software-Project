@@ -54,34 +54,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.isRoomLocked = true;
             }),
 
-            this.socketReceiver.onPlayerRemoved().subscribe(async (players: IPlayer[]) => {
+            this.socketReceiver.onPlayersUpdated().subscribe((players: IPlayer[]) => {
                 this.players = players;
-                if (!players.find((p) => p.id === this.playerService.getPlayer().id)) {
-                    if (!this.isAdmin) {
-                        await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
-                        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-                        this.subscriptions = [];
-                        this.router.navigate(['/acceuil']);
-                    }
-                }
             }),
 
-            this.socketReceiver.onPlayerDisconnected().subscribe(async (players: IPlayer[]) => {
-                this.players = players;
-                if (!players.find((p) => p.id === this.playerService.getPlayer().id)) {
-                    if (!this.isAdmin) {
-                        await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
-                        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-                        this.subscriptions = [];
-                        this.router.navigate(['/acceuil']);
-                    }
-                }
-            }),
-
-            this.socketReceiver.onAdminDisconnected().subscribe(async () => {
-                const message = this.isAdmin
-                    ? "Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil"
-                    : "L'admin s'est déconnecté. Vous allez être redirigé vers la page d'accueil";
+            this.socketReceiver.onPlayerRemoved().subscribe(async (message: string) => {
                 await this.warning(message);
                 this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                 this.subscriptions = [];
@@ -121,20 +98,14 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.socketEmitter.startGame();
     }
 
-    removePlayer(playerId: string) {
-        this.socketEmitter.removePlayer(playerId);
+    expelPlayer(playerId: string) {
+        this.socketEmitter.expelPlayer(playerId);
     }
 
     disconnect() {
         this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
-
         const currentId = this.playerService.getPlayer().id;
-
         this.socketEmitter.disconnect(currentId);
-
-        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-        this.subscriptions = [];
-        this.router.navigate(['/acceuil']);
     }
 
     async warning(message: string): Promise<void> {

@@ -39,7 +39,7 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
                 this.lifePercentOpponent = Math.floor(((this.opponentPlayer?.currentLife ?? 0) / (this.opponentPlayer?.life ?? 1)) * this.perCent);
             }),
 
-            this.socketReceiver.onFightTimerUpdate().subscribe((remainingTime) => {
+            this.socketReceiver.onFightTimerUpdate().subscribe((remainingTime: number) => {
                 this.timer = `${remainingTime.toString()} s`;
             }),
         );

@@ -109,6 +109,7 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
         } else {
             this.game.removePlayer(playerId, confirmDisconnectMessage);
+            this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
         }
     }
 
