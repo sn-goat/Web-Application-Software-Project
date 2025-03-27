@@ -28,7 +28,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
         const clientSock: Socket = this.server.sockets.sockets.get(payload.playerId);
         clientSock.leave(payload.accessCode);
-        clientSock.disconnect(true);
+        clientSock.disconnect();
     }
 
     @OnEvent(InternalRoomEvents.PlayersUpdated)
