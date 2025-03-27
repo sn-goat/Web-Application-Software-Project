@@ -9,9 +9,7 @@ export enum GameEvents {
     GameStarted = 'gameStarted',
     DebugStateChanged = 'debugStateChanged',
     BroadcastEndDebugState = 'endDebug',
-    End = 'endGame',
     GameEnded = 'gameEnded',
-    BroadcastQuitGame = 'playerQuit',
 }
 
 export enum TurnEvents {

@@ -23,17 +23,12 @@ export class SocketEmitterService {
         this.accessCode = accessCode;
     }
 
-    getAccessCode(): string {
-        return this.accessCode;
-    }
-
     createRoom(map: Cell[][]) {
         this.socket.emit(RoomEvents.CreateRoom, map);
     }
 
     joinRoom() {
         this.socket.emit(RoomEvents.JoinRoom, this.accessCode);
-        this.socket.emit(RoomEvents.GetRoom, this.accessCode);
     }
 
     shareCharacter(player: PlayerInput) {
@@ -70,6 +65,14 @@ export class SocketEmitterService {
 
     movePlayer(path: PathInfo, playerId: string) {
         this.socket.emit(TurnEvents.Move, { accessCode: this.accessCode, path, playerId });
+    }
+
+    debugMove(direction: Vec2, playerId: string) {
+        this.socket.emit(TurnEvents.DebugMove, { accessCode: this.accessCode, direction, playerId });
+    }
+
+    endTurn() {
+        this.socket.emit(TurnEvents.End, this.accessCode);
     }
 
     changeDoorState(doorPosition: Vec2, playerId: string) {

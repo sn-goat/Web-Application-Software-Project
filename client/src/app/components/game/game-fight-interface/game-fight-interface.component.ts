@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { FightInfo } from '@common/game';
 import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -18,8 +17,8 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
     readonly perCent = 100;
     timer: string = '00 s';
     currentNameTurn: string = '';
-    myPlayer: (IPlayer & FightInfo) | null;
-    opponentPlayer: (IPlayer & FightInfo) | null;
+    myPlayer: IPlayer | null;
+    opponentPlayer: IPlayer | null;
     lifePercentMyPlayer: number;
     lifePercentOpponent: number;
     flee: () => void;

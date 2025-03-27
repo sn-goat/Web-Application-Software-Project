@@ -5,7 +5,7 @@ import { Fight } from '@app/class/fight';
 import { Avatar, IGame, PathInfo } from '@common/game';
 import { GameUtils } from '@app/services/game/game-utils';
 import { Timer } from './timer';
-import { InternalEvents, InternalFightEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
     FIGHT_TURN_DURATION_IN_S,
@@ -15,7 +15,7 @@ import {
     TimerType,
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -62,12 +62,13 @@ export class Game implements IGame {
         this.players.push(player);
     }
 
-    removePlayer(playerId: string): void {
+    removePlayer(playerId: string, message: string): void {
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             return;
         }
         this.players.splice(index, 1);
+        this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { playerId, message });
     }
 
     getMapSize(): number {
@@ -205,6 +206,19 @@ export class Game implements IGame {
             this.movePlayerToSpawn(fightResult.loser);
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
         }
+    }
+
+    isPlayerInFight(playerId: string): boolean {
+        return this.fight.hasFight() && this.fight.isPlayerInFight(playerId);
+    }
+    removePlayerOnMap(playerId: string): void {
+        const player = this.getPlayer(playerId);
+        this.map[player.position.y][player.position.x].player = Avatar.Default;
+        this.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
+    }
+    removePlayerFromFight(playerId: string): void {
+        const fightResult = this.fight.handleFightRemoval(playerId);
+        this.internalEmitter.emit(InternalFightEvents.End, fightResult);
     }
 
     endFight(): void {

@@ -35,8 +35,8 @@ export class JoinRoomComponent {
             this.showCharacterForm = true;
         });
 
-        this.socketReceiver.onJoinError().subscribe((data: { message: string }) => {
-            this.joinResult = data.message;
+        this.socketReceiver.onJoinError().subscribe((message) => {
+            this.joinResult = message;
             this.showCharacterForm = false;
         });
     }

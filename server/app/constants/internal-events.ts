@@ -4,8 +4,13 @@ export enum InternalTimerEvents {
     End = 'timerEnded',
 }
 
+export enum InternalRoomEvents {
+    CloseRoom = 'closeRoom',
+    PlayerRemoved = 'playerRemoved',
+}
+
 export enum InternalGameEvents {
-    AssignSpawn = 'assignSpawn',
+    DebugStateChanged = 'debugStateChanged',
 }
 
 export enum InternalTurnEvents {

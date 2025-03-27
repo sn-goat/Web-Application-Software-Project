@@ -39,6 +39,14 @@ export class SocketReceiverService {
         });
     }
 
+    onJoinError(): Observable<string> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.JoinError, (message: string) => {
+                observer.next(message);
+            });
+        });
+    }
+
     onSetCharacter(): Observable<IPlayer> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.SetCharacter, (player: IPlayer) => {
@@ -105,7 +113,7 @@ export class SocketReceiverService {
 
     onGameEnded(): Observable<IPlayer> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.GameEnded, (winner) => {
+            this.socket.on(GameEvents.GameEnded, (winner: IPlayer) => {
                 observer.next(winner);
             });
         });
@@ -114,6 +122,15 @@ export class SocketReceiverService {
     onPlayerTurnChanged(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.PlayerTurn, (turn: { player: IPlayer; path: Record<string, PathInfo> }) => {
+                const receivedMap = new Map(Object.entries(turn.path));
+                observer.next({ player: turn.player, path: receivedMap });
+            });
+        });
+    }
+
+    onPlayerTurnUpdate(): Observable<TurnInfo> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.UpdateTurn, (turn: { player: IPlayer; path: Record<string, PathInfo> }) => {
                 const receivedMap = new Map(Object.entries(turn.path));
                 observer.next({ player: turn.player, path: receivedMap });
             });
@@ -157,6 +174,14 @@ export class SocketReceiverService {
     onFighterTurnChanged(): Observable<IFight> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.ChangeFighter, (data) => observer.next(data));
+        });
+    }
+
+    onFightTimerUpdate(): Observable<number> {
+        return new Observable((observer) => {
+            this.socket.on(FightEvents.UpdateTimer, (remainingTime) => {
+                observer.next(remainingTime);
+            });
         });
     }
 

@@ -53,4 +53,15 @@ export class Fight implements IFight {
     hasFight(): boolean {
         return this.hasFightStarted;
     }
+
+    isPlayerInFight(playerId: string): boolean {
+        return this.player1.id === playerId || this.player2.id === playerId;
+    }
+
+    handleFightRemoval(playerId: string): { winner: Player; loser: Player } {
+        const winner = this.getOpponent(playerId);
+        winner.wins += 1;
+        const loser = this.getFighter(playerId);
+        return { winner, loser };
+    }
 }

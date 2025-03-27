@@ -31,11 +31,7 @@ export class PlayerService implements OnDestroy {
                 }
             }),
 
-            this.socketReceiver.onTurnStart().subscribe(() => {
-                this.setPlayerActive(true);
-            }),
-
-            this.socketReceiver.onTurnUpdate().subscribe((data) => {
+            this.socketReceiver.onPlayerTurnUpdate().subscribe((data) => {
                 if (data.player.id === this.getPlayer().id) {
                     this.setPlayer(data.player);
                     this.setPath(data.path);
@@ -43,9 +39,8 @@ export class PlayerService implements OnDestroy {
                 }
             }),
 
-            this.socketReceiver.onAssignSpawn().subscribe((data) => {
-                this.getPlayer().spawnPosition = data;
-                this.getPlayer().position = data;
+            this.socketReceiver.onTurnStart().subscribe(() => {
+                this.setPlayerActive(true);
             }),
         );
     }
@@ -83,7 +78,7 @@ export class PlayerService implements OnDestroy {
         const selectedPath = this.path.value?.get(keyPos);
         if (selectedPath) {
             this.isActivePlayer.next(false);
-            this.socketEmitter.movePlayer(selectedPath, this.getPlayer());
+            this.socketEmitter.movePlayer(selectedPath, this.getPlayer().id);
         }
     }
 

@@ -19,6 +19,7 @@ export enum RoomEvents {
     RoomData = 'roomData',
     PlayerJoined = 'playerJoined',
     PlayerRemoved = 'playerRemoved',
+    ExpelPlayer = 'expelPlayer',
     PlayerDisconnected = 'playerDisconnected',
     RoomLocked = 'roomLocked',
     RoomUnlocked = 'roomUnlocked',

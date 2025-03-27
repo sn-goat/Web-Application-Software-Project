@@ -1,7 +1,6 @@
-import { InternalEvents, InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { Fight } from '@app/class/fight';
-import { Game } from '@app/class/game';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
 import { MAX_FIGHT_WINS, PathInfo } from '@common/game';
@@ -11,6 +10,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Game } from '@app/class/game';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -22,7 +22,7 @@ export class GameGateway {
 
     @OnEvent(InternalTimerEvents.FightUpdate)
     handleFightTimerUpdate(payload: { accessCode: string; remainingTime: number }) {
-        const fight = this.gameManager.getFight(payload.accessCode);
+        const fight: Fight = this.gameManager.getFight(payload.accessCode);
         this.server.to([fight.player1.id, fight.player2.id]).emit(FightEvents.UpdateTimer, payload.remainingTime);
     }
 
@@ -31,9 +31,9 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit(TurnEvents.UpdateTimer, payload.remainingTime);
     }
 
-    @OnEvent(InternalGameEvents.AssignSpawn)
-    handleAssignSpawn(payload: { playerId: string; position: Vec2 }) {
-        this.server.to(payload.playerId).emit(GameEvents.AssignSpawn, payload.position);
+    @OnEvent(InternalGameEvents.DebugStateChanged)
+    handleDebugStateChange(payload: { accessCode: string; newState: boolean }) {
+        this.server.to(payload.accessCode).emit(GameEvents.DebugStateChanged, payload.newState);
     }
 
     @OnEvent(InternalTurnEvents.Move)
@@ -69,25 +69,19 @@ export class GameGateway {
 
     @OnEvent(InternalFightEvents.End)
     manageEndFight(payload: { accessCode: string; winner: Player; loser: Player }) {
-        const game = this.gameManager.getGame(payload.accessCode);
+        const game: Game = this.gameManager.getGame(payload.accessCode);
         this.server.to(payload.winner.id).emit(FightEvents.Winner, payload.winner);
         this.server.to(payload.loser.id).emit(FightEvents.Loser, payload.loser);
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
         if (payload.winner.wins >= MAX_FIGHT_WINS) {
-            this.server.to(payload.accessCode).emit(GameEvents.End, payload.winner);
-            this.gameManager.closeGame(payload.accessCode);
+            this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);
+            this.gameManager.closeRoom(payload.accessCode);
         } else if (game.isPlayerTurn(payload.loser.id)) {
             game.endTurn();
         } else {
             game.timer.resumeTimer();
             game.decrementAction(payload.winner);
         }
-    }
-
-    @OnEvent(InternalEvents.PlayerRemoved)
-    handlePlayerRemoved(payload: { accessCode: string; game: Game }) {
-        this.logger.log('Player removed from game');
-        this.server.to(payload.accessCode).emit(GameEvents.BroadcastQuitGame, payload.game);
     }
 
     @OnEvent(InternalTurnEvents.Start)
@@ -98,7 +92,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.Start)
     handleGameStart(client: Socket, accessCode: string) {
-        let game = this.gameManager.getGame(accessCode);
+        let game: Game = this.gameManager.getGame(accessCode);
         if (!game) {
             this.logger.error('Game not found for access code: ' + accessCode);
             return;
@@ -110,7 +104,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.Debug)
     handleDebug(client: Socket, accessCode: string) {
-        const game = this.gameManager.getGame(accessCode);
+        const game: Game = this.gameManager.getGame(accessCode);
         if (game) {
             this.logger.log('Toggling debug mode');
             const newDebugState = game.toggleDebug();
@@ -120,7 +114,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
-        const game = this.gameManager.getGame(payload.accessCode);
+        const game: Game = this.gameManager.getGame(payload.accessCode);
         if (game && game.isPlayerTurn(payload.playerId)) {
             game.startTurn();
         }
@@ -128,7 +122,7 @@ export class GameGateway {
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
     handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
-        const game = this.gameManager.getGame(payload.accessCode);
+        const game: Game = this.gameManager.getGame(payload.accessCode);
         const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
         this.server
             .to(payload.accessCode)
@@ -138,13 +132,13 @@ export class GameGateway {
     @SubscribeMessage(TurnEvents.Move)
     handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo; playerId: string }) {
         this.logger.log('Player movement');
-        const game = this.gameManager.getGame(payload.accessCode);
+        const game: Game = this.gameManager.getGame(payload.accessCode);
         game.processPath(payload.path, payload.playerId);
     }
 
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; playerId: string }) {
-        const game = this.gameManager.getGame(payload.accessCode);
+        const game: Game = this.gameManager.getGame(payload.accessCode);
         if (game.isDebugMode) {
             game.movePlayerDebug(payload.direction, payload.playerId);
         }
@@ -152,27 +146,27 @@ export class GameGateway {
 
     @SubscribeMessage(TurnEvents.End)
     handlePlayerEnd(client: Socket, accessCode: string) {
-        const game = this.gameManager.getGame(accessCode);
+        const game: Game = this.gameManager.getGame(accessCode);
         game.endTurn();
     }
 
     @SubscribeMessage(FightEvents.Init)
     handleFightInit(client: Socket, payload: { accessCode: string; playerInitiatorId: string; playerDefenderId: string }) {
         this.logger.log('Initiating fight');
-        const game = this.gameManager.getGame(payload.accessCode);
-        const fight = game.initFight(payload.playerInitiatorId, payload.playerDefenderId);
+        const game: Game = this.gameManager.getGame(payload.accessCode);
+        const fight: Fight = game.initFight(payload.playerInitiatorId, payload.playerDefenderId);
         this.server.to([fight.player1.id, fight.player2.id]).emit(FightEvents.Init, fight);
     }
 
     @SubscribeMessage(FightEvents.Flee)
     handlePlayerFlee(client: Socket, accessCode: string) {
         this.logger.log('Player fleeing from ' + accessCode);
-        const game = this.gameManager.getGame(accessCode);
+        const game: Game = this.gameManager.getGame(accessCode);
         if (game.flee()) {
             this.server.to([game.fight.player1.id, game.fight.player2.id]).emit(FightEvents.End, null);
             game.endFight();
         } else {
-            const fight = game.changeFighter();
+            const fight: Fight = game.changeFighter();
             this.server.to([fight.player1.id, fight.player2.id]).emit(FightEvents.ChangeFighter, fight);
         }
     }
@@ -180,7 +174,7 @@ export class GameGateway {
     @SubscribeMessage(FightEvents.Attack)
     handlePlayerAttack(client: Socket, accessCode: string) {
         this.logger.log('Player attack from ' + accessCode);
-        const game = this.gameManager.getGame(accessCode);
+        const game: Game = this.gameManager.getGame(accessCode);
         game.playerAttack();
     }
 }

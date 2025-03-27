@@ -23,6 +23,7 @@ export class GameService {
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
+    private organizerId: string = '';
     private dialog = inject(MatDialog);
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
@@ -51,11 +52,6 @@ export class GameService {
             newMap[payload.position.y][payload.position.x].tile = payload.newState;
             this.map.next(newMap);
             this.isActionSelected.next(false);
-        });
-
-        this.socketReceiver.onQuitGame().subscribe((game) => {
-            this.playingPlayers.next(game.players);
-            this.map.next(game.map);
         });
     }
 
@@ -120,7 +116,7 @@ export class GameService {
 
     debugMovePlayer(cell: Cell): void {
         if (this.canTeleport(cell)) {
-            this.socketEmitter.debugMove(cell.position, this.playerService.getPlayer());
+            this.socketEmitter.debugMove(cell.position, this.playerService.getPlayer().id);
         }
     }
 
@@ -220,10 +216,6 @@ export class GameService {
         return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
     }
 
-    getOrganizerId(): string {
-        return this.organizerId;
-    }
-
     findPossibleActions(position: Vec2): Set<string> {
         const possibleActions = new Set<string>();
         const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
@@ -236,6 +228,10 @@ export class GameService {
             }
         }
         return possibleActions;
+    }
+
+    getOrganizerId(): string {
+        return this.organizerId;
     }
 
     private isValidCellForAction(cell: Cell): boolean {
