@@ -4,6 +4,7 @@ import { Cell, Vec2 } from '@common/board';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 import { Player } from './player';
+import { Fight } from './fight';
 
 const confirmDisconnectMessage = 'Vous avez quitté la partie avec succès';
 const adminDisconnectMessage = "La partie a été fermée dû à la déconnection de l'organisateur";
@@ -58,8 +59,12 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalTurnEvents.Start, playerId);
         });
 
+        this.internalEmitter.on(InternalFightEvents.ChangeFighter, (fight: Fight) => {
+            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, fight);
+        });
+
         this.internalEmitter.on(InternalFightEvents.End, (fightResult: { winner: Player; loser: Player }) => {
-            this.globalEmitter.emit(InternalFightEvents.End, fightResult);
+            this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, winner: fightResult.winner, loser: fightResult.loser });
         });
     }
 

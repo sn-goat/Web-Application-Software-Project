@@ -44,7 +44,7 @@ export class Game implements IGame {
         this.pendingEndTurn = false;
         this.maxPlayers = getLobbyLimit(map.length);
 
-        this.internalEmitter.on(InternalTimerEvents.End, () => {
+        this.internalEmitter.on(InternalEvents.EndTimer, () => {
             if (this.fight.hasFight()) {
                 this.playerAttack();
             } else {
@@ -186,7 +186,13 @@ export class Game implements IGame {
     }
 
     initFight(playerInitiatorId: string, playerDefenderId: string): Fight {
-        this.fight.initFight(this.getPlayer(playerInitiatorId), this.getPlayer(playerDefenderId));
+        const playerInitiator = this.getPlayer(playerInitiatorId);
+        const playerDefender = this.getPlayer(playerDefenderId);
+
+        playerInitiator.initFight();
+        playerDefender.initFight();
+
+        this.fight.initFight(playerInitiator, playerDefender);
         this.timer.startTimer(FIGHT_TURN_DURATION_IN_S, TimerType.Combat);
         return this.fight;
     }
@@ -203,11 +209,13 @@ export class Game implements IGame {
     }
 
     playerAttack(): void {
+        log(`Player ${this.fight.currentPlayer.name} has attacked`);
         const fightResult = this.fight.playerAttack(this.isDebugMode);
         if (fightResult === null) {
             this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
         } else {
             this.movePlayerToSpawn(fightResult.loser);
+            this.endFight();
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
         }
     }

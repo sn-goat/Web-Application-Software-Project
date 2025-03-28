@@ -56,7 +56,7 @@ export class GameGateway {
 
     @OnEvent(InternalTurnEvents.ChangeTurn)
     handleEndTurn(payload: { accessCode: string; player: Player; path: Record<string, PathInfo> }) {
-        this.logger.log('Ending turn early');
+        this.logger.log('Changing turn to player: ' + payload.player.name);
         this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { player: payload.player, path: payload.path });
     }
 

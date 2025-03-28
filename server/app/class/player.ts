@@ -79,7 +79,7 @@ export class Player implements IPlayer {
     }
 
     private initiateAttack(isDebugMode: boolean): number {
-        this.diceResult = isDebugMode ? minDiceValue : Math.floor(Math.random() * this.diceToNumber(this.attackDice)) + 1;
+        this.diceResult = isDebugMode ? this.diceToNumber(this.attackDice) : Math.floor(Math.random() * this.diceToNumber(this.attackDice)) + 1;
         return this.diceResult + this.attackPower;
     }
 
