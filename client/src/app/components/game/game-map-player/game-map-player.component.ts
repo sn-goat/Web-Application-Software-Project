@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
@@ -6,7 +7,7 @@ import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-map-player',
-    imports: [],
+    imports: [CommonModule],
     templateUrl: './game-map-player.component.html',
     styleUrl: './game-map-player.component.scss',
 })
@@ -48,5 +49,6 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
 
     ngOnDestroy() {
         this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+        this.subscriptions = [];
     }
 }

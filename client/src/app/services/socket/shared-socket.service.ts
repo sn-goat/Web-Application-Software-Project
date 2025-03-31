@@ -8,10 +8,9 @@ import { environment } from 'src/environments/environment';
 export class SharedSocketService {
     socket: Socket;
     constructor() {
-        this.socket = io(environment.serverUrl, {
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
+        this.socket = io(environment.serverUrl);
+        this.socket.on('disconnect', () => {
+            this.socket.connect();
         });
     }
 }

@@ -25,6 +25,12 @@ export interface PlayerAttributes {
     life: number;
     attackDice: Dice;
     defenseDice: Dice;
+    team?: Team;
+}
+
+export enum Team {
+    RED = 'Rouge',
+    BLUE = 'Bleu',
 }
 
 export interface GameStats {

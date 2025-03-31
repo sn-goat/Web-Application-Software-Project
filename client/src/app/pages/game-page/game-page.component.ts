@@ -44,8 +44,6 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     debugMode = false;
     popupVisible = false;
 
-    private readonly quitGameMessage = "Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.";
-    private readonly notEnoughPlayersMessage = "Pas assez de joueurs pour continuer la partie. Vous allez être redirigé vers la page d'accueil.";
     private readonly endGameTimeoutInS = 5000;
     private subscriptions: Subscription[] = [];
     private gameService = inject(GameService);
@@ -59,11 +57,6 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     @HostListener('window:beforeunload', ['$event'])
     onBeforeUnload(): void {
         this.socketEmitter.disconnect(this.playerService.getPlayer().id);
-    }
-
-    @HostListener('window:pageshow', ['$event'])
-    async onPageShow(): Promise<void> {
-        this.warning(this.quitGameMessage);
     }
 
     ngOnInit(): void {
@@ -83,12 +76,6 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this.fightLogicService.fightStarted.subscribe((show) => {
                 this.showFightInterface = show;
-            }),
-
-            this.gameService.playingPlayers.subscribe((players) => {
-                if (players && players.length < 2) {
-                    this.warning(this.notEnoughPlayersMessage);
-                }
             }),
 
             this.gameService.isDebugMode.subscribe((isDebugMode) => {

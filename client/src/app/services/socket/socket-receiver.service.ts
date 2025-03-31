@@ -24,7 +24,7 @@ export class SocketReceiverService {
 
     onRoomCreated(): Observable<IRoom> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.RoomCreated, (room) => {
+            this.socket.once(RoomEvents.RoomCreated, (room) => {
                 this.socketEmitter.setAccessCode(room.accessCode);
                 observer.next(room);
             });
@@ -49,7 +49,7 @@ export class SocketReceiverService {
 
     onSetCharacter(): Observable<IPlayer> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.SetCharacter, (player: IPlayer) => {
+            this.socket.once(RoomEvents.SetCharacter, (player: IPlayer) => {
                 observer.next(player);
             });
         });
@@ -57,7 +57,7 @@ export class SocketReceiverService {
 
     onPlayerRemoved(): Observable<string> {
         return new Observable((observer) => {
-            this.socket.on(RoomEvents.PlayerRemoved, (message: string) => {
+            this.socket.once(RoomEvents.PlayerRemoved, (message: string) => {
                 observer.next(message);
             });
         });
@@ -95,6 +95,14 @@ export class SocketReceiverService {
         });
     }
 
+    onGameStartedError(): Observable<string> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.Error, (message: string) => {
+                observer.next(message);
+            });
+        });
+    }
+
     onDebugModeChanged(): Observable<boolean> {
         return new Observable((observer) => {
             this.socket.on(GameEvents.DebugStateChanged, (isDebug: boolean) => {
@@ -105,7 +113,7 @@ export class SocketReceiverService {
 
     onGameEnded(): Observable<IPlayer> {
         return new Observable((observer) => {
-            this.socket.on(GameEvents.GameEnded, (winner: IPlayer) => {
+            this.socket.once(GameEvents.GameEnded, (winner: IPlayer) => {
                 observer.next(winner);
             });
         });
@@ -114,8 +122,6 @@ export class SocketReceiverService {
     onPlayerTurnChanged(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.PlayerTurn, (turn: { player: IPlayer; path: Record<string, PathInfo> }) => {
-                // eslint-disable-next-line no-console
-                console.log(turn);
                 const receivedMap = new Map(Object.entries(turn.path));
                 observer.next({ player: turn.player, path: receivedMap });
             });

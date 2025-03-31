@@ -40,5 +40,6 @@ export class RoomService {
     reset() {
         this.connected.next([]);
         this.isRoomLocked.next(false);
+        this.maxPlayer.next(0);
     }
 }

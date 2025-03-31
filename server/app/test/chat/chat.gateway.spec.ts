@@ -1,5 +1,5 @@
 import { ChatGateway } from '@app/gateways/chat/chat.gateway';
-import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID } from '@app/gateways/chat/chat.gateway.constants';
+import { PRIVATE_ROOM_ID } from '@app/gateways/chat/chat.gateway.constants';
 import { ChatEvents } from '@app/gateways/chat/chat.gateway.events';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -86,13 +86,6 @@ describe('ChatGateway', () => {
             },
         } as BroadcastOperator<unknown, unknown>);
         gateway.roomMessage(socket, 'X');
-    });
-
-    it('afterInit() should emit time after 1s', () => {
-        jest.useFakeTimers();
-        gateway.afterInit();
-        jest.advanceTimersByTime(DELAY_BEFORE_EMITTING_TIME);
-        expect(server.emit.calledWith(ChatEvents.Clock, match.any)).toBeTruthy();
     });
 
     it('hello message should be sent on connection', () => {

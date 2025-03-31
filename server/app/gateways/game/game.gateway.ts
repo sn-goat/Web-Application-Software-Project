@@ -1,16 +1,16 @@
+import { Fight } from '@app/class/fight';
+import { Game } from '@app/class/game';
+import { Player } from '@app/class/player';
 import { InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { Fight } from '@app/class/fight';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
 import { MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { Player } from '@app/class/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Game } from '@app/class/game';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -98,8 +98,13 @@ export class GameGateway {
             return;
         }
         game = game.configureGame();
-        this.server.to(accessCode).emit(GameEvents.GameStarted, game);
-        game.startTurn();
+        if (game) {
+            this.server.to(accessCode).emit(GameEvents.GameStarted, game);
+            game.startTurn();
+        } else {
+            this.logger.error('Game could not be configured for access code: ' + accessCode);
+            client.emit(GameEvents.Error, 'Il vous faut un nombre de joueurs pair pour commencer la partie.');
+        }
     }
 
     @SubscribeMessage(GameEvents.Ready)

@@ -1,12 +1,6 @@
-import { Cell, Vec2 } from '@common/board';
-import { Player } from '@app/class/player';
-import { getLobbyLimit } from '@common/lobby-limits';
 import { Fight } from '@app/class/fight';
-import { Avatar, IGame, PathInfo } from '@common/game';
-import { GameUtils } from '@app/services/game/game-utils';
-import { Timer } from './timer';
+import { Player } from '@app/class/player';
 import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -15,8 +9,15 @@ import {
     TimerType,
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
+import { Board } from '@app/model/database/board';
+import { GameUtils } from '@app/services/game/game-utils';
+import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
+import { Avatar, IGame, PathInfo } from '@common/game';
+import { getLobbyLimit } from '@common/lobby-limits';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { log } from 'console';
+import { Timer } from './timer';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -25,24 +26,26 @@ export class Game implements IGame {
     currentTurn: number;
     hasStarted: boolean;
     isDebugMode: boolean;
+    isCTF: boolean;
     fight: Fight;
     timer: Timer;
     movementInProgress: boolean;
     pendingEndTurn: boolean;
     maxPlayers: number;
 
-    constructor(internalEmitter: EventEmitter2, map: Cell[][]) {
+    constructor(internalEmitter: EventEmitter2, board: Board) {
         this.internalEmitter = internalEmitter;
-        this.map = map;
+        this.map = board.board;
         this.players = [];
         this.currentTurn = 0;
         this.hasStarted = false;
         this.isDebugMode = false;
+        this.isCTF = board.isCTF;
         this.timer = new Timer(internalEmitter);
         this.fight = new Fight(internalEmitter);
         this.movementInProgress = false;
         this.pendingEndTurn = false;
-        this.maxPlayers = getLobbyLimit(map.length);
+        this.maxPlayers = getLobbyLimit(board.size);
 
         this.internalEmitter.on(InternalEvents.EndTimer, () => {
             if (this.fight.hasFight()) {
@@ -92,6 +95,13 @@ export class Game implements IGame {
     }
 
     configureGame(): Game {
+        if (this.isCTF) {
+            if (this.players.length % 2 !== 0) {
+                return null;
+            }
+            GameUtils.assignTeams(this.players);
+        }
+        this.hasStarted = true;
         this.players = GameUtils.sortPlayersBySpeed(this.players);
         const allSpawns = GameUtils.getAllSpawnPoints(this.map);
         const usedSpawnPoints = GameUtils.assignSpawnPoints(this.players, allSpawns, this.map);

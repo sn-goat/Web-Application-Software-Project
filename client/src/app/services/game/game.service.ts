@@ -93,6 +93,7 @@ export class GameService {
     }
 
     isWithinActionRange(cell: Cell): boolean {
+        if (!this.isValidCellForAction(cell)) return false;
         const playerPos = this.activePlayer.value?.position;
         if (!playerPos) return false;
         const actionPos = cell.position;
@@ -252,6 +253,11 @@ export class GameService {
         return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
     }
     private isValidCellForAction(cell: Cell): boolean {
-        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+        const myPlayer = this.playerService.getPlayer();
+        const defender = this.findDefender(cell.player);
+        if (defender) {
+            return !defender.team || myPlayer.team !== defender.team;
+        }
+        return cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
     }
 }

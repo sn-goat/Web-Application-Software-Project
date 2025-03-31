@@ -49,6 +49,7 @@ export class GameFightInterfaceComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        this.subscriptions = [];
     }
 
     isMyTurn(): boolean {

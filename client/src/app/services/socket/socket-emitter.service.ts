@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SharedSocketService } from '@app/services/socket/shared-socket.service';
-import { Cell, Vec2 } from '@common/board';
+import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { ChatEvents } from '@common/chat.gateway.events';
 import { PathInfo } from '@common/game';
@@ -25,8 +25,8 @@ export class SocketEmitterService {
         this.accessCode = accessCode;
     }
 
-    createRoom(map: Cell[][]) {
-        this.socket.emit(RoomEvents.CreateRoom, map);
+    createRoom(mapName: string) {
+        this.socket.emit(RoomEvents.CreateRoom, mapName);
     }
 
     joinRoom(accessCode: string) {

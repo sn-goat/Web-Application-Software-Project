@@ -9,12 +9,8 @@ import {
     Dice,
     IPlayer,
     PlayerInput,
+    Team,
 } from '@common/player';
-
-const dice4 = 4;
-const dice6 = 6;
-const minDiceValue = 1;
-const fleeThreshold = 0.3;
 
 export class Player implements IPlayer {
     id: string;
@@ -34,6 +30,12 @@ export class Player implements IPlayer {
     fleeAttempts: number;
     currentLife: number;
     diceResult: number;
+    team?: Team;
+
+    private readonly dice4 = 4;
+    private readonly dice6 = 6;
+    private readonly minDiceValue = 1;
+    private readonly fleeThreshold = 0.3;
 
     constructor(id: string, player: PlayerInput) {
         this.id = id;
@@ -45,14 +47,22 @@ export class Player implements IPlayer {
         this.defenseDice = player.defenseDice;
         this.attackPower = player.attackPower;
         this.defensePower = player.defensePower;
-
         this.wins = DEFAULT_WINS;
+        this.team = null;
     }
 
     attemptFlee(): boolean {
         this.fleeAttempts -= 1;
-        const isFleeSuccessful = Math.random() < fleeThreshold;
+        const isFleeSuccessful = Math.random() < this.fleeThreshold;
         return isFleeSuccessful;
+    }
+
+    setTeam(team: Team): void {
+        this.team = team;
+    }
+
+    getTeam(): Team {
+        return this.team;
     }
 
     initTurn(): void {
@@ -84,11 +94,11 @@ export class Player implements IPlayer {
     }
 
     private initiateDefence(isDebugMode: boolean): number {
-        this.diceResult = isDebugMode ? minDiceValue : Math.floor(Math.random() * this.diceToNumber(this.defenseDice)) + 1;
+        this.diceResult = isDebugMode ? this.minDiceValue : Math.floor(Math.random() * this.diceToNumber(this.defenseDice)) + 1;
         return this.diceResult + this.defensePower;
     }
 
     private diceToNumber(dice: Dice): number {
-        return dice === 'D6' ? dice6 : dice4;
+        return dice === 'D6' ? this.dice6 : this.dice4;
     }
 }

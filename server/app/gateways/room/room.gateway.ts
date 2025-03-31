@@ -1,14 +1,13 @@
-import { GameManagerService } from '@app/services/game/games-manager.service';
-import { Cell } from '@common/board';
+import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
+import { InternalRoomEvents } from '@app/constants/internal-events';
+import { GameManagerService } from '@app/services/game/games-manager.service';
 import { PlayerInput } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Player } from '@app/class/player';
-import { InternalRoomEvents } from '@app/constants/internal-events';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -28,7 +27,6 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
         const clientSock: Socket = this.server.sockets.sockets.get(payload.playerId);
         clientSock.leave(payload.accessCode);
-        clientSock.disconnect();
     }
 
     @OnEvent(InternalRoomEvents.PlayersUpdated)
@@ -37,8 +35,8 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(RoomEvents.CreateRoom)
-    handleCreateRoom(client: Socket, map: Cell[][]) {
-        const room: Room = this.gameManager.openRoom(client.id, map);
+    async handleCreateRoom(client: Socket, mapName: string) {
+        const room: Room = await this.gameManager.openRoom(client.id, mapName);
         client.join(room.accessCode);
         client.emit(RoomEvents.RoomCreated, room);
         this.logger.log(`Salle de jeu créée avec le code ${room.accessCode}`);

@@ -35,5 +35,6 @@ export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        this.subscriptions = [];
     }
 }

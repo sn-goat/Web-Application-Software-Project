@@ -3,7 +3,7 @@ import { RANDOM_SORT_OFFSET } from '@app/gateways/game/game.gateway.constants';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';
-import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS } from '@common/player';
+import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, Team } from '@common/player';
 
 export class GameUtils {
     static isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
@@ -159,7 +159,19 @@ export class GameUtils {
             });
         });
     }
-
+    static assignTeams(playersList: Player[]): void {
+        const shuffled = [...playersList];
+        // Shuffle players
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        const mid = Math.floor(shuffled.length / 2);
+        // Assign teams
+        for (let i = 0; i < shuffled.length; i++) {
+            shuffled[i].setTeam(i < mid ? Team.RED : Team.BLUE);
+        }
+    }
     private static vec2Key(vec: Vec2): string {
         return `${vec.x},${vec.y}`;
     }

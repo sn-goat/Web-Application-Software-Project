@@ -1,16 +1,12 @@
 import { Game } from '@app/class/game';
 import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
-import { Cell, Vec2 } from '@common/board';
+import { Board } from '@app/model/database/board';
+import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
 import { Player } from './player';
-
-const confirmDisconnectMessage = 'Vous avez quitté la partie avec succès';
-const adminDisconnectMessage = "La partie a été fermée dû à la déconnection de l'organisateur";
-const playerBanMessage = "Vous avez été expulsé de la partie par l'organisateur";
-const notEnoughPlayersMessage = "Il n'y pas assez de joueurs pour continuer la partie";
 
 export class Room implements IRoom {
     accessCode: string;
@@ -21,13 +17,18 @@ export class Room implements IRoom {
     private internalEmitter: EventEmitter2;
     private globalEmitter: EventEmitter2;
 
-    constructor(globalEmitter: EventEmitter2, accessCode: string, organizerId: string, map: Cell[][]) {
+    private readonly confirmDisconnectMessage = 'Vous avez quitté la partie avec succès';
+    private readonly adminDisconnectMessage = "La partie a été fermée dû à la déconnection de l'organisateur";
+    private readonly playerBanMessage = "Vous avez été expulsé de la partie par l'organisateur";
+    private readonly notEnoughPlayersMessage = "Il n'y pas assez de joueurs pour continuer la partie";
+
+    constructor(globalEmitter: EventEmitter2, accessCode: string, organizerId: string, board: Board) {
         this.accessCode = accessCode;
         this.organizerId = organizerId;
         this.isLocked = false;
         this.internalEmitter = new EventEmitter2();
         this.globalEmitter = globalEmitter;
-        this.game = new Game(this.internalEmitter, map);
+        this.game = new Game(this.internalEmitter, board);
 
         this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (playerId: string, message: string) => {
             this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, { accessCode: this.accessCode, playerId, message });
@@ -91,7 +92,8 @@ export class Room implements IRoom {
     }
 
     expelPlayer(playerId: string): void {
-        this.game.removePlayer(playerId, playerBanMessage);
+        this.game.removePlayer(playerId, this.playerBanMessage);
+        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
     }
 
     removePlayer(playerId: string): void {
@@ -104,24 +106,28 @@ export class Room implements IRoom {
 
     removeAllPlayers(): void {
         for (const player of this.getPlayers()) {
-            this.game.removePlayer(player.id, confirmDisconnectMessage);
+            this.game.removePlayer(player.id, this.confirmDisconnectMessage);
         }
     }
 
-    removePlayerFromLobby(playerId: string): void {
+    addMessage(message: ChatMessage): void {
+        this.chatHistory.push(message);
+    }
+
+    private removePlayerFromLobby(playerId: string): void {
         if (this.isPlayerAdmin(playerId)) {
             for (const player of this.getPlayers().filter((p) => p.id !== playerId)) {
-                this.game.removePlayer(player.id, adminDisconnectMessage);
+                this.game.removePlayer(player.id, this.adminDisconnectMessage);
             }
-            this.game.removePlayer(playerId, confirmDisconnectMessage);
+            this.game.removePlayer(playerId, this.confirmDisconnectMessage);
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
         } else {
-            this.game.removePlayer(playerId, confirmDisconnectMessage);
+            this.game.removePlayer(playerId, this.confirmDisconnectMessage);
             this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
         }
     }
 
-    removePlayerFromGame(playerId: string): void {
+    private removePlayerFromGame(playerId: string): void {
         if (this.isPlayerAdmin(playerId) && this.game.isDebugMode) {
             this.game.isDebugMode = false;
             this.globalEmitter.emit(InternalGameEvents.DebugStateChanged, { accessCode: this.accessCode, newState: false });
@@ -136,17 +142,14 @@ export class Room implements IRoom {
         }
 
         this.game.removePlayerOnMap(playerId);
-        this.game.removePlayer(playerId, confirmDisconnectMessage);
+        this.game.removePlayer(playerId, this.confirmDisconnectMessage);
+        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
 
         if (this.game.players.length < 2) {
             const lastPlayer = this.getPlayers()[0];
-            this.game.removePlayer(lastPlayer.id, notEnoughPlayersMessage);
+            this.game.removePlayer(lastPlayer.id, this.notEnoughPlayersMessage);
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
         }
-    }
-
-    addMessage(message: ChatMessage): void {
-        this.chatHistory.push(message);
     }
 
     private generateUniquePlayerName(player: Player): void {

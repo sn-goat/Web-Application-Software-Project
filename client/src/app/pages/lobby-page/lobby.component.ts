@@ -71,6 +71,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.router.navigate(['/acceuil']);
             }),
 
+            this.socketReceiver.onGameStartedError().subscribe((message: string) => {
+                this.openDialog(message, Alert.WARNING);
+            }),
+
             this.socketReceiver.onGameStarted().subscribe((game: IGame) => {
                 this.gameService.setGame(game);
                 this.router.navigate(['/jeu']);

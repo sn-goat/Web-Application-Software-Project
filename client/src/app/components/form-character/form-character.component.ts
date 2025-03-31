@@ -77,11 +77,19 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             this.roomService.isRoomLocked.subscribe((isLocked) => {
                 this.isRoomLocked = isLocked;
             }),
+
+            this.socketReceiver.onRoomCreated().subscribe((room) => {
+                this.accessCode = room.accessCode;
+                this.socketEmitter.shareCharacter(this.playerInput);
+                this.playerService.setAdmin(true);
+                this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
+            }),
         );
     }
 
     ngOnDestroy(): void {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        this.subscriptions = [];
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -149,14 +157,8 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             .getGameMap()
             .pipe(first())
             .subscribe((map) => {
-                const selectedMap = map.board;
+                const selectedMap = map.name;
                 this.socketEmitter.createRoom(selectedMap);
-                this.socketReceiver.onRoomCreated().subscribe((room) => {
-                    this.accessCode = room.accessCode;
-                    this.socketEmitter.shareCharacter(this.playerInput);
-                    this.playerService.setAdmin(true);
-                    this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
-                });
             });
     }
 }

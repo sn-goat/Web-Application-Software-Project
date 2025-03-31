@@ -14,6 +14,7 @@ export interface IGame {
     currentTurn: number;
     isDebugMode: boolean;
     maxPlayers: number;
+    isCTF: boolean;
 }
 
 export interface GameFormData {
