@@ -1,5 +1,15 @@
 import { Vec2 } from './board';
 
+export interface PlayerInput {
+    name: string,
+    avatar: string,
+    life: number,
+    speed: number,
+    attackPower: number,
+    defensePower: number,
+    attackDice: Dice,
+    defenseDice: Dice,
+}
 export interface PlayerInfo {
     id: string;
     name: string;
@@ -9,12 +19,18 @@ export interface PlayerInfo {
 export type Dice = 'D4' | 'D6';
 
 export interface PlayerAttributes {
-    attack: number;
-    defense: number;
+    attackPower: number;
+    defensePower: number;
     speed: number;
     life: number;
     attackDice: Dice;
     defenseDice: Dice;
+    team?: Team;
+}
+
+export enum Team {
+    RED = 'Rouge',
+    BLUE = 'Bleu',
 }
 
 export interface GameStats {
@@ -25,7 +41,13 @@ export interface GameStats {
     spawnPosition: Vec2;
 }
 
-export type PlayerStats = PlayerInfo & PlayerAttributes & GameStats;
+export interface FightInfo {
+    fleeAttempts: number;
+    currentLife: number;
+    diceResult: number;
+}
+
+export type IPlayer = PlayerInfo & PlayerAttributes & GameStats & FightInfo;
 
 export const DEFAULT_ATTACK_VALUE = 4;
 export const ATTACK_ICE_DECREMENT = 2;
@@ -37,6 +59,7 @@ export const DEFAULT_DICE: Dice = 'D4';
 export const DEFAULT_MOVEMENT_POINTS = 0;
 export const DEFAULT_ACTIONS = 1;
 export const DEFAULT_WINS = 0;
+export const DEFAULT_FLEE_ATTEMPTS = 2;
 export const DEFAULT_POSITION: Vec2 = { x: 0, y: 0 };
 export const DEFAULT_POSITION_BEFORE_GAME: Vec2 = { x: -1, y: -1 };
 export const DEFAULT_MOVEMENT_DIRECTIONS: Vec2[] = [

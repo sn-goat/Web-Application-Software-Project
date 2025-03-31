@@ -1,0 +1,65 @@
+import { InternalEvents } from '@app/constants/internal-events';
+import { TimerType } from '@app/gateways/game/game.gateway.constants';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+const ONE_SECOND_IN_MS = 1000;
+
+export class Timer {
+    type: string;
+    remainingTime: number;
+    pausedTime: number;
+    intervalId: NodeJS.Timeout;
+    private eventEmitter: EventEmitter2;
+
+    constructor(eventEmitter: EventEmitter2) {
+        this.eventEmitter = eventEmitter;
+    }
+
+    startTimer(duration: number, newType: TimerType = TimerType.Movement) {
+        let pausedTime = this.pausedTime;
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+
+        if (this.type === TimerType.Movement) {
+            pausedTime = this.pauseTimer();
+        }
+
+        this.type = newType;
+        this.remainingTime = duration;
+        this.pausedTime = pausedTime;
+
+        const intervalId = setInterval(() => {
+            this.eventEmitter.emit(InternalEvents.UpdateTimer, this.remainingTime);
+            if (this.remainingTime <= 0) {
+                clearInterval(intervalId);
+                this.eventEmitter.emit(InternalEvents.EndTimer);
+                return;
+            }
+
+            this.remainingTime -= 1;
+        }, ONE_SECOND_IN_MS);
+
+        this.intervalId = intervalId;
+    }
+
+    pauseTimer(): number {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.pausedTime = this.remainingTime;
+            return this.pausedTime;
+        }
+    }
+
+    resumeTimer() {
+        if (this.pausedTime) {
+            this.startTimer(this.pausedTime, TimerType.Movement);
+        }
+    }
+
+    stopTimer() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+    }
+}

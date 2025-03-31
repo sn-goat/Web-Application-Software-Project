@@ -16,18 +16,18 @@
         }
         <div class="name-container">
             <label for="player-name">Qui êtes vous ?</label>
-            <input type="text" id="player-name" [(ngModel)]="playerStats.name" placeholder="Enter your name" class="name-input" maxlength="20" />
+            <input type="text" id="player-name" [(ngModel)]="playerInput.name" placeholder="Enter your name" class="name-input" maxlength="20" />
         </div>
         <div class="stat-container">
             <div class="stat-column">
                 <p class="stat-description">Attribuer un +2</p>
                 <div class="tooltip">
-                    <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ playerStats.life }}</button>
+                    <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ playerInput.life }}</button>
                     <span class="tooltiptext">le nombre de points de vie</span>
                 </div>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
-                        Rapidité: {{ playerStats.speed }}
+                        Rapidité: {{ playerInput.speed }}
                     </button>
                     <span class="tooltiptext">déterminer l'ordre des tours et points de mouvement par tour</span>
                 </div>
@@ -36,16 +36,16 @@
                 <p class="stat-description">Attribuer un D6</p>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
-                        Attaque: {{ playerStats.attack }} + @if(playerStats.attackDice) {
-                        <img [src]="diceToImageLink(playerStats.attackDice)" alt="Attack Dice" class="dice-image" />
+                        Attaque: {{ playerInput.attackPower }} + @if(playerInput.attackDice) {
+                        <img [src]="diceToImageLink(playerInput.attackDice)" alt="Attack Dice" class="dice-image" />
                         }
                     </button>
                     <span class="tooltiptext">dégats d'une attaque</span>
                 </div>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
-                        Défense: {{ playerStats.defense }} + @if(playerStats.defenseDice) {
-                        <img [src]="diceToImageLink(playerStats.defenseDice)" alt="Defense Dice" class="dice-image" />
+                        Défense: {{ playerInput.defensePower }} + @if(playerInput.defenseDice) {
+                        <img [src]="diceToImageLink(playerInput.defenseDice)" alt="Defense Dice" class="dice-image" />
                         }
                     </button>
                     <span class="tooltiptext">capacité à bloquer une attaque </span>

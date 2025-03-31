@@ -3,7 +3,7 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE } from '@app/constants/path';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { PlayerService } from '@app/services/player/player.service';
-import { PlayerStats } from '@common/player';
+import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -17,14 +17,14 @@ export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
     readonly diceToImageLink = diceToImageLink;
 
     maxHealth: number = 0;
-    myPlayer: PlayerStats | null;
+    myPlayer: IPlayer | null;
 
     private playerService: PlayerService = inject(PlayerService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
         this.subscriptions.push(
-            this.playerService.myPlayer.subscribe((player: PlayerStats | null) => {
+            this.playerService.myPlayer.subscribe((player: IPlayer | null) => {
                 this.myPlayer = player;
                 if (player) {
                     this.maxHealth = player.life;
@@ -35,5 +35,6 @@ export class GameMapPlayerDetailedComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        this.subscriptions = [];
     }
 }

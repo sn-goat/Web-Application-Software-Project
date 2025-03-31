@@ -7,12 +7,13 @@ import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/playerConst';
 import { GameService } from '@app/services/game/game.service';
-import { SocketService } from '@app/services/socket/socket.service';
-import { Game, Room } from '@common/game';
-import { getLobbyLimit } from '@common/lobby-limits';
-import { PlayerStats } from '@common/player';
+import { PlayerService } from '@app/services/player/player.service';
+import { RoomService } from '@app/services/room/room.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
+import { IGame } from '@common/game';
+import { IPlayer } from '@common/player';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 @Component({
     selector: 'app-lobby',
@@ -22,82 +23,58 @@ import { map } from 'rxjs/operators';
 })
 export class LobbyComponent implements OnInit, OnDestroy {
     accessCode: string = '';
-    players: PlayerStats[] = [];
+    players: IPlayer[] = [];
     isRoomLocked: boolean = false;
     isAdmin: boolean = false;
     maxPlayers: number = 0;
     readonly diceToImageLink = diceToImageLink;
 
     private readonly dialog = inject(MatDialog);
-    private readonly socketService = inject(SocketService);
+    private readonly socketEmitter = inject(SocketEmitterService);
+    private readonly socketReceiver = inject(SocketReceiverService);
     private readonly router = inject(Router);
+    private readonly roomService = inject(RoomService);
     private readonly gameService = inject(GameService);
+    private readonly playerService = inject(PlayerService);
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        this.maxPlayers = getLobbyLimit(this.socketService.getGameSize());
-
-        if (history.state && history.state.accessCode) {
-            this.accessCode = history.state.accessCode;
-        }
+        this.isAdmin = this.playerService.isPlayerAdmin();
+        this.accessCode = this.socketEmitter.getAccessCode();
 
         this.subscriptions.push(
-            this.socketService
-                .onPlayerJoined()
-                .pipe(map((response: { room: Room } | Room) => ('room' in response ? response.room : response)))
-                .subscribe((room: Room) => {
-                    this.players = room.players;
-                    this.accessCode = room.accessCode;
-                    this.checkIfAdmin();
-                }),
-            this.socketService.onPlayersList().subscribe((players: PlayerStats[]) => {
+            this.roomService.connected.subscribe((players) => {
                 this.players = players;
-                if (this.players.length === this.maxPlayers && !this.isRoomLocked) {
-                    this.socketService.lockRoom(this.accessCode);
-                    this.isRoomLocked = true;
-                } else if (this.players.length < this.maxPlayers && this.isRoomLocked) {
-                    this.socketService.unlockRoom(this.accessCode);
-                    this.isRoomLocked = false;
-                }
             }),
-            this.socketService.onRoomLocked().subscribe(() => {
-                this.isRoomLocked = true;
+
+            this.roomService.isRoomLocked.subscribe((isLocked) => {
+                this.isRoomLocked = isLocked;
             }),
-            this.socketService.onPlayerRemoved().subscribe(async (players: PlayerStats[]) => {
+
+            this.roomService.maxPlayer.subscribe((maxPlayers) => {
+                this.maxPlayers = maxPlayers;
+            }),
+
+            this.socketReceiver.onRoomUnlocked().subscribe(() => {
+                this.isRoomLocked = false;
+            }),
+
+            this.socketReceiver.onPlayersUpdated().subscribe((players: IPlayer[]) => {
                 this.players = players;
-                if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
-                    if (!this.isAdmin) {
-                        await this.warning("Vous avez été retiré de la partie par l'admin, vous allez être redirigé vers la page d'accueil");
-                        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-                        this.subscriptions = [];
-                        this.socketService.resetSocketState();
-                        this.router.navigate(['/acceuil']);
-                    }
-                }
             }),
-            this.socketService.onPlayerDisconnected().subscribe(async (players: PlayerStats[]) => {
-                this.players = players;
-                if (!players.find((p) => p.id === this.socketService.getCurrentPlayerId())) {
-                    if (!this.isAdmin) {
-                        await this.warning("Deconnexion de la partie. Vous allez être redirigé vers la page d'accueil");
-                        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-                        this.subscriptions = [];
-                        this.socketService.resetSocketState();
-                        this.router.navigate(['/acceuil']);
-                    }
-                }
-            }),
-            this.socketService.onAdminDisconnected().subscribe(async () => {
-                const message = this.isAdmin
-                    ? "Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil"
-                    : "L'admin s'est déconnecté. Vous allez être redirigé vers la page d'accueil";
+
+            this.socketReceiver.onPlayerRemoved().subscribe(async (message: string) => {
                 await this.warning(message);
                 this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                 this.subscriptions = [];
-                this.socketService.resetSocketState();
                 this.router.navigate(['/acceuil']);
             }),
-            this.socketService.onBroadcastStartGame().subscribe((game: Game) => {
+
+            this.socketReceiver.onGameStartedError().subscribe((message: string) => {
+                this.openDialog(message, Alert.WARNING);
+            }),
+
+            this.socketReceiver.onGameStarted().subscribe((game: IGame) => {
                 this.gameService.setGame(game);
                 this.router.navigate(['/jeu']);
             }),
@@ -109,8 +86,8 @@ export class LobbyComponent implements OnInit, OnDestroy {
         this.subscriptions = [];
     }
 
-    checkIfAdmin() {
-        this.isAdmin = this.players.length > 0 && this.players[0].id === this.socketService.getCurrentPlayerId();
+    getPlayerId(): string {
+        return this.playerService.getPlayer().id;
     }
 
     toggleRoomLock() {
@@ -118,40 +95,25 @@ export class LobbyComponent implements OnInit, OnDestroy {
             return;
         }
         if (this.isRoomLocked) {
-            this.socketService.unlockRoom(this.accessCode);
+            this.socketEmitter.unlockRoom();
             this.isRoomLocked = false;
         } else {
-            this.socketService.lockRoom(this.accessCode);
+            this.socketEmitter.lockRoom();
             this.isRoomLocked = true;
         }
     }
 
-    configureGame() {
-        this.socketService.configureGame(this.accessCode, this.players);
+    startGame() {
+        this.socketEmitter.startGame();
     }
 
-    removePlayer(playerId: string) {
-        this.socketService.removePlayer(this.accessCode, playerId);
+    expelPlayer(playerId: string) {
+        this.socketEmitter.expelPlayer(playerId);
     }
 
     disconnect() {
-        this.warning("Vous vous êtes déconnecté. Vous allez être redirigé vers la page d'accueil");
-
-        const currentId = this.socketService.getCurrentPlayerId();
-        const currentAccessCode = this.accessCode;
-
-        this.socketService.disconnect(currentAccessCode, currentId);
-
-        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-        this.subscriptions = [];
-
-        this.socketService.resetSocketState();
-
-        this.router.navigate(['/acceuil']);
-    }
-
-    getCurrentPlayerId(): string {
-        return this.socketService.getCurrentPlayerId();
+        const currentId = this.playerService.getPlayer().id;
+        this.socketEmitter.disconnect(currentId);
     }
 
     async warning(message: string): Promise<void> {

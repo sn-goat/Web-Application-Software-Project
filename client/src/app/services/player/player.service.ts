@@ -1,40 +1,45 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { SocketService } from '@app/services/socket/socket.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Vec2 } from '@common/board';
-import { PathInfo } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { PathInfo, TurnInfo } from '@common/game';
+import { IPlayer } from '@common/player';
 import { BehaviorSubject, Subscription } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class PlayerService implements OnDestroy {
-    myPlayer: BehaviorSubject<PlayerStats | null> = new BehaviorSubject<PlayerStats | null>(null);
+    myPlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isActivePlayer: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     path: BehaviorSubject<Map<string, PathInfo>> = new BehaviorSubject<Map<string, PathInfo>>(new Map());
     subscriptions: Subscription[] = [];
     private isAdmin: boolean = false;
-    private accessCode: string = '';
 
-    private readonly socketService = inject(SocketService);
+    private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
+    private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
 
     constructor() {
         this.subscriptions.push(
-            this.socketService.onTurnSwitch().subscribe((data) => {
-                if (data.player.id === this.getPlayer().id) {
-                    this.setPath(data.path);
-                    this.setPlayer(data.player);
+            this.socketReceiver.onSetCharacter().subscribe((player: IPlayer) => {
+                this.setPlayer(player);
+            }),
+
+            this.socketReceiver.onPlayerRemoved().subscribe(() => {
+                this.resetPlayers();
+            }),
+
+            this.socketReceiver.onPlayerTurnChanged().subscribe((turn: TurnInfo) => {
+                if (turn.player.id === this.getPlayer().id) {
+                    this.setPath(turn.path);
+                    this.setPlayer(turn.player);
                 } else {
                     this.setPlayerActive(false);
                     this.setPath(new Map());
                 }
             }),
 
-            this.socketService.onTurnStart().subscribe(() => {
-                this.setPlayerActive(true);
-            }),
-
-            this.socketService.onTurnUpdate().subscribe((data) => {
+            this.socketReceiver.onPlayerTurnUpdate().subscribe((data) => {
                 if (data.player.id === this.getPlayer().id) {
                     this.setPlayer(data.player);
                     this.setPath(data.path);
@@ -42,14 +47,13 @@ export class PlayerService implements OnDestroy {
                 }
             }),
 
-            this.socketService.onAssignSpawn().subscribe((data) => {
-                this.getPlayer().spawnPosition = data;
-                this.getPlayer().position = data;
+            this.socketReceiver.onTurnStart().subscribe(() => {
+                this.setPlayerActive(true);
             }),
         );
     }
 
-    setPlayer(player: PlayerStats): void {
+    setPlayer(player: IPlayer): void {
         this.myPlayer.next(player);
     }
 
@@ -73,16 +77,8 @@ export class PlayerService implements OnDestroy {
         this.isActivePlayer.next(isActive);
     }
 
-    getPlayer(): PlayerStats {
-        return this.myPlayer.value ?? ({} as PlayerStats);
-    }
-
-    setAccessCode(accessCode: string): void {
-        this.accessCode = accessCode;
-    }
-
-    getAccessCode(): string {
-        return this.accessCode;
+    getPlayer(): IPlayer {
+        return this.myPlayer.value ?? ({} as IPlayer);
     }
 
     sendMove(position: Vec2): void {
@@ -90,7 +86,7 @@ export class PlayerService implements OnDestroy {
         const selectedPath = this.path.value?.get(keyPos);
         if (selectedPath) {
             this.isActivePlayer.next(false);
-            this.socketService.movePlayer(this.getAccessCode(), selectedPath, this.getPlayer());
+            this.socketEmitter.movePlayer(selectedPath, this.getPlayer().id);
         }
     }
 
@@ -99,7 +95,6 @@ export class PlayerService implements OnDestroy {
         this.isActivePlayer.next(false);
         this.path.next(new Map());
         this.isAdmin = false;
-        this.accessCode = '';
     }
 
     ngOnDestroy() {
