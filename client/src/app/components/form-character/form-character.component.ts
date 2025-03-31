@@ -5,20 +5,11 @@ import { Router, RouterLink } from '@angular/router';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { SocketService } from '@app/services/socket/socket.service';
+import { RoomService } from '@app/services/room/room.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { ASSET_EXT, ASSET_PATH } from '@common/game';
-import {
-    DEFAULT_ACTIONS,
-    DEFAULT_ATTACK_VALUE,
-    DEFAULT_DEFENSE_VALUE,
-    DEFAULT_DICE,
-    DEFAULT_LIFE_VALUE,
-    DEFAULT_MOVEMENT_POINTS,
-    DEFAULT_POSITION,
-    DEFAULT_SPEED_VALUE,
-    DEFAULT_WINS,
-    PlayerStats,
-} from '@common/player';
+import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFAULT_DICE, DEFAULT_LIFE_VALUE, DEFAULT_SPEED_VALUE, PlayerInput } from '@common/player';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
@@ -45,21 +36,15 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     attackSelected: boolean = false;
     defenseSelected: boolean = false;
 
-    playerStats: PlayerStats = {
-        id: ' ',
+    playerInput: PlayerInput = {
         name: '',
         avatar: this.currentPortraitImage,
         life: DEFAULT_LIFE_VALUE,
-        attack: DEFAULT_ATTACK_VALUE,
-        defense: DEFAULT_DEFENSE_VALUE,
         speed: DEFAULT_SPEED_VALUE,
+        attackPower: DEFAULT_ATTACK_VALUE,
+        defensePower: DEFAULT_DEFENSE_VALUE,
         attackDice: DEFAULT_DICE,
         defenseDice: DEFAULT_DICE,
-        movementPts: DEFAULT_MOVEMENT_POINTS,
-        actions: DEFAULT_ACTIONS,
-        position: DEFAULT_POSITION,
-        spawnPosition: DEFAULT_POSITION,
-        wins: DEFAULT_WINS,
     };
 
     takenAvatars: string[] = [];
@@ -67,8 +52,10 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
     private subscriptions: Subscription[] = [];
     private readonly gameMapService = inject(GameMapService);
+    private readonly roomService = inject(RoomService);
     private readonly playerService = inject(PlayerService);
-    private readonly socketService = inject(SocketService);
+    private readonly socketEmitter = inject(SocketEmitterService);
+    private readonly socketReceiver = inject(SocketReceiverService);
     private readonly router = inject(Router);
 
     get isCurrentAvatarTaken(): boolean {
@@ -80,36 +67,29 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        if (!this.isCreationPage) {
-            this.takenAvatars = this.socketService.gameRoom?.players.map((player) => player.avatar);
-        }
         this.subscriptions.push(
-            this.socketService.onPlayerJoined().subscribe((data) => {
+            this.roomService.connected.subscribe((connectedPlayers) => {
                 if (!this.isCreationPage) {
-                    this.takenAvatars = data.room.players.map((player) => player.avatar);
+                    this.takenAvatars = connectedPlayers.map((player) => player.avatar);
                 }
             }),
 
-            this.socketService.onPlayerRemoved().subscribe((data) => {
-                if (!this.isCreationPage) {
-                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
-                }
+            this.roomService.isRoomLocked.subscribe((isLocked) => {
+                this.isRoomLocked = isLocked;
             }),
 
-            this.socketService.onPlayerDisconnected().subscribe((data) => {
-                if (!this.isCreationPage) {
-                    this.takenAvatars = this.takenAvatars.filter((avatar) => data.map((player) => player.avatar).includes(avatar));
-                }
-            }),
-
-            this.socketService.onRoomLocked().subscribe(() => {
-                this.isRoomLocked = true;
+            this.socketReceiver.onRoomCreated().subscribe((room) => {
+                this.accessCode = room.accessCode;
+                this.socketEmitter.shareCharacter(this.playerInput);
+                this.playerService.setAdmin(true);
+                this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
             }),
         );
     }
 
     ngOnDestroy(): void {
         this.subscriptions.forEach((sub) => sub.unsubscribe());
+        this.subscriptions = [];
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
@@ -118,7 +98,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
         } else if (direction === 'next') {
             this.currentPortraitIndex = (this.currentPortraitIndex + 1) % this.totalPortraits;
         }
-        this.playerStats.avatar = this.currentPortraitImage;
+        this.playerInput.avatar = this.currentPortraitImage;
     }
 
     selectStat(stat: StatBonus) {
@@ -128,13 +108,13 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
         if (this[otherSelectedStat]) {
             this[otherSelectedStat] = false;
-            this.playerStats[otherStat] = 4;
+            this.playerInput[otherStat] = 4;
         }
         this[selectedStat] = !this[selectedStat];
         if (this[selectedStat]) {
-            this.playerStats[stat] += 2;
+            this.playerInput[stat] += 2;
         } else {
-            this.playerStats[stat] -= 2;
+            this.playerInput[stat] -= 2;
         }
     }
 
@@ -145,16 +125,16 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
         if (this[selectedStat]) {
             this[selectedStat] = false;
-            this.playerStats[`${stat}Dice`] = 'D4';
-            this.playerStats[`${otherStat}Dice`] = 'D4';
+            this.playerInput[`${stat}Dice`] = 'D4';
+            this.playerInput[`${otherStat}Dice`] = 'D4';
         } else {
             this[selectedStat] = true;
-            this.playerStats[`${stat}Dice`] = 'D6';
+            this.playerInput[`${stat}Dice`] = 'D6';
 
             if (this[otherSelectedStat]) {
                 this[otherSelectedStat] = false;
             }
-            this.playerStats[`${otherStat}Dice`] = 'D4';
+            this.playerInput[`${otherStat}Dice`] = 'D4';
         }
     }
 
@@ -165,13 +145,11 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
     canJoin(): boolean {
         const selectedStats = [this.lifeSelected, this.speedSelected, this.attackSelected, this.defenseSelected];
-        return this.playerStats.name.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
+        return this.playerInput.name.trim().length > 0 && selectedStats.filter((stat) => stat).length === 2;
     }
 
     shareCharacter(): void {
-        this.playerService.setPlayer(this.playerStats);
-        this.playerService.setAccessCode(this.accessCode);
-        this.socketService.shareCharacter(this.accessCode, this.playerStats);
+        this.socketEmitter.shareCharacter(this.playerInput);
     }
 
     createGame(): void {
@@ -179,17 +157,8 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             .getGameMap()
             .pipe(first())
             .subscribe((map) => {
-                const selectedMapSize = map.size;
-                this.socketService.createRoom(selectedMapSize);
-                this.socketService.onRoomCreated().subscribe((data: unknown) => {
-                    this.accessCode = (data as { accessCode: string }).accessCode;
-                    this.socketService.createGame(this.accessCode, map.name);
-                    this.socketService.shareCharacter(this.accessCode, this.playerStats);
-                    this.playerService.setPlayer(this.playerStats);
-                    this.playerService.setAdmin(true);
-                    this.playerService.setAccessCode(this.accessCode);
-                    this.router.navigate(['/lobby'], { state: { accessCode: this.accessCode } });
-                });
+                const selectedMap = map.name;
+                this.socketEmitter.createRoom(selectedMap);
             });
     }
 }

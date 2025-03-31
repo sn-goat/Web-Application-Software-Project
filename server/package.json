@@ -7,7 +7,7 @@
         "prebuild": "rimraf out",
         "build": "rimraf out && nest build",
         "format": "prettier --config ../.prettierrc.yaml --write \"app/**/*\"",
-        "start": "rimraf out && nest start --watch",
+        "start": "rimraf out && nest start --watch --debug",
         "lint": "eslint -c .eslintrc.json \"./app/**/*.ts\" --format stylish",
         "lint:fix": "eslint -c .eslintrc.json \"./app/**/*.ts\" --format stylish --fix",
         "test": "jest",

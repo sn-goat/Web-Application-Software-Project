@@ -10,7 +10,7 @@
         <button (click)="disconnect()">Disconnect</button>
 
         @if (isAdmin) {
-        <button [disabled]="!(players.length >= 2 && (isRoomLocked || players.length === maxPlayers))" (click)="configureGame()">
+        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">
             Démarrer partie!
         </button>
         }
@@ -26,8 +26,8 @@
                     <strong>{{ player.name }}</strong>
                 </span>
 
-                @if (isAdmin && player.id !== getCurrentPlayerId()) {
-                <button (click)="removePlayer(player.id)">Bannir</button>
+                @if (isAdmin && player.id !== getPlayerId()) {
+                <button (click)="expelPlayer(player.id)">Bannir</button>
                 }
             </li>
             }

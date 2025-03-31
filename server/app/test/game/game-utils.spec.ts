@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable max-params */
+import { Player } from '@app/class/player';
 import { GameUtils } from '@app/services/game/game-utils';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar } from '@common/game';
-import { PlayerStats } from '@common/player';
 
 describe('GameUtils Comprehensive Tests', () => {
     // Utilitaire pour créer une cellule factice
@@ -80,7 +80,7 @@ describe('GameUtils Comprehensive Tests', () => {
     // Tests pour sortPlayersBySpeed
     describe('sortPlayersBySpeed', () => {
         it('should sort players in descending order of speed', () => {
-            const players: PlayerStats[] = [{ speed: 5 } as PlayerStats, { speed: 10 } as PlayerStats, { speed: 7 } as PlayerStats];
+            const players: Player[] = [{ speed: 5 } as Player, { speed: 10 } as Player, { speed: 7 } as Player];
             const sorted = GameUtils.sortPlayersBySpeed(players);
             expect(sorted[0].speed).toBe(10);
             expect(sorted[1].speed).toBe(7);
@@ -105,9 +105,9 @@ describe('GameUtils Comprehensive Tests', () => {
     // Tests pour assignSpawnPoints
     describe('assignSpawnPoints', () => {
         it('should assign spawn points to players and update the map', () => {
-            const players: PlayerStats[] = [
-                { speed: 5, avatar: Avatar.Berserker, spawnPosition: null, position: null } as PlayerStats,
-                { speed: 7, avatar: Avatar.Cleric, spawnPosition: null, position: null } as PlayerStats,
+            const players: Player[] = [
+                { speed: 5, avatar: Avatar.Berserker, spawnPosition: null, position: null } as Player,
+                { speed: 7, avatar: Avatar.Cleric, spawnPosition: null, position: null } as Player,
             ];
             const spawnPoints: Vec2[] = [
                 { x: 0, y: 0 },
@@ -194,7 +194,7 @@ describe('GameUtils Comprehensive Tests', () => {
     });
     describe('sortPlayersBySpeed', () => {
         it('should sort players in descending order when speeds differ', () => {
-            const players: PlayerStats[] = [{ speed: 5 } as PlayerStats, { speed: 10 } as PlayerStats, { speed: 7 } as PlayerStats];
+            const players: Player[] = [{ speed: 5 } as Player, { speed: 10 } as Player, { speed: 7 } as Player];
             const sorted = GameUtils.sortPlayersBySpeed(players);
             expect(sorted[0].speed).toBe(10);
             expect(sorted[1].speed).toBe(7);
@@ -204,7 +204,7 @@ describe('GameUtils Comprehensive Tests', () => {
         it('should handle players with equal speed by randomizing their order', () => {
             // Stub Math.random so the sort comparison is deterministic.
             const mathRandomMock = jest.spyOn(Math, 'random').mockReturnValue(0.8);
-            const players: PlayerStats[] = [{ speed: 5 } as PlayerStats, { speed: 5 } as PlayerStats, { speed: 5 } as PlayerStats];
+            const players: Player[] = [{ speed: 5 } as Player, { speed: 5 } as Player, { speed: 5 } as Player];
             const sorted = GameUtils.sortPlayersBySpeed(players);
             // Since all speeds are equal, verify that the sorted array is a permutation of the original.
             expect(sorted.map((p) => p.speed)).toEqual([5, 5, 5]);

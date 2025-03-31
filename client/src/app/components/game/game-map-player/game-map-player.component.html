@@ -4,6 +4,17 @@
         <div class="player-image">
             <img draggable="false" [src]="player.avatar" [alt]="player.name" />
             <h3 [class.player-not-in-game]="!playerIsInGame(player)">{{ player.name }}</h3>
+            @if(player.team) {
+                <h4
+                    class="team-label"
+                    [ngClass]="{
+                        bleu: player.team === 'Bleu',
+                        rouge: player.team === 'Rouge'
+                    }"
+                >
+                    Équipe {{ player.team }}
+                </h4>
+                }
         </div>
         <div class="player-info">
             @if (player.id === getOrganizerId()) {

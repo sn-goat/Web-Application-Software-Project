@@ -139,6 +139,24 @@ $active-player-color: #ff9800;
     }
 }
 
+.team-label {
+    font-size: var(--small-font-size);
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 0 4px rgba(255, 105, 135, 0.4);
+    color: #f06292;
+
+    &.bleu {
+        color: #64b5f6;
+        text-shadow: 0 0 4px rgba(100, 181, 246, 0.4);
+    }
+
+    &.rouge {
+        color: #ef5350;
+        text-shadow: 0 0 4px rgba(239, 83, 80, 0.4);
+    }
+}
+
 /* Player states */
 .player-not-in-game {
     text-decoration: line-through;

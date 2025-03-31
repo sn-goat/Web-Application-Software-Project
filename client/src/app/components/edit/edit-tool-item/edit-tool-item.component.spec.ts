@@ -103,12 +103,12 @@ describe('EditToolItemComponent', () => {
             component.ngOnInit();
 
             expect(component.remainingItem).toBe(7);
-            /* expect(component.isDraggable).toBeTrue(); DISABLED UNTIL SPRINT 3*/
+            expect(component.isDraggable).toBeTrue();
 
             // Now simulate no remaining items.
             nbrItemsSubject.next(0);
             expect(component.remainingItem).toBe(0);
-            /* expect(component.isDraggable).toBeFalse(); DISABLED UNTIL SPRINT 3 */
+            expect(component.isDraggable).toBeFalse();
         });
     });
 

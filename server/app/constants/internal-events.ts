@@ -1,25 +1,36 @@
 export enum InternalTimerEvents {
-    Update = 'timerUpdate',
+    FightUpdate = 'fightTimerUpdate',
+    TurnUpdate = 'turnTimerUpdate',
     End = 'timerEnded',
 }
 
+export enum InternalRoomEvents {
+    CloseRoom = 'closeRoom',
+    PlayerRemoved = 'playerRemoved',
+    PlayersUpdated = 'updatePlayers',
+}
+
 export enum InternalGameEvents {
-    AssignSpawn = 'assignSpawn',
+    DebugStateChanged = 'debugStateChanged',
 }
 
 export enum InternalTurnEvents {
     Move = 'playerMove',
     BroadcastDoor = 'doorBroadcast',
     Update = 'updateTurn',
-    End = 'endTurn',
+    Start = 'startTurn',
+    ChangeTurn = 'ChangeTurn',
 }
 
 export enum InternalEvents {
+    UpdateTimer = 'updateTimer',
+    EndTimer = 'endTimer',
+    PlayerMoved = 'playerMoved',
     PlayerRemoved = 'playerRemoved',
 }
 
 export enum InternalFightEvents {
     Init = 'initFight',
-    SwitchTurn = 'switchTurn',
+    ChangeFighter = 'changeFighter',
     End = 'endFight',
 }
