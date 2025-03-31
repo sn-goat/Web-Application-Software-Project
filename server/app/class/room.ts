@@ -1,10 +1,11 @@
 import { Game } from '@app/class/game';
 import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { Cell, Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
-import { Player } from './player';
 import { Fight } from './fight';
+import { Player } from './player';
 
 const confirmDisconnectMessage = 'Vous avez quitté la partie avec succès';
 const adminDisconnectMessage = "La partie a été fermée dû à la déconnection de l'organisateur";
@@ -16,6 +17,7 @@ export class Room implements IRoom {
     organizerId: string;
     isLocked: boolean;
     game: Game;
+    chatHistory: ChatMessage[] = [];
     private internalEmitter: EventEmitter2;
     private globalEmitter: EventEmitter2;
 
@@ -141,6 +143,10 @@ export class Room implements IRoom {
             this.game.removePlayer(lastPlayer.id, notEnoughPlayersMessage);
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
         }
+    }
+
+    addMessage(message: ChatMessage): void {
+        this.chatHistory.push(message);
     }
 
     private generateUniquePlayerName(player: Player): void {
