@@ -10,6 +10,7 @@ import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-pl
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
+import { PopupComponent } from '@app/components/popup/popup.component';
 import { Alert } from '@app/constants/enums';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
@@ -29,6 +30,7 @@ import { firstValueFrom, Subscription, timer } from 'rxjs';
         HeaderBarComponent,
         CommonModule,
         GameFightInterfaceComponent,
+        PopupComponent,
     ],
     templateUrl: './game-page.component.html',
     styleUrl: './game-page.component.scss',
@@ -40,6 +42,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     showChat = false;
     showInfo = false;
     debugMode = false;
+    popupVisible = false;
 
     private readonly quitGameMessage = "Vous avez été déconnecté de la partie, vous allez être redirigé vers la page d'accueil.";
     private readonly notEnoughPlayersMessage = "Pas assez de joueurs pour continuer la partie. Vous allez être redirigé vers la page d'accueil.";
@@ -120,7 +123,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     toggleChat() {
-        this.showChat = !this.showChat;
+        this.popupVisible = !this.popupVisible;
     }
 
     ngOnDestroy(): void {
