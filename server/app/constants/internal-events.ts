@@ -33,4 +33,6 @@ export enum InternalFightEvents {
     Init = 'initFight',
     ChangeFighter = 'changeFighter',
     End = 'endFight',
+    Attack = 'attack',
+    Flee = 'flee',
 }

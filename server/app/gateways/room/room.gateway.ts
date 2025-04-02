@@ -8,6 +8,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { JournalService } from '@app/services/journal/journal.service';
+import { GameMessage } from '@common/journal';
+import { Game } from '@app/class/game';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -15,7 +18,10 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger(RoomGateway.name);
 
-    constructor(private readonly gameManager: GameManagerService) {}
+    constructor(
+        private readonly gameManager: GameManagerService,
+        private journalService: JournalService,
+    ) {}
     @OnEvent(InternalRoomEvents.CloseRoom)
     handleClosingRoom(accessCode: string): void {
         this.gameManager.closeRoom(accessCode);
@@ -24,6 +30,15 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @OnEvent(InternalRoomEvents.PlayerRemoved)
     handlePlayerRemoved(payload: { accessCode: string; playerId: string; message: string }): void {
         this.server.to(payload.playerId).emit(RoomEvents.PlayerRemoved, payload.message);
+
+        const game: Game = this.gameManager.getGame(payload.accessCode);
+        this.journalService.dispatchEntry(
+            this.gameManager.getRoom(payload.accessCode),
+            [game.getPlayer(payload.playerId).name],
+            GameMessage.QUIT,
+            this.server,
+        );
+
         this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
         const clientSock: Socket = this.server.sockets.sockets.get(payload.playerId);
         clientSock.leave(payload.accessCode);
