@@ -47,7 +47,7 @@ export class SocketReceiverService {
 
     onSetCharacter(): Observable<IPlayer> {
         return new Observable((observer) => {
-            this.socket.once(RoomEvents.SetCharacter, (player: IPlayer) => {
+            this.socket.on(RoomEvents.SetCharacter, (player: IPlayer) => {
                 observer.next(player);
             });
         });
@@ -157,9 +157,11 @@ export class SocketReceiverService {
         });
     }
 
-    onDoorStateChanged(): Observable<{ position: Vec2; newState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }> {
+    onDoorStateChanged(): Observable<{ doorPosition: Vec2; newDoorState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.DoorStateChanged, (data) => observer.next(data));
+            this.socket.on(TurnEvents.DoorStateChanged, (data) => {
+                observer.next(data);
+            });
         });
     }
 
@@ -187,7 +189,9 @@ export class SocketReceiverService {
 
     onEndFight(): Observable<IPlayer[] | null> {
         return new Observable((observer) => {
-            this.socket.on(FightEvents.End, (data) => observer.next(data));
+            this.socket.on(FightEvents.End, (data) => {
+                observer.next(data);
+            });
         });
     }
 

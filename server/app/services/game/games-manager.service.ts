@@ -31,7 +31,7 @@ export class GameManagerService {
     closeRoom(accessCode: string): void {
         if (this.gameRooms.has(accessCode)) {
             const room = this.getRoom(accessCode);
-            room.removeAllPlayers();
+            room.closeRoom();
             this.gameRooms.delete(accessCode);
             this.logger.log(`Room with access code ${accessCode} has been closed.`);
             return;

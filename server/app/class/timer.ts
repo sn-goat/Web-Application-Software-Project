@@ -61,5 +61,6 @@ export class Timer {
         if (this.intervalId) {
             clearInterval(this.intervalId);
         }
+        this.remainingTime = 0;
     }
 }

@@ -32,6 +32,7 @@ export class GameService {
     constructor() {
         this.socketReceiver.onPlayersUpdated().subscribe((players) => {
             this.playingPlayers.next(players);
+            this.updateInitialPlayers(players);
         });
 
         this.socketReceiver.onPlayerJoined().subscribe((room) => {
@@ -56,8 +57,9 @@ export class GameService {
         });
 
         this.socketReceiver.onDoorStateChanged().subscribe((door) => {
+            console.log('Door state changed:', door);
             const newMap = this.map.value;
-            newMap[door.position.y][door.position.x].tile = door.newState;
+            newMap[door.doorPosition.y][door.doorPosition.x].tile = door.newDoorState;
             this.map.next(newMap);
             this.isActionSelected.next(false);
         });
@@ -65,6 +67,7 @@ export class GameService {
         this.socketReceiver.onEndFight().subscribe((players: IPlayer[] | null) => {
             if (players !== null) {
                 this.playingPlayers.next(players);
+                this.updateInitialPlayers(players);
             }
             this.toggleActionMode();
         });
@@ -110,11 +113,13 @@ export class GameService {
         return this.initialPlayers.value;
     }
 
-    removePlayerInGame(player: IPlayer): void {
-        if (this.isPlayerInGame(player)) {
-            const updatePlayers = this.playingPlayers.value.filter((currentPlayer) => currentPlayer.id !== player.id);
-            this.playingPlayers.next(updatePlayers);
-        }
+    updateInitialPlayers(players: IPlayer[]): void {
+        const currentInitialPlayers = [...this.initialPlayers.value];
+        const updatedInitialPlayers = currentInitialPlayers.map((initialPlayer) => {
+            const updatedPlayer = players.find((player) => player.id === initialPlayer.id);
+            return updatedPlayer || initialPlayer;
+        });
+        this.initialPlayers.next(updatedInitialPlayers);
     }
 
     setGame(game: IGame): void {
