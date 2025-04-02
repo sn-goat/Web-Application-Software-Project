@@ -94,7 +94,7 @@ export class JournalService {
                 messageType +
                 `${fight.attacker.name} 
                 avec une valeur dé d'atttaque de 
-                ${fight.attacker.diceResult} sur ${fight.defender.name} |  
+                ${fight.attacker.diceResult} |  
                 ${fight.defender.name} se défend avec une valeur dé défense de ${fight.defender.diceResult} | 
                 ${fight.attacker.name} inflige ${fight.damage} points de dégâts à ${fight.defender.name}`;
         } else {

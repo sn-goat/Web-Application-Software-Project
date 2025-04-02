@@ -47,18 +47,13 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit(TurnEvents.PlayerMoved, { previousPosition: payload.previousPosition, player: payload.player });
     }
 
-    @OnEvent(InternalTurnEvents.BroadcastDoor)
-    sendDoorState(payload: { accessCode: string; position: Vec2; newState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR }) {
-        this.logger.log('Changing door state at position: ' + payload.position + ' to: ' + payload.newState);
-        this.server.to(payload.accessCode).emit(TurnEvents.DoorStateChanged, { position: payload.position, newState: payload.newState });
+    // not used
+    // @OnEvent(InternalTurnEvents.BroadcastDoor)
+    // sendDoorState(payload: { accessCode: string; position: Vec2; newState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR }) {
+    //     this.logger.log('Changing door state at position: ' + payload.position + ' to: ' + payload.newState);
+    //     this.server.to(payload.accessCode).emit(TurnEvents.DoorStateChanged, { position: payload.position, newState: payload.newState });
 
-        const room: IRoom = this.gameManager.getRoom(payload.accessCode);
-        if (payload.newState === Tile.OPENED_DOOR) {
-            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.OPEN_DOOR, this.server);
-        } else {
-            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.CLOSE_DOOR, this.server);
-        }
-    }
+    // }
 
     @OnEvent(InternalTurnEvents.Update)
     handleUpdateTurn(turn: { player: Player; path: Record<string, PathInfo> }) {
@@ -136,7 +131,7 @@ export class GameGateway {
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         if (game && game.isPlayerTurn(payload.playerId)) {
-            game.startTurn();
+            // game.startTurn(); pas nécessaire ici, car déjà géré par handle game start
         }
     }
 
@@ -176,6 +171,13 @@ export class GameGateway {
     handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
+        const room: IRoom = this.gameManager.getRoom(payload.accessCode);
+
+        if (sendingInfo.newDoorState === Tile.OPENED_DOOR) {
+            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.OPEN_DOOR, this.server);
+        } else if (sendingInfo.newDoorState === Tile.CLOSED_DOOR) {
+            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.CLOSE_DOOR, this.server);
+        }
         this.server
             .to(payload.accessCode)
             .emit(TurnEvents.DoorStateChanged, { doorPosition: sendingInfo.doorPosition, newDoorState: sendingInfo.newDoorState });
@@ -247,7 +249,7 @@ export class GameGateway {
             accessCode,
             damage: attacker.getDamage(game.isDebugMode, defender),
         };
-        game.playerAttack();
         this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.ATTACK, this.server);
+        game.playerAttack();
     }
 }
