@@ -13,6 +13,7 @@ import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/web
 import { Server, Socket } from 'socket.io';
 import { JournalService } from '@app/services/journal/journal.service';
 import { GameMessage, FightMessage, FightJournal } from '@common/journal';
+import { log } from 'console';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -178,6 +179,7 @@ export class GameGateway {
         } else if (sendingInfo.newDoorState === Tile.CLOSED_DOOR) {
             this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.CLOSE_DOOR, this.server);
         }
+        log(sendingInfo);
         this.server
             .to(payload.accessCode)
             .emit(TurnEvents.DoorStateChanged, { doorPosition: sendingInfo.doorPosition, newDoorState: sendingInfo.newDoorState });

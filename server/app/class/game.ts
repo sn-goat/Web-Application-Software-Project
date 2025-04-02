@@ -68,6 +68,21 @@ export class Game implements IGame {
         this.players.push(player);
     }
 
+    closeGame(): void {
+        this.internalEmitter.removeAllListeners(InternalEvents.EndTimer);
+        this.internalEmitter.removeAllListeners(InternalEvents.UpdateTimer);
+
+        if (this.fight) {
+            this.fight = null;
+        }
+
+        this.players = [];
+        this.hasStarted = false;
+        this.movementInProgress = false;
+        this.pendingEndTurn = false;
+        this.maxPlayers = 0;
+    }
+
     removePlayer(playerId: string, message: string): void {
         log(`Player ${playerId} has been removed from the game`);
         const index = this.players.findIndex((p) => p.id === playerId);
@@ -173,7 +188,6 @@ export class Game implements IGame {
 
     endTurn(): void {
         this.pendingEndTurn = false;
-        this.players[this.currentTurn].actions = 0;
         this.currentTurn = (this.currentTurn + 1) % this.players.length;
         this.startTurn();
     }
@@ -266,19 +280,21 @@ export class Game implements IGame {
 
     private checkForEndTurn(player: Player): void {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
-        if (this.isPlayerContinueTurn(player, Object.keys(path))) {
+        if (this.isPlayerContinueTurn(player, path.size)) {
+            log(`Player ${player.name} can continue turn`);
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {
             this.endTurn();
         }
     }
 
-    private isPlayerContinueTurn(player: Player, path: string[]): boolean {
-        return this.pendingEndTurn || this.isPlayerCanMove(Object.keys(path)) || this.isPlayerCanMakeAction(player);
+    private isPlayerContinueTurn(player: Player, pathLength: number): boolean {
+        return this.pendingEndTurn || this.isPlayerCanMove(pathLength) || this.isPlayerCanMakeAction(player);
     }
 
-    private isPlayerCanMove(path: string[]): boolean {
-        return path.length > 0;
+    private isPlayerCanMove(pathLength: number): boolean {
+        log(`Player can move on: ${pathLength}`);
+        return pathLength > 0;
     }
 
     private isPlayerCanMakeAction(player: Player): boolean {
