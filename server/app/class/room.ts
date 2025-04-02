@@ -103,6 +103,24 @@ export class Room implements IRoom {
         }
     }
 
+    closeRoom(): void {
+        if (this.game) {
+            this.game.timer.stopTimer();
+        }
+
+        this.internalEmitter.removeAllListeners();
+
+        this.removeAllPlayers();
+
+        if (this.game) {
+            this.game.closeGame();
+            this.game = null;
+        }
+
+        this.globalEmitter = null;
+        this.internalEmitter = null;
+    }
+
     removeAllPlayers(): void {
         for (const player of this.getPlayers()) {
             this.game.removePlayer(player.id, this.confirmDisconnectMessage);
@@ -123,6 +141,16 @@ export class Room implements IRoom {
     }
 
     private removePlayerFromGame(playerId: string): void {
+        this.game.removePlayerOnMap(playerId);
+        this.game.removePlayer(playerId, this.confirmDisconnectMessage);
+
+        if (this.game.players.length < 2) {
+            const lastPlayer = this.getPlayers()[0];
+            this.game.removePlayer(lastPlayer.id, this.notEnoughPlayersMessage);
+            this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
+            return;
+        }
+        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
         if (this.isPlayerAdmin(playerId) && this.game.isDebugMode) {
             this.game.isDebugMode = false;
             this.globalEmitter.emit(InternalGameEvents.DebugStateChanged, { accessCode: this.accessCode, newState: false });
@@ -134,16 +162,6 @@ export class Room implements IRoom {
 
         if (this.game.isPlayerTurn(playerId)) {
             this.game.endTurn();
-        }
-
-        this.game.removePlayerOnMap(playerId);
-        this.game.removePlayer(playerId, this.confirmDisconnectMessage);
-        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
-
-        if (this.game.players.length < 2) {
-            const lastPlayer = this.getPlayers()[0];
-            this.game.removePlayer(lastPlayer.id, this.notEnoughPlayersMessage);
-            this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
         }
     }
 
