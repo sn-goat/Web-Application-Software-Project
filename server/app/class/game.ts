@@ -33,6 +33,8 @@ export class Game implements IGame {
     pendingEndTurn: boolean;
     maxPlayers: number;
 
+    private continueMovement: boolean;
+
     constructor(internalEmitter: EventEmitter2, board: Board) {
         this.internalEmitter = internalEmitter;
         this.map = board.board;
@@ -144,7 +146,13 @@ export class Game implements IGame {
                     this.decrementMovement(player, pathInfo.cost);
                 } else {
                     this.movePlayer(path[index], player);
-                    index++;
+                    if (!this.continueMovement) {
+                        clearInterval(interval);
+                        this.movementInProgress = false;
+                        this.decrementMovement(player, index+1);
+                    } else {
+                        index++;
+                    }
                 }
             }, MOVEMENT_TIMEOUT_IN_MS);
         }
@@ -164,8 +172,8 @@ export class Game implements IGame {
         const previousPosition = player.position;
         this.map[previousPosition.y][previousPosition.x].player = Avatar.Default;
         this.map[position.y][position.x].player = player.avatar as Avatar;
-
         const cell = this.map[position.y][position.x];
+        this.continueMovement = true;
         if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
             console.log(`Joueur tente de collecter item: ${cell.item}`);
             if (player.addItemToInventory(cell.item)) {
@@ -177,11 +185,11 @@ export class Game implements IGame {
                     item: collectedItem,
                     position
                 });
+                this.continueMovement = false;
             } else {
                 console.log(`Inventaire plein pour joueur ${player.name}`);
             }
         }
-        
         const fieldType = this.map[position.y][position.x].tile;
         player.updatePosition(position, fieldType);
         this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
