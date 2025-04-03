@@ -1,5 +1,5 @@
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
     DEFAULT_ACTIONS,
@@ -31,11 +31,13 @@ export class Player implements IPlayer {
     currentLife: number;
     diceResult: number;
     team?: Team;
+    inventory: Item[]; // Nouvel attribut pour l'inventaire
 
     private readonly dice4 = 4;
     private readonly dice6 = 6;
     private readonly minDiceValue = 1;
     private readonly fleeThreshold = 0.3;
+    private readonly maxInventorySize = 2;
 
     constructor(id: string, player: PlayerInput) {
         this.id = id;
@@ -49,6 +51,7 @@ export class Player implements IPlayer {
         this.defensePower = player.defensePower;
         this.wins = DEFAULT_WINS;
         this.team = null;
+        this.inventory = [];
     }
 
     attemptFlee(): boolean {
@@ -86,6 +89,27 @@ export class Player implements IPlayer {
         this.attackPower = fieldType === Tile.ICE ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
         this.defensePower = fieldType === Tile.ICE ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
         this.position = position;
+    }
+
+    addItemToInventory(item: Item): boolean {
+        if (this.inventory.length < this.maxInventorySize) {
+            this.inventory.push(item);
+            return true;
+        }
+        return false;
+    }
+
+    removeItemFromInventory(item: Item): boolean {
+        const index = this.inventory.indexOf(item);
+        if (index !== -1) {
+            this.inventory.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+
+    hasItem(item: Item): boolean {
+        return this.inventory.includes(item);
     }
 
     private initiateAttack(isDebugMode: boolean): number {

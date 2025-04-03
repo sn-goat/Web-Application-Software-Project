@@ -1,4 +1,5 @@
 import { Vec2 } from './board';
+import { Item } from './enums';
 
 export interface PlayerInput {
     name: string,
@@ -39,6 +40,7 @@ export interface GameStats {
     movementPts: number;
     position: Vec2;
     spawnPosition: Vec2;
+    inventory: Item[];
 }
 
 export interface FightInfo {

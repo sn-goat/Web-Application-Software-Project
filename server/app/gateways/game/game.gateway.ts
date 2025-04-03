@@ -1,17 +1,17 @@
+import { Fight } from '@app/class/fight';
+import { Game } from '@app/class/game';
+import { Player } from '@app/class/player';
 import { InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { Fight } from '@app/class/fight';
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import { MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { Player } from '@app/class/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { Game } from '@app/class/game';
 import { log } from 'console';
+import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -89,6 +89,15 @@ export class GameGateway {
     handleStartTurn(playerId: string) {
         this.logger.log('Starting turn for player');
         this.server.to(playerId).emit(TurnEvents.Start, {});
+    }
+
+    @OnEvent(InternalTurnEvents.ItemCollected)
+    handleItemCollected(payload: { player: Player; item: Item }) {
+        this.logger.log(`Player ${payload.player.name} collected item: ${payload.item}`);
+        this.server.to(payload.player.id).emit(TurnEvents.BroadcastItem, { 
+            playerId: payload.player.id, 
+            item: payload.item 
+        });
     }
 
     @SubscribeMessage(GameEvents.Start)

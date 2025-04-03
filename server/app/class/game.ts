@@ -1,12 +1,6 @@
-import { Cell, Vec2 } from '@common/board';
-import { Player } from '@app/class/player';
-import { getLobbyLimit } from '@common/lobby-limits';
 import { Fight } from '@app/class/fight';
-import { Avatar, IGame, PathInfo } from '@common/game';
-import { GameUtils } from '@app/services/game/game-utils';
-import { Timer } from './timer';
+import { Player } from '@app/class/player';
 import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -15,9 +9,15 @@ import {
     TimerType,
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
-import { Item, Tile } from '@common/enums';
-import { log } from 'console';
 import { Board } from '@app/model/database/board';
+import { GameUtils } from '@app/services/game/game-utils';
+import { Cell, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
+import { Avatar, IGame, PathInfo } from '@common/game';
+import { getLobbyLimit } from '@common/lobby-limits';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { log } from 'console';
+import { Timer } from './timer';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -164,6 +164,27 @@ export class Game implements IGame {
         const previousPosition = player.position;
         this.map[previousPosition.y][previousPosition.x].player = Avatar.Default;
         this.map[position.y][position.x].player = player.avatar as Avatar;
+
+        const cell = this.map[position.y][position.x];
+        
+        console.log(`Position: (${position.x}, ${position.y}), Contenu de la cellule:`, cell);
+        console.log(`Valeur de cell.item:`, cell.item);
+
+        if (cell.item !== Item.DEFAULT) {
+            console.log(`Joueur tente de collecter item: ${cell.item}`);
+            if (player.addItemToInventory(cell.item)) {
+                console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
+                const collectedItem = cell.item;
+                cell.item = Item.DEFAULT;
+                this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
+                    player, 
+                    item: collectedItem 
+                });
+            } else {
+                console.log(`Inventaire plein pour joueur ${player.name}`);
+            }
+        }
+        
         const fieldType = this.map[position.y][position.x].tile;
         player.updatePosition(position, fieldType);
         this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });

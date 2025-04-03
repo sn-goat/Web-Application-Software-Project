@@ -33,7 +33,7 @@ export enum TurnEvents {
     DoorStateChanged = 'eventOnDoor',
     
     // BroadcastEnd = 'endPlayerTurn',
-    // BroadcastItem = 'eventItem',
+    BroadcastItem = 'eventItem',
     // UpdateActions = 'updateActions',
 }
 

@@ -20,6 +20,7 @@ export enum InternalTurnEvents {
     Update = 'updateTurn',
     Start = 'startTurn',
     ChangeTurn = 'ChangeTurn',
+    ItemCollected = 'itemCollected',
 }
 
 export enum InternalEvents {
