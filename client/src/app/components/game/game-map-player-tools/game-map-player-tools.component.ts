@@ -40,6 +40,7 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
 
             this.playerService.myPlayer.subscribe((player) => {
                 this.playerHasAction = (player?.actions ?? 0) > 0;
+                this.items = player?.inventory ?? [];
             }),
 
             this.gameService.isActionSelected.subscribe((isActive) => {

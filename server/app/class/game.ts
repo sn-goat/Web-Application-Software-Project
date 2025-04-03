@@ -166,11 +166,7 @@ export class Game implements IGame {
         this.map[position.y][position.x].player = player.avatar as Avatar;
 
         const cell = this.map[position.y][position.x];
-        
-        console.log(`Position: (${position.x}, ${position.y}), Contenu de la cellule:`, cell);
-        console.log(`Valeur de cell.item:`, cell.item);
-
-        if (cell.item !== Item.DEFAULT) {
+        if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
             console.log(`Joueur tente de collecter item: ${cell.item}`);
             if (player.addItemToInventory(cell.item)) {
                 console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
@@ -178,7 +174,8 @@ export class Game implements IGame {
                 cell.item = Item.DEFAULT;
                 this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
                     player, 
-                    item: collectedItem 
+                    item: collectedItem,
+                    position
                 });
             } else {
                 console.log(`Inventaire plein pour joueur ${player.name}`);

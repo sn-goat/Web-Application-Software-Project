@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { RoomEvents } from '@common/room.gateway.events';
-import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { Observable } from 'rxjs';
-import { SocketEmitterService } from './socket-emitter.service';
-import { IRoom, IGame, PathInfo, TurnInfo, IFight } from '@common/game';
-import { IPlayer } from '@common/player';
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
+import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
+import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { IPlayer } from '@common/player';
+import { RoomEvents } from '@common/room.gateway.events';
+import { Observable } from 'rxjs';
 import { SharedSocketService } from './shared-socket.service';
+import { SocketEmitterService } from './socket-emitter.service';
 
 @Injectable({
     providedIn: 'root',
@@ -207,6 +207,15 @@ export class SocketReceiverService {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Loser, (loser) => {
                 observer.next(loser);
+            });
+        });
+    }
+
+    onItemCollected(): Observable<{ player: IPlayer; item: Item, position: Vec2 }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer; item: Item, position: Vec2 }) => {
+                console.log(`[SocketReceiver] Item collected: ${data.item}`);
+                observer.next(data);
             });
         });
     }

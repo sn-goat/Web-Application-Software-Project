@@ -92,11 +92,12 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.ItemCollected)
-    handleItemCollected(payload: { player: Player; item: Item }) {
+    handleItemCollected(payload: { accessCode: string, player: Player; item: Item, position: Vec2 }) {
         this.logger.log(`Player ${payload.player.name} collected item: ${payload.item}`);
-        this.server.to(payload.player.id).emit(TurnEvents.BroadcastItem, { 
-            playerId: payload.player.id, 
-            item: payload.item 
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastItem, { 
+            player: payload.player, 
+            item: payload.item,
+            position: payload.position
         });
     }
 
