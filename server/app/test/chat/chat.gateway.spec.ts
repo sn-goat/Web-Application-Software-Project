@@ -1,27 +1,61 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChatGateway } from '@app/gateways/chat/chat.gateway';
-import { PRIVATE_ROOM_ID } from '@app/gateways/chat/chat.gateway.constants';
-import { ChatEvents } from '@app/gateways/chat/chat.gateway.events';
+import { GameManagerService } from '@app/services/game/games-manager.service';
+import { ChatMessage } from '@common/chat';
+import { ChatEvents } from '@common/chat.gateway.events';
+import { IPlayer, Team } from '@common/player';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SinonStubbedInstance, createStubInstance, match, stub } from 'sinon';
-import { BroadcastOperator, Server, Socket } from 'socket.io';
+import { SinonStubbedInstance, createStubInstance, stub } from 'sinon';
+import { Server, Socket } from 'socket.io';
 
 describe('ChatGateway', () => {
     let gateway: ChatGateway;
     let logger: SinonStubbedInstance<Logger>;
     let socket: SinonStubbedInstance<Socket>;
     let server: SinonStubbedInstance<Server>;
+    let gameManagerService: SinonStubbedInstance<GameManagerService>;
+    let mockSender: IPlayer;
 
     beforeEach(async () => {
         logger = createStubInstance(Logger);
         socket = createStubInstance<Socket>(Socket);
         server = createStubInstance<Server>(Server);
+        gameManagerService = createStubInstance<GameManagerService>(GameManagerService);
+
+        // Create a mock sender with full IPlayer implementation
+        mockSender = {
+            id: 'sender123',
+            name: 'Test Sender',
+            avatar: 'avatar1',
+            attackPower: 5,
+            defensePower: 3,
+            speed: 2,
+            life: 10,
+            attackDice: 'D6',
+            defenseDice: 'D4',
+            team: Team.RED,
+            actions: 1,
+            wins: 0,
+            movementPts: 2,
+            position: { x: 0, y: 0 },
+            spawnPosition: { x: 0, y: 0 },
+            fleeAttempts: 2,
+            currentLife: 10,
+            diceResult: 5,
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ChatGateway,
                 {
                     provide: Logger,
                     useValue: logger,
+                },
+                {
+                    provide: GameManagerService,
+                    useValue: gameManagerService,
                 },
             ],
         }).compile();
@@ -36,65 +70,114 @@ describe('ChatGateway', () => {
         expect(gateway).toBeDefined();
     });
 
-    it('validate() message should take account word length', () => {
-        const testCases = [
-            { word: undefined, isValid: false },
-            { word: 'XXXX', isValid: false },
-            { word: 'XXXXXX', isValid: true },
-            { word: 'XXXXXXX', isValid: true },
-        ];
-        for (const { word, isValid } of testCases) {
-            gateway.validate(socket, word);
-            expect(socket.emit.calledWith(ChatEvents.WordValidated, isValid)).toBeTruthy();
-        }
+    describe('roomMessage', () => {
+        it('should process room message and broadcast it', () => {
+            // Setup
+            const mockRoom = {
+                addMessage: jest.fn(),
+            };
+            const mockMessage: ChatMessage = {
+                accessCode: 'room123',
+                sender: mockSender,
+                message: 'Hello World',
+                timestamp: new Date().toISOString(),
+            };
+
+            gameManagerService.getRoom.returns(mockRoom as any);
+            stub(socket, 'broadcast').value({
+                to: (roomId: string) => ({
+                    emit: (event: string, data: any) => {
+                        expect(roomId).toEqual('room123');
+                        expect(event).toEqual(ChatEvents.RoomMessage);
+                        expect(data).toEqual(mockMessage);
+                    },
+                }),
+            });
+
+            // Execute
+            gateway.roomMessage(socket, mockMessage);
+
+            // Assert
+            expect(gameManagerService.getRoom.called).toBe(true);
+            expect(mockRoom.addMessage).toHaveBeenCalledWith(mockMessage);
+        });
+
+        it('should handle empty message gracefully', () => {
+            // Setup
+            const mockRoom = {
+                addMessage: jest.fn(),
+            };
+            const mockMessage: ChatMessage = {
+                accessCode: 'room123',
+                sender: mockSender,
+                message: '',
+                timestamp: new Date().toISOString(),
+            };
+
+            gameManagerService.getRoom.returns(mockRoom as any);
+            stub(socket, 'broadcast').value({
+                to: () => ({
+                    emit: jest.fn(),
+                }),
+            });
+
+            // Execute
+            gateway.roomMessage(socket, mockMessage);
+
+            // Assert
+            expect(gameManagerService.getRoom.called).toBe(true);
+            expect(mockRoom.addMessage).toHaveBeenCalled();
+        });
     });
 
-    it('validateWithAck() message should take account word length ', () => {
-        const testCases = [
-            { word: undefined, isValid: false },
-            { word: 'XXXX', isValid: false },
-            { word: 'XXXXXX', isValid: true },
-            { word: 'XXXXXXX', isValid: true },
-        ];
-        for (const { word, isValid } of testCases) {
-            const res = gateway.validateWithAck(socket, word);
-            expect(res.isValid).toEqual(isValid);
-        }
+    describe('handleConnection', () => {
+        it('should log connection and emit hello message', () => {
+            // Execute
+            gateway.handleConnection(socket);
+
+            // Assert
+            expect(logger.log).toBeCalled();
+            expect(socket.emit.calledWith(ChatEvents.Hello, 'Hello World!')).toBe(true);
+        });
     });
 
-    it('broadcastAll() should send a mass message to the server', () => {
-        gateway.broadcastAll(socket, 'X');
-        expect(server.emit.calledWith(ChatEvents.MassMessage, match.any)).toBeTruthy();
+    describe('handleDisconnect', () => {
+        it('should log disconnection', () => {
+            // Execute
+            gateway.handleDisconnect(socket);
+
+            // Assert
+            expect(logger.log).toBeCalled();
+        });
     });
 
-    it('joinRoom() should join the socket room', () => {
-        gateway.joinRoom(socket);
-        expect(socket.join.calledOnce).toBeTruthy();
-    });
+    describe('integrated testing', () => {
+        it('should properly interact with GameManagerService', () => {
+            // Setup
+            const mockRoom = {
+                addMessage: jest.fn(),
+            };
 
-    it('roomMessage() should not send message if socket not in the room', () => {
-        stub(socket, 'rooms').value(new Set());
-        gateway.roomMessage(socket, 'X');
-        expect(server.to.called).toBeFalsy();
-    });
+            const mockMessage: ChatMessage = {
+                accessCode: 'room123',
+                sender: mockSender,
+                message: 'Test message',
+                timestamp: new Date().toISOString(),
+            };
+            gameManagerService.getRoom.returns(mockRoom as any);
+            stub(socket, 'broadcast').value({
+                to: () => ({ emit: jest.fn() }),
+            });
 
-    it('roomMessage() should send message if socket in the room', () => {
-        stub(socket, 'rooms').value(new Set([PRIVATE_ROOM_ID]));
-        server.to.returns({
-            emit: (event: string) => {
-                expect(event).toEqual(ChatEvents.RoomMessage);
-            },
-        } as BroadcastOperator<unknown, unknown>);
-        gateway.roomMessage(socket, 'X');
-    });
+            // Execute
+            gateway.handleConnection(socket);
+            gateway.roomMessage(socket, mockMessage);
+            gateway.handleDisconnect(socket);
 
-    it('hello message should be sent on connection', () => {
-        gateway.handleConnection(socket);
-        expect(socket.emit.calledWith(ChatEvents.Hello, match.any)).toBeTruthy();
-    });
-
-    it('socket disconnection should be logged', () => {
-        gateway.handleDisconnect(socket);
-        expect(logger.log.calledOnce).toBeTruthy();
+            // Assert
+            expect(gameManagerService.getRoom.called).toBe(true);
+            expect(mockRoom.addMessage).toHaveBeenCalled();
+            expect(socket.emit.calledWith(ChatEvents.Hello)).toBe(true);
+        });
     });
 });

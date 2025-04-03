@@ -148,11 +148,12 @@ export class GameGateway {
         }
     }
 
+    // Duplication de code ??
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         if (game && game.isPlayerTurn(payload.playerId)) {
-            // game.startTurn(); pas nécessaire ici, car déjà géré par handle game start
+            // game.startTurn(); pas nécessaire ici, car déjà géré par handleGameStart
         }
     }
 

@@ -41,7 +41,7 @@ export class JournalComponent implements OnDestroy, OnInit {
 
     shouldDisplayEntry(journalEntry: Entry): boolean {
         if (this.isFilterActive) {
-            return journalEntry.playersInvolved.find((playerId) => playerId === this.myPlayerId) !== undefined;
+            return journalEntry.playersInvolved.includes(this.myPlayerId);
         } else {
             return true;
         }
