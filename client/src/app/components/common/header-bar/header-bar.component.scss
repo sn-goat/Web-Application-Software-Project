@@ -1,12 +1,32 @@
-$primary-bg: #1a1625;
-$primary-text: #7ee0d0;
-$glow-teal: rgba(126, 224, 208, 0.2);
-$glow-gold: rgba(255, 215, 0, 0.2);
+$scroll-gold: #d4af37;
 
 mat-toolbar {
-    background-color: $primary-bg;
+  background-color: transparent;
+  display: flex;
+    align-items: center;
+}
+.backButton {
+  width: 48px;
+  height: 48px;
+  background-color: #d4af37;
+  color: #1a1625;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #d4af37;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    background-color: #ffd700;
+  }
+
+  mat-icon {
+    color: #1a1625;
+  }
 }
 
-mat-icon {
-    color: #7ee0d0;
+mat-toolbar {
+  display: flex;
+  justify-content: center;
+  background-color: transparent;
+  margin-bottom: 16px;
 }
