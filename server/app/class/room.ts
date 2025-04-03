@@ -70,13 +70,13 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, winner: fightResult.winner, loser: fightResult.loser });
         });
 
-        this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; item: Item, position: Vec2 }) => {
-            console.log(`[Room] Relaying ItemCollected event for player ${payload.player.name}, item: ${payload.item}`);
-            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {accessCode: this.accessCode, player: payload.player, item: payload.item, position: payload.position});
+        this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; position: Vec2 }) => {
+            console.log(`[Room] Relaying ItemCollected event for player ${payload.player.name}`);
+            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {accessCode: this.accessCode, player: payload.player, position: payload.position});
         });
 
-        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (player: Player) => {
-            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, { accessCode: this.accessCode, player });
+        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (payload: { player: Player, item: Item, position: Vec2 }) => {
+            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, { accessCode: this.accessCode, player: payload.player, item: payload.item, position: payload.position });
         });
     }
 

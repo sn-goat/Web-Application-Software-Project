@@ -101,11 +101,12 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.InventoryFull)
-    handleInventoryFull(payload: { accessCode: string; player: Player, item: Item }) {
+    handleInventoryFull(payload: { accessCode: string, player: Player, item: Item, position: Vec2 }) {
         this.logger.log(`Player ${payload.player.name} inventory is full`);
         this.server.to(payload.accessCode).emit(TurnEvents.InventoryFull, { 
             player: payload.player, 
-            item: payload.item 
+            item: payload.item, 
+            position: payload.position
         });
     }
 

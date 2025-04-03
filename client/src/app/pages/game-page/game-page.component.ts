@@ -10,12 +10,16 @@ import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-pl
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
+import { ItemPopup } from '@app/components/game/item-popup/item-popup.component';
 import { Alert } from '@app/constants/enums';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
+import { Vec2 } from '@common/board';
+import { Item } from '@common/enums';
+import { IPlayer } from '@common/player';
 import { firstValueFrom, Subscription, timer } from 'rxjs';
 
 @Component({
@@ -31,7 +35,7 @@ import { firstValueFrom, Subscription, timer } from 'rxjs';
         GameFightInterfaceComponent,
     ],
     templateUrl: './game-page.component.html',
-    styleUrl: './game-page.component.scss',
+    styleUrls: ['./game-page.component.scss'],
 })
 export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild(HeaderBarComponent) headerBar!: HeaderBarComponent;
@@ -87,6 +91,20 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
                 this.warning(`${winner.name} a remporté la partie avec 3 victoires!`);
                 timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/acceuil']));
             }),
+
+            this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer, item: Item, position: Vec2 }) => {
+                if (payload.player.id === this.playerService.getPlayer().id) {
+                    this.dialog.open(ItemPopup, {
+                        data: {
+                            inventory: [...payload.player.inventory, payload.item],
+                            collectedPosition: payload.position
+                        },
+                        disableClose: true,
+                        width: '500px',
+                        height: '500px'
+                    });
+                }
+            })
         );
     }
 

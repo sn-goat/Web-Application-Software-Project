@@ -211,10 +211,19 @@ export class SocketReceiverService {
         });
     }
 
-    onItemCollected(): Observable<{ player: IPlayer; item: Item, position: Vec2 }> {
+    onItemCollected(): Observable<{ player: IPlayer, position: Vec2 }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer; item: Item, position: Vec2 }) => {
-                console.log(`[SocketReceiver] Item collected: ${data.item}`);
+            this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer, position: Vec2 }) => {
+                console.log(`[SocketReceiver] Item collected`);
+                observer.next(data);
+            });
+        });
+    }
+
+    onInventoryFull(): Observable<{ player: IPlayer, item: Item, position: Vec2 }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.InventoryFull, (data: { player: IPlayer, item: Item, position: Vec2 }) => {
+                console.log(`[SocketReceiver] Inventory full`);
                 observer.next(data);
             });
         });

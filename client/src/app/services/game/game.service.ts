@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { PlayerToolsService } from '@app/services/player-tools/player-tools.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
@@ -29,7 +28,6 @@ export class GameService {
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private playerService = inject(PlayerService);
-    private playerToolsService = inject(PlayerToolsService);
 
     constructor() {
         this.socketReceiver.onPlayersUpdated().subscribe((players) => {
@@ -79,21 +77,11 @@ export class GameService {
         });
 
         this.socketReceiver.onItemCollected().subscribe((data) => {
-            const playerId = data.player.id;
-            const item = data.item;
-            console.log(`Item collecté: ${item} par joueur: ${playerId}`);
-
             const position = data.position;
-            if (position && this.map.value[position.y][position.x]) {
-                const newMap = [...this.map.value];
-                const updatedCell = { ...newMap[position.y][position.x] };
-                updatedCell.item = Item.DEFAULT;
-                newMap[position.y][position.x] = updatedCell;
-                this.map.next(newMap);
-                console.log(`Item retiré de la carte à la position: (${position.x}, ${position.y})`);
-            } else {
-                console.error(`Position de joueur invalide: ${JSON.stringify(position)}`);
-            }
+            const newMap = this.map.value;
+            newMap[position.y][position.x].item = Item.DEFAULT;
+            this.map.next(newMap);
+            console.log(`Item retiré de la carte à la position: (${position.x}, ${position.y})`);
         });
     }
 
@@ -272,6 +260,18 @@ export class GameService {
 
     getOrganizerId(): string {
         return this.organizerId;
+    }
+
+    handleInventoryChoice(currentItems: Item[], collectedPosition: Vec2, itemToThrow: Item): void {
+        const newInventory = currentItems.filter(item => item !== itemToThrow);
+        const newMap = this.map.value;
+        newMap[collectedPosition.y][collectedPosition.x].item = itemToThrow;
+        console.log('New inventory:', newInventory);
+        // this.socketEmitter.inventoryChoice({
+        //     playerId: this.playerService.getPlayer().id,
+        //     newInventory,
+        //     position: collectedPosition
+        // });
     }
 
     private findDefender(avatar: Avatar): IPlayer | null {

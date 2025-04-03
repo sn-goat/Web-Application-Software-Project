@@ -188,8 +188,10 @@ export class Game implements IGame {
                 console.log(`Inventaire plein pour joueur ${player.name}`);
                 this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
                     player,
-                    newItem: cell.item
+                    item: cell.item,
+                    position
                 });
+                cell.item = Item.DEFAULT;
                 this.continueMovement = false;
             }
         }
