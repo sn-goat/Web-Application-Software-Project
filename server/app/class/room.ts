@@ -68,7 +68,7 @@ export class Room implements IRoom {
         });
 
         this.internalEmitter.on(InternalFightEvents.ChangeFighter, (fight: Fight) => {
-            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, fight);
+            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, { accessCode: this.accessCode, fight });
         });
 
         this.internalEmitter.on(InternalFightEvents.End, (fightResult: { winner: Player; loser: Player }) => {

@@ -70,14 +70,34 @@ export class GameGateway {
     }
 
     @OnEvent(InternalFightEvents.ChangeFighter)
-    changeFighter(fight: Fight) {
-        this.logger.log('Switching turn to player: ' + fight.currentPlayer.name);
-        this.server.to(fight.player1.id).emit(FightEvents.ChangeFighter, fight);
-        this.server.to(fight.player2.id).emit(FightEvents.ChangeFighter, fight);
+    changeFighter(payload: { accessCode: string; fight: Fight }) {
+        this.logger.log('Switching turn to player: ' + payload.fight.currentPlayer.name);
+        this.server.to(payload.fight.player1.id).emit(FightEvents.ChangeFighter, payload.fight);
+        this.server.to(payload.fight.player2.id).emit(FightEvents.ChangeFighter, payload.fight);
+
+        const defender: Player = payload.fight.currentPlayer;
+        const attacker: Player = payload.fight.currentPlayer.id === payload.fight.player1.id ? payload.fight.player2 : payload.fight.player1;
+        const fightJournal: FightJournal = {
+            attacker,
+            defender,
+            accessCode: payload.accessCode,
+            damage: attacker.getDamage(),
+        };
+        this.journalService.dispatchEntry(fightJournal, [attacker.name], FightMessage.ATTACK, this.server);
     }
 
     @OnEvent(InternalFightEvents.End)
     manageEndFight(payload: { accessCode: string; winner: Player; loser: Player }) {
+        const defender: Player = payload.loser;
+        const attacker: Player = payload.winner;
+        const fightJournal: FightJournal = {
+            attacker,
+            defender,
+            accessCode: payload.accessCode,
+            damage: attacker.getDamage(),
+        };
+        this.journalService.dispatchEntry(fightJournal, [attacker.name], FightMessage.ATTACK, this.server);
+
         const game: Game = this.gameManager.getGame(payload.accessCode);
         this.server.to(payload.winner.id).emit(FightEvents.Winner, payload.winner);
         this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.WINNER_FIGHT, this.server);
@@ -242,16 +262,6 @@ export class GameGateway {
     handlePlayerAttack(client: Socket, accessCode: string) {
         this.logger.log('Player attack from ' + accessCode);
         const game: Game = this.gameManager.getGame(accessCode);
-        const fight: Fight = game.fight;
-        const attacker: Player = fight.currentPlayer;
-        const defender: Player = fight.currentPlayer.id === fight.player1.id ? fight.player2 : fight.player1;
-        const fightJournal: FightJournal = {
-            attacker,
-            defender,
-            accessCode,
-            damage: attacker.getDamage(game.isDebugMode, defender),
-        };
-        this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.ATTACK, this.server);
         game.playerAttack();
     }
 }
