@@ -1,11 +1,12 @@
 import { Game } from '@app/class/game';
 import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
+import { Item } from '@common/enums';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
-import { Player } from './player';
 import { Fight } from './fight';
-import { Board } from '@app/model/database/board';
+import { Player } from './player';
 
 export class Room implements IRoom {
     accessCode: string;
@@ -67,6 +68,11 @@ export class Room implements IRoom {
 
         this.internalEmitter.on(InternalFightEvents.End, (fightResult: { winner: Player; loser: Player }) => {
             this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, winner: fightResult.winner, loser: fightResult.loser });
+        });
+        
+        this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; item: Item }) => {
+            console.log(`[Room] Relaying ItemCollected event for player ${payload.player.name}, item: ${payload.item}`);
+            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, payload);
         });
     }
 

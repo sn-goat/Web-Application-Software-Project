@@ -31,7 +31,7 @@ export class Player implements IPlayer {
     currentLife: number;
     diceResult: number;
     team?: Team;
-    inventory: Item[]; // Nouvel attribut pour l'inventaire
+    inventory: Item[];
 
     private readonly dice4 = 4;
     private readonly dice6 = 6;
