@@ -15,13 +15,11 @@ describe('JournalService', () => {
     beforeEach(() => {
         journalService = new JournalService();
 
-        // Mock the Socket.io server
         mockServer = {
             to: jest.fn().mockReturnThis(),
             emit: jest.fn(),
         };
 
-        // Mock players with all required IPlayer properties
         const player1: IPlayer = {
             id: 'player1',
             name: 'Player One',
@@ -64,7 +62,6 @@ describe('JournalService', () => {
             diceResult: 3,
         };
 
-        // Mock room with all required IRoom properties
         mockRoom = {
             accessCode: 'room123',
             organizerId: 'organizer1',
@@ -79,7 +76,6 @@ describe('JournalService', () => {
             },
         };
 
-        // Mock fight journal
         mockFightJournal = {
             accessCode: 'room123',
             attacker: player1,

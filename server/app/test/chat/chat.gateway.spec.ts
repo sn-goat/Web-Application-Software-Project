@@ -24,7 +24,6 @@ describe('ChatGateway', () => {
         server = createStubInstance<Server>(Server);
         gameManagerService = createStubInstance<GameManagerService>(GameManagerService);
 
-        // Create a mock sender with full IPlayer implementation
         mockSender = {
             id: 'sender123',
             name: 'Test Sender',
@@ -61,7 +60,6 @@ describe('ChatGateway', () => {
         }).compile();
 
         gateway = module.get<ChatGateway>(ChatGateway);
-        // We want to assign a value to the private field
         // eslint-disable-next-line dot-notation
         gateway['server'] = server;
     });
@@ -72,7 +70,6 @@ describe('ChatGateway', () => {
 
     describe('roomMessage', () => {
         it('should process room message and broadcast it', () => {
-            // Setup
             const mockRoom = {
                 addMessage: jest.fn(),
             };
@@ -94,16 +91,13 @@ describe('ChatGateway', () => {
                 }),
             });
 
-            // Execute
             gateway.roomMessage(socket, mockMessage);
 
-            // Assert
             expect(gameManagerService.getRoom.called).toBe(true);
             expect(mockRoom.addMessage).toHaveBeenCalledWith(mockMessage);
         });
 
         it('should handle empty message gracefully', () => {
-            // Setup
             const mockRoom = {
                 addMessage: jest.fn(),
             };
@@ -121,10 +115,8 @@ describe('ChatGateway', () => {
                 }),
             });
 
-            // Execute
             gateway.roomMessage(socket, mockMessage);
 
-            // Assert
             expect(gameManagerService.getRoom.called).toBe(true);
             expect(mockRoom.addMessage).toHaveBeenCalled();
         });
@@ -132,10 +124,8 @@ describe('ChatGateway', () => {
 
     describe('handleConnection', () => {
         it('should log connection and emit hello message', () => {
-            // Execute
             gateway.handleConnection(socket);
 
-            // Assert
             expect(logger.log).toBeCalled();
             expect(socket.emit.calledWith(ChatEvents.Hello, 'Hello World!')).toBe(true);
         });
@@ -143,17 +133,14 @@ describe('ChatGateway', () => {
 
     describe('handleDisconnect', () => {
         it('should log disconnection', () => {
-            // Execute
             gateway.handleDisconnect(socket);
 
-            // Assert
             expect(logger.log).toBeCalled();
         });
     });
 
     describe('integrated testing', () => {
         it('should properly interact with GameManagerService', () => {
-            // Setup
             const mockRoom = {
                 addMessage: jest.fn(),
             };
@@ -169,12 +156,10 @@ describe('ChatGateway', () => {
                 to: () => ({ emit: jest.fn() }),
             });
 
-            // Execute
             gateway.handleConnection(socket);
             gateway.roomMessage(socket, mockMessage);
             gateway.handleDisconnect(socket);
 
-            // Assert
             expect(gameManagerService.getRoom.called).toBe(true);
             expect(mockRoom.addMessage).toHaveBeenCalled();
             expect(socket.emit.calledWith(ChatEvents.Hello)).toBe(true);
