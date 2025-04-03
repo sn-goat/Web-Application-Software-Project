@@ -34,6 +34,7 @@ export enum TurnEvents {
     
     // BroadcastEnd = 'endPlayerTurn',
     BroadcastItem = 'eventItem',
+    InventoryFull = 'inventoryFull'
     // UpdateActions = 'updateActions',
 }
 

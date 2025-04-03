@@ -178,16 +178,19 @@ export class Game implements IGame {
             console.log(`Joueur tente de collecter item: ${cell.item}`);
             if (player.addItemToInventory(cell.item)) {
                 console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
-                const collectedItem = cell.item;
                 cell.item = Item.DEFAULT;
                 this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
                     player, 
-                    item: collectedItem,
                     position
                 });
                 this.continueMovement = false;
             } else {
                 console.log(`Inventaire plein pour joueur ${player.name}`);
+                this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
+                    player,
+                    newItem: cell.item
+                });
+                this.continueMovement = false;
             }
         }
         const fieldType = this.map[position.y][position.x].tile;

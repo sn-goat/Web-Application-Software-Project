@@ -74,6 +74,10 @@ export class Room implements IRoom {
             console.log(`[Room] Relaying ItemCollected event for player ${payload.player.name}, item: ${payload.item}`);
             this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {accessCode: this.accessCode, player: payload.player, item: payload.item, position: payload.position});
         });
+
+        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (player: Player) => {
+            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, { accessCode: this.accessCode, player });
+        });
     }
 
     setLock(isLocked: boolean): void {

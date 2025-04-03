@@ -21,6 +21,7 @@ export enum InternalTurnEvents {
     Start = 'startTurn',
     ChangeTurn = 'ChangeTurn',
     ItemCollected = 'itemCollected',
+    InventoryFull = 'inventoryFull',
 }
 
 export enum InternalEvents {

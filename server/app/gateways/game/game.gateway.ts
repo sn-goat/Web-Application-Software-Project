@@ -92,12 +92,20 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.ItemCollected)
-    handleItemCollected(payload: { accessCode: string, player: Player; item: Item, position: Vec2 }) {
-        this.logger.log(`Player ${payload.player.name} collected item: ${payload.item}`);
+    handleItemCollected(payload: { accessCode: string, player: Player, position: Vec2 }) {
+        this.logger.log(`Player ${payload.player.name} collected item`);
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastItem, { 
             player: payload.player, 
-            item: payload.item,
             position: payload.position
+        });
+    }
+
+    @OnEvent(InternalTurnEvents.InventoryFull)
+    handleInventoryFull(payload: { accessCode: string; player: Player, item: Item }) {
+        this.logger.log(`Player ${payload.player.name} inventory is full`);
+        this.server.to(payload.accessCode).emit(TurnEvents.InventoryFull, { 
+            player: payload.player, 
+            item: payload.item 
         });
     }
 
