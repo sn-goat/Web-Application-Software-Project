@@ -1,25 +1,41 @@
-<div class="container justified">
-    <h1 class="header-item">{{ title }}</h1>
-    @if (!gameLogoError) {
-    <img [src]="gameLogoPath" (error)="handleGameLogoError()" alt="Logo Jeu" />
-    } @else {
-    <p class="error-message">Erreur de chargement du logo</p>
-    }
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polytopia - Accueil Médiéval</title>
 
-    <section id="server-message" class="justified">
-        <div class="button-container">
-            <button class="button" routerLink="/joindre">Joindre une partie</button>
-            <button class="button" routerLink="/creation">Créer une partie</button>
-            <button class="button" routerLink="/admin">Administer les jeux</button>
+        <!-- Medieval Font -->
+        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="container justified" style="background: url('assets/main.gif') no-repeat center center; background-size: cover">
+            <h1 class="medieval-title">📜 Les Chroniques Polytopiennes</h1>
+
+
+            <img
+                src="./assets/logo.png"
+                alt="Logo Jeu"
+                onerror="this.style.display='none'; document.getElementById('logo-error').style.display = 'block';"
+            />
+
+            <p id="logo-error" class="error-message" style="display: none">Erreur de chargement du logo</p>
+
+            <section id="server-message" class="justified">
+                <div class="parchment-box">
+                    <div class="button-container">
+<button class="button" routerLink="/game">🛡 Joindre une partie</button>
+<button class="button" routerLink="/creation">⚔ Créer une partie</button>
+<button class="button" routerLink="/admin">📜 Administer les jeux</button>
+
+                    </div>
+                </div>
+            </section>
+
+            <footer class="footer-item">
+                <h4 class="team-name">Équipe 112</h4>
+                <p>Léonard Renoud, Arnaud Grandisson, Sergile Junior Domguia Nyouvop, Shanmukh Iyer, Hossam Moustafa, Hubert Khouzam</p>
+            </footer>
         </div>
-    </section>
-
-    <footer class="footer-item">
-        <h4 class="team-name">Équipe 112</h4>
-        <p>
-            @for (member of teamMembers; track member) {
-            <span>{{ member }}</span>
-            @if (!$last) {, } }
-        </p>
-    </footer>
-</div>
+    </body>
+</html>
