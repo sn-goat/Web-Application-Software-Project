@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 })
 export class ItemPopup implements OnInit, OnDestroy {
   items: Item[] = [];
+  newItem: Item;
   readonly src = DEFAULT_PATH_ITEMS;
   readonly fileType = DEFAULT_FILE_TYPE;
   collectedPosition: Vec2;
@@ -28,11 +29,12 @@ export class ItemPopup implements OnInit, OnDestroy {
     console.log('Inventory data:', this.data.inventory);
     console.log('Collected position:', this.data.collectedPosition);
     this.items = this.data.inventory;
+    this.newItem = this.items[this.items.length - 1];
     this.collectedPosition = this.data.collectedPosition;
   }
 
   selectItemToThrow(selectedItem: Item): void {
-    this.gameService.handleInventoryChoice(this.items, this.collectedPosition, selectedItem);
+    this.gameService.handleInventoryChoice(this.collectedPosition, selectedItem, this.newItem);
     this.dialogRef.close();
   }
 

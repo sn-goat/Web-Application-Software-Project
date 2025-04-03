@@ -203,4 +203,22 @@ export class GameGateway {
         const game: Game = this.gameManager.getGame(accessCode);
         game.playerAttack();
     }
+
+    @SubscribeMessage(TurnEvents.InventoryChoice)
+    handleInventoryChoice(client: Socket, payload: { playerId: string, itemToThrow: Item, itemToAdd: Item, position: Vec2, accessCode: string }): void {
+        const game: Game = this.gameManager.getGame(payload.accessCode);
+        if (!game) return;
+
+        const player = game.getPlayer(payload.playerId);
+        if (player) {
+            player.removeItemFromInventory(payload.itemToThrow);
+            player.addItemToInventory(payload.itemToAdd);
+            game.map[payload.position.y][payload.position.x].item = payload.itemToThrow;
+            this.server.to(payload.accessCode).emit(TurnEvents.MapUpdate, {
+                player,
+                item: payload.itemToThrow,
+                position: payload.position
+            });
+        }
+    }
 }

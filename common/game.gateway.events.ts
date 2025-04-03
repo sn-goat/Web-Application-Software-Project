@@ -34,8 +34,10 @@ export enum TurnEvents {
     
     // BroadcastEnd = 'endPlayerTurn',
     BroadcastItem = 'eventItem',
-    InventoryFull = 'inventoryFull'
-    // UpdateActions = 'updateActions',
+    InventoryFull = 'inventoryFull',
+    InventoryChoice = 'inventoryChoice',
+    MapUpdate = 'mapUpdate',
+    // UpdateActions = 'updateActions'
 }
 
 export enum FightEvents {

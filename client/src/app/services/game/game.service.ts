@@ -83,6 +83,14 @@ export class GameService {
             this.map.next(newMap);
             console.log(`Item retiré de la carte à la position: (${position.x}, ${position.y})`);
         });
+
+        this.socketReceiver.onMapUpdate().subscribe((data: { player: IPlayer, item: Item, position: Vec2 }) => {
+            const pos = data.position;
+            const newMap = [...this.map.value];
+            newMap[pos.y][pos.x].item = data.item;
+            this.map.next(newMap);
+            console.log(`Map mise à jour : inventory of player ${data.player.name} est mis à jour`);
+        });
     }
 
     initFight(avatar: Avatar): void {
@@ -262,16 +270,14 @@ export class GameService {
         return this.organizerId;
     }
 
-    handleInventoryChoice(currentItems: Item[], collectedPosition: Vec2, itemToThrow: Item): void {
-        const newInventory = currentItems.filter(item => item !== itemToThrow);
-        const newMap = this.map.value;
-        newMap[collectedPosition.y][collectedPosition.x].item = itemToThrow;
-        console.log('New inventory:', newInventory);
-        // this.socketEmitter.inventoryChoice({
-        //     playerId: this.playerService.getPlayer().id,
-        //     newInventory,
-        //     position: collectedPosition
-        // });
+    handleInventoryChoice(collectedPosition: Vec2, itemToThrow: Item, itemToAdd: Item): void {
+        this.socketEmitter.inventoryChoice({
+            playerId: this.playerService.getPlayer().id,
+            itemToThrow: itemToThrow,
+            itemToAdd: itemToAdd,
+            position: collectedPosition,
+            accessCode: this.socketEmitter.getAccessCode()
+        });
     }
 
     private findDefender(avatar: Avatar): IPlayer | null {

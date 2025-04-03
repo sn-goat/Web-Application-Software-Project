@@ -228,4 +228,13 @@ export class SocketReceiverService {
             });
         });
     }
+    
+    onMapUpdate(): Observable<{ player: IPlayer, item: Item, position: Vec2}> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.MapUpdate, (data: { player: IPlayer, item: Item, position: Vec2}) => {
+                console.log(`[SocketReceiver] Map updated`);
+                observer.next(data);
+            });
+        });
+    }
 }
