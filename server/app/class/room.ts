@@ -30,8 +30,13 @@ export class Room implements IRoom {
         this.globalEmitter = globalEmitter;
         this.game = new Game(this.internalEmitter, board);
 
-        this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (playerId: string, message: string) => {
-            this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, { accessCode: this.accessCode, playerId, message });
+        this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (payload: { name: string; playerId: string; message: string }) => {
+            this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, {
+                accessCode: this.accessCode,
+                name: payload.name,
+                playerId: payload.playerId,
+                message: payload.message,
+            });
         });
 
         this.internalEmitter.on(InternalTimerEvents.TurnUpdate, (remainingTime) => {

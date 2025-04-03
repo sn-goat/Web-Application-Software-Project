@@ -89,8 +89,8 @@ export class Game implements IGame {
         if (index < 0) {
             return;
         }
-        this.players.splice(index, 1);
-        this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, playerId, message);
+        const player = this.players.splice(index, 1)[0];
+        this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { name: player.name, playerId, message });
     }
 
     getMapSize(): number {

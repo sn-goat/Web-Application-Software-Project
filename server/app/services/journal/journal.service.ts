@@ -71,7 +71,7 @@ export class JournalService {
             messageType,
             message: messageFormat,
             accessCode: room.accessCode,
-            playersInvolved: [room.game.players.find((player) => player.name === currentPlayers[0]).id],
+            playersInvolved: [messageType === GameMessage.QUIT ? '' : room.game.players.find((player) => player.name === currentPlayers[0]).id],
         };
 
         return newMessage;

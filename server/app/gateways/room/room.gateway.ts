@@ -10,7 +10,6 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server, Socket } from 'socket.io';
 import { JournalService } from '@app/services/journal/journal.service';
 import { GameMessage } from '@common/journal';
-import { Game } from '@app/class/game';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -28,16 +27,9 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @OnEvent(InternalRoomEvents.PlayerRemoved)
-    handlePlayerRemoved(payload: { accessCode: string; playerId: string; message: string }): void {
+    handlePlayerRemoved(payload: { accessCode: string; name: string; playerId: string; message: string }): void {
+        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.name], GameMessage.QUIT, this.server);
         this.server.to(payload.playerId).emit(RoomEvents.PlayerRemoved, payload.message);
-
-        const game: Game = this.gameManager.getGame(payload.accessCode);
-        this.journalService.dispatchEntry(
-            this.gameManager.getRoom(payload.accessCode),
-            [game.getPlayer(payload.playerId).name],
-            GameMessage.QUIT,
-            this.server,
-        );
 
         this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
         const clientSock: Socket = this.server.sockets.sockets.get(payload.playerId);
