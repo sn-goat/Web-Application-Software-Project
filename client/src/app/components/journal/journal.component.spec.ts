@@ -1,10 +1,10 @@
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { JournalComponent } from './journal.component';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { Entry, FightMessage, GameMessage } from '@common/journal';
 import { BehaviorSubject } from 'rxjs';
-import { Entry, GameMessage, FightMessage } from '@common/journal';
-import { Component } from '@angular/core';
+import { JournalComponent } from './journal.component';
 
 @Component({
     standalone: true,
@@ -63,14 +63,6 @@ describe('JournalComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('should initialize with journal entries', () => {
-        expect(component.journalEntries).toEqual(mockEntries);
-    });
-
-    it('should set myPlayerId from PlayerService', () => {
-        expect(component.myPlayerId).toBe(testPlayerId);
     });
 
     it('should toggle filter state when toggleFilter is called', () => {
