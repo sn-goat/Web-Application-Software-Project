@@ -92,19 +92,19 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
                 timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/acceuil']));
             }),
 
-            this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer, item: Item, position: Vec2 }) => {
+            this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer; item: Item; position: Vec2 }) => {
                 if (payload.player.id === this.playerService.getPlayer().id) {
                     this.dialog.open(ItemPopup, {
                         data: {
                             inventory: [...payload.player.inventory, payload.item],
-                            collectedPosition: payload.position
+                            collectedPosition: payload.position,
                         },
                         disableClose: true,
                         width: '500px',
-                        height: '500px'
+                        height: '500px',
                     });
                 }
-            })
+            }),
         );
     }
 

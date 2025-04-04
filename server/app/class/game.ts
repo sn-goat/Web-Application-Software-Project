@@ -191,7 +191,6 @@ export class Game implements IGame {
                     item: cell.item,
                     position
                 });
-                cell.item = Item.DEFAULT;
                 this.continueMovement = false;
             }
         }

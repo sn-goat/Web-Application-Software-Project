@@ -93,7 +93,7 @@ export class SocketEmitterService {
         this.socket.emit(FightEvents.Attack, this.accessCode);
     }
 
-    inventoryChoice(payload: { playerId: string, itemToThrow: Item, itemToAdd: Item, position: Vec2, accessCode: string }): void {
+    inventoryChoice(payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string }): void {
         this.socket.emit(TurnEvents.InventoryChoice, payload);
     }
 }

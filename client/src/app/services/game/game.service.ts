@@ -84,7 +84,7 @@ export class GameService {
             console.log(`Item retiré de la carte à la position: (${position.x}, ${position.y})`);
         });
 
-        this.socketReceiver.onMapUpdate().subscribe((data: { player: IPlayer, item: Item, position: Vec2 }) => {
+        this.socketReceiver.onMapUpdate().subscribe((data: { player: IPlayer; item: Item; position: Vec2 }) => {
             const pos = data.position;
             const newMap = [...this.map.value];
             newMap[pos.y][pos.x].item = data.item;
@@ -273,10 +273,10 @@ export class GameService {
     handleInventoryChoice(collectedPosition: Vec2, itemToThrow: Item, itemToAdd: Item): void {
         this.socketEmitter.inventoryChoice({
             playerId: this.playerService.getPlayer().id,
-            itemToThrow: itemToThrow,
-            itemToAdd: itemToAdd,
+            itemToThrow,
+            itemToAdd,
             position: collectedPosition,
-            accessCode: this.socketEmitter.getAccessCode()
+            accessCode: this.socketEmitter.getAccessCode(),
         });
     }
 

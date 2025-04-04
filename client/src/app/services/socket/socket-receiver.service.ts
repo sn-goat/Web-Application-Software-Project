@@ -211,28 +211,28 @@ export class SocketReceiverService {
         });
     }
 
-    onItemCollected(): Observable<{ player: IPlayer, position: Vec2 }> {
+    onItemCollected(): Observable<{ player: IPlayer; position: Vec2 }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer, position: Vec2 }) => {
-                console.log(`[SocketReceiver] Item collected`);
+            this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer; position: Vec2 }) => {
+                console.log('[SocketReceiver] Item collected');
                 observer.next(data);
             });
         });
     }
 
-    onInventoryFull(): Observable<{ player: IPlayer, item: Item, position: Vec2 }> {
+    onInventoryFull(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.InventoryFull, (data: { player: IPlayer, item: Item, position: Vec2 }) => {
-                console.log(`[SocketReceiver] Inventory full`);
+            this.socket.on(TurnEvents.InventoryFull, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
+                console.log('[SocketReceiver] Inventory full');
                 observer.next(data);
             });
         });
     }
-    
-    onMapUpdate(): Observable<{ player: IPlayer, item: Item, position: Vec2}> {
+
+    onMapUpdate(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.MapUpdate, (data: { player: IPlayer, item: Item, position: Vec2}) => {
-                console.log(`[SocketReceiver] Map updated`);
+            this.socket.on(TurnEvents.MapUpdate, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
+                console.log('[SocketReceiver] Map updated');
                 observer.next(data);
             });
         });
