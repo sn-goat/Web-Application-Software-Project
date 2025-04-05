@@ -1,4 +1,5 @@
 import { Player } from '@app/class/player';
+import { Item } from '@common/enums';
 import { IFight } from '@common/game';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -44,8 +45,14 @@ export class Fight implements IFight {
         const defender = this.getOpponent(this.currentPlayer.id);
         const isDefenderDead = attacker.attack(isDebugMode, defender);
         if (isDefenderDead) {
-            attacker.wins += 1;
-            return { winner: attacker, loser: defender };
+            if (defender.hasItem(Item.PEARL) && !defender.pearlUsed) {
+                defender.pearlUsed = true;
+                defender.currentLife = Math.floor(defender.life / 2);
+                return null;
+            } else {
+                attacker.wins += 1;
+                return { winner: attacker, loser: defender };
+            }
         }
         return null;
     }

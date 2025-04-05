@@ -70,6 +70,7 @@ export class SocketEmitterService {
     }
 
     debugMove(direction: Vec2, playerId: string) {
+        console.log('SOCKET: Debug move', direction, playerId);
         this.socket.emit(TurnEvents.DebugMove, { accessCode: this.accessCode, direction, playerId });
     }
 

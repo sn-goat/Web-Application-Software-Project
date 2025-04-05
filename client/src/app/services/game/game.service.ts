@@ -151,6 +151,7 @@ export class GameService {
     }
 
     debugMovePlayer(cell: Cell): void {
+        console.log('Debug move player to cell:', cell);
         if (this.canTeleport(cell)) {
             this.socketEmitter.debugMove(cell.position, this.playerService.getPlayer().id);
         }

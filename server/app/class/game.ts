@@ -176,22 +176,31 @@ export class Game implements IGame {
         this.continueMovement = true;
         if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
             console.log(`Joueur tente de collecter item: ${cell.item}`);
-            if (player.addItemToInventory(cell.item)) {
-                console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
-                cell.item = Item.DEFAULT;
-                this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
-                    player, 
-                    position
-                });
-                this.continueMovement = false;
+            // Si l'inventaire n'est pas complet, on ajoute l'item normalement
+            if (player.inventory.length < 2) {
+                if (player.addItemToInventory(cell.item)) {
+                    console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
+                    const collectedItem = cell.item;
+                    cell.item = Item.DEFAULT;
+                    this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
+                        player, 
+                        item: collectedItem,
+                        position
+                    });
+                    this.continueMovement = false;
+                }
             } else {
+                // INVENTAIRE PLEIN : émettre un événement pour demander au client quel item jeter
                 console.log(`Inventaire plein pour joueur ${player.name}`);
                 this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
                     player,
-                    item: cell.item,
+                    newItem: cell.item,
+                    inventory: player.inventory,
                     position
                 });
+                // On arrête le mouvement jusqu'à la décision du joueur
                 this.continueMovement = false;
+                return;
             }
         }
         const fieldType = this.map[position.y][position.x].tile;

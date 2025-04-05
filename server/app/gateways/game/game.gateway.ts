@@ -155,9 +155,7 @@ export class GameGateway {
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
-        if (game.isDebugMode) {
-            game.movePlayerDebug(payload.direction, payload.playerId);
-        }
+        game.movePlayerDebug(payload.direction, payload.playerId);
     }
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
