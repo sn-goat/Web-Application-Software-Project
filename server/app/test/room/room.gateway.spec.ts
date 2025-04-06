@@ -60,7 +60,7 @@ describe('RoomGateway', () => {
         } as unknown as jest.Mocked<GameManagerService>;
 
         journalService = {
-            dispatchEvent: jest.fn(),
+            dispatchEntry: jest.fn(),
         } as unknown as jest.Mocked<JournalService>;
 
         const module: TestingModule = await Test.createTestingModule({

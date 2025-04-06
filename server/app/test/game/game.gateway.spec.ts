@@ -50,10 +50,11 @@ describe('GameGateway', () => {
             getGame: jest.fn(),
             getFight: jest.fn(),
             closeRoom: jest.fn(),
+            getRoom: jest.fn(),
         } as unknown as jest.Mocked<GameManagerService>;
 
         journalService = {
-            dispatchEvent: jest.fn(),
+            dispatchEntry: jest.fn(),
         } as unknown as jest.Mocked<JournalService>;
 
         const module: TestingModule = await Test.createTestingModule({
@@ -76,8 +77,8 @@ describe('GameGateway', () => {
     describe('Event Handlers', () => {
         it('handleFightTimerUpdate should emit timer to both players', () => {
             const payload = { accessCode: '123', remainingTime: 15 };
-            const fight = { player1: { id: 'p1' }, player2: { id: 'p2' } } as Fight;
-            gameManager.getFight.mockReturnValue(fight);
+            const fight1 = { player1: { id: 'p1' }, player2: { id: 'p2' } } as Fight;
+            gameManager.getFight.mockReturnValue(fight1);
 
             gateway.handleFightTimerUpdate(payload);
 
@@ -135,23 +136,23 @@ describe('GameGateway', () => {
         });
 
         it('changeFighter should emit ChangeFighter event to both players', () => {
-            const fight = {
-                player1: { id: 'p1' },
-                player2: { id: 'p2' },
+            const fight1 = {
+                player1: { id: 'p1', getDamage: () => 5 },
+                player2: { id: 'p2', getDamage: () => 5 },
                 currentPlayer: { name: 'Player 1' },
             } as Fight;
 
-            gateway.changeFighter({ accessCode: '1234', fight });
+            gateway.changeFighter({ accessCode: '1234', fight: fight1 });
 
             expect(server.to).toHaveBeenCalledWith('p1');
             expect(server.to).toHaveBeenCalledWith('p2');
-            expect(emitMock).toHaveBeenCalledWith(FightEvents.ChangeFighter, fight);
+            expect(emitMock).toHaveBeenCalledWith(FightEvents.ChangeFighter, fight1);
         });
 
         it('manageEndFight should emit appropriate events based on win state', () => {
             // Setup
-            const winner = { id: 'w1', wins: 3 } as Player;
-            const loser = { id: 'l1' } as Player;
+            const winner = { id: 'w1', wins: 3, getDamage: () => 5 } as Player;
+            const loser = { id: 'l1', getDamage: () => 5 } as Player;
             const accessCode = 'fight123';
             const players = [winner, loser];
 
@@ -186,8 +187,8 @@ describe('GameGateway', () => {
 
         it('manageEndFight should end turn when loser is current player', () => {
             // Setup
-            const winner = { id: 'w1', wins: 1 } as Player; // Not enough wins yet
-            const loser = { id: 'l1' } as Player;
+            const winner = { id: 'w1', wins: 1, getDamage: () => 5 } as Player; // Not enough wins yet
+            const loser = { id: 'l1', getDamage: () => 5 } as Player;
             const accessCode = 'fight123';
             const players = [winner, loser];
 
@@ -220,8 +221,8 @@ describe('GameGateway', () => {
 
         it('manageEndFight should resume timer and decrement action when winner continues', () => {
             // Setup
-            const winner = { id: 'w1', wins: 1 } as Player;
-            const loser = { id: 'l1' } as Player;
+            const winner = { id: 'w1', wins: 1, getDamage: () => 5 } as Player;
+            const loser = { id: 'l1', getDamage: () => 5 } as Player;
             const accessCode = 'fight123';
             const players = [winner, loser];
 
@@ -343,10 +344,13 @@ describe('GameGateway', () => {
 
             const game = {
                 toggleDebug: jest.fn().mockReturnValue(true),
+                isDebugMode: true,
+                getPlayer: jest.fn().mockReturnValue([{ name: 'player123' }] as Player[]),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
 
+            gameManager.getRoom.mockReturnValue({ game } as any);
             gateway.handleDebug(client, accessCode);
 
             expect(gameManager.getGame).toHaveBeenCalledWith(accessCode);
@@ -417,9 +421,12 @@ describe('GameGateway', () => {
 
             const game = {
                 changeDoorState: jest.fn().mockReturnValue(sendingInfo),
+                players: [{ id: playerId, name: 'Player 1' } as Player, { id: 'player2', name: 'Player 2' } as Player],
+                currentTurn: 0,
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
+            gameManager.getRoom.mockReturnValue({ game } as any);
 
             gateway.handleChangeDoorState(client, { accessCode, doorPosition, playerId });
 
@@ -458,6 +465,7 @@ describe('GameGateway', () => {
 
             const game = {
                 initFight: jest.fn().mockReturnValue(fight),
+                getPlayer: jest.fn().mockReturnValue({ name: playerInitiatorId } as Player),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -475,6 +483,7 @@ describe('GameGateway', () => {
             const game = {
                 flee: jest.fn().mockReturnValue(true),
                 fight: {
+                    currentPlayer: { id: 'p1' },
                     player1: { id: 'p1' },
                     player2: { id: 'p2' },
                 },
@@ -495,6 +504,7 @@ describe('GameGateway', () => {
             const accessCode = 'game123';
 
             const fight = {
+                currentPlayer: { id: 'p1' },
                 player1: { id: 'p1' },
                 player2: { id: 'p2' },
             } as Fight;
@@ -502,6 +512,7 @@ describe('GameGateway', () => {
             const game = {
                 flee: jest.fn().mockReturnValue(false),
                 changeFighter: jest.fn().mockReturnValue(fight),
+                fight,
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
