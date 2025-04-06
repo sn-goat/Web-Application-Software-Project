@@ -1,23 +1,48 @@
-<div class="editor-container">
-    <div class="editor-panel">
-        <h1>Informations</h1>
-        <div class="form-container">
-            <label for="Nom">Nom de la carte:</label>
-            <input id="Nom" type="text" maxlength="15" placeholder="15 caractères maximum" matInput [(ngModel)]="name" />
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polytopia - Édition de Cartes</title>
 
-            <label for="Description">Description de la carte:</label>
-            <textarea id="Description" rows="4" maxlength="100" placeholder="100 caractères maximum" matInput [(ngModel)]="description"></textarea>
+        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="background-gif" style="background-image: url('assets/backgrounds/edit.gif')"></div>
+        <h1 class="medieval-title">Édition de carte</h1>
+        <div class="container justified">
+            <div class="main-content">
+                <div class="editor-container">
+                    <div class="editor-panel">
+                        <h1>Informations</h1>
+                        <div class="form-container">
+                            <label for="Nom">Nom de la carte:</label>
+                            <input id="Nom" type="text" maxlength="15" placeholder="15 caractères maximum" matInput [(ngModel)]="name" />
 
-            <button type="button" id="saveButton" (click)="checkIfReadyToSave()">Enregistrer</button>
-            <button type="reset" class="reset-button" (click)="reset()">Réinitialiser</button>
-            <button type="button" class="return-button" (click)="confirmReturn()">Retour</button>
+                            <label for="Description">Description de la carte:</label>
+                            <textarea
+                                id="Description"
+                                rows="4"
+                                maxlength="100"
+                                placeholder="100 caractères maximum"
+                                matInput
+                                [(ngModel)]="description"
+                            ></textarea>
+
+                            <button type="button" id="saveButton" (click)="checkIfReadyToSave()">Enregistrer</button>
+                            <button type="reset" class="reset-button" (click)="reset()">Réinitialiser</button>
+                            <button type="button" class="return-button" (click)="confirmReturn()">Retour</button>
+                        </div>
+                    </div>
+                    <div class="map-container" id="map-screenshot">
+                        <app-board-game></app-board-game>
+                    </div>
+
+                    <div class="tiles-panel">
+                        <app-edit-item-area></app-edit-item-area>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="map-container" id="map-screenshot">
-        <app-board-game></app-board-game>
-    </div>
-
-    <div class="tiles-panel">
-        <app-edit-item-area></app-edit-item-area>
-    </div>
-</div>
+    </body>
+</html>
