@@ -7,6 +7,7 @@ import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { GameGateway } from '@app/gateways/game/game.gateway';
 import { GameManagerService } from '@app/services/game/games-manager.service';
+import { JournalService } from '@app/services/journal/journal.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
@@ -18,6 +19,7 @@ import { BroadcastOperator, Server, Socket } from 'socket.io';
 describe('GameGateway', () => {
     let gateway: GameGateway;
     let server: jest.Mocked<Server>;
+    let journalService: jest.Mocked<JournalService>;
     let gameManager: jest.Mocked<GameManagerService>;
     let emitMock: jest.Mock;
     let broadcastOperator: Partial<BroadcastOperator<any, any>>;
@@ -50,8 +52,17 @@ describe('GameGateway', () => {
             closeRoom: jest.fn(),
         } as unknown as jest.Mocked<GameManagerService>;
 
+        journalService = {
+            dispatchEvent: jest.fn(),
+        } as unknown as jest.Mocked<JournalService>;
+
         const module: TestingModule = await Test.createTestingModule({
-            providers: [GameGateway, { provide: GameManagerService, useValue: gameManager }, { provide: Logger, useValue: new Logger() }],
+            providers: [
+                GameGateway,
+                { provide: GameManagerService, useValue: gameManager },
+                { provide: Logger, useValue: new Logger() },
+                { provide: JournalService, useValue: journalService },
+            ],
         }).compile();
 
         gateway = module.get<GameGateway>(GameGateway);

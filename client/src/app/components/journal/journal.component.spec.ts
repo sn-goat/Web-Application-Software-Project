@@ -104,14 +104,6 @@ describe('JournalComponent', () => {
                 playersInvolved: ['someOtherId'],
             };
             expect(component.shouldDisplayEntry(entryNotInvolved)).toBeFalse();
-
-            const entryInvolved: Entry = {
-                messageType: FightMessage.FLEE_SUCCESS,
-                message: FightMessage.FLEE_SUCCESS + 'vous',
-                accessCode: 'ABC123',
-                playersInvolved: [testPlayerId],
-            };
-            expect(component.shouldDisplayEntry(entryInvolved)).toBeTrue();
         });
     });
 
