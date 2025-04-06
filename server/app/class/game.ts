@@ -109,6 +109,10 @@ export class Game implements IGame {
         return this.players.find((p) => p.id === playerId);
     }
 
+    getPlayerByAvatar(avatar: Avatar): Player {
+        return this.players.find((p) => p.avatar === avatar);
+    }
+
     isGameFull(): boolean {
         return this.players.length >= this.maxPlayers;
     }
@@ -128,6 +132,7 @@ export class Game implements IGame {
         return this;
     }
 
+    // TODO: Ajouter Find possible actions au turn
     configureTurn(): { player: Player; path: Record<string, PathInfo> } {
         const player = this.players[this.currentTurn];
         player.initTurn();
@@ -363,6 +368,16 @@ export class Game implements IGame {
     }
 
     private isPlayerCanMakeAction(player: Player): boolean {
-        return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player.position);
+        return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player);
+    }
+
+    private cellHasPlayerToAttack(cell: Cell, player): boolean {
+        const hasPlayer = cell.player !== undefined && cell.player !== Avatar.Default;
+        if (this.isCTF) {
+            const isEnemy = this.getPlayerByAvatar(cell.player).team !== player.team;
+            return hasPlayer && isEnemy;
+        } else {
+            return hasPlayer;
+        }
     }
 }

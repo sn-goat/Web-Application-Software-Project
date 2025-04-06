@@ -27,6 +27,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     pathCells: Set<string> = new Set();
+    // TODO: Transformer ActionCells en un tableau de Cell
     actionCells: Set<string> = new Set();
     highlightedPathCells: Set<string> = new Set();
     getTooltipContent: (cell: Cell) => string;
@@ -71,6 +72,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
             this.gameService.isActionSelected.subscribe((isAction) => {
                 this.isActionSelected = isAction;
+                // TODO: S'abonner à playerService pour savoir les POssibles Actions
                 this.actionCells = isAction ? this.gameService.findPossibleActions(this.playerService.getPlayer().position) : new Set<string>();
             }),
 
@@ -83,7 +85,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     onLeftClicked(cell: Cell) {
         if (!this.isPlayerTurn) return;
-
+        // TODO: Adapter pour un tableau de cell et juste vérifier si elle se trouve dans Action Cell
         if (this.isActionSelected) {
             if (this.gameService.isWithinActionRange(cell)) {
                 if (this.fightLogicService.isAttackProvocation(cell)) {
@@ -142,6 +144,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
         return this.highlightedPathCells.has(`${cell.position.x},${cell.position.y}`);
     }
 
+    // TODO: Adapter pour un tableau de cell
     isActionCell(cell: Cell): boolean {
         return this.actionCells.has(`${cell.position.x},${cell.position.y}`);
     }
