@@ -26,7 +26,7 @@
             <span class="item-ctf">Mode: {{ map.isCTF ? 'CTF' : 'Classique' }}</span>
         </div>
         <div class="item-footer">
-            <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility }}</span>
+            <span class="item-visibility" [ngClass]="map.visibility.toLowerCase()">{{ map.visibility === 'Public'? 'Publique': 'Privé' }}</span>
         </div>
     </div>
 

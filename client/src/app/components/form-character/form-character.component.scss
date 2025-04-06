@@ -1,34 +1,13 @@
-.stat-button,
-.join-button,
-.open-popup-button,
-.close-popup-button,
-.arrow-button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: 2px solid #00a896;
-    border-radius: 10px;
-    background-color: #0d0215;
-    color: #d8f3dc;
-    box-shadow: 0 0 5px #00a896;
-    cursor: pointer;
-    transition:
-        background-color 0.3s ease,
-        color 0.3s ease;
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
 
-    &.selected {
-        background-color: #00a896;
-        color: #0d0215;
-    }
+$scroll-gold: #d4af37;
+$primary-bg: rgba(36, 24, 10, 0.85);
+$primary-text: #f2e5b8;
+$glow-gold: rgba(255, 215, 0, 0.3);
 
-    &:disabled {
-        opacity: 0.6;
-    }
-}
-
-.taken {
-    // grayscale the image
-    filter: grayscale(100%);
-    cursor: not-allowed;
+* {
+  font-family: 'MedievalSharp', cursive;
+  color: $primary-text;
 }
 
 .popup {
@@ -39,155 +18,273 @@
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 32px;
+  gap: 20px;
+  flex: 1;
 }
 
 .popup-content {
-    background-color: #0d0215;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+  animation: popupFade 1.5s ease-out;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  max-width: 880px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 2px solid var(--scroll-gold);
+  box-shadow:
+    0 0 25px rgba(212, 175, 55, 0.25),
+    0 0 60px rgba(255, 215, 0, 0.1),
+    inset 0 0 10px rgba(255, 255, 200, 0.05);
+  backdrop-filter: blur(2px);
+  background-color: rgba(36, 24, 10, 0.9);
+  border-radius: 20px;
+  padding: 30px 40px;
+  color: $primary-text;
+}
+
+
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .portrait-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-right: 32px;
+  border-right: 2px solid rgba(255, 215, 0, 0.2);
+  justify-content: space-between; // push arrows to top/bottom
+  min-width: 180px;
+  height: 100%; // MATCH the full popup height
 }
 
-.stat-container {
-    display: flex;
-    flex-direction: row;
-    gap: 50px; // gap between the two columns
+
+
+.arrow-button {
+  font-size: 1.5rem;
+  border: 2px solid $scroll-gold;
+  background-color: transparent;
+  color: $primary-text;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px $scroll-gold;
+
+  &:hover {
+    background-color: $scroll-gold;
+    color: black;
+  }
 }
 
-.stat-column {
-    display: flex;
-    flex-direction: column;
-    gap: 20px; // gap between buttons in the column
-}
 
 .portrait-display {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 200px;
-    height: 200px;
-    border: 2px solid #00a896;
-    border-radius: 15px;
-    overflow: hidden;
-    background-color: #f0f0f0;
+  flex: 1; // take all available vertical space
+  height: 100%;
+  background: #1e1e1e;
+  border-radius: 16px;
+  border: 2px solid $scroll-gold;
+  box-shadow: inset 0 0 8px $scroll-gold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 12px 0;
 }
+
 
 .portrait-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    width: 100%;
+    border-radius: 16px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
+
 .name-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-    gap: 5px;
+  text-align: center;
+  margin-top: 16px;
+  margin-bottom: 10px;
 }
 
 .name-input {
-    width: 200px;
-    padding: 10px;
-    border: 2px solid #00a896;
-    border-radius: 5px;
-    background-color: #0d0215;
-    color: #d8f3dc;
-    font-size: 1rem;
-    text-align: center;
+  background: rgba(36, 24, 10, 0.6);
+  border: 2px solid $scroll-gold;
+  color: $primary-text;
+  border-radius: 8px;
+  padding: 10px;
+  width: 220px;
+  font-size: 1rem;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  text-align: center;
+
+  &::placeholder {
+    color: #a89d84;
+  }
 }
+
+.stat-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 20px;
+  position: relative;
+}
+
+
+
+.stat-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 200px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.1);
+}
+
 
 .stat-description {
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    text-align: center;
-    color: #d8f3dc;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--scroll-gold);
+  text-align: center;
+  margin-bottom: 12px;
+  text-shadow: 0 0 3px black;
+}
+.join-button {
+  width: 100%;
+  max-width: 420px;
+  font-weight: bold;
 }
 
-.name-input::placeholder {
-    color: #8f8f8f;
+
+.stat-button,
+.join-button,
+.close-popup-button {
+  min-width: 130px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border: 2px solid $scroll-gold;
+  color: $primary-text;
+  cursor: pointer;
+  box-shadow: 0 0 10px $glow-gold;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  text-align: center;
+
+  &.selected {
+    background-color: $scroll-gold;
+    color: black;
+  }
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
 }
 
-.name-input:focus {
-    outline: none;
-    border-color: #d8f3dc;
+.close-popup-button, .join-button {
+  align-self: center; // center inside form-content
+  margin-top: 16px;
+  width: 160px;
 }
 
 .tooltip {
-    position: relative;
-    display: inline-block;
+  position: relative;
+  display: inline-block;
+}
 
-    .tooltiptext {
-        visibility: hidden;
-        width: 120px;
-        background-color: #555;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px 0;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -60px;
-        opacity: 0;
-        transition: opacity 0.3s;
+.tooltiptext {
+  visibility: hidden;
+  width: 180px;
+  background-color: #1a1a1a;
+  color: $primary-text;
+  text-align: center;
+  border-radius: 6px;
+  padding: 6px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -90px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.9rem;
+  box-shadow: 0 0 8px #000;
 
-        &::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #555 transparent transparent transparent;
-        }
-    }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1a1a1a transparent transparent transparent;
+  }
+}
 
-    &:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-    }
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
 
 .dice-image {
-    width: 20px;
-    height: 20px;
-    vertical-align: middle;
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.4));
 }
 
+.taken {
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
+
 .retour {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: #0d0215;
-    background-color: #00a896;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition:
-        background-color 0.3s ease,
-        color 0.3s ease;
+  padding: 8px 16px;
+  background-color: $scroll-gold;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  font-family: 'MedievalSharp', cursive;
+  cursor: pointer;
+  box-shadow: 0 0 10px $glow-gold;
 }
 
 .retour:hover {
-    background-color: #d8f3dc;
-    color: #0d0215;
+  background-color: #fff4c2;
 }
