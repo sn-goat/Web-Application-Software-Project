@@ -11,11 +11,11 @@
         <div class="container justified" style="background: url('./assets/backgrounds/main.gif') no-repeat center center; background-size: cover">
             <h1 class="medieval-title">📜 Les Chroniques Polytopiennes</h1>
 
-            <img
-                src="./assets/logo.png"
-                alt="Logo Jeu"
-                onerror="this.style.display='none'; document.getElementById('logo-error').style.display = 'block';"
-            />
+            @if (!gameLogoError) {
+            <img [src]="gameLogoPath" (error)="handleGameLogoError()" alt="Logo Jeu" />
+            } @else {
+            <p class="error-message">Erreur de chargement du logo</p>
+            }
 
             <p id="logo-error" class="error-message" style="display: none">Erreur de chargement du logo</p>
 

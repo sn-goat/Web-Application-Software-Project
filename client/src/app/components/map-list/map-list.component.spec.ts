@@ -130,7 +130,7 @@ describe('MapListComponent', () => {
         expect(item).not.toBeNull();
         expect(item.nativeElement.textContent).toContain(mockBoardGames[0].name);
         expect(item.nativeElement.textContent).toContain(mockBoardGames[0].size.toString());
-        expect(item.nativeElement.textContent).toContain(mockBoardGames[0].visibility);
+        expect(item.nativeElement.textContent).toContain(mockBoardGames[0].visibility === 'Public' ? 'Publique' : 'Privé');
     });
 
     it('should sort items by name', () => {

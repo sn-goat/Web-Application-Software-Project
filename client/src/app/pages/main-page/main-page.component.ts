@@ -15,7 +15,7 @@ import { RoomService } from '@app/services/room/room.service';
 export class MainPageComponent implements OnInit {
     readonly title: string = 'POLYTOPIA';
     readonly teamMembers: string[] = TEAM_MEMBERS;
-    readonly gameLogoPath: string = './assets/POLYTOPIA_game_logo.png';
+    readonly gameLogoPath: string = './assets/logo.png';
     gameLogoError: boolean = false;
     private readonly playerService = inject(PlayerService);
     private readonly gameService = inject(GameService);
