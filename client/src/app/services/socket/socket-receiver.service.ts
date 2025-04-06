@@ -117,6 +117,7 @@ export class SocketReceiverService {
         });
     }
 
+    // TODO: Ajouter Possible Actions
     onPlayerTurnChanged(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.PlayerTurn, (turn: { player: IPlayer; path: Record<string, PathInfo> }) => {
@@ -126,6 +127,7 @@ export class SocketReceiverService {
         });
     }
 
+    // TODO: Ajouter Possible Actions
     onPlayerTurnUpdate(): Observable<TurnInfo> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.UpdateTurn, (turn: { player: IPlayer; path: Record<string, PathInfo> }) => {
@@ -229,6 +231,7 @@ export class SocketReceiverService {
         });
     }
 
+    // TODO: Vous pouvez aussi envoyer la nouvelle Map directement ce sera moins chiant et on pourra centraliser les modifications sécifique de la map backend
     onMapUpdate(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.MapUpdate, (data: { player: IPlayer; item: Item; position: Vec2 }) => {

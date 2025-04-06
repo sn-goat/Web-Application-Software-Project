@@ -18,6 +18,7 @@ import { getLobbyLimit } from '@common/lobby-limits';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { log } from 'console';
 import { Timer } from './timer';
+import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_POSITIONS } from '@common/player';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -107,6 +108,10 @@ export class Game implements IGame {
         return this.players.find((p) => p.id === playerId);
     }
 
+    getPlayerByAvatar(avatar: Avatar): Player {
+        return this.players.find((p) => p.avatar === avatar);
+    }
+
     isGameFull(): boolean {
         return this.players.length >= this.maxPlayers;
     }
@@ -126,6 +131,7 @@ export class Game implements IGame {
         return this;
     }
 
+    // TODO: Ajouter Find possible actions au turn
     configureTurn(): { player: Player; path: Record<string, PathInfo> } {
         const player = this.players[this.currentTurn];
         player.initTurn();
@@ -328,6 +334,7 @@ export class Game implements IGame {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
         if (this.isPlayerContinueTurn(player, path.size)) {
             log(`Player ${player.name} can continue turn`);
+            // TODO: Add find possible actions
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {
             this.endTurn();
@@ -345,5 +352,51 @@ export class Game implements IGame {
 
     private isPlayerCanMakeAction(player: Player): boolean {
         return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player.position);
+    }
+
+    private findPossibleActions(map: Cell[][], player: Player): Cell[] {
+        const possibleActions: Cell[] = [];
+
+        if (player.actions <= 0) {
+            return possibleActions;
+        }
+
+        for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
+            const newPos: Vec2 = { x: player.position.x + dir.x, y: player.position.y + dir.y };
+            if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
+                const cell = map[newPos.y][newPos.x];
+                if (this.isValidCellForAction(cell, player)) {
+                    possibleActions.push(cell);
+                }
+            }
+        }
+
+        if (player.hasItem(Item.BOW)) {
+            for (const dir of DIAGONAL_POSITIONS) {
+                const newPos: Vec2 = { x: player.position.x + dir.x, y: player.position.y + dir.y };
+                if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
+                    const cell = map[newPos.y][newPos.x];
+                    if (this.cellHasPlayerToAttack(cell, player)) {
+                        possibleActions.push(cell);
+                    }
+                }
+            }
+        }
+
+        return possibleActions;
+    }
+
+    private cellHasPlayerToAttack(cell: Cell, player): boolean {
+        const hasPlayer = cell.player !== undefined && cell.player !== Avatar.Default;
+        if (this.isCTF) {
+            const isEnemy = this.getPlayerByAvatar(cell.player).team !== player.team;
+            return hasPlayer && isEnemy;
+        } else {
+            return hasPlayer;
+        }
+    }
+
+    private isValidCellForAction(cell: Cell, player: Player): boolean {
+        return this.cellHasPlayerToAttack(cell, player) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
     }
 }

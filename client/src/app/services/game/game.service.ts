@@ -252,7 +252,7 @@ export class GameService {
     getItemDescription(item: Item): string {
         return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
     }
-
+    // TODO: Supprimer la méthode car elle se fais backend
     findPossibleActions(position: Vec2): Set<string> {
         const possibleActions = new Set<string>();
         const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
