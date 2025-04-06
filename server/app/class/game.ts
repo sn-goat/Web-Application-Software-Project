@@ -170,41 +170,48 @@ export class Game implements IGame {
 
     movePlayer(position: Vec2, player: Player): void {
         const previousPosition = player.position;
-        this.map[previousPosition.y][previousPosition.x].player = Avatar.Default;
+        this._clearCell(previousPosition);
+        this._setPlayerInCell(position, player);
+        this._handleItemCollection(position, player);
+        this._updatePlayerPositionAndNotify(previousPosition, position, player);
+    }
+
+    private _clearCell(position: Vec2): void {
+        this.map[position.y][position.x].player = Avatar.Default;
+    }
+
+    private _setPlayerInCell(position: Vec2, player: Player): void {
         this.map[position.y][position.x].player = player.avatar as Avatar;
+    }
+
+    private _handleItemCollection(position: Vec2, player: Player): void {
         const cell = this.map[position.y][position.x];
         this.continueMovement = true;
         if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
             console.log(`Joueur tente de collecter item: ${cell.item}`);
-            // Si l'inventaire n'est pas complet, on ajoute l'item normalement
-            if (player.inventory.length < 2) {
-                if (player.addItemToInventory(cell.item)) {
-                    console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
-                    const collectedItem = cell.item;
-                    cell.item = Item.DEFAULT;
-                    this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
-                        player, 
-                        item: collectedItem,
-                        position
-                    });
-                    this.continueMovement = false;
-                }
+            if (player.addItemToInventory(cell.item)) {
+                console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
+                cell.item = Item.DEFAULT;
+                this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
+                    player, 
+                    position
+                });
+                this.continueMovement = false;
             } else {
-                // INVENTAIRE PLEIN : émettre un événement pour demander au client quel item jeter
                 console.log(`Inventaire plein pour joueur ${player.name}`);
                 this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
                     player,
-                    newItem: cell.item,
-                    inventory: player.inventory,
+                    item: cell.item,
                     position
                 });
-                // On arrête le mouvement jusqu'à la décision du joueur
                 this.continueMovement = false;
-                return;
             }
         }
-        const fieldType = this.map[position.y][position.x].tile;
-        player.updatePosition(position, fieldType);
+    }
+
+    private _updatePlayerPositionAndNotify(previousPosition: Vec2, newPosition: Vec2, player: Player): void {
+        const fieldType = this.map[newPosition.y][newPosition.x].tile;
+        player.updatePosition(newPosition, fieldType);
         this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
     }
 
