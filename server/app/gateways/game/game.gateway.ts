@@ -73,6 +73,7 @@ export class GameGateway {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         this.server.to(payload.winner.id).emit(FightEvents.Winner, payload.winner);
         this.server.to(payload.loser.id).emit(FightEvents.Loser, payload.loser);
+        game.dropItems(payload.loser.id);
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
         if (payload.winner.wins >= MAX_FIGHT_WINS) {
             this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);

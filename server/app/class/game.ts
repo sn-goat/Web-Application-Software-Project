@@ -18,6 +18,7 @@ import { getLobbyLimit } from '@common/lobby-limits';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { log } from 'console';
 import { Timer } from './timer';
+import { DEFAULT_MOVEMENT_DIRECTIONS } from '@common/player';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -87,6 +88,7 @@ export class Game implements IGame {
 
     removePlayer(playerId: string, message: string): void {
         log(`Player ${playerId} has been removed from the game`);
+        this.dropItems(playerId);
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             return;
@@ -236,6 +238,23 @@ export class Game implements IGame {
         this.pendingEndTurn = false;
         this.currentTurn = (this.currentTurn + 1) % this.players.length;
         this.startTurn();
+    }
+
+    dropItems(playerId: string): void {
+        const player = this.getPlayer(playerId);
+        const items = player.inventory;
+        const playerPosition = player.position;
+        items.forEach((item) => {
+            const directions = DEFAULT_MOVEMENT_DIRECTIONS;
+            for (const direction of directions) {
+                const newX = playerPosition.x + direction.x;
+                const newY = playerPosition.y + direction.y;
+                if (this.map[newY] && this.map[newY][newX] && this.map[newY][newX].item === Item.DEFAULT) {
+                    this.map[newY][newX].item = item;
+                    player.removeItemFromInventory(item);
+                }
+            }
+        });
     }
 
     isPlayerTurn(playerId: string): boolean {
