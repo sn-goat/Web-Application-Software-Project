@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
+import { SharedSocketService } from '@app/services/socket/shared-socket.service';
 import { Vec2 } from '@common/board';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerInput } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
-import { SharedSocketService } from '@app/services/socket/shared-socket.service';
 
 @Injectable({
     providedIn: 'root',

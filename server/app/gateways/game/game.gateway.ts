@@ -1,17 +1,16 @@
+import { Fight } from '@app/class/fight';
+import { Game } from '@app/class/game';
+import { Player } from '@app/class/player';
 import { InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { Fight } from '@app/class/fight';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
 import { MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { Player } from '@app/class/player';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Game } from '@app/class/game';
-import { log } from 'console';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -145,7 +144,6 @@ export class GameGateway {
     handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
-        log(sendingInfo);
         this.server
             .to(payload.accessCode)
             .emit(TurnEvents.DoorStateChanged, { doorPosition: sendingInfo.doorPosition, newDoorState: sendingInfo.newDoorState });
