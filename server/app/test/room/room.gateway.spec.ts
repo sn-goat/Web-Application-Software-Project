@@ -82,6 +82,7 @@ describe('RoomGateway', () => {
             const errorSpy = jest.spyOn(Logger.prototype, 'log');
             const payload = {
                 accessCode: 'room123',
+                name: 'player',
                 playerId: 'player123',
                 message: 'Player was removed',
             };

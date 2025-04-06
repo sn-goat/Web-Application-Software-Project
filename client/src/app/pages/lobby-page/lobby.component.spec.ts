@@ -39,6 +39,7 @@ describe('LobbyComponent', () => {
     const playerServiceMock = {
         isPlayerAdmin: jasmine.createSpy('isPlayerAdmin'),
         getPlayer: jasmine.createSpy('getPlayer').and.returnValue(players[0]),
+        myPlayer: new BehaviorSubject<IPlayer>(players[0]),
     };
 
     const roomServiceMock = {

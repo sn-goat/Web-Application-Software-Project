@@ -7,6 +7,8 @@ import { Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
 import { IPlayer, PlayerInput } from '@common/player';
 import { Subject } from 'rxjs';
+import { Entry } from '@common/journal';
+import { ChatMessage } from '@common/chat';
 
 export class MockSocketService {
     gameRoom: IRoom = {
@@ -33,6 +35,9 @@ export class MockSocketService {
     private endOfGame = new Subject<unknown>();
     private gameStartedError = new Subject<string>();
 
+    private journalSubject = new Subject<Entry[]>();
+    private chatSubject = new Subject<ChatMessage>();
+
     private turnUpdateSubject = new Subject<TurnInfo>();
     private fightInitSubject = new Subject<IFight>();
     private fighterTurnChangedSubject = new Subject<IFight>();
@@ -48,6 +53,14 @@ export class MockSocketService {
 
     onPlayerMoved() {
         return this.playerMovedSubject.asObservable();
+    }
+
+    onJournalEntry() {
+        return this.journalSubject.asObservable();
+    }
+
+    receiveMessageFromServer() {
+        return this.chatSubject.asObservable();
     }
 
     onPlayerRemoved() {

@@ -140,7 +140,7 @@ export class GameGateway {
         game = game.configureGame();
         if (game) {
             this.server.to(accessCode).emit(GameEvents.GameStarted, game);
-            game.startTurn();
+            // game.startTurn();
         } else {
             this.logger.error('Game could not be configured for access code: ' + accessCode);
             client.emit(GameEvents.Error, 'Il vous faut un nombre de joueurs pair pour commencer la partie.');
@@ -152,7 +152,7 @@ export class GameGateway {
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         if (game && game.isPlayerTurn(payload.playerId)) {
-            // game.startTurn(); pas nécessaire ici, car déjà géré par handleGameStart
+            game.startTurn();
         }
     }
 

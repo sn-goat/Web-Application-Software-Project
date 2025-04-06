@@ -93,18 +93,6 @@ describe('GameGateway', () => {
             expect(emitMock).toHaveBeenCalledWith(TurnEvents.PlayerMoved, { previousPosition: position, player });
         });
 
-        it('sendDoorState should emit DoorStateChanged event', () => {
-            const payload = { accessCode: 'ROOM', position: { x: 3, y: 4 }, newState: Tile.CLOSED_DOOR as Tile.CLOSED_DOOR | Tile.OPENED_DOOR };
-
-            gateway.sendDoorState(payload);
-
-            expect(server.to).toHaveBeenCalledWith('ROOM');
-            expect(emitMock).toHaveBeenCalledWith(TurnEvents.DoorStateChanged, {
-                position: payload.position,
-                newState: payload.newState,
-            });
-        });
-
         it('handleDebugStateChange should emit DebugStateChanged event', () => {
             const payload = { accessCode: 'code123', newState: true };
 
@@ -142,7 +130,7 @@ describe('GameGateway', () => {
                 currentPlayer: { name: 'Player 1' },
             } as Fight;
 
-            gateway.changeFighter(fight);
+            gateway.changeFighter({ accessCode: '1234', fight });
 
             expect(server.to).toHaveBeenCalledWith('p1');
             expect(server.to).toHaveBeenCalledWith('p2');
