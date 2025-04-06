@@ -9,7 +9,7 @@ import { SocketReceiverService } from '@app/services/socket/socket-receiver.serv
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, getAvatarName } from '@common/game';
-import { DEFAULT_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
+import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -112,12 +112,20 @@ export class GameService {
     }
 
     isWithinActionRange(cell: Cell): boolean {
-        if (!this.isValidCellForAction(cell)) return false;
+        if (!this.isValidCellForFight(cell) && !this.isValidCellForDoor(cell)) {
+            return false;
+        }
         const playerPos = this.activePlayer.value?.position;
-        if (!playerPos) return false;
+        if (!playerPos) {
+            return false;
+        }
         const actionPos = cell.position;
         const dx = Math.abs(playerPos.x - actionPos.x);
         const dy = Math.abs(playerPos.y - actionPos.y);
+        const player = this.activePlayer.value;
+        if (player && player.inventory.includes(Item.BOW)) {
+            return (dx <= 1 && dy <= 1) && !(dx === 0 && dy === 0);
+        }
         return dx + dy === 1;
     }
 
@@ -252,18 +260,46 @@ export class GameService {
     getItemDescription(item: Item): string {
         return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
     }
-    // TODO: Supprimer la méthode car elle se fais backend
+    
     findPossibleActions(position: Vec2): Set<string> {
         const possibleActions = new Set<string>();
-        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
-        for (const dir of directions) {
+        const player = this.activePlayer.value;
+        if (!player) {
+            return possibleActions;
+        }
+        
+        for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
-                if (this.isValidCellForAction(this.map.value[newPos.y][newPos.x])) {
+            if (
+                newPos.y >= 0 &&
+                newPos.y < this.map.value.length &&
+                newPos.x >= 0 &&
+                newPos.x < this.map.value[0].length
+            ) {
+                const cell = this.map.value[newPos.y][newPos.x];
+                if (this.isValidCellForDoor(cell) || this.isValidCellForFight(cell)) {
                     possibleActions.add(`${newPos.x},${newPos.y}`);
                 }
             }
         }
+        
+        if (player.inventory.includes(Item.BOW)) {
+            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
+                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+                if (
+                    newPos.y >= 0 &&
+                    newPos.y < this.map.value.length &&
+                    newPos.x >= 0 &&
+                    newPos.x < this.map.value[0].length
+                ) {
+                    const cell = this.map.value[newPos.y][newPos.x];
+                    if (this.isValidCellForFight(cell)) {
+                        possibleActions.add(`${newPos.x},${newPos.y}`);
+                    }
+                }
+            }
+        }
+        
         return possibleActions;
     }
 
@@ -285,12 +321,16 @@ export class GameService {
         return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
     }
 
-    private isValidCellForAction(cell: Cell): boolean {
+    private isValidCellForDoor(cell: Cell): boolean {
+        return cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+    }
+
+    private isValidCellForFight(cell: Cell): boolean {
         const myPlayer = this.playerService.getPlayer();
         const defender = this.findDefender(cell.player);
         if (defender) {
             return !defender.team || myPlayer.team !== defender.team;
         }
-        return cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+        return false;
     }
 }

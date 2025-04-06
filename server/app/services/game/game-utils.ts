@@ -6,16 +6,27 @@ import { Avatar, PathInfo } from '@common/game';
 import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, Team } from '@common/player';
 
 export class GameUtils {
-    static isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
-        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
+    static isPlayerCanMakeAction(map: Cell[][], player: Player): boolean {
+        const hasBow = player.inventory.includes(Item.BOW);
+        const position: Vec2 = player.position;
+        const directions: Vec2[] = hasBow ? DIAGONAL_MOVEMENT_DIRECTIONS : DEFAULT_MOVEMENT_DIRECTIONS;
+        
         for (const dir of directions) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
-                if (this.isValidCellForAction(map[newPos.y][newPos.x])) {
+            if (
+                newPos.y >= 0 &&
+                newPos.y < map.length &&
+                newPos.x >= 0 &&
+                newPos.x < map[0].length
+            ) {
+                const targetCell = map[newPos.y][newPos.x];
+                if (this.isValidCellForAction(targetCell)) {
+                    console.log('Player can make action');
                     return true;
                 }
             }
         }
+        console.log('Player can make action');
         return false;
     }
 
