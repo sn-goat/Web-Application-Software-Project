@@ -11,6 +11,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Game } from '@app/class/game';
+import { log } from 'console';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -144,6 +145,7 @@ export class GameGateway {
     handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
+        log(sendingInfo);
         this.server
             .to(payload.accessCode)
             .emit(TurnEvents.DoorStateChanged, { doorPosition: sendingInfo.doorPosition, newDoorState: sendingInfo.newDoorState });
