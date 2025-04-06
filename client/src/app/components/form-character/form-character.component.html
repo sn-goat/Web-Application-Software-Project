@@ -14,9 +14,10 @@
         @if(isCurrentAvatarTaken) {
         <p style="color: red">Avatar déjà sélectionné par un autre joueur</p>
         }
+        <div class="form-content">
         <div class="name-container">
             <label for="player-name">Qui êtes vous ?</label>
-            <input type="text" id="player-name" [(ngModel)]="playerInput.name" placeholder="Enter your name" class="name-input" maxlength="20" />
+            <input type="text" id="player-name" [(ngModel)]="playerInput.name" placeholder="Choisissez un nom" class="name-input" maxlength="20" />
         </div>
         <div class="stat-container">
             <div class="stat-column">
@@ -62,5 +63,6 @@
         <p style="color: red">Veuillez vous diriger vers le menu principal ou soumettre un nouveau code d'accès.</p>
         <button class="close-popup-button" routerLink="/accueil" (click)="onClose()">Retour au menu principal</button>
         }
+        </div>
     </div>
 </div>
