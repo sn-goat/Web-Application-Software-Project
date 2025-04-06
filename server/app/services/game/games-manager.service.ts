@@ -1,18 +1,17 @@
-import { Room } from '@app/class/room';
-import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Game } from '@app/class/game';
 import { Fight } from '@app/class/fight';
+import { Game } from '@app/class/game';
+import { Room } from '@app/class/room';
 import { Board } from '@app/model/database/board';
 import { BoardService } from '@app/services/board/board.service';
-
-const minNumber = 1000;
-const maxNumber = 9000;
+import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class GameManagerService {
     private readonly logger = new Logger(GameManagerService.name);
     private gameRooms: Map<string, Room> = new Map();
+    private readonly minRandomNumber = 1000;
+    private readonly maxRandomNumber = 9000;
 
     constructor(
         private readonly globalEmitter: EventEmitter2,
@@ -54,7 +53,7 @@ export class GameManagerService {
     private generateUniqueAccessCode(): string {
         let code: string;
         do {
-            code = Math.floor(minNumber + Math.random() * maxNumber).toString();
+            code = Math.floor(this.minRandomNumber + Math.random() * this.maxRandomNumber).toString();
         } while (this.gameRooms.has(code));
         return code;
     }

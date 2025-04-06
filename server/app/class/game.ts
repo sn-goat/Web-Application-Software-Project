@@ -1,12 +1,6 @@
-import { Cell, Vec2 } from '@common/board';
-import { Player } from '@app/class/player';
-import { getLobbyLimit } from '@common/lobby-limits';
 import { Fight } from '@app/class/fight';
-import { Avatar, IGame, PathInfo } from '@common/game';
-import { GameUtils } from '@app/services/game/game-utils';
-import { Timer } from './timer';
+import { Player } from '@app/class/player';
 import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -15,9 +9,14 @@ import {
     TimerType,
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
-import { Item, Tile } from '@common/enums';
-import { log } from 'console';
 import { Board } from '@app/model/database/board';
+import { GameUtils } from '@app/services/game/game-utils';
+import { Cell, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
+import { Avatar, IGame, PathInfo } from '@common/game';
+import { getLobbyLimit } from '@common/lobby-limits';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Timer } from './timer';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -84,7 +83,6 @@ export class Game implements IGame {
     }
 
     removePlayer(playerId: string, message: string): void {
-        log(`Player ${playerId} has been removed from the game`);
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             return;
@@ -233,7 +231,6 @@ export class Game implements IGame {
     }
 
     playerAttack(): void {
-        log(`Player ${this.fight.currentPlayer.name} has attacked`);
         const fightResult = this.fight.playerAttack(this.isDebugMode);
         if (fightResult === null) {
             this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
@@ -281,7 +278,6 @@ export class Game implements IGame {
     private checkForEndTurn(player: Player): void {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
         if (this.isPlayerContinueTurn(player, path.size)) {
-            log(`Player ${player.name} can continue turn`);
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {
             this.endTurn();
@@ -293,7 +289,6 @@ export class Game implements IGame {
     }
 
     private isPlayerCanMove(pathLength: number): boolean {
-        log(`Player can move on: ${pathLength}`);
         return pathLength > 0;
     }
 
