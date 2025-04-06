@@ -1,110 +1,110 @@
-// /* eslint-disable @typescript-eslint/no-magic-numbers */
-// import { CommonModule } from '@angular/common';
-// import { ComponentFixture, TestBed } from '@angular/core/testing';
-// import { DEFAULT_FILE_TYPE } from '@app/constants/path';
-// import { PlayerService } from '@app/services/player/player.service';
-// import { PlayerStats } from '@common/player';
-// import { BehaviorSubject, Subscription } from 'rxjs';
-// import { GameMapPlayerDetailedComponent } from './game-map-player-detailed.component';
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+import { CommonModule } from '@angular/common';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DEFAULT_FILE_TYPE } from '@app/constants/path';
+import { PlayerService } from '@app/services/player/player.service';
+import { IPlayer } from '@common/player';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import { GameMapPlayerDetailedComponent } from './game-map-player-detailed.component';
 
-// describe('GameMapPlayerDetailedComponent', () => {
-//     let component: GameMapPlayerDetailedComponent;
-//     let fixture: ComponentFixture<GameMapPlayerDetailedComponent>;
-//     let playerServiceMock: jasmine.SpyObj<PlayerService>;
-//     let myPlayerSubject: BehaviorSubject<PlayerStats | null>;
-//     let unsubscribeSpy: jasmine.Spy;
+describe('GameMapPlayerDetailedComponent', () => {
+    let component: GameMapPlayerDetailedComponent;
+    let fixture: ComponentFixture<GameMapPlayerDetailedComponent>;
+    let playerServiceMock: jasmine.SpyObj<PlayerService>;
+    let myPlayerSubject: BehaviorSubject<IPlayer | null>;
+    let unsubscribeSpy: jasmine.Spy;
 
-//     const mockPlayer: PlayerStats = {
-//         id: '1',
-//         name: 'testUser',
-//         avatar: '1',
-//         life: 100,
-//         attack: 10,
-//         defense: 10,
-//         speed: 5,
-//         attackDice: 'D6',
-//         defenseDice: 'D4',
-//         movementPts: 5,
-//         actions: 2,
-//         wins: 0,
-//         position: { x: 0, y: 0 },
-//         spawnPosition: { x: 0, y: 0 },
-//     };
+    const mockPlayer = {
+        id: '1',
+        name: 'testUser',
+        avatar: '1',
+        life: 100,
+        attackPower: 10,
+        defensePower: 10,
+        speed: 5,
+        attackDice: 'D6',
+        defenseDice: 'D4',
+        movementPts: 5,
+        actions: 2,
+        wins: 0,
+        position: { x: 0, y: 0 },
+        spawnPosition: { x: 0, y: 0 },
+    } as IPlayer;
 
-//     beforeEach(async () => {
-//         // Création d'un BehaviorSubject pour simuler l'émission de myPlayer$
-//         myPlayerSubject = new BehaviorSubject<PlayerStats | null>(mockPlayer);
-//         unsubscribeSpy = jasmine.createSpy('unsubscribe');
+    beforeEach(async () => {
+        // Création d'un BehaviorSubject pour simuler l'émission de myPlayer$
+        myPlayerSubject = new BehaviorSubject<IPlayer | null>(mockPlayer);
+        unsubscribeSpy = jasmine.createSpy('unsubscribe');
 
-//         // On spy sur la méthode unsubscribe afin de vérifier la désinscription (optionnel)
-//         spyOn(Subscription.prototype, 'unsubscribe').and.callFake(() => {
-//             unsubscribeSpy();
-//             return undefined;
-//         });
+        // On spy sur la méthode unsubscribe afin de vérifier la désinscription (optionnel)
+        spyOn(Subscription.prototype, 'unsubscribe').and.callFake(() => {
+            unsubscribeSpy();
+            return undefined;
+        });
 
-//         // Création du mock pour PlayerService avec la propriété myPlayer$
-//         playerServiceMock = jasmine.createSpyObj('PlayerService', [], {
-//             myPlayer: myPlayerSubject.asObservable(),
-//         });
+        // Création du mock pour PlayerService avec la propriété myPlayer$
+        playerServiceMock = jasmine.createSpyObj('PlayerService', [], {
+            myPlayer: myPlayerSubject.asObservable(),
+        });
 
-//         await TestBed.configureTestingModule({
-//             imports: [CommonModule, GameMapPlayerDetailedComponent],
-//             providers: [{ provide: PlayerService, useValue: playerServiceMock }],
-//         }).compileComponents();
-//     });
+        await TestBed.configureTestingModule({
+            imports: [CommonModule, GameMapPlayerDetailedComponent],
+            providers: [{ provide: PlayerService, useValue: playerServiceMock }],
+        }).compileComponents();
+    });
 
-//     beforeEach(() => {
-//         fixture = TestBed.createComponent(GameMapPlayerDetailedComponent);
-//         component = fixture.componentInstance;
-//         fixture.detectChanges();
-//     });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(GameMapPlayerDetailedComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-//     it('should create', () => {
-//         expect(component).toBeTruthy();
-//     });
+    it('should create', () => {
+        expect(component).toBeTruthy();
+    });
 
-//     it('should initialize with constant paths', () => {
-//         expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
-//     });
+    it('should initialize with constant paths', () => {
+        expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
+    });
 
-//     it('should initialize myPlayer and maxHealth during ngOnInit', () => {
-//         // Dès l'initialisation, le subject émet mockPlayer
-//         expect(component.myPlayer).toEqual(mockPlayer);
-//         expect(component.maxHealth).toBe(mockPlayer.life);
-//     });
+    it('should initialize myPlayer and maxHealth during ngOnInit', () => {
+        // Dès l'initialisation, le subject émet mockPlayer
+        expect(component.myPlayer).toEqual(mockPlayer);
+        expect(component.maxHealth).toBe(mockPlayer.life);
+    });
 
-//     it('should update myPlayer and maxHealth when myPlayer$ emits a new value', () => {
-//         const updatedPlayer: PlayerStats = { ...mockPlayer, life: 80 };
-//         myPlayerSubject.next(updatedPlayer);
-//         fixture.detectChanges();
-//         expect(component.myPlayer).toEqual(updatedPlayer);
-//         expect(component.maxHealth).toBe(updatedPlayer.life);
-//     });
+    it('should update myPlayer and maxHealth when myPlayer$ emits a new value', () => {
+        const updatedPlayer: IPlayer = { ...mockPlayer, life: 80 };
+        myPlayerSubject.next(updatedPlayer);
+        fixture.detectChanges();
+        expect(component.myPlayer).toEqual(updatedPlayer);
+        expect(component.maxHealth).toBe(updatedPlayer.life);
+    });
 
-//     it('should handle case where player is undefined during initialization', async () => {
-//         const emptyPlayerSubject = new BehaviorSubject<PlayerStats | null>(null);
-//         const newPlayerServiceMock = jasmine.createSpyObj('PlayerService', [], {
-//             myPlayer: emptyPlayerSubject.asObservable(),
-//         });
+    it('should handle case where player is undefined during initialization', async () => {
+        const emptyPlayerSubject = new BehaviorSubject<IPlayer | null>(null);
+        const newPlayerServiceMock = jasmine.createSpyObj('PlayerService', [], {
+            myPlayer: emptyPlayerSubject.asObservable(),
+        });
 
-//         TestBed.resetTestingModule();
-//         await TestBed.configureTestingModule({
-//             imports: [CommonModule, GameMapPlayerDetailedComponent],
-//             providers: [{ provide: PlayerService, useValue: newPlayerServiceMock }],
-//         }).compileComponents();
+        TestBed.resetTestingModule();
+        await TestBed.configureTestingModule({
+            imports: [CommonModule, GameMapPlayerDetailedComponent],
+            providers: [{ provide: PlayerService, useValue: newPlayerServiceMock }],
+        }).compileComponents();
 
-//         const newFixture = TestBed.createComponent(GameMapPlayerDetailedComponent);
-//         newFixture.detectChanges();
-//         const newComponent = newFixture.componentInstance;
-//         expect(newComponent.myPlayer).toBeNull();
-//         expect(newComponent.maxHealth).toBe(0);
-//     });
+        const newFixture = TestBed.createComponent(GameMapPlayerDetailedComponent);
+        newFixture.detectChanges();
+        const newComponent = newFixture.componentInstance;
+        expect(newComponent.myPlayer).toBeNull();
+        expect(newComponent.maxHealth).toBe(0);
+    });
 
-//     it('should update maxHealth when a valid player is emitted', () => {
-//         const updatedPlayer: PlayerStats = { ...mockPlayer, life: 75 };
-//         myPlayerSubject.next(updatedPlayer);
-//         fixture.detectChanges();
-//         expect(component.myPlayer).toEqual(updatedPlayer);
-//         expect(component.maxHealth).toBe(75);
-//     });
-// });
+    it('should update maxHealth when a valid player is emitted', () => {
+        const updatedPlayer: IPlayer = { ...mockPlayer, life: 75 };
+        myPlayerSubject.next(updatedPlayer);
+        fixture.detectChanges();
+        expect(component.myPlayer).toEqual(updatedPlayer);
+        expect(component.maxHealth).toBe(75);
+    });
+});

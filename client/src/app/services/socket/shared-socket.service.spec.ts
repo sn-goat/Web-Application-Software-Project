@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-
 import { SharedSocketService } from './shared-socket.service';
 
 describe('SharedSocketService', () => {

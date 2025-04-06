@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
@@ -59,7 +58,6 @@ export class GameService {
         });
 
         this.socketReceiver.onDoorStateChanged().subscribe((door) => {
-            console.log('Door state changed:', door);
             const newMap = this.map.value;
             newMap[door.doorPosition.y][door.doorPosition.x].tile = door.newDoorState;
             this.map.next(newMap);

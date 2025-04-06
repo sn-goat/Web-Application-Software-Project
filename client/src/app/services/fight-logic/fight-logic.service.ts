@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
+import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Cell } from '@common/board';
 import { Avatar, IFight } from '@common/game';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
-import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 
 @Injectable({
     providedIn: 'root',

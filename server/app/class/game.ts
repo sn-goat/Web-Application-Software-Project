@@ -16,7 +16,6 @@ import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, PathInfo } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { log } from 'console';
 import { Timer } from './timer';
 
 export class Game implements IGame {
@@ -84,7 +83,6 @@ export class Game implements IGame {
     }
 
     removePlayer(playerId: string, message: string): void {
-        log(`Player ${playerId} has been removed from the game`);
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             return;
@@ -233,7 +231,6 @@ export class Game implements IGame {
     }
 
     playerAttack(): void {
-        log(`Player ${this.fight.currentPlayer.name} has attacked`);
         const fightResult = this.fight.playerAttack(this.isDebugMode);
         if (fightResult === null) {
             this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
@@ -281,7 +278,6 @@ export class Game implements IGame {
     private checkForEndTurn(player: Player): void {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
         if (this.isPlayerContinueTurn(player, path.size)) {
-            log(`Player ${player.name} can continue turn`);
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {
             this.endTurn();
@@ -293,7 +289,6 @@ export class Game implements IGame {
     }
 
     private isPlayerCanMove(pathLength: number): boolean {
-        log(`Player can move on: ${pathLength}`);
         return pathLength > 0;
     }
 
