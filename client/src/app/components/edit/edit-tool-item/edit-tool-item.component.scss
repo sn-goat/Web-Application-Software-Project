@@ -37,7 +37,7 @@ img.item-moved {
 
 .tooltip {
     position: absolute;
-    bottom: calc(100% + 5px); 
+    bottom: calc(100% + 5px);
     left: 50%;
     transform: translateX(-50%);
     background-color: #1a1625;
@@ -62,7 +62,6 @@ img.item-moved {
     overflow-wrap: break-word;
     overflow: hidden;
     text-align: center;
-
 }
 
 .object:hover .tooltip,
