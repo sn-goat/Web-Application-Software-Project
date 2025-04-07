@@ -46,7 +46,7 @@ describe('GameUtils Comprehensive Tests', () => {
 
         it('should return false if no neighboring cell is valid for action', () => {
             const board = createBoard(3, 3);
-            const mockPlayer = { position: { x: 1, y: 1 } } as Player;
+            const mockPlayer = { position: { x: 1, y: 1 }, inventory: [] } as Player;
             const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
             expect(result).toBe(false);
         });

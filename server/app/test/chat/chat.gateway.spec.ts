@@ -43,6 +43,7 @@ describe('ChatGateway', () => {
             fleeAttempts: 2,
             currentLife: 10,
             diceResult: 5,
+            inventory: [],
         };
 
         const module: TestingModule = await Test.createTestingModule({

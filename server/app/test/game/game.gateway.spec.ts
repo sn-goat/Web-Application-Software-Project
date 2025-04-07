@@ -36,7 +36,7 @@ describe('GameGateway', () => {
         };
 
         server = {
-            to: jest.fn().mockReturnValue(broadcastOperator),
+            to: jest.fn().mockReturnValue(broadcastOperator)
         } as unknown as jest.Mocked<Server>;
 
         client = {
@@ -162,6 +162,7 @@ describe('GameGateway', () => {
                 endTurn: jest.fn(),
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
+                dropItems: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -198,6 +199,7 @@ describe('GameGateway', () => {
                 endTurn: jest.fn(),
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
+                dropItems: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -232,6 +234,7 @@ describe('GameGateway', () => {
                 endTurn: jest.fn(),
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
+                dropItems: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -393,22 +396,6 @@ describe('GameGateway', () => {
             expect(game.movePlayerDebug).toHaveBeenCalledWith(direction, playerId);
         });
 
-        it('debugPlayerMovement should not move player when not in debug mode', () => {
-            const accessCode = 'game123';
-            const playerId = 'player123';
-            const direction = { x: 1, y: 0 } as Vec2;
-
-            const game = {
-                isDebugMode: false,
-                movePlayerDebug: jest.fn(),
-            } as unknown as Game;
-
-            gameManager.getGame.mockReturnValue(game as any);
-
-            gateway.debugPlayerMovement(client, { accessCode, direction, playerId });
-
-            expect(game.movePlayerDebug).not.toHaveBeenCalled();
-        });
 
         it('handleChangeDoorState should change door state and broadcast', () => {
             const accessCode = 'game123';

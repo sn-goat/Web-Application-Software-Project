@@ -51,6 +51,18 @@ describe('GameMapComponent', () => {
         gameMapServiceMock = jasmine.createSpyObj('GameMapService', ['getGameMap']);
         gameMapServiceMock.getGameMap.and.returnValue(boardSubject);
 
+        playerServiceMock = {
+            isActivePlayer: new BehaviorSubject(false),
+            path: new BehaviorSubject<Map<string, PathInfo> | null>(null),
+            sendMove: jasmine.createSpy('sendMove'),
+            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({ 
+                id: 'player1', 
+                position: { x: 5, y: 5 },
+                spawnPosition: { x: 5, y: 5 },
+                inventory: [] 
+            })
+        };
+
         // Création des mocks pour PlayerService, GameService et FightLogicService
         playerServiceMock = {
             isActivePlayer: new BehaviorSubject(false),

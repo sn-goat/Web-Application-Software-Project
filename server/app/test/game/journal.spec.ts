@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { JournalService } from '@app/services/journal/journal.service';
 import { IRoom } from '@common/game';
 import { JournalEvent } from '@common/game.gateway.events';
 import { FightJournal, FightMessage, GameMessage } from '@common/journal';
 import { IPlayer, Team } from '@common/player';
 import { Server } from 'socket.io';
-import { JournalService } from '@app/services/journal/journal.service';
 
 describe('JournalService', () => {
     let journalService: JournalService;
@@ -39,6 +39,7 @@ describe('JournalService', () => {
             fleeAttempts: 2,
             currentLife: 10,
             diceResult: 5,
+            inventory: [],
         };
 
         const player2: IPlayer = {
@@ -60,6 +61,7 @@ describe('JournalService', () => {
             fleeAttempts: 2,
             currentLife: 8,
             diceResult: 3,
+            inventory: [],
         };
 
         mockRoom = {
