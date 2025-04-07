@@ -44,6 +44,7 @@ export class Fight implements IFight {
         const defender = this.getOpponent(this.currentPlayer.id);
         const isDefenderDead = attacker.attack(isDebugMode, defender);
         if (isDefenderDead) {
+            defender.losses += 1;
             attacker.wins += 1;
             return { winner: attacker, loser: defender };
         }

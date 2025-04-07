@@ -1,5 +1,5 @@
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Tile, Item } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
     DEFAULT_ACTIONS,
@@ -32,6 +32,13 @@ export class Player implements IPlayer {
     diceResult: number;
     team?: Team;
 
+    takenDamage: number;
+    givenDamage: number;
+    itemsPicked: Set<Item>;
+    tilesVisited: Set<Vec2>;
+    losses: number;
+    fleeSuccess: number;
+
     private readonly dice4 = 4;
     private readonly dice6 = 6;
     private readonly minDiceValue = 1;
@@ -56,6 +63,9 @@ export class Player implements IPlayer {
     attemptFlee(): boolean {
         this.fleeAttempts -= 1;
         const isFleeSuccessful = Math.random() < this.fleeThreshold;
+        if (isFleeSuccessful) {
+            this.fleeSuccess += 1;
+        }
         return isFleeSuccessful;
     }
 
@@ -81,7 +91,9 @@ export class Player implements IPlayer {
     attack(isDebugMode: boolean, playerDefender: Player): boolean {
         this.currentDamage = Math.max(this.initiateAttack(isDebugMode) - playerDefender.initiateDefence(isDebugMode), 0);
         playerDefender.currentLife = Math.max(playerDefender.currentLife - this.currentDamage, 0);
-        return playerDefender.currentLife === 0;
+        playerDefender.takenDamage += this.currentDamage;
+        this.givenDamage += this.currentDamage;
+        return !playerDefender.currentLife;
     }
 
     updatePosition(position: Vec2, fieldType: Tile): void {

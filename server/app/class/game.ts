@@ -13,12 +13,14 @@ import { Board } from '@app/model/database/board';
 import { GameUtils } from '@app/services/game/game-utils';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, IGame, PathInfo } from '@common/game';
+import { Avatar, IGame, PathInfo, GameStats } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Timer } from './timer';
+import { IPlayer } from '@common/player';
+import { Stats } from '@common/stats';
 
-export class Game implements IGame {
+export class Game implements IGame, GameStats {
     internalEmitter: EventEmitter2;
     map: Cell[][];
     players: Player[];
@@ -32,9 +34,24 @@ export class Game implements IGame {
     pendingEndTurn: boolean;
     maxPlayers: number;
 
+    gameDuration: string;
+    tilesVisited: Set<Vec2>;
+    doorsHandled: Set<Vec2>;
+    flagsCaptured: Set<string>;
+    disconnectedPlayers: IPlayer[];
+    tilesNumber: number;
+    doorsNumber: number;
+
+    stats: Stats;
+
+    startOfGame: Date;
+    endOfGame: Date;
+
     constructor(internalEmitter: EventEmitter2, board: Board) {
         this.internalEmitter = internalEmitter;
         this.map = board.board;
+        this.tilesNumber = board.size * board.size;
+        this.doorsNumber = this.getDoorsNumber(board.board);
         this.players = [];
         this.currentTurn = 0;
         this.hasStarted = false;
@@ -88,7 +105,16 @@ export class Game implements IGame {
             return;
         }
         const player = this.players.splice(index, 1)[0];
+        this.disconnectedPlayers.push(player);
         this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { name: player.name, playerId, message });
+    }
+
+    startGame(): void {
+        this.startOfGame = new Date();
+    }
+
+    endGame(): void {
+        this.endOfGame = new Date();
     }
 
     getMapSize(): number {
@@ -132,6 +158,9 @@ export class Game implements IGame {
     processPath(pathInfo: PathInfo, playerId: string): void {
         const player = this.getPlayer(playerId);
         if (player && !this.pendingEndTurn) {
+            pathInfo.path.forEach((pos) => {
+                player.tilesVisited.add(pos);
+            });
             this.movementInProgress = true;
             let index = 0;
             const path = pathInfo.path;
@@ -201,6 +230,7 @@ export class Game implements IGame {
 
     changeDoorState(doorPosition: Vec2, playerId: string): { doorPosition: Vec2; newDoorState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR } {
         const door = this.map[doorPosition.y][doorPosition.x];
+        this.doorsHandled.add(doorPosition);
         const player = this.getPlayer(playerId);
         door.tile = door.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
         this.decrementAction(player);
@@ -256,6 +286,12 @@ export class Game implements IGame {
 
     endFight(): void {
         this.fight = new Fight(this.internalEmitter);
+    }
+
+    private getDoorsNumber(map: Cell[][]): number {
+        return map.reduce((count, row) => {
+            return count + row.filter((cell) => cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR).length;
+        }, 0);
     }
 
     private movePlayerToSpawn(player: Player): void {

@@ -17,6 +17,21 @@ export interface IGame {
     isCTF: boolean;
 }
 
+export interface GameStats {
+    gameDuration: string;
+    tilesVisitedPercentage?: number;
+    tilesVisited?: Set<Vec2>;
+    doorsHandled?: Set<Vec2>;
+    doorsHandledPercentage?: number;
+    flagsCaptured?: Set<string>;
+    flagsCapturedCount?: number;
+    disconnectedPlayers: IPlayer[];
+    tilesNumber: number;
+    doorsNumber: number;
+    startOfGame?: Date;
+    endOfGame?: Date;
+}
+
 export interface GameFormData {
     name: string;
     description: string;

@@ -1,4 +1,5 @@
 import { Vec2 } from './board';
+import { Item } from './enums';
 
 export interface PlayerInput {
     name: string,
@@ -41,13 +42,27 @@ export interface GameStats {
     spawnPosition: Vec2;
 }
 
+export interface PlayerStats {
+    name: string;
+    takenDamage: number;
+    givenDamage: number;
+    itemsPicked?: Set<Item>;
+    itemsPickedCount?: number;
+    tilesVisited?: Set<Vec2>;
+    tilesVisitedPercentage?: number;
+    wins: number;
+    losses: number;
+    fleeSuccess: number; 
+    totalFights?: number;
+}
+
 export interface FightInfo {
     fleeAttempts: number;
     currentLife: number;
     diceResult: number;
 }
 
-export type IPlayer = PlayerInfo & PlayerAttributes & GameStats & FightInfo;
+export type IPlayer = PlayerInfo & PlayerAttributes & GameStats & FightInfo & PlayerStats;
 
 export const DEFAULT_ATTACK_VALUE = 4;
 export const ATTACK_ICE_DECREMENT = 2;
