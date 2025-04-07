@@ -1,55 +1,82 @@
-<div class="map-list-container">
-    @if(isLoading) {
-    <div class="circ">
-        <div class="load">Attente . . .</div>
-        <div class="hands"></div>
-        <div class="body"></div>
-        <div class="head">
-            <div class="eye"></div>
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polytopia - Administration Royale</title>
+
+        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+    </head>
+
+    <body>
+        <div class="admin-container" style="background: url('assets/backgrounds/maps.gif') no-repeat center center; background-size: cover">
+            <app-header-bar></app-header-bar>
+
+            @if(isCreationPage) {
+            <h1 class="medieval-title">Création de Parite</h1>
+            }@else {
+            <h1 class="medieval-title">Administration des Cartes</h1>
+            }
+
+            <main class="main-content">
+                <div class="map-list-container">
+                    @if(isLoading) {
+                    <div class="empty-state">
+                        <p class="medieval-title">Aucunes parties trouvées</p>
+                    </div>
+
+                    } @if(mapsLoaded) {
+                    <div class="search-bar">
+                        <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher une carte..." class="search-input" />
+                        <div class="filter-sort">
+                            <select [(ngModel)]="sortBy" class="sort-select">
+                                <option value="updatedAt">Dernière mise à jour</option>
+                                <option value="name">Nom</option>
+                                <option value="size">Taille</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-container">
+                        @for (map of getFilteredAndSortedItems(); track map) {
+                        <app-map-card
+                            [map]="map"
+                            [isCreationPage]="isCreationPage"
+                            (click)="onDivClick(map)"
+                            (edit)="onEdit($event)"
+                            (delete)="onDelete($event)"
+                            (toggleVisibility)="toggleVisibility($event)"
+                        >
+                        </app-map-card>
+                        } @if (!isCreationPage) {
+                        <div class="list-item new-map-card" (click)="createNewMap()">
+                            <div class="add-icon">+</div>
+                            <p class="add-text">Créer une carte</p>
+                        </div>
+                        } @else if (isCreationPage && isAllMapsHidden()) {
+                        <div class="empty-state">
+                            <p>Aucunes partie disponible, changez la visibilité de vos parties</p>
+                        </div>
+                        }
+                    </div>
+                    } @else {
+
+                    @if (!isCreationPage) {
+                    <div class="list-item new-map-card" (click)="createNewMap()">
+                        <div class="add-icon">+</div>
+                        <p class="add-text">Créer une carte</p>
+                    </div>
+                    } }
+                </div>
+            </main>
+
+            <footer class="footer-item">
+                @if(isCreationPage) {
+                <p>Interface de création de jeu royale</p>
+                }@else {
+                <p>Interface d'administration royale</p>
+                }
+            </footer>
         </div>
-    </div>
-    } @if(mapsLoaded) {
-    <div class="search-bar">
-        <app-header-bar></app-header-bar>
-        <input type="text" [(ngModel)]="searchQuery" placeholder="Search..." class="search-input" />
-        <div class="filter-sort">
-            <select [(ngModel)]="sortBy" class="sort-select">
-                <option value="updatedAt">Date de dernière mise à jour</option>
-                <option value="name">Nom</option>
-                <option value="size">Taille</option>
-            </select>
-        </div>
-    </div>
-    <div class="grid-container">
-        @for (map of getFilteredAndSortedItems(); track map) {
-        <app-map-card
-            [map]="map"
-            [isCreationPage]="isCreationPage"
-            (click)="onDivClick(map)"
-            (edit)="onEdit($event)"
-            (delete)="onDelete($event)"
-            (toggleVisibility)="toggleVisibility($event)"
-        >
-        </app-map-card>
-        } @if (!isCreationPage) {
-        <div class="list-item new-map-card" (click)="createNewMap()">
-            <div class="add-icon">+</div>
-            <p class="add-text">Créer une partie</p>
-        </div>
-        } @else if (isCreationPage && isAllMapsHidden()) {
-        <div class="empty-state">
-            <p>Aucunes partie disponible, changez la visibilité de vos parties</p>
-        </div>
-        }
-    </div>
-    } @else {
-    <div class="empty-state">
-        <p>Aucunes parties trouvées</p>
-    </div>
-    @if (!isCreationPage) {
-    <div class="list-item new-map-card" (click)="createNewMap()">
-        <div class="add-icon">+</div>
-        <p class="add-text">Créer une partie</p>
-    </div>
-    } }
-</div>
+    </body>
+</html>

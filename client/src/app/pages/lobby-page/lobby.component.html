@@ -10,9 +10,7 @@
         <button (click)="disconnect()">Disconnect</button>
 
         @if (isAdmin) {
-        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">
-            Démarrer partie!
-        </button>
+        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">Démarrer partie!</button>
         }
     </div>
 
@@ -34,11 +32,12 @@
         </ul>
     </div>
 
-    <div class="chat-box">
+    <!-- <div class="chat-box">
         <h2>Zone de chat</h2>
         <div class="chat-messages">
             <div class="message"><strong>[Admin]</strong>: Bonjour à tous!</div>
         </div>
         <input type="text" placeholder="Tapez votre message..." disabled />
-    </div>
+    </div> -->
+    <app-chat></app-chat>
 </div>

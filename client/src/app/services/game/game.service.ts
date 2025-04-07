@@ -9,6 +9,7 @@ import { SocketReceiverService } from '@app/services/socket/socket-receiver.serv
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, getAvatarName } from '@common/game';
+import { Entry } from '@common/journal';
 import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 
@@ -22,6 +23,7 @@ export class GameService {
     activePlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    journalEntries: BehaviorSubject<Entry[]> = new BehaviorSubject<Entry[]>([]);
 
     private organizerId: string = '';
     private dialog = inject(MatDialog);
@@ -97,6 +99,9 @@ export class GameService {
             newMap[pos.y][pos.x].item = data.item;
             this.map.next(newMap);
             console.log(`Map mise à jour : inventory of player ${data.player.name} est mis à jour`);
+        });
+        this.socketReceiver.onJournalEntry().subscribe((entry) => {
+            this.journalEntries.next([...this.journalEntries.getValue(), entry]);
         });
     }
 

@@ -81,6 +81,7 @@ const createDummyPlayer = (id: string): Player => {
         updatePosition: jest.fn(),
         attack: jest.fn(),
         attemptFlee: jest.fn(),
+        name: 'DummyPlayer',
     } as unknown as Player;
 };
 
@@ -150,7 +151,7 @@ describe('Game', () => {
             const emitSpy = jest.spyOn(emitter, 'emit');
             game.removePlayer('p1', 'bye');
             expect(game.players).toHaveLength(1);
-            expect(emitSpy).toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, 'p1', 'bye');
+            expect(emitSpy).toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, { name: player1.name, playerId: 'p1', message: 'bye' });
         });
 
         it('removePlayer should do nothing if player not found', () => {

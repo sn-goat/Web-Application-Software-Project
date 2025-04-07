@@ -16,7 +16,7 @@ export enum InternalGameEvents {
 
 export enum InternalTurnEvents {
     Move = 'playerMove',
-    BroadcastDoor = 'doorBroadcast',
+    // BroadcastDoor = 'doorBroadcast', never used
     Update = 'updateTurn',
     Start = 'startTurn',
     ChangeTurn = 'ChangeTurn',
@@ -36,4 +36,6 @@ export enum InternalFightEvents {
     Init = 'initFight',
     ChangeFighter = 'changeFighter',
     End = 'endFight',
+    Attack = 'attack',
+    Flee = 'flee',
 }

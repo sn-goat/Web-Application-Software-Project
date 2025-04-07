@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SharedSocketService } from '@app/services/socket/shared-socket.service';
 import { Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
+import { ChatEvents } from '@common/chat.gateway.events';
 import { Item } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
@@ -70,7 +72,6 @@ export class SocketEmitterService {
     }
 
     debugMove(direction: Vec2, playerId: string) {
-        console.log('SOCKET: Debug move', direction, playerId);
         this.socket.emit(TurnEvents.DebugMove, { accessCode: this.accessCode, direction, playerId });
     }
 
@@ -96,5 +97,8 @@ export class SocketEmitterService {
 
     inventoryChoice(payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string }): void {
         this.socket.emit(TurnEvents.InventoryChoice, payload);
+    }
+    sendMessageToServer(message: ChatMessage) {
+        this.socket.emit(ChatEvents.RoomMessage, message);
     }
 }

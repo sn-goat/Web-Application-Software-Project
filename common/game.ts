@@ -32,8 +32,8 @@ export interface IFight {
     currentPlayer: IPlayer;
 }
 
-export const ASSET_PATH = './assets/portraits/portrait';
-export const ASSET_EXT = '.png';
+export const ASSET_PATH = './assets/character-animations/portrait';
+export const ASSET_EXT = '.gif';
 export const ACCESS_CODE_REGEX = /^\d{4}$/;
 
 export enum Avatar {

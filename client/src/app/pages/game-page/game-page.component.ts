@@ -11,6 +11,7 @@ import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-playe
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
 import { ItemPopup } from '@app/components/game/item-popup/item-popup.component';
+import { PopupComponent } from '@app/components/popup/popup.component';
 import { Alert } from '@app/constants/enums';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
@@ -33,6 +34,7 @@ import { firstValueFrom, Subscription, timer } from 'rxjs';
         HeaderBarComponent,
         CommonModule,
         GameFightInterfaceComponent,
+        PopupComponent,
     ],
     templateUrl: './game-page.component.html',
     styleUrls: ['./game-page.component.scss'],
@@ -44,6 +46,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     showChat = false;
     showInfo = false;
     debugMode = false;
+    popupVisible = false;
 
     private readonly endGameTimeoutInS = 5000;
     private subscriptions: Subscription[] = [];
@@ -125,7 +128,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     toggleChat() {
-        this.showChat = !this.showChat;
+        this.popupVisible = !this.popupVisible;
     }
 
     ngOnDestroy(): void {

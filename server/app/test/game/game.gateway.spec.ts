@@ -7,6 +7,7 @@ import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { GameGateway } from '@app/gateways/game/game.gateway';
 import { GameManagerService } from '@app/services/game/games-manager.service';
+import { JournalService } from '@app/services/journal/journal.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
@@ -18,6 +19,7 @@ import { BroadcastOperator, Server, Socket } from 'socket.io';
 describe('GameGateway', () => {
     let gateway: GameGateway;
     let server: jest.Mocked<Server>;
+    let journalService: jest.Mocked<JournalService>;
     let gameManager: jest.Mocked<GameManagerService>;
     let emitMock: jest.Mock;
     let broadcastOperator: Partial<BroadcastOperator<any, any>>;
@@ -51,11 +53,16 @@ describe('GameGateway', () => {
             getRoom: jest.fn(),
         } as unknown as jest.Mocked<GameManagerService>;
 
+        journalService = {
+            dispatchEntry: jest.fn(),
+        } as unknown as jest.Mocked<JournalService>;
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GameGateway,
                 { provide: GameManagerService, useValue: gameManager },
                 { provide: Logger, useValue: new Logger() },
+                { provide: JournalService, useValue: journalService },
             ],
         }).compile();
 
@@ -128,10 +135,24 @@ describe('GameGateway', () => {
             expect(emitMock).toHaveBeenCalledWith(TurnEvents.PlayerTurn, { player, path });
         });
 
+        it('changeFighter should emit ChangeFighter event to both players', () => {
+            const fight1 = {
+                player1: { id: 'p1', getDamage: () => 5 },
+                player2: { id: 'p2', getDamage: () => 5 },
+                currentPlayer: { name: 'Player 1' },
+            } as Fight;
+
+            gateway.changeFighter({ accessCode: '1234', fight: fight1 });
+
+            expect(server.to).toHaveBeenCalledWith('p1');
+            expect(server.to).toHaveBeenCalledWith('p2');
+            expect(emitMock).toHaveBeenCalledWith(FightEvents.ChangeFighter, fight1);
+        });
+
         it('manageEndFight should emit appropriate events based on win state', () => {
             // Setup
-            const winner = { id: 'w1', wins: 3, getDamage: () => 5 } as unknown as Player;
-            const loser = { id: 'l1', getDamage: () => 5 } as unknown as Player;
+            const winner = { id: 'w1', wins: 3, getDamage: () => 5 } as Player;
+            const loser = { id: 'l1', getDamage: () => 5 } as Player;
             const accessCode = 'fight123';
             const players = [winner, loser];
 
@@ -166,8 +187,8 @@ describe('GameGateway', () => {
 
         it('manageEndFight should end turn when loser is current player', () => {
             // Setup
-            const winner = { id: 'w1', wins: 1, getDamage: () => 5 } as unknown as Player; // Not enough wins yet
-            const loser = { id: 'l1', getDamage: () => 5 } as unknown as Player;
+            const winner = { id: 'w1', wins: 1, getDamage: () => 5 } as Player; // Not enough wins yet
+            const loser = { id: 'l1', getDamage: () => 5 } as Player;
             const accessCode = 'fight123';
             const players = [winner, loser];
 
@@ -200,8 +221,8 @@ describe('GameGateway', () => {
 
         it('manageEndFight should resume timer and decrement action when winner continues', () => {
             // Setup
-            const winner = { id: 'w1', wins: 1, getDamage: () => 5 } as unknown as Player;
-            const loser = { id: 'l1', getDamage: () => 5 } as unknown as Player;
+            const winner = { id: 'w1', wins: 1, getDamage: () => 5 } as Player;
+            const loser = { id: 'l1', getDamage: () => 5 } as Player;
             const accessCode = 'fight123';
             const players = [winner, loser];
 

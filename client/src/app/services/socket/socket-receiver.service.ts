@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
+import { ChatEvents } from '@common/chat.gateway.events';
 import { Item, Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
-import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, JournalEvent, TurnEvents } from '@common/game.gateway.events';
+import { Entry } from '@common/journal';
 import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Observable } from 'rxjs';
@@ -197,6 +200,14 @@ export class SocketReceiverService {
         });
     }
 
+    onJournalEntry(): Observable<Entry> {
+        return new Observable((observer) => {
+            this.socket.on(JournalEvent.Add, (entry) => {
+                observer.next(entry);
+            });
+        });
+    }
+
     onWinner(): Observable<IPlayer> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Winner, (winner) => {
@@ -216,7 +227,6 @@ export class SocketReceiverService {
     onItemCollected(): Observable<{ player: IPlayer; position: Vec2 }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer; position: Vec2 }) => {
-                console.log('[SocketReceiver] Item collected');
                 observer.next(data);
             });
         });
@@ -233,7 +243,6 @@ export class SocketReceiverService {
     onInventoryFull(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.InventoryFull, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
-                console.log('[SocketReceiver] Inventory full');
                 observer.next(data);
             });
         });
@@ -243,8 +252,14 @@ export class SocketReceiverService {
     onMapUpdate(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.MapUpdate, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
-                console.log('[SocketReceiver] Map updated');
                 observer.next(data);
+            });
+        });
+    }
+    receiveMessageFromServer(): Observable<ChatMessage> {
+        return new Observable((observer) => {
+            this.socket.on(ChatEvents.RoomMessage, (message: ChatMessage) => {
+                observer.next(message);
             });
         });
     }

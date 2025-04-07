@@ -56,3 +56,9 @@ export enum FightEvents {
 
     // FailedFlee = 'failedFlee',
 }
+
+export enum JournalEvent {
+    Add = 'addJournalEntry',
+    Clear = 'clearJournal',
+}
+

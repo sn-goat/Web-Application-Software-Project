@@ -36,7 +36,7 @@ describe('MainPageComponent', () => {
     });
 
     it('should initialize with correct game logo path', () => {
-        expect(component.gameLogoPath).toContain('/assets/POLYTOPIA_game_logo.png');
+        expect(component.gameLogoPath).toContain('/assets/logo.png');
     });
 
     it('should initialize with gameLogoError as false', () => {
@@ -65,13 +65,13 @@ describe('MainPageComponent', () => {
 
     it('should render title in the template', () => {
         const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.textContent).toContain('POLYTOPIA');
+        expect(compiled.textContent).toContain('Polytopiennes');
     });
 
     it('should render game logo with correct src', () => {
         const compiled = fixture.nativeElement as HTMLElement;
         const img = compiled.querySelector('img');
-        expect(img?.src).toContain('/assets/POLYTOPIA_game_logo.png');
+        expect(img?.src).toContain('/assets/logo.png');
     });
 
     it('should render team members list', () => {
