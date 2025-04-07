@@ -1,25 +1,31 @@
-@if (!showCharacterForm)
-{
-    <app-header-bar></app-header-bar>
-    <div class="container">
-        <h1>Rejoindre une salle de jeu</h1>
-        <label for="code">Code d'accès :</label>
-        <input
-            id="code"
-            [(ngModel)]="accessCode"
-            placeholder="Entrez le code d'accès"
-            (input)="validateCode()"
-        />
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polytopia - Joindre une salle</title>
 
-        @if(!isValidCode && accessCode.length > 0){<p class="error">
-            Le code doit contenir exactement 4 chiffres.
-        </p>}
+        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="background-gif" style="background-image: url('assets/backgrounds/lobby.gif')"></div>
+            <h1 class="medieval-title">Rejoignez une salle</h1>
+            @if (!showCharacterForm) {
+            <app-header-bar></app-header-bar>
+            <div class="container">
+                <label for="code">Code d'accès :</label>
+                <input id="code" [(ngModel)]="accessCode" placeholder="Entrez le code d'accès" (input)="validateCode()" />
 
-        <button (click)="joinRoom()" [disabled]="!isValidCode">Rejoindre</button>
+                @if(!isValidCode && accessCode.length > 0){
+                <p class="error">Le code doit contenir exactement 4 chiffres.</p>
+                }
 
-        <p>{{ joinResult }}</p>
-    </div>
-}
-@else {
-    <app-form-character [accessCode]="accessCode" (closePopup)="closeCharacterForm()"></app-form-character>
-}
+                <button (click)="joinRoom()" [disabled]="!isValidCode">Rejoindre</button>
+
+                <p>{{ joinResult }}</p>
+            </div>
+            } @else {
+            <app-form-character [accessCode]="accessCode" (closePopup)="closeCharacterForm()"></app-form-character>
+            }
+    </body>
+</html>

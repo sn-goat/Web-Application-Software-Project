@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { IPlayer } from '@common/player';
+import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 
 @Component({
     selector: 'app-chat',
@@ -10,7 +10,9 @@ import { IPlayer } from '@common/player';
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
-export class ChatComponent {
+export class ChatComponent implements AfterViewChecked {
+    @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
+
     newMessage: string = '';
     myPlayer: IPlayer | null = null;
 
@@ -21,6 +23,16 @@ export class ChatComponent {
         this.playerService.myPlayer.subscribe((player) => {
             this.myPlayer = player;
         });
+    }
+
+    ngAfterViewChecked(): void {
+        this.scrollToBottom();
+    }
+
+    scrollToBottom(): void {
+        if (this.scrollAnchor) {
+            this.scrollAnchor.nativeElement.scrollIntoView({ behavior: 'smooth' });
+        }
     }
 
     sendMessage(): void {

@@ -1,17 +1,32 @@
 <div class="chat-container">
-    <div class="chat-history">
+    <div class="chat-history" #chatHistory>
         @if(chatService.chatHistory().length > 0) { @for(message of chatService.chatHistory(); track message) {
         <div class="chat-message">
-            <span class="chat-sender">{{ message.sender.name }}</span>
-            <span class="chat-timestamp">{{ message.timestamp }}</span>
+            <div class="chat-message-header">
+                <span class="chat-sender">{{ message.sender.name }}</span>
+                <span class="chat-timestamp">{{ message.timestamp }}</span>
+            </div>
             <span class="chat-text">{{ message.message }}</span>
         </div>
         } } @else {
-        <p>No messages yet.</p>
+        <p>Aucun message à montrer.</p>
         }
+
+        <div #scrollAnchor></div>
     </div>
-    <div class="chat-input">
-        <input type="text" [(ngModel)]="newMessage" placeholder="Type your message..." maxlength="200" />
-        <button (click)="sendMessage()">Send</button>
-    </div>
+
+<div class="chat-input">
+  <div class="input-row">
+    <input
+      type="text"
+      [(ngModel)]="newMessage"
+      placeholder="Tappez votre message..."
+      maxlength="200"
+    />
+    <button (click)="sendMessage()">Send</button>
+  </div>
+  <small class="char-counter">{{ newMessage.length }}/200</small>
+</div>
+
+
 </div>
