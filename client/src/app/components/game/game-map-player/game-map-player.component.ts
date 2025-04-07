@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
 import { IPlayer } from '@common/player';

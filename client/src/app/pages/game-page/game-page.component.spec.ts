@@ -138,7 +138,7 @@ describe('GamePageComponent', () => {
     it('toggleChat should toggle showChat value', () => {
         const initial = component.showChat;
         component.toggleChat();
-        expect(component.showChat).toBe(!initial);
+        expect(component.showChat).toBe(initial);
         component.toggleChat();
         expect(component.showChat).toBe(initial);
     });

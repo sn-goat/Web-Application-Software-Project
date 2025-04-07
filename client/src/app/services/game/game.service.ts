@@ -10,6 +10,7 @@ import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, getAvatarName } from '@common/game';
 import { DEFAULT_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
+import { Entry } from '@common/journal';
 
 @Injectable({
     providedIn: 'root',
@@ -21,6 +22,7 @@ export class GameService {
     activePlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    journalEntries: BehaviorSubject<Entry[]> = new BehaviorSubject<Entry[]>([]);
 
     private organizerId: string = '';
     private dialog = inject(MatDialog);
@@ -72,6 +74,9 @@ export class GameService {
 
         this.socketReceiver.onGameEnded().subscribe(() => {
             this.resetGame();
+        });
+        this.socketReceiver.onJournalEntry().subscribe((entry) => {
+            this.journalEntries.next([...this.journalEntries.getValue(), entry]);
         });
     }
 
@@ -255,7 +260,6 @@ export class GameService {
     private findDefender(avatar: Avatar): IPlayer | null {
         return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
     }
-
     private isValidCellForAction(cell: Cell): boolean {
         const myPlayer = this.playerService.getPlayer();
         const defender = this.findDefender(cell.player);

@@ -1,18 +1,19 @@
 import { Game } from '@app/class/game';
 import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
-import { Player } from './player';
 import { Fight } from './fight';
-import { Board } from '@app/model/database/board';
+import { Player } from './player';
 
 export class Room implements IRoom {
     accessCode: string;
     organizerId: string;
     isLocked: boolean;
     game: Game;
-
+    chatHistory: ChatMessage[] = [];
     private internalEmitter: EventEmitter2;
     private globalEmitter: EventEmitter2;
 
@@ -29,8 +30,13 @@ export class Room implements IRoom {
         this.globalEmitter = globalEmitter;
         this.game = new Game(this.internalEmitter, board);
 
-        this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (playerId: string, message: string) => {
-            this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, { accessCode: this.accessCode, playerId, message });
+        this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (payload: { name: string; playerId: string; message: string }) => {
+            this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, {
+                accessCode: this.accessCode,
+                name: payload.name,
+                playerId: payload.playerId,
+                message: payload.message,
+            });
         });
 
         this.internalEmitter.on(InternalTimerEvents.TurnUpdate, (remainingTime) => {
@@ -62,7 +68,7 @@ export class Room implements IRoom {
         });
 
         this.internalEmitter.on(InternalFightEvents.ChangeFighter, (fight: Fight) => {
-            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, fight);
+            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, { accessCode: this.accessCode, fight });
         });
 
         this.internalEmitter.on(InternalFightEvents.End, (fightResult: { winner: Player; loser: Player }) => {
@@ -125,6 +131,10 @@ export class Room implements IRoom {
         for (const player of this.getPlayers()) {
             this.game.removePlayer(player.id, this.confirmDisconnectMessage);
         }
+    }
+
+    addMessage(message: ChatMessage): void {
+        this.chatHistory.push(message);
     }
 
     private removePlayerFromLobby(playerId: string): void {

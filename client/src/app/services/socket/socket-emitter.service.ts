@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { SharedSocketService } from '@app/services/socket/shared-socket.service';
 import { Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
+import { ChatEvents } from '@common/chat.gateway.events';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { PlayerInput } from '@common/player';
@@ -90,5 +92,9 @@ export class SocketEmitterService {
 
     attack() {
         this.socket.emit(FightEvents.Attack, this.accessCode);
+    }
+
+    sendMessageToServer(message: ChatMessage) {
+        this.socket.emit(ChatEvents.RoomMessage, message);
     }
 }

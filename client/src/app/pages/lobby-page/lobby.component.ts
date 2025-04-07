@@ -3,6 +3,7 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { ChatComponent } from '@app/components/chat/chat.component';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/playerConst';
@@ -19,7 +20,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
     selector: 'app-lobby',
     templateUrl: './lobby.component.html',
     styleUrls: ['./lobby.component.scss'],
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, ChatComponent],
 })
 export class LobbyComponent implements OnInit, OnDestroy {
     accessCode: string = '';

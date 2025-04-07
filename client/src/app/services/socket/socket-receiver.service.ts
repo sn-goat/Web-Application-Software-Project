@@ -1,13 +1,16 @@
 import { Injectable } from '@angular/core';
-import { RoomEvents } from '@common/room.gateway.events';
-import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { Observable } from 'rxjs';
-import { SocketEmitterService } from './socket-emitter.service';
-import { IRoom, IGame, PathInfo, TurnInfo, IFight } from '@common/game';
-import { IPlayer } from '@common/player';
 import { Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
+import { ChatEvents } from '@common/chat.gateway.events';
 import { Tile } from '@common/enums';
+import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
+import { FightEvents, GameEvents, TurnEvents, JournalEvent } from '@common/game.gateway.events';
+import { IPlayer } from '@common/player';
+import { RoomEvents } from '@common/room.gateway.events';
+import { Observable } from 'rxjs';
 import { SharedSocketService } from './shared-socket.service';
+import { SocketEmitterService } from './socket-emitter.service';
+import { Entry } from '@common/journal';
 
 @Injectable({
     providedIn: 'root',
@@ -195,6 +198,14 @@ export class SocketReceiverService {
         });
     }
 
+    onJournalEntry(): Observable<Entry> {
+        return new Observable((observer) => {
+            this.socket.on(JournalEvent.Add, (entry) => {
+                observer.next(entry);
+            });
+        });
+    }
+
     onWinner(): Observable<IPlayer> {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Winner, (winner) => {
@@ -207,6 +218,14 @@ export class SocketReceiverService {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Loser, (loser) => {
                 observer.next(loser);
+            });
+        });
+    }
+
+    receiveMessageFromServer(): Observable<ChatMessage> {
+        return new Observable((observer) => {
+            this.socket.on(ChatEvents.RoomMessage, (message: ChatMessage) => {
+                observer.next(message);
             });
         });
     }

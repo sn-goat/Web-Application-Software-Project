@@ -1,0 +1,17 @@
+<div class="chat-container">
+    <div class="chat-history">
+        @if(chatService.chatHistory().length > 0) { @for(message of chatService.chatHistory(); track message) {
+        <div class="chat-message">
+            <span class="chat-sender">{{ message.sender.name }}</span>
+            <span class="chat-timestamp">{{ message.timestamp }}</span>
+            <span class="chat-text">{{ message.message }}</span>
+        </div>
+        } } @else {
+        <p>No messages yet.</p>
+        }
+    </div>
+    <div class="chat-input">
+        <input type="text" [(ngModel)]="newMessage" placeholder="Type your message..." maxlength="200" />
+        <button (click)="sendMessage()">Send</button>
+    </div>
+</div>

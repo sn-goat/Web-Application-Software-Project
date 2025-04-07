@@ -37,6 +37,8 @@ export class Player implements IPlayer {
     private readonly minDiceValue = 1;
     private readonly fleeThreshold = 0.3;
 
+    private currentDamage: number;
+
     constructor(id: string, player: PlayerInput) {
         this.id = id;
         this.name = player.name;
@@ -77,8 +79,8 @@ export class Player implements IPlayer {
     }
 
     attack(isDebugMode: boolean, playerDefender: Player): boolean {
-        const damage = Math.max(this.initiateAttack(isDebugMode) - playerDefender.initiateDefence(isDebugMode), 0);
-        playerDefender.currentLife = Math.max(playerDefender.currentLife - damage, 0);
+        this.currentDamage = Math.max(this.initiateAttack(isDebugMode) - playerDefender.initiateDefence(isDebugMode), 0);
+        playerDefender.currentLife = Math.max(playerDefender.currentLife - this.currentDamage, 0);
         return playerDefender.currentLife === 0;
     }
 
@@ -88,6 +90,9 @@ export class Player implements IPlayer {
         this.position = position;
     }
 
+    getDamage(): number {
+        return this.currentDamage;
+    }
     private initiateAttack(isDebugMode: boolean): number {
         this.diceResult = isDebugMode ? this.diceToNumber(this.attackDice) : Math.floor(Math.random() * this.diceToNumber(this.attackDice)) + 1;
         return this.diceResult + this.attackPower;

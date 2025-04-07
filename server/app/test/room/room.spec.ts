@@ -119,10 +119,11 @@ describe('Room', () => {
         it('should forward InternalRoomEvents.PlayerRemoved events', () => {
             // Get the internal emitter from room
             const internalEmitter = (room as any).internalEmitter as EventEmitter2;
-            // Fire a PlayerRemoved event on internal emitter
-            internalEmitter.emit(InternalRoomEvents.PlayerRemoved, 'p1', 'Test message');
+            // Fire a PlayerRemoved event on internal emitter{ name: string; playerId: string; message: string }
+            internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { name: 'joe', playerId: 'p1', message: 'Test message' });
             expect(globalEmitter.emit).toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, {
                 accessCode: room.accessCode,
+                name: 'joe',
                 playerId: 'p1',
                 message: 'Test message',
             });
@@ -185,7 +186,10 @@ describe('Room', () => {
             const internalEmitter = (room as any).internalEmitter as EventEmitter2;
             const fight = {} as Fight;
             internalEmitter.emit(InternalFightEvents.ChangeFighter, fight);
-            expect(globalEmitter.emit).toHaveBeenCalledWith(InternalFightEvents.ChangeFighter, fight);
+            expect(globalEmitter.emit).toHaveBeenCalledWith(InternalFightEvents.ChangeFighter, {
+                accessCode: room.accessCode,
+                fight,
+            });
         });
 
         it('should forward InternalFightEvents.End events', () => {

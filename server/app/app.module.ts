@@ -9,6 +9,7 @@ import { GameGateway } from '@app/gateways/game/game.gateway';
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { BoardService } from '@app/services/board/board.service';
 import { GameManagerService } from '@app/services/game/games-manager.service';
+import { JournalService } from '@app/services/journal/journal.service';
 
 @Module({
     imports: [
@@ -24,6 +25,6 @@ import { GameManagerService } from '@app/services/game/games-manager.service';
         EventEmitterModule.forRoot(),
     ],
     controllers: [BoardController],
-    providers: [ChatGateway, BoardService, Logger, RoomGateway, GameGateway, GameManagerService],
+    providers: [ChatGateway, BoardService, Logger, RoomGateway, GameGateway, GameManagerService, JournalService],
 })
 export class AppModule {}
