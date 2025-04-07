@@ -7,11 +7,8 @@ import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, Team } from 
 
 export class GameUtils {
     static isPlayerCanMakeAction(map: Cell[][], player: Player): boolean {
-        const hasBow = player.inventory.includes(Item.BOW);
         const position: Vec2 = player.position;
-        const directions: Vec2[] = hasBow ? DIAGONAL_MOVEMENT_DIRECTIONS : DEFAULT_MOVEMENT_DIRECTIONS;
-        
-        for (const dir of directions) {
+        for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
             if (
                 newPos.y >= 0 &&
@@ -21,12 +18,27 @@ export class GameUtils {
             ) {
                 const targetCell = map[newPos.y][newPos.x];
                 if (this.isValidCellForAction(targetCell)) {
-                    console.log('Player can make action');
+                    console.log('Player can make action (cardinal)');
                     return true;
                 }
             }
         }
-        console.log('Player can make action');
+        if (player.inventory.includes(Item.BOW)) {
+            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
+                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+                if (
+                    newPos.y >= 0 &&
+                    newPos.y < map.length &&
+                    newPos.x >= 0 &&
+                    newPos.x < map[0].length
+                ) {
+                    const targetCell = map[newPos.y][newPos.x];
+                    if (this.isValidCellForAttack(targetCell)) {
+                        return true;
+                    }
+                }
+            }
+        }
         return false;
     }
 
@@ -217,5 +229,9 @@ export class GameUtils {
 
     private static isValidCellForAction(cell: Cell): boolean {
         return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+    }
+
+    private static isValidCellForAttack(cell: Cell): boolean {
+        return (cell.player !== undefined && cell.player !== Avatar.Default);
     }
 }

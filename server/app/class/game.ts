@@ -87,7 +87,6 @@ export class Game implements IGame {
     }
 
     removePlayer(playerId: string, message: string): void {
-        log(`Player ${playerId} has been removed from the game`);
         this.dropItems(playerId);
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
@@ -308,11 +307,7 @@ export class Game implements IGame {
         const cell = this.map[position.y][position.x];
         this.continueMovement = true;
         if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
-            // eslint-disable-next-line no-console
-            console.log(`Joueur tente de collecter item: ${cell.item}`);
             if (player.addItemToInventory(cell.item)) {
-                // eslint-disable-next-line no-console
-                console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
                 cell.item = Item.DEFAULT;
                 this.internalEmitter.emit(InternalTurnEvents.ItemCollected, {
                     player,
@@ -320,8 +315,6 @@ export class Game implements IGame {
                 });
                 this.continueMovement = false;
             } else {
-                // eslint-disable-next-line no-console
-                console.log(`Inventaire plein pour joueur ${player.name}`);
                 this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
                     player,
                     item: cell.item,

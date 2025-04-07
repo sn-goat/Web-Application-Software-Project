@@ -85,15 +85,19 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     onLeftClicked(cell: Cell) {
         if (!this.isPlayerTurn) return;
-        // TODO: Adapter pour un tableau de cell et juste vérifier si elle se trouve dans Action Cell
         if (this.isActionSelected) {
             if (this.gameService.isWithinActionRange(cell)) {
                 if (this.fightLogicService.isAttackProvocation(cell)) {
                     this.gameService.initFight(cell.player);
                     return;
                 }
-
                 if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
+                    const player = this.playerService.getPlayer();
+                    const dx = Math.abs(player.position.x - cell.position.x);
+                    const dy = Math.abs(player.position.y - cell.position.y);
+                    if (dx > 0 && dy > 0) {
+                        return;
+                    }
                     this.gameService.toggleDoor(cell.position);
                     return;
                 }
