@@ -222,6 +222,14 @@ export class SocketReceiverService {
         });
     }
 
+    onItemDropped(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.DroppedItem, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
+                observer.next(data);
+            });
+        });
+    }
+
     onInventoryFull(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.InventoryFull, (data: { player: IPlayer; item: Item; position: Vec2 }) => {

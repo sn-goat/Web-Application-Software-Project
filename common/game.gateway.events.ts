@@ -5,11 +5,11 @@ export enum GameEvents {
 
     Debug = 'toggleDebug',
     DebugStateChanged = 'debugStateChanged',
-    
+
     GameEnded = 'gameEnded',
 
     Error = 'error',
-    
+
     // Create = 'createGame',
     // Configure = 'configureGame',
     // EndDebug = 'endDebug',
@@ -22,18 +22,19 @@ export enum TurnEvents {
     Start = 'startTurn',
     UpdateTurn = 'updateTurn',
     End = 'endTurn',
-    
+
     UpdateTimer = 'timeUpdate',
-    
+
     Move = 'moveAck',
     DebugMove = 'debugMove',
     PlayerMoved = 'playerMoved',
-    
+
     ChangeDoorState = 'changeDoorState',
     DoorStateChanged = 'eventOnDoor',
-    
+
     // BroadcastEnd = 'endPlayerTurn',
     BroadcastItem = 'eventItem',
+    DroppedItem = 'droppedItem',
     InventoryFull = 'inventoryFull',
     InventoryChoice = 'inventoryChoice',
     MapUpdate = 'mapUpdate',
@@ -43,15 +44,15 @@ export enum TurnEvents {
 export enum FightEvents {
     Init = 'initFightAck',
     ChangeFighter = 'changeFighter',
-    
+
     UpdateTimer = 'fightTimeUpdate',
-    
+
     Flee = 'fleeAck',
     Attack = 'attackAck',
-    
+
     End = 'endFight',
     Winner = 'winner',
     Loser = 'loser',
-    
+
     // FailedFlee = 'failedFlee',
 }

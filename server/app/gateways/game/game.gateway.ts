@@ -93,21 +93,31 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.ItemCollected)
-    handleItemCollected(payload: { accessCode: string, player: Player, position: Vec2 }) {
+    handleItemCollected(payload: { accessCode: string; player: Player; position: Vec2 }) {
         this.logger.log(`Player ${payload.player.name} collected item`);
-        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastItem, { 
-            player: payload.player, 
-            position: payload.position
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastItem, {
+            player: payload.player,
+            position: payload.position,
         });
     }
 
     @OnEvent(InternalTurnEvents.InventoryFull)
-    handleInventoryFull(payload: { accessCode: string, player: Player, item: Item, position: Vec2 }) {
+    handleInventoryFull(payload: { accessCode: string; player: Player; item: Item; position: Vec2 }) {
         this.logger.log(`Player ${payload.player.name} inventory is full`);
-        this.server.to(payload.accessCode).emit(TurnEvents.InventoryFull, { 
-            player: payload.player, 
-            item: payload.item, 
-            position: payload.position
+        this.server.to(payload.accessCode).emit(TurnEvents.InventoryFull, {
+            player: payload.player,
+            item: payload.item,
+            position: payload.position,
+        });
+    }
+
+    @OnEvent(InternalTurnEvents.DroppedItem)
+    handleDroppedItem(payload: { accessCode: string; player: Player; item: Item; position: Vec2 }) {
+        this.logger.log(`Player ${payload.player.name} dropped item`);
+        this.server.to(payload.accessCode).emit(TurnEvents.DroppedItem, {
+            player: payload.player,
+            item: payload.item,
+            position: payload.position,
         });
     }
 
@@ -204,7 +214,10 @@ export class GameGateway {
     }
 
     @SubscribeMessage(TurnEvents.InventoryChoice)
-    handleInventoryChoice(client: Socket, payload: { playerId: string, itemToThrow: Item, itemToAdd: Item, position: Vec2, accessCode: string }): void {
+    handleInventoryChoice(
+        client: Socket,
+        payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string },
+    ): void {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         if (!game) return;
 
@@ -216,7 +229,7 @@ export class GameGateway {
             this.server.to(payload.accessCode).emit(TurnEvents.MapUpdate, {
                 player,
                 item: payload.itemToThrow,
-                position: payload.position
+                position: payload.position,
             });
         }
     }

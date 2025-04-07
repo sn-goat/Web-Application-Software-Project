@@ -84,6 +84,13 @@ export class GameService {
             console.log(`Item retiré de la carte à la position: (${position.x}, ${position.y})`);
         });
 
+        this.socketReceiver.onItemDropped().subscribe((data) => {
+            const position = data.position;
+            const newMap = this.map.value;
+            newMap[position.y][position.x].item = data.item;
+            this.map.next(newMap);
+        });
+
         this.socketReceiver.onMapUpdate().subscribe((data: { player: IPlayer; item: Item; position: Vec2 }) => {
             const pos = data.position;
             const newMap = [...this.map.value];
@@ -124,7 +131,7 @@ export class GameService {
         const dy = Math.abs(playerPos.y - actionPos.y);
         const player = this.activePlayer.value;
         if (player && player.inventory.includes(Item.BOW)) {
-            return (dx <= 1 && dy <= 1) && !(dx === 0 && dy === 0);
+            return dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
         }
         return dx + dy === 1;
     }
@@ -260,38 +267,28 @@ export class GameService {
     getItemDescription(item: Item): string {
         return ASSETS_DESCRIPTION.get(item) || 'Aucune description';
     }
-    
+
     findPossibleActions(position: Vec2): Set<string> {
         const possibleActions = new Set<string>();
         const player = this.activePlayer.value;
         if (!player) {
             return possibleActions;
         }
-        
+
         for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (
-                newPos.y >= 0 &&
-                newPos.y < this.map.value.length &&
-                newPos.x >= 0 &&
-                newPos.x < this.map.value[0].length
-            ) {
+            if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
                 const cell = this.map.value[newPos.y][newPos.x];
                 if (this.isValidCellForDoor(cell) || this.isValidCellForFight(cell)) {
                     possibleActions.add(`${newPos.x},${newPos.y}`);
                 }
             }
         }
-        
+
         if (player.inventory.includes(Item.BOW)) {
             for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
                 const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-                if (
-                    newPos.y >= 0 &&
-                    newPos.y < this.map.value.length &&
-                    newPos.x >= 0 &&
-                    newPos.x < this.map.value[0].length
-                ) {
+                if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
                     const cell = this.map.value[newPos.y][newPos.x];
                     if (this.isValidCellForFight(cell)) {
                         possibleActions.add(`${newPos.x},${newPos.y}`);
@@ -299,7 +296,7 @@ export class GameService {
                 }
             }
         }
-        
+
         return possibleActions;
     }
 

@@ -72,11 +72,29 @@ export class Room implements IRoom {
 
         this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; position: Vec2 }) => {
             console.log(`[Room] Relaying ItemCollected event for player ${payload.player.name}`);
-            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {accessCode: this.accessCode, player: payload.player, position: payload.position});
+            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {
+                accessCode: this.accessCode,
+                player: payload.player,
+                position: payload.position,
+            });
         });
 
-        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (payload: { player: Player, item: Item, position: Vec2 }) => {
-            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, { accessCode: this.accessCode, player: payload.player, item: payload.item, position: payload.position });
+        this.internalEmitter.on(InternalTurnEvents.DroppedItem, (payload: { player: Player; item: Item; position: Vec2 }) => {
+            this.globalEmitter.emit(InternalTurnEvents.DroppedItem, {
+                accessCode: this.accessCode,
+                player: payload.player,
+                item: payload.item,
+                position: payload.position,
+            });
+        });
+
+        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (payload: { player: Player; item: Item; position: Vec2 }) => {
+            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, {
+                accessCode: this.accessCode,
+                player: payload.player,
+                item: payload.item,
+                position: payload.position,
+            });
         });
     }
 
@@ -153,6 +171,7 @@ export class Room implements IRoom {
     private removePlayerFromGame(playerId: string): void {
         this.game.removePlayerOnMap(playerId);
         this.game.removePlayer(playerId, this.confirmDisconnectMessage);
+        this.game.dropItems(playerId);
 
         if (this.game.players.length < 2) {
             const lastPlayer = this.getPlayers()[0];

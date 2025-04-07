@@ -15,10 +15,10 @@ import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, PathInfo } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
+import { DEFAULT_MOVEMENT_DIRECTIONS } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { log } from 'console';
 import { Timer } from './timer';
-import { DEFAULT_MOVEMENT_DIRECTIONS } from '@common/player';
 
 export class Game implements IGame {
     internalEmitter: EventEmitter2;
@@ -156,7 +156,7 @@ export class Game implements IGame {
                     if (!this.continueMovement) {
                         clearInterval(interval);
                         this.movementInProgress = false;
-                        this.decrementMovement(player, index+1);
+                        this.decrementMovement(player, index + 1);
                     } else {
                         index++;
                     }
@@ -181,45 +181,6 @@ export class Game implements IGame {
         this._setPlayerInCell(position, player);
         this._handleItemCollection(position, player);
         this._updatePlayerPositionAndNotify(previousPosition, position, player);
-    }
-
-    private _clearCell(position: Vec2): void {
-        this.map[position.y][position.x].player = Avatar.Default;
-    }
-
-    private _setPlayerInCell(position: Vec2, player: Player): void {
-        this.map[position.y][position.x].player = player.avatar as Avatar;
-    }
-
-    private _handleItemCollection(position: Vec2, player: Player): void {
-        const cell = this.map[position.y][position.x];
-        this.continueMovement = true;
-        if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
-            console.log(`Joueur tente de collecter item: ${cell.item}`);
-            if (player.addItemToInventory(cell.item)) {
-                console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
-                cell.item = Item.DEFAULT;
-                this.internalEmitter.emit(InternalTurnEvents.ItemCollected, { 
-                    player, 
-                    position
-                });
-                this.continueMovement = false;
-            } else {
-                console.log(`Inventaire plein pour joueur ${player.name}`);
-                this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
-                    player,
-                    item: cell.item,
-                    position
-                });
-                this.continueMovement = false;
-            }
-        }
-    }
-
-    private _updatePlayerPositionAndNotify(previousPosition: Vec2, newPosition: Vec2, player: Player): void {
-        const fieldType = this.map[newPosition.y][newPosition.x].tile;
-        player.updatePosition(newPosition, fieldType);
-        this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
     }
 
     movePlayerDebug(direction: Vec2, playerId: string): void {
@@ -256,7 +217,10 @@ export class Game implements IGame {
                 const newY = playerPosition.y + direction.y;
                 if (this.map[newY] && this.map[newY][newX] && this.map[newY][newX].item === Item.DEFAULT) {
                     this.map[newY][newX].item = item;
+                    console.log(`Dropped item ${this.map[newY][newX].item} at position (${newX}, ${newY})`);
                     player.removeItemFromInventory(item);
+                    this.internalEmitter.emit(InternalTurnEvents.DroppedItem, { player, item, position: { x: newX, y: newY } });
+                    break;
                 }
             }
         });
@@ -308,6 +272,7 @@ export class Game implements IGame {
         if (fightResult === null) {
             this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
         } else {
+            this.dropItems(fightResult.loser.id);
             this.movePlayerToSpawn(fightResult.loser);
             this.endFight();
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
@@ -329,6 +294,48 @@ export class Game implements IGame {
 
     endFight(): void {
         this.fight = new Fight(this.internalEmitter);
+    }
+
+    private _clearCell(position: Vec2): void {
+        this.map[position.y][position.x].player = Avatar.Default;
+    }
+
+    private _setPlayerInCell(position: Vec2, player: Player): void {
+        this.map[position.y][position.x].player = player.avatar as Avatar;
+    }
+
+    private _handleItemCollection(position: Vec2, player: Player): void {
+        const cell = this.map[position.y][position.x];
+        this.continueMovement = true;
+        if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
+            // eslint-disable-next-line no-console
+            console.log(`Joueur tente de collecter item: ${cell.item}`);
+            if (player.addItemToInventory(cell.item)) {
+                // eslint-disable-next-line no-console
+                console.log(`Item ${cell.item} ajouté à l'inventaire du joueur ${player.name}`);
+                cell.item = Item.DEFAULT;
+                this.internalEmitter.emit(InternalTurnEvents.ItemCollected, {
+                    player,
+                    position,
+                });
+                this.continueMovement = false;
+            } else {
+                // eslint-disable-next-line no-console
+                console.log(`Inventaire plein pour joueur ${player.name}`);
+                this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
+                    player,
+                    item: cell.item,
+                    position,
+                });
+                this.continueMovement = false;
+            }
+        }
+    }
+
+    private _updatePlayerPositionAndNotify(previousPosition: Vec2, newPosition: Vec2, player: Player): void {
+        const fieldType = this.map[newPosition.y][newPosition.x].tile;
+        player.updatePosition(newPosition, fieldType);
+        this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
     }
 
     private movePlayerToSpawn(player: Player): void {
