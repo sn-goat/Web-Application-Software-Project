@@ -7,6 +7,7 @@ import { GameUtils } from '@app/services/game/game-utils';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar } from '@common/game';
+import { Team } from '@common/player';
 
 describe('GameUtils Comprehensive Tests', () => {
     // Utilitaire pour créer une cellule factice
@@ -38,13 +39,15 @@ describe('GameUtils Comprehensive Tests', () => {
             // Une cellule voisine est considérée valide pour l’action si
             // soit elle possède un joueur (différent de Avatar.Default) soit son tile est CLOSED_DOOR ou OPENED_DOOR.
             board[0][1] = dummyCell(1, 0, Tile.CLOSED_DOOR);
-            const result = GameUtils.isPlayerCanMakeAction(board, { x: 1, y: 1 });
+            const mockPlayer = { position: { x: 1, y: 1 } } as Player;
+            const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
             expect(result).toBe(true);
         });
 
         it('should return false if no neighboring cell is valid for action', () => {
             const board = createBoard(3, 3);
-            const result = GameUtils.isPlayerCanMakeAction(board, { x: 1, y: 1 });
+            const mockPlayer = { position: { x: 1, y: 1 } } as Player;
+            const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
             expect(result).toBe(false);
         });
     });
@@ -139,6 +142,53 @@ describe('GameUtils Comprehensive Tests', () => {
             GameUtils.removeUnusedSpawnPoints(board, usedSpawnPoints);
             expect(board[0][0].item).toBe(Item.SPAWN);
             expect(board[1][1].item).toBe(Item.DEFAULT);
+        });
+    });
+
+    describe('assignTeams', () => {
+        class MockPlayer {
+            team: Team;
+            setTeam = jest.fn((t: Team) => {
+                this.team = t;
+            });
+        }
+
+        function createMockPlayers(n: number): MockPlayer[] {
+            return Array.from({ length: n }, () => new MockPlayer());
+        }
+
+        it('should assign half players to RED and half to BLUE (even count)', () => {
+            const players = createMockPlayers(6);
+            GameUtils.assignTeams(players as any);
+
+            const redCount = players.filter((p) => p.team === Team.RED).length;
+            const blueCount = players.filter((p) => p.team === Team.BLUE).length;
+
+            expect(redCount).toBe(3);
+            expect(blueCount).toBe(3);
+            players.forEach((p) => expect(p.setTeam).toHaveBeenCalledTimes(1));
+        });
+
+        it('should assign floor(n/2) to RED and rest to BLUE (odd count)', () => {
+            const players = createMockPlayers(5);
+            GameUtils.assignTeams(players as any);
+
+            const redCount = players.filter((p) => p.team === Team.RED).length;
+            const blueCount = players.filter((p) => p.team === Team.BLUE).length;
+
+            expect(redCount).toBe(2);
+            expect(blueCount).toBe(3);
+            players.forEach((p) => expect(p.setTeam).toHaveBeenCalledTimes(1));
+        });
+
+        it('should not mutate original array order directly', () => {
+            const players = createMockPlayers(4);
+            const originalOrder = [...players];
+
+            GameUtils.assignTeams(players as any);
+
+            // Ensures original array is not mutated (though team attributes do change)
+            expect(players).toEqual(originalOrder);
         });
     });
 

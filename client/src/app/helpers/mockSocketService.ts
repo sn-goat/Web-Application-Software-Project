@@ -3,46 +3,44 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { Vec2 } from '@common/board';
-import { Game, Room } from '@common/game';
-import { PlayerStats } from '@common/player';
+import { Item, Tile } from '@common/enums';
+import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
+import { IPlayer, PlayerInput } from '@common/player';
 import { Subject } from 'rxjs';
 
 export class MockSocketService {
-    gameRoom: Room = {
+    gameRoom: IRoom = {
         accessCode: 'test-code',
         organizerId: 'organizer-id',
-        players: [],
         isLocked: false,
-        mapSize: 15,
+        game: { players: [], map: [], currentTurn: 0, isCTF: false, isDebugMode: false, maxPlayers: 4 },
     };
 
-    private playerJoinedSubject = new Subject<unknown>();
-    private playersListSubject = new Subject<PlayerStats[]>();
-    private playerRemovedSubject = new Subject<PlayerStats[]>();
-    private playerDisconnectedSubject = new Subject<PlayerStats[]>();
+    private playerJoinedSubject = new Subject<IRoom>();
+    private playerMovedSubject = new Subject<{ previousPosition: Vec2; player: IPlayer }>();
+    private playerRemovedSubject = new Subject<unknown>();
+    private playerUpdatedSubject = new Subject<IPlayer[]>();
+    private setCharacterSubject = new Subject<IPlayer>();
     private roomLockedSubject = new Subject<unknown>();
-    private gameSubject = new Subject<Game>();
+    private roomUnlockedSubject = new Subject<void>();
+    private gameSubject = new Subject<IGame>();
     private roomCreatedSubject = new Subject<unknown>();
-    private joinErrorSubject = new Subject<{ message: string }>();
-    private broadcastDebugStateSubject = new Subject<unknown>();
+    private joinErrorSubject = new Subject<string>();
+    private debugStateSubject = new Subject<unknown>();
     private startTurnSubject = new Subject<unknown>();
-    private endTurnSubject = new Subject<unknown>();
-    private fullInventorySubject = new Subject<unknown>();
-    private broadcastMoveSubject = new Subject<unknown>();
-    private broadcastItemSubject = new Subject<unknown>();
-    private broadcastDoorSubject = new Subject<unknown>();
-    private adminDisconnected = new Subject<unknown>();
+    private onPlayerTurnChangedSubject = new Subject<TurnInfo>();
+    private doorSubject = new Subject<unknown>();
     private endOfGame = new Subject<unknown>();
+    private gameStartedError = new Subject<string>();
+    private itemCollected = new Subject<Item>();
+    private itemDropped = new Subject<Item>();
+    private mapUpdate = new Subject<unknown>();
+    private inventoryFull = new Subject<unknown>();
 
-    private switchTurnSubject = new Subject<unknown>();
-    private turnUpdateSubject = new Subject<unknown>();
-    private assignSpawnSubject = new Subject<unknown>();
+    private turnUpdateSubject = new Subject<TurnInfo>();
+    private fightInitSubject = new Subject<IFight>();
+    private fighterTurnChangedSubject = new Subject<IFight>();
     private endFightSubject = new Subject<unknown>();
-    private quitGameSubject = new Subject<unknown>();
-
-    getGameSize() {
-        return 15;
-    }
 
     getCurrentPlayerId(): string {
         return 'current-player';
@@ -52,23 +50,31 @@ export class MockSocketService {
         return this.playerJoinedSubject.asObservable();
     }
 
-    onPlayersList() {
-        return this.playersListSubject.asObservable();
+    onPlayerMoved() {
+        return this.playerMovedSubject.asObservable();
     }
 
     onPlayerRemoved() {
         return this.playerRemovedSubject.asObservable();
     }
 
-    onPlayerDisconnected() {
-        return this.playerDisconnectedSubject.asObservable();
+    onPlayersUpdated() {
+        return this.playerUpdatedSubject.asObservable();
+    }
+
+    onSetCharacter() {
+        return this.setCharacterSubject.asObservable();
     }
 
     onRoomLocked() {
         return this.roomLockedSubject.asObservable();
     }
 
-    onBroadcastStartGame() {
+    onRoomUnlocked() {
+        return this.roomUnlockedSubject.asObservable();
+    }
+
+    onGameStarted() {
         return this.gameSubject.asObservable();
     }
 
@@ -80,167 +86,180 @@ export class MockSocketService {
         return this.joinErrorSubject.asObservable();
     }
 
-    onBroadcastDebugState() {
-        return this.broadcastDebugStateSubject.asObservable();
-    }
-
     onTurnStart() {
         return this.startTurnSubject.asObservable();
     }
 
-    onBroadcastMove() {
-        return this.broadcastMoveSubject.asObservable();
+    onPlayerTurnChanged() {
+        return this.onPlayerTurnChangedSubject.asObservable();
     }
 
-    onBroadcastItem() {
-        return this.broadcastItemSubject.asObservable();
+    onDoorStateChanged() {
+        return this.doorSubject.asObservable();
     }
 
-    onBroadcastDoor() {
-        return this.broadcastDoorSubject.asObservable();
-    }
-
-    onSwitchTurn() {
-        return this.switchTurnSubject.asObservable();
+    onFightInit() {
+        return this.fightInitSubject.asObservable();
     }
 
     onEndFight() {
         return this.endFightSubject.asObservable();
     }
 
-    onTurnSwitch() {
-        return this.switchTurnSubject.asObservable();
+    onFighterTurnChanged() {
+        return this.fighterTurnChangedSubject.asObservable();
     }
 
-    onTurnUpdate() {
+    onPlayerTurnUpdate() {
         return this.turnUpdateSubject.asObservable();
     }
 
-    onAssignSpawn() {
-        return this.assignSpawnSubject.asObservable();
-    }
-
-    onQuitGame() {
-        return this.quitGameSubject.asObservable();
-    }
-
-    onAdminDisconnected() {
-        return this.adminDisconnected.asObservable();
-    }
-
-    onEndGame() {
+    onGameEnded() {
         return this.endOfGame.asObservable();
     }
 
-    onBroadcastDebugEndState() {
-        return this.broadcastDebugStateSubject.asObservable();
+    onDebugModeChanged() {
+        return this.debugStateSubject.asObservable();
     }
 
-    createRoom(_size: number): void {}
+    onGameStartedError() {
+        return this.gameStartedError.asObservable();
+    }
+
+    onItemCollected() {
+        return this.itemCollected.asObservable();
+    }
+
+    onItemDropped() {
+        return this.itemDropped.asObservable();
+    }
+
+    onInventoryFull() {
+        return this.inventoryFull.asObservable();
+    }   
+
+    onMapUpdate() {
+        return this.mapUpdate.asObservable();
+    }
+
+    createRoom(_mapName: string): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
-    removePlayer(_accessCode: string, _playerId: string): void {}
-    disconnect(_accessCode: string, _playerId: string): void {}
+    expelPlayer(_playerId: string): void {}
+    disconnect(_playerId: string): void {}
     createGame(_accessCode: string, _mapName: string): void {}
-    configureGame(_accessCode: string, _players: PlayerStats[]): void {}
-    movePlayer(_accessCode: string, _playerId: string, _direction: Vec2): void {}
-    changeDoorState(_accessCode: string, _position: Vec2): void {}
+    startGame(): void {}
+    movePlayer(_selectedPath: PathInfo, _playerId: string): void {}
+    changeDoorState(_position: Vec2, _playerId: string): void {}
     joinRoom(_accessCode: string): void {}
-    shareCharacter(_accessCode: string, _player: PlayerStats): void {}
-    playerFlee(_accessCode: string, _playerId: string): void {}
-    playerAttack(_accessCode: string, _playerId: string): void {}
-    quitGame(_accessCode: string): void {}
-    resetSocketState(): void {}
+    shareCharacter(_player: PlayerInput): void {}
+    flee(): void {}
+    attack(): void {}
+    ready(_playerId: string): void {}
 
-    endTurn(_accessCode: string): void {
-        // On peut laisser vide ou ajouter une logique de mock ici
-    }
+    endTurn(_accessCode: string): void {}
 
-    initFight(_accessCode: string, _player: PlayerStats, _defender: PlayerStats): void {}
-    debugMove(_accessCode: string, _position: Vec2): void {}
-    toggleDebugMode(_accessCode: string): void {}
+    initFight(_player: string, _defender: string): void {}
+    debugMove(_position: Vec2, _playerId: string): void {}
+    toggleDebug(): void {}
 
-    triggerPlayerJoined(data: { room: { players: unknown[] } }) {
+    triggerPlayerJoined(data: IRoom) {
         this.playerJoinedSubject.next(data);
     }
 
-    triggerPlayersList(players: PlayerStats[]) {
-        this.playersListSubject.next(players);
+    triggerOnPlayersUpdated(data: IPlayer[]) {
+        this.playerUpdatedSubject.next(data);
     }
 
-    triggerPlayerRemoved(players: PlayerStats[]) {
-        this.playerRemovedSubject.next(players);
+    triggerPlayerMoved(movement: { previousPosition: Vec2; player: IPlayer }) {
+        this.playerMovedSubject.next(movement);
     }
 
-    triggerPlayerDisconnected(players: PlayerStats[]) {
-        this.playerDisconnectedSubject.next(players);
+    triggerPlayerRemoved() {
+        this.playerRemovedSubject.next(null);
     }
 
-    triggerRoomLocked(data: unknown) {
-        this.roomLockedSubject.next(data);
+    triggerRoomLocked() {
+        this.roomLockedSubject.next(null);
     }
 
-    triggerOnBroadcastStartGame(game: Game) {
-        this.gameSubject.next(game);
+    triggerOnRoomUnlocked() {
+        this.roomUnlockedSubject.next();
     }
 
-    triggerRoomCreated(data: unknown) {
+    triggerRoomCreated(data: IRoom) {
         this.roomCreatedSubject.next(data);
     }
 
-    triggerJoinError(errorData: { message: string }) {
-        this.joinErrorSubject.next(errorData);
+    triggerJoinError(message: string) {
+        this.joinErrorSubject.next(message);
     }
 
-    triggerBroadcastDebugState(data: unknown) {
-        this.broadcastDebugStateSubject.next(data);
+    triggerStartTurn() {
+        this.startTurnSubject.next(null);
     }
 
-    triggerStartTurn(data: unknown) {
-        this.startTurnSubject.next(data);
+    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }) {
+        this.doorSubject.next(data);
     }
 
-    triggerEndTurn(data: unknown) {
-        this.endTurnSubject.next(data);
+    triggerOnFightInit(data: IFight) {
+        this.fightInitSubject.next(data);
     }
 
-    triggerFullInventory(data: unknown) {
-        this.fullInventorySubject.next(data);
+    triggerOnFightTurnChanged(data: IFight) {
+        this.fighterTurnChangedSubject.next(data);
     }
 
-    triggerBroadcastMove(data: unknown) {
-        this.broadcastMoveSubject.next(data);
-    }
-
-    triggerBroadcastItem(data: unknown) {
-        this.broadcastItemSubject.next(data);
-    }
-
-    triggerBroadcastDoor(data: unknown) {
-        this.broadcastDoorSubject.next(data);
-    }
-
-    triggerSwitchTurn(data: unknown) {
-        this.switchTurnSubject.next(data);
+    triggerSetCharacter(data: IPlayer) {
+        this.setCharacterSubject.next(data);
     }
 
     triggerEndFight(data: unknown) {
         this.endFightSubject.next(data);
     }
 
-    triggerQuitGame(data: unknown) {
-        this.quitGameSubject.next(data);
-    }
-
-    triggerTurnUpdate(data: unknown) {
+    triggerTurnUpdate(data: TurnInfo) {
         this.turnUpdateSubject.next(data);
     }
 
-    triggerAssignSpawn(data: unknown) {
-        this.assignSpawnSubject.next(data);
+    triggerOnGameStarted(data: IGame) {
+        this.gameSubject.next(data);
     }
 
-    triggerOnAdminDisconect(data: unknown) {
-        this.adminDisconnected.next(data);
+    triggerPlayerTurnChanged(data: TurnInfo) {
+        this.onPlayerTurnChangedSubject.next(data);
+    }
+
+    triggerOnDebugModeChanged(data: boolean) {
+        this.debugStateSubject.next(data);
+    }
+
+    triggerOnGameStartedError(data: string) {
+        this.gameStartedError.next(data);
+    }
+
+    triggerEndOfGame() {
+        this.endOfGame.next(null);
+    }
+
+    triggerItemCollected(data: Item) {
+        this.itemCollected.next(data);
+    }
+    
+    triggerItemDropped(data: Item) {
+        this.itemDropped.next(data);
+    }
+
+    triggerMapUpdate(data: unknown) {
+        this.mapUpdate.next(data);
+    }
+
+    triggerInventoryFull(data: unknown) {
+        this.inventoryFull.next(data);
+    }
+
+    getAccessCode() {
+        return this.gameRoom.accessCode;
     }
 }

@@ -3,14 +3,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Game } from '@app/class/game';
-import { Board } from '@app/model/database/board';
-import { Cell, Vec2 } from '@common/board';
-import { Player } from '@app/class/player';
 import { Fight } from '@app/class/fight';
+import { Game } from '@app/class/game';
+import { Player } from '@app/class/player';
 import { Timer } from '@app/class/timer';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -18,10 +15,13 @@ import {
     THREE_SECONDS_IN_MS,
     TimerType,
 } from '@app/gateways/game/game.gateway.constants';
-import { Avatar, IGame, PathInfo, TurnInfo } from '@common/game';
-import { Item, Tile, Visibility } from '@common/enums';
-import { getLobbyLimit } from '@common/lobby-limits';
+import { Board } from '@app/model/database/board';
 import { GameUtils } from '@app/services/game/game-utils';
+import { Cell, Vec2 } from '@common/board';
+import { Item, Tile, Visibility } from '@common/enums';
+import { Avatar, PathInfo } from '@common/game';
+import { getLobbyLimit } from '@common/lobby-limits';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // --- Create a dummy board that conforms to the Board interface ---
 const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.DEFAULT, cost: number = 1): Cell => ({
@@ -62,7 +62,7 @@ jest.spyOn(GameUtils, 'findPossiblePaths').mockImplementation(
     (map: Cell[][], pos: Vec2, pts: number) => new Map<string, PathInfo>([['key', { path: [pos], cost: 1 }]]),
 );
 jest.spyOn(GameUtils, 'findValidSpawn').mockImplementation((map: Cell[][], pos: Vec2) => pos);
-jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockImplementation((map: Cell[][], pos: Vec2) => true);
+jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockImplementation((map: Cell[][], player: Player) => true);
 
 // --- Create dummy players ---
 const createDummyPlayer = (id: string): Player => {
