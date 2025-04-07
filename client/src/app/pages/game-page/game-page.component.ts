@@ -96,7 +96,8 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
             }),
 
             this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer; item: Item; position: Vec2 }) => {
-                if (payload.player.id === this.playerService.getPlayer().id) {
+                const localPlayer = this.playerService.getPlayer();
+                if (localPlayer && payload && payload.player && payload.player.id === localPlayer.id) {
                     this.dialog.open(ItemPopup, {
                         data: {
                             inventory: [...payload.player.inventory, payload.item],

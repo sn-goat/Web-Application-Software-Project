@@ -269,6 +269,7 @@ describe('GameService', () => {
     });
 
     it('should return false for isWithinActionRange when cell is not adjacent', () => {
+        testPlayer.inventory = [Item.MONSTER_EGG];
         service.activePlayer.next(testPlayer);
         const positiveResult = service.isWithinActionRange(adjacentCell);
         expect(positiveResult).toBeTrue();
@@ -467,13 +468,15 @@ describe('GameService', () => {
     });
 
     it('findPossibleActions should return possible actions for players and doors', () => {
+        testPlayer.inventory = [Item.MONSTER_EGG];
+        service.playingPlayers.next([testPlayer]);
         const initialMap: Cell[][] = [
             [
-                { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
+                { player: testPlayer.avatar, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
                 { player: Avatar.Default, tile: Tile.WALL, position: { x: 1, y: 0 } } as Cell,
             ],
             [
-                { player: Avatar.Wizard, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
+                { player: testPlayer.avatar, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
                 { player: Avatar.Default, tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 } } as Cell,
             ],
         ];
@@ -485,6 +488,8 @@ describe('GameService', () => {
     });
 
     it('findPossibleActions should return an empty set if no actions available', () => {
+        testPlayer.inventory = [Item.MONSTER_EGG];
+        service.playingPlayers.next([testPlayer]);
         const initialMap: Cell[][] = [
             [
                 { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
