@@ -56,8 +56,12 @@ describe('GameMapComponent', () => {
             isActivePlayer: new BehaviorSubject(false),
             path: new BehaviorSubject<Map<string, PathInfo> | null>(null),
             sendMove: jasmine.createSpy('sendMove'),
-            getPlayer: jasmine.createSpy('getPlayer'),
-        };
+            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({ 
+                id: 'player1', 
+                position: { x: 5, y: 5 },
+                spawnPosition: { x: 5, y: 5 },
+                inventory: [] 
+            })};
         gameServiceMock = {
             isWithinActionRange: jasmine.createSpy('isWithinActionRange'),
             initFight: jasmine.createSpy('initFight'),
