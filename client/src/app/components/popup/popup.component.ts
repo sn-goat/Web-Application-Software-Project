@@ -12,11 +12,8 @@ import { PopupService } from '@app/services/popup/popup.service';
 export class PopupComponent {
     @Input() isVisible: boolean = false;
     @Output() isVisibleChange = new EventEmitter<boolean>();
-    private readonly popupService: PopupService = inject(PopupService);
-
     selectedTab: 'chat' | 'journal' = 'chat';
-
-    constructor() {}
+    private readonly popupService: PopupService = inject(PopupService);
 
     togglePopup(): void {
         this.isVisible = !this.isVisible;
