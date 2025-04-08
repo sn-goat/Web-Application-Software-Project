@@ -82,7 +82,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
             this.popupService.popupVisible$.subscribe((isVisible) => {
                 this.popupVisible = isVisible;
-            })
+            }),
         );
         this.getTooltipContent = this.gameService.getCellDescription.bind(this.gameService);
     }

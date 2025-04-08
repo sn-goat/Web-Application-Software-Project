@@ -6,7 +6,10 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class PopupService {
     private popupVisibleSubject = new BehaviorSubject<boolean>(false);
-    popupVisible$: Observable<boolean> = this.popupVisibleSubject.asObservable();
+
+    get popupVisible$(): Observable<boolean> {
+        return this.popupVisibleSubject.asObservable();
+    }
 
     setPopupVisible(isVisible: boolean): void {
         this.popupVisibleSubject.next(isVisible);
