@@ -1,7 +1,7 @@
 <div class="container">
     <div class="header">
         @if (myPlayer) { <img class="player-image" [src]="myPlayer.avatar" alt="Avatar du Joueur" />}
-        <h2>Mes informations</h2>
+        <h2>{{ myPlayer?.name }}</h2>
     </div>
 
     <div class="info">

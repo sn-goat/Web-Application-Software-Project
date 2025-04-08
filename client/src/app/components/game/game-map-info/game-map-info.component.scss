@@ -1,14 +1,20 @@
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
-$primary-text: #7ee0d0;
+$primary-text: #f2e5b8;
 $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
-$map-color: #7ee0d0;
-$player-color: #ff9800;
-$game-color: #7ee0d0;
+$map-color: #f2e5b8;
+$player-color: #f2e5b8;
+$game-color: #f2e5b8;
 $rectangle-border: 1px solid $primary-text;
+
+h2,
+h3,
+p {
+    font-family: 'MedievalSharp', cursive;
+}
 
 .game-map-info {
     position: fixed;
@@ -16,14 +22,13 @@ $rectangle-border: 1px solid $primary-text;
     left: 20px;
     width: 400px;
     height: 500px;
-    background: rgba(0, 0, 0, 0.9);
     border: $rectangle-border;
     color: $primary-text;
-    // padding: 10px;
     border-radius: 8px;
     box-shadow: 0 0 10px $primary-text;
     z-index: 1000;
     animation: fadeIn 0.3s ease-in-out;
+    background: rgba(0, 0, 0, 0.9);
 }
 
 :host {
@@ -32,24 +37,35 @@ $rectangle-border: 1px solid $primary-text;
     width: 100%;
 }
 .close-popup {
-    background: transparent;
-    border: none;
+    font-family: 'MedievalSharp', cursive;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1.1px solid $primary-text;
+    border-radius: 50%;
     color: $primary-text;
     cursor: pointer;
     font-size: 18px;
+    &:hover {
+        background: #f2e5b8;
+        color: #000000;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    }
 }
 .container {
-    background-color: $secondary-bg;
+    background-color: rgba(0, 0, 0, 0.3);
     border-radius: $border-radius;
     height: 100%;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
     box-shadow:
-        0 0 15px rgba(0, 0, 0, 0.5),
-        0 0 10px $glow-teal;
-    color: $primary-text;
-    font-family: 'Rajdhani', sans-serif;
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.9);
 
     .header {
         background-color: rgba(0, 0, 0, 0.3);
@@ -58,14 +74,14 @@ $rectangle-border: 1px solid $primary-text;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-
+        text-align: center;
+        align-items: center;
         h2 {
             margin: 0;
             font-size: 1rem;
             font-weight: 600;
             text-align: center;
             color: $primary-text;
-            text-transform: uppercase;
             letter-spacing: 1px;
             text-shadow: 0 0 10px $glow-teal;
         }
@@ -77,7 +93,6 @@ $rectangle-border: 1px solid $primary-text;
         padding: 10px 15px;
         display: flex;
         flex-direction: column;
-        background-color: rgba(0, 0, 0, 0.3);
         gap: 15px;
 
         &::-webkit-scrollbar {
@@ -152,7 +167,6 @@ $rectangle-border: 1px solid $primary-text;
                 margin: 0 0 8px 0;
                 font-size: 1.1rem;
                 color: $secondary-text;
-                text-transform: uppercase;
                 letter-spacing: 0.5px;
                 border-bottom: 1px solid rgba($primary-text, 0.3);
                 padding-bottom: 5px;

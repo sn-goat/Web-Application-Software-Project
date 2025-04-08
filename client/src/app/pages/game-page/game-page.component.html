@@ -1,44 +1,47 @@
-<div class="game-grid">
-    <div class="left-rectangle">
-        <app-header-bar></app-header-bar>
-        <app-game-map-player></app-game-map-player>
-    </div>
-
-    <div class="map-container">
-        <app-game-map></app-game-map>
-    </div>
-
-    <div class="right-rectangle">
-        <app-game-map-player-detailed></app-game-map-player-detailed>
-    </div>
-
-    <div class="bottom-rectangle">
-        <div class="chat-info-container">
-            @if (debugMode) {
-            <div class="debug-indicator">Debug Actif</div>
-            }
-
-            <button (click)="toggleChat()" class="toggle-button">Chat & Journal</button>
-            <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
+<body>
+    <div class="background-gif" style="background-image: url('assets/backgrounds/game.gif')"></div>
+    <div class="game-grid">
+        <div class="left-rectangle">
+            <app-header-bar></app-header-bar>
+            <app-game-map-player></app-game-map-player>
         </div>
-        <app-game-map-player-tools></app-game-map-player-tools>
-    </div>
 
-    @if(showFightInterface){
-    <div class="fight-overlay">
-        <app-game-fight-interface></app-game-fight-interface>
-    </div>
-    }
-
-    <app-popup [(isVisible)]="popupVisible"></app-popup>
-
-    @if (showInfo) {
-    <div class="popup">
-        <div class="popup-header">
-            <span>Infos Partie</span>
-            <button (click)="toggleInfo()" class="close-popup">X</button>
+        <div class="map-container">
+            <app-game-map></app-game-map>
         </div>
-        <app-game-map-info></app-game-map-info>
+
+        <div class="right-rectangle">
+            <app-game-map-player-detailed></app-game-map-player-detailed>
+        </div>
+
+        <div class="bottom-rectangle">
+            <div class="chat-info-container">
+                @if (debugMode) {
+                <div class="debug-indicator">Debug Actif</div>
+                }
+
+                <button (click)="toggleChat()" class="toggle-button">Chat & Journal</button>
+                <button (click)="toggleInfo()" class="toggle-button">Info Partie</button>
+            </div>
+            <app-game-map-player-tools></app-game-map-player-tools>
+        </div>
+
+        @if(showFightInterface){
+        <div class="fight-overlay">
+            <app-game-fight-interface></app-game-fight-interface>
+        </div>
+        }
+
+        <app-popup [(isVisible)]="popupVisible"></app-popup>
+
+        @if (showInfo) {
+        <div class="popup">
+            <div class="popup-header">
+                <span>Infos Partie</span>
+                <button (click)="toggleInfo()" class="close-popup">X</button>
+            </div>
+            <app-game-map-info></app-game-map-info>
+        </div>
+        }
     </div>
-    }
-</div>
+</body>
