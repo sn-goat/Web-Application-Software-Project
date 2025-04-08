@@ -6,6 +6,7 @@ export class GameStatsUtils {
     private static readonly minutesMilliseconds = 60000;
     private static readonly secondsMilliseconds = 1000;
     private static readonly timeThreshold = 10;
+    private static readonly hundredPercent = 100;
 
     static calculateStats(playersStats: PlayerStats[], gameStats: GameStats): Stats {
         const stats: Stats = {
@@ -34,7 +35,7 @@ export class GameStatsUtils {
         return playersStats.map((player) => {
             player.totalFights = player.wins + player.losses + player.fleeSuccess;
             // player.itemsPickedCount = player.itemsPicked.size;
-            player.tilesVisitedPercentage = player.tilesVisited.size / tilesNumber;
+            player.tilesVisitedPercentage = `${(player.tilesVisited.size / tilesNumber) * this.hundredPercent}%`;
 
             player.itemsPicked = undefined;
 
@@ -55,8 +56,8 @@ export class GameStatsUtils {
         this.addVisitedTileToGameStats(playersStats, gameStats);
         this.addVisitedTileToGameStats(gameStats.disconnectedPlayers, gameStats);
 
-        gameStats.tilesVisitedPercentage = gameStats.tilesVisited.size / gameStats.tilesNumber;
-        gameStats.doorsHandledPercentage = gameStats.doorsHandled.size / gameStats.doorsNumber;
+        gameStats.tilesVisitedPercentage = `${(gameStats.tilesVisited.size / gameStats.tilesNumber) * this.hundredPercent}%`;
+        gameStats.doorsHandledPercentage = `${(gameStats.doorsHandled.size / gameStats.doorsNumber) * this.hundredPercent}%`;
         // gameStats.flagsCapturedCount = gameStats.flagsCaptured.size;
         this.calculateGameDuration(gameStats);
 

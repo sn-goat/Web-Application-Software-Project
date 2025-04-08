@@ -49,7 +49,7 @@ export interface PlayerStats {
     itemsPicked?: Set<Item>;
     itemsPickedCount?: number;
     tilesVisited?: Set<Vec2>;
-    tilesVisitedPercentage?: number;
+    tilesVisitedPercentage?: string;
     wins: number;
     losses: number;
     fleeSuccess: number; 

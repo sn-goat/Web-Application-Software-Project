@@ -19,10 +19,10 @@ export interface IGame {
 
 export interface GameStats {
     gameDuration: string;
-    tilesVisitedPercentage?: number;
+    tilesVisitedPercentage?: string;
     tilesVisited?: Set<Vec2>;
     doorsHandled?: Set<Vec2>;
-    doorsHandledPercentage?: number;
+    doorsHandledPercentage?: string;
     flagsCaptured?: Set<string>;
     flagsCapturedCount?: number;
     disconnectedPlayers: IPlayer[];
