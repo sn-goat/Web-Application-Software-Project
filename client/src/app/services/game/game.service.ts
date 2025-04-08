@@ -87,9 +87,13 @@ export class GameService {
         });
 
         this.socketReceiver.onItemDropped().subscribe((data) => {
-            const position = data.position;
-            const newMap = this.map.value;
-            newMap[position.y][position.x].item = data.item;
+            const newMap = [...this.map.value];
+            for (const droppedItem of data.droppedItems) {
+                const position = droppedItem.position;
+                newMap[position.y][position.x].item = droppedItem.item;
+                console.log(`Dropped item ${droppedItem.item} at position (${position.x}, ${position.y})`);
+            }
+            
             this.map.next(newMap);
         });
 

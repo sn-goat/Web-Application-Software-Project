@@ -84,12 +84,11 @@ export class Room implements IRoom {
             });
         });
 
-        this.internalEmitter.on(InternalTurnEvents.DroppedItem, (payload: { player: Player; item: Item; position: Vec2 }) => {
+        this.internalEmitter.on(InternalTurnEvents.DroppedItem, (payload: { player: Player; droppedItems: { item: Item; position: Vec2 }[] }) => {
             this.globalEmitter.emit(InternalTurnEvents.DroppedItem, {
                 accessCode: this.accessCode,
                 player: payload.player,
-                item: payload.item,
-                position: payload.position,
+                droppedItems: payload.droppedItems,
             });
         });
 

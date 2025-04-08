@@ -10,12 +10,7 @@ export class GameUtils {
         const position: Vec2 = player.position;
         for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (
-                newPos.y >= 0 &&
-                newPos.y < map.length &&
-                newPos.x >= 0 &&
-                newPos.x < map[0].length
-            ) {
+            if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
                 const targetCell = map[newPos.y][newPos.x];
                 if (this.isValidCellForAction(targetCell)) {
                     console.log('Player can make action (cardinal)');
@@ -26,12 +21,7 @@ export class GameUtils {
         if (player.inventory.includes(Item.BOW)) {
             for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
                 const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-                if (
-                    newPos.y >= 0 &&
-                    newPos.y < map.length &&
-                    newPos.x >= 0 &&
-                    newPos.x < map[0].length
-                ) {
+                if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
                     const targetCell = map[newPos.y][newPos.x];
                     if (this.isValidCellForAttack(targetCell)) {
                         return true;
@@ -232,6 +222,6 @@ export class GameUtils {
     }
 
     private static isValidCellForAttack(cell: Cell): boolean {
-        return (cell.player !== undefined && cell.player !== Avatar.Default);
+        return cell.player !== undefined && cell.player !== Avatar.Default;
     }
 }

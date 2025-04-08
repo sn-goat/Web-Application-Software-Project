@@ -207,22 +207,45 @@ export class Game implements IGame {
 
     dropItems(playerId: string): void {
         const player = this.getPlayer(playerId);
-        const items = player.inventory;
+        if (!player || !player.inventory.length) return;
+
         const playerPosition = player.position;
-        items.forEach((item) => {
+        const itemsToProcess = [...player.inventory];
+        const droppedItems = [];
+
+        for (const item of itemsToProcess) {
             const directions = DEFAULT_MOVEMENT_DIRECTIONS;
+            let dropped = false;
+
             for (const direction of directions) {
+                if (dropped) break;
+
                 const newX = playerPosition.x + direction.x;
                 const newY = playerPosition.y + direction.y;
-                if (this.map[newY] && this.map[newY][newX] && this.map[newY][newX].item === Item.DEFAULT) {
+                const newCell = this.map[newY]?.[newX];
+
+                if (
+                    this._canDropItemHere(newCell) && 
+                    !droppedItems.some(dropItem => dropItem.position.x === newX && dropItem.position.y === newY) &&
+                    !this.players.some(p => p.position.x === newX && p.position.y === newY)
+                ) {
                     this.map[newY][newX].item = item;
                     console.log(`Dropped item ${this.map[newY][newX].item} at position (${newX}, ${newY})`);
                     player.removeItemFromInventory(item);
-                    this.internalEmitter.emit(InternalTurnEvents.DroppedItem, { player, item, position: { x: newX, y: newY } });
-                    break;
+                    droppedItems.push({
+                        item,
+                        position: { x: newX, y: newY },
+                    });
+                    dropped = true;
                 }
             }
-        });
+        }
+        if (droppedItems.length > 0) {
+            this.internalEmitter.emit(InternalTurnEvents.DroppedItem, {
+                player,
+                droppedItems,
+            });
+        }
     }
 
     isPlayerTurn(playerId: string): boolean {
@@ -293,6 +316,13 @@ export class Game implements IGame {
 
     endFight(): void {
         this.fight = new Fight(this.internalEmitter);
+    }
+
+    private _canDropItemHere(cell: Cell): boolean {
+        return (
+            (cell.player === undefined || cell.player === Avatar.Default || cell.item === Item.DEFAULT) &&
+            (cell.tile === Tile.FLOOR || cell.tile === Tile.ICE || cell.tile === Tile.WATER || cell.tile === Tile.OPENED_DOOR)
+        );
     }
 
     private _clearCell(position: Vec2): void {

@@ -94,7 +94,6 @@ export class GameGateway {
         this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.WINNER_FIGHT, this.server);
 
         this.server.to(payload.loser.id).emit(FightEvents.Loser, payload.loser);
-        game.dropItems(payload.loser.id);
         this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.loser.name], GameMessage.LOSER_FIGHT, this.server);
 
         this.journalService.dispatchEntry(
@@ -143,12 +142,11 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.DroppedItem)
-    handleDroppedItem(payload: { accessCode: string; player: Player; item: Item; position: Vec2 }) {
-        this.logger.log(`Player ${payload.player.name} dropped item`);
+    handleDroppedItem(payload: { accessCode: string; player: Player; droppedItems: { item: Item; position: Vec2 }[] }) {
+        this.logger.log(`Player ${payload.player.name} dropped ${payload.droppedItems.length} items`);
         this.server.to(payload.accessCode).emit(TurnEvents.DroppedItem, {
             player: payload.player,
-            item: payload.item,
-            position: payload.position,
+            droppedItems: payload.droppedItems,
         });
     }
 

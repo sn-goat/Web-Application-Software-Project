@@ -232,9 +232,9 @@ export class SocketReceiverService {
         });
     }
 
-    onItemDropped(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
+    onItemDropped(): Observable<{ player: IPlayer; droppedItems: { item: Item; position: Vec2 }[] }> {
         return new Observable((observer) => {
-            this.socket.on(TurnEvents.DroppedItem, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
+            this.socket.on(TurnEvents.DroppedItem, (data: { player: IPlayer; droppedItems: { item: Item; position: Vec2 }[] }) => {
                 observer.next(data);
             });
         });
