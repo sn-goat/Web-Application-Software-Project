@@ -124,6 +124,7 @@ export class Game implements IGame {
             GameUtils.assignTeams(this.players);
         }
         this.hasStarted = true;
+        GameUtils.normalizeChestItems(this.map);
         this.players = GameUtils.sortPlayersBySpeed(this.players);
         const allSpawns = GameUtils.getAllSpawnPoints(this.map);
         const usedSpawnPoints = GameUtils.assignSpawnPoints(this.players, allSpawns, this.map);

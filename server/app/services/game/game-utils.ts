@@ -185,6 +185,33 @@ export class GameUtils {
             shuffled[i].setTeam(i < mid ? Team.RED : Team.BLUE);
         }
     }
+
+    static normalizeChestItems(map: Cell[][]): void {
+        const allItems = Object.values(Item) as Item[];
+        const allowed = allItems.filter(item => item !== Item.CHEST && item !== Item.FLAG && item !== Item.SPAWN);
+        const presentAllowed = new Set<Item>();
+        map.forEach(row => {
+                    row.forEach(cell => {
+                        if (cell.item !== Item.CHEST && cell.item !== Item.FLAG && cell.item !== Item.SPAWN && allowed.includes(cell.item)) {
+                            presentAllowed.add(cell.item);
+                        }
+                    });
+                });
+        const available = allowed.filter(item => !presentAllowed.has(item));
+        map.forEach(row => {
+            row.forEach(cell => {
+                if (cell.item === Item.CHEST) {
+                    if (available.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * available.length);
+                        const newItem = available[randomIndex];
+                        cell.item = newItem;
+                        available.splice(randomIndex, 1);
+                    }
+                }
+            });
+        });
+    }
+
     private static vec2Key(vec: Vec2): string {
         return `${vec.x},${vec.y}`;
     }
