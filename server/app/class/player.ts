@@ -47,6 +47,12 @@ export class Player implements IPlayer {
     private currentDamage: number;
 
     constructor(id: string, player: PlayerInput) {
+        this.tilesVisited = new Set<Vec2>();
+        this.itemsPicked = new Set<Item>();
+        this.takenDamage = 0;
+        this.givenDamage = 0;
+        this.losses = 0;
+        this.fleeSuccess = 0;
         this.id = id;
         this.name = player.name;
         this.avatar = player.avatar;
@@ -97,6 +103,7 @@ export class Player implements IPlayer {
     }
 
     updatePosition(position: Vec2, fieldType: Tile): void {
+        this.tilesVisited.add(position);
         this.attackPower = fieldType === Tile.ICE ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
         this.defensePower = fieldType === Tile.ICE ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
         this.position = position;

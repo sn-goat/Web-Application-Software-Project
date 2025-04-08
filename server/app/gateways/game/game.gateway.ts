@@ -1,18 +1,25 @@
 import { Fight } from '@app/class/fight';
 import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
-import { InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import {
+    InternalFightEvents,
+    InternalGameEvents,
+    InternalTimerEvents,
+    InternalTurnEvents,
+    InternalStatsEvents,
+} from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { Vec2 } from '@common/board';
 import { Tile } from '@common/enums';
 import { MAX_FIGHT_WINS, PathInfo, IRoom } from '@common/game';
-import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, TurnEvents, StatsEvents } from '@common/game.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JournalService } from '@app/services/journal/journal.service';
 import { GameMessage, FightMessage, FightJournal } from '@common/journal';
+import { Stats } from '@common/stats';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -68,6 +75,27 @@ export class GameGateway {
         this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.player.name], GameMessage.START_TURN, this.server);
     }
 
+    @OnEvent(InternalStatsEvents.DispatchStats)
+    handleStats(payload: { accessCode: string; stats: Stats }) {
+        this.logger.log('Dispatching stats for game: ');
+        payload.stats.playersStats.forEach((player) => {
+            this.logger.log('Player stats: ' + player.name);
+            this.logger.log('Stats flee success: ' + player.fleeSuccess);
+            this.logger.log('Stats given damage: ' + player.givenDamage);
+            this.logger.log('Stats taken damage: ' + player.takenDamage);
+            this.logger.log('Stats wins: ' + player.wins);
+            this.logger.log('Stats losses: ' + player.losses);
+            this.logger.log('Stats tiles visited(%): ' + player.tilesVisitedPercentage);
+            this.logger.log('Stats total fights: ' + player.totalFights);
+        });
+        this.logger.log('Game stats: ' + payload.accessCode);
+        this.logger.log('Stats doors handled (%): ' + payload.stats.gameStats.doorsHandledPercentage);
+        this.logger.log('Stats game duration: ' + payload.stats.gameStats.gameDuration);
+        this.logger.log('Stats total tiles visited(%): ' + payload.stats.gameStats.tilesVisitedPercentage);
+
+        this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, payload.stats);
+    }
+
     @OnEvent(InternalFightEvents.ChangeFighter)
     changeFighter(payload: { accessCode: string; fight: Fight }) {
         this.logger.log('Switching turn to player: ' + payload.fight.currentPlayer.name);
@@ -115,6 +143,7 @@ export class GameGateway {
         if (payload.winner.wins >= MAX_FIGHT_WINS) {
             this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);
             this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.END_GAME, this.server);
+            game.dispatchGameStats();
             this.gameManager.closeRoom(payload.accessCode);
         } else if (game.isPlayerTurn(payload.loser.id)) {
             game.endTurn();

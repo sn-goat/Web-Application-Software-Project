@@ -53,6 +53,10 @@ export enum FightEvents {
     // FailedFlee = 'failedFlee',
 }
 
+export enum StatsEvents {
+    StatsUpdate = 'updateStats',
+}
+
 export enum JournalEvent {
     Add = 'addJournalEntry',
     Clear = 'clearJournal',

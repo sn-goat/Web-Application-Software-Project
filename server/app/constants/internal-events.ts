@@ -14,6 +14,10 @@ export enum InternalGameEvents {
     DebugStateChanged = 'debugStateChanged',
 }
 
+export enum InternalStatsEvents {
+    DispatchStats = 'dispatchStats',
+}
+
 export enum InternalTurnEvents {
     Move = 'playerMove',
     // BroadcastDoor = 'doorBroadcast', never used

@@ -1,6 +1,13 @@
 import { Fight } from '@app/class/fight';
 import { Player } from '@app/class/player';
-import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import {
+    InternalEvents,
+    InternalFightEvents,
+    InternalRoomEvents,
+    InternalTimerEvents,
+    InternalTurnEvents,
+    InternalStatsEvents,
+} from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -19,6 +26,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Timer } from './timer';
 import { IPlayer } from '@common/player';
 import { Stats } from '@common/stats';
+import { GameStatsUtils } from '@app/services/game/game-stats-utils';
 
 export class Game implements IGame, GameStats {
     internalEmitter: EventEmitter2;
@@ -41,17 +49,22 @@ export class Game implements IGame, GameStats {
     disconnectedPlayers: IPlayer[];
     tilesNumber: number;
     doorsNumber: number;
+    timeStartOfGame: Date;
+    timeEndOfGame: Date;
 
     stats: Stats;
-
-    startOfGame: Date;
-    endOfGame: Date;
 
     constructor(internalEmitter: EventEmitter2, board: Board) {
         this.internalEmitter = internalEmitter;
         this.map = board.board;
         this.tilesNumber = board.size * board.size;
         this.doorsNumber = this.getDoorsNumber(board.board);
+        this.tilesVisited = new Set<Vec2>();
+        this.doorsHandled = new Set<Vec2>();
+        this.flagsCaptured = new Set<string>();
+        this.disconnectedPlayers = [];
+        this.timeStartOfGame = null;
+        this.timeEndOfGame = null;
         this.players = [];
         this.currentTurn = 0;
         this.hasStarted = false;
@@ -109,12 +122,10 @@ export class Game implements IGame, GameStats {
         this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { name: player.name, playerId, message });
     }
 
-    startGame(): void {
-        this.startOfGame = new Date();
-    }
-
-    endGame(): void {
-        this.endOfGame = new Date();
+    dispatchGameStats(): void {
+        this.endGameTimer();
+        const stats = GameStatsUtils.calculateStats(this.players, this);
+        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, stats);
     }
 
     getMapSize(): number {
@@ -145,6 +156,7 @@ export class Game implements IGame, GameStats {
         const allSpawns = GameUtils.getAllSpawnPoints(this.map);
         const usedSpawnPoints = GameUtils.assignSpawnPoints(this.players, allSpawns, this.map);
         GameUtils.removeUnusedSpawnPoints(this.map, usedSpawnPoints);
+        this.startGameTimer();
         return this;
     }
 
@@ -158,9 +170,6 @@ export class Game implements IGame, GameStats {
     processPath(pathInfo: PathInfo, playerId: string): void {
         const player = this.getPlayer(playerId);
         if (player && !this.pendingEndTurn) {
-            pathInfo.path.forEach((pos) => {
-                player.tilesVisited.add(pos);
-            });
             this.movementInProgress = true;
             let index = 0;
             const path = pathInfo.path;
@@ -286,6 +295,14 @@ export class Game implements IGame, GameStats {
 
     endFight(): void {
         this.fight = new Fight(this.internalEmitter);
+    }
+
+    private startGameTimer(): void {
+        this.timeStartOfGame = new Date();
+    }
+
+    private endGameTimer(): void {
+        this.timeEndOfGame = new Date();
     }
 
     private getDoorsNumber(map: Cell[][]): number {

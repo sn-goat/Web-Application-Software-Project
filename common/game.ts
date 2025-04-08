@@ -28,8 +28,8 @@ export interface GameStats {
     disconnectedPlayers: IPlayer[];
     tilesNumber: number;
     doorsNumber: number;
-    startOfGame?: Date;
-    endOfGame?: Date;
+    timeStartOfGame?: Date;
+    timeEndOfGame?: Date;
 }
 
 export interface GameFormData {

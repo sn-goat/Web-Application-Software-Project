@@ -1,5 +1,12 @@
 import { Game } from '@app/class/game';
-import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import {
+    InternalFightEvents,
+    InternalGameEvents,
+    InternalRoomEvents,
+    InternalTimerEvents,
+    InternalTurnEvents,
+    InternalStatsEvents,
+} from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
@@ -7,6 +14,7 @@ import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
 import { Player } from './player';
+import { Stats } from '@common/stats';
 
 export class Room implements IRoom {
     accessCode: string;
@@ -41,6 +49,10 @@ export class Room implements IRoom {
 
         this.internalEmitter.on(InternalTimerEvents.TurnUpdate, (remainingTime) => {
             this.globalEmitter.emit(InternalTimerEvents.TurnUpdate, { accessCode: this.accessCode, remainingTime });
+        });
+
+        this.internalEmitter.on(InternalStatsEvents.DispatchStats, (stats: Stats) => {
+            this.globalEmitter.emit(InternalStatsEvents.DispatchStats, { accessCode: this.accessCode, stats });
         });
 
         this.internalEmitter.on(InternalTimerEvents.FightUpdate, (remainingTime) => {

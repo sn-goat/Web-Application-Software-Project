@@ -10,14 +10,14 @@ export class GameStatsUtils {
     static calculateStats(playersStats: PlayerStats[], gameStats: GameStats): Stats {
         const stats: Stats = {
             playersStats: this.calculatePlayersStats(playersStats, gameStats.tilesNumber),
-            gameStats: this.calculateGameStats(gameStats, playersStats),
             disconnectedPlayersStats: this.calculatePlayersStats(gameStats.disconnectedPlayers, gameStats.tilesNumber),
+            gameStats: this.calculateGameStats(gameStats, playersStats),
         };
         return stats;
     }
 
     private static calculateGameDuration(gameStats: GameStats): void {
-        const gameDuration = gameStats.startOfGame.getTime() - gameStats.startOfGame.getTime();
+        const gameDuration = gameStats.timeEndOfGame.getTime() - gameStats.timeStartOfGame.getTime();
         const minutes = Math.floor(gameDuration / this.minutesMilliseconds);
         const seconds = Math.floor((gameDuration % this.minutesMilliseconds) / this.secondsMilliseconds);
 
@@ -26,32 +26,38 @@ export class GameStatsUtils {
 
         gameStats.gameDuration = `${minutesFormat}:${secondsFormat}`;
 
-        gameStats.startOfGame = undefined;
-        gameStats.endOfGame = undefined;
+        gameStats.timeStartOfGame = undefined;
+        gameStats.timeEndOfGame = undefined;
     }
 
     private static calculatePlayersStats(playersStats: PlayerStats[], tilesNumber: number): PlayerStats[] {
         return playersStats.map((player) => {
             player.totalFights = player.wins + player.losses + player.fleeSuccess;
-            player.itemsPickedCount = player.itemsPicked.size;
-            player.tilesVisitedPercentage = player.tilesVisited.size / (tilesNumber * tilesNumber);
+            // player.itemsPickedCount = player.itemsPicked.size;
+            player.tilesVisitedPercentage = player.tilesVisited.size / tilesNumber;
 
             player.itemsPicked = undefined;
-            player.tilesVisited = undefined;
 
             return player;
         });
     }
 
-    private static calculateGameStats(gameStats: GameStats, playersStats: PlayerStats[]): GameStats {
+    private static addVisitedTileToGameStats(playersStats: PlayerStats[], gameStats: GameStats): void {
         playersStats.forEach((player) => {
             player.tilesVisited.forEach((tile) => {
                 gameStats.tilesVisited.add(tile);
             });
+            player.tilesVisited = undefined;
         });
+    }
+
+    private static calculateGameStats(gameStats: GameStats, playersStats: PlayerStats[]): GameStats {
+        this.addVisitedTileToGameStats(playersStats, gameStats);
+        this.addVisitedTileToGameStats(gameStats.disconnectedPlayers, gameStats);
+
         gameStats.tilesVisitedPercentage = gameStats.tilesVisited.size / gameStats.tilesNumber;
         gameStats.doorsHandledPercentage = gameStats.doorsHandled.size / gameStats.doorsNumber;
-        gameStats.flagsCapturedCount = gameStats.flagsCaptured.size;
+        // gameStats.flagsCapturedCount = gameStats.flagsCaptured.size;
         this.calculateGameDuration(gameStats);
 
         gameStats.tilesVisited = undefined;
