@@ -17,6 +17,7 @@ import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
+import { PopupService } from '@app/services/popup/popup.service';
 import { firstValueFrom, Subscription, timer } from 'rxjs';
 
 @Component({
@@ -52,6 +53,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly socketEmitter = inject(SocketEmitterService);
     private readonly socketReceiver = inject(SocketReceiverService);
     private router = inject(Router);
+    private readonly popupService = inject(PopupService);
 
     private readonly dialog = inject(MatDialog);
     @HostListener('window:beforeunload', ['$event'])
@@ -111,6 +113,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     toggleChat() {
         this.popupVisible = !this.popupVisible;
+        this.popupService.setPopupVisible(this.popupVisible);
     }
 
     ngOnDestroy(): void {
