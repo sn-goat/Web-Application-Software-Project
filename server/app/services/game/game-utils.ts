@@ -209,6 +209,48 @@ export class GameUtils {
         });
     }
 
+    static canDropItem(cell: Cell): boolean {
+        return (
+            (cell.player === undefined || cell.player === Avatar.Default || cell.item === Item.DEFAULT) &&
+            (cell.tile === Tile.FLOOR || cell.tile === Tile.ICE || cell.tile === Tile.WATER || cell.tile === Tile.OPENED_DOOR)
+        );
+    }
+
+    static findValidDropCell(map: Cell[][], playerPos: Vec2, droppedItems: { position: Vec2 }[], players: any[]): Vec2 | null {
+        const rows = map.length;
+        const cols = map[0].length;
+        const queue: Vec2[] = [playerPos];
+        const visited = new Set<string>();
+        const key = (vec: Vec2) => `${vec.x},${vec.y}`;
+        visited.add(key(playerPos));
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (!(current.x === playerPos.x && current.y === playerPos.y)) {
+                const cell = map[current.y]?.[current.x];
+                if (
+                    cell &&
+                    this.canDropItem(cell) &&
+                    !droppedItems.some(drop => drop.position.x === current.x && drop.position.y === current.y) &&
+                    !players.some(p => p.position.x === current.x && p.position.y === current.y)
+                ) {
+                    return { x: current.x, y: current.y };
+                }
+            }
+            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
+                const newX = current.x + dir.x;
+                const newY = current.y + dir.y;
+                const newPos: Vec2 = { x: newX, y: newY };
+                const newKey = key(newPos);
+                if (newX >= 0 && newY >= 0 && newX < cols && newY < rows && !visited.has(newKey)) {
+                    visited.add(newKey);
+                    queue.push(newPos);
+                }
+            }
+        }
+        return null;
+    }
+
     private static vec2Key(vec: Vec2): string {
         return `${vec.x},${vec.y}`;
     }

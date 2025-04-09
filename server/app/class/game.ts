@@ -2,12 +2,7 @@ import { Fight } from '@app/class/fight';
 import { Player } from '@app/class/player';
 import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import {
-    FIGHT_TURN_DURATION_IN_S,
-    FIGHT_TURN_DURATION_NO_FLEE_IN_S,
-    MOVEMENT_TIMEOUT_IN_MS,
-    THREE_SECONDS_IN_MS,
-    TimerType,
-    TURN_DURATION_IN_S,
+    FIGHT_TURN_DURATION_IN_S, FIGHT_TURN_DURATION_NO_FLEE_IN_S, MOVEMENT_TIMEOUT_IN_MS, THREE_SECONDS_IN_MS, TimerType, TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
 import { Board } from '@app/model/database/board';
 import { GameUtils } from '@app/services/game/game-utils';
@@ -206,39 +201,19 @@ export class Game implements IGame {
     dropItems(playerId: string): void {
         const player = this.getPlayer(playerId);
         if (!player || !player.inventory.length) return;
-        const playerPosition = player.position;
-        const itemsToProcess = [...player.inventory];
+        const playerPos = player.position;
         const droppedItems = [];
-        for (const item of itemsToProcess) {
-            let dropped = false;
-            const maxRadius = Math.max(this.map.length, this.map[0]?.length || 0);
-            let radius = 1;
-            while (!dropped && radius <= maxRadius) {
-                const ringCells: { dx: number; dy: number }[] = [];
-                for (let dx = -radius; dx <= radius; dx++) {
-                    for (let dy = -radius; dy <= radius; dy++) {
-                        if (Math.max(Math.abs(dx), Math.abs(dy)) === radius) {
-                            ringCells.push({ dx, dy });
-                        }
-                    }
-                }
-                for (const cell of ringCells) {
-                    const newX = playerPosition.x + cell.dx;
-                    const newY = playerPosition.y + cell.dy;
-                    const newCell = this.map[newY]?.[newX];
-                    if (
-                        this._canDropItemHere(newCell) &&
-                        !droppedItems.some((dropItem) => dropItem.position.x === newX && dropItem.position.y === newY) &&
-                        !this.players.some((p) => p.position.x === newX && p.position.y === newY)
-                    ) {
-                        this.map[newY][newX].item = item;
-                        player.removeItemFromInventory(item);
-                        droppedItems.push({ item, position: { x: newX, y: newY } });
-                        dropped = true;
-                        break;
-                    }
-                }
-                radius++;
+        for (const item of [...player.inventory]) {
+            const dropPos = GameUtils.findValidDropCell(this.map, playerPos, droppedItems, this.players);
+            if (dropPos) {
+                this.map[dropPos.y][dropPos.x].item = item;
+                player.removeItemFromInventory(item);
+                droppedItems.push({ item, position: dropPos });
+            } else {
+                const fallback = player.spawnPosition || playerPos;
+                this.map[fallback.y][fallback.x].item = item;
+                player.removeItemFromInventory(item);
+                droppedItems.push({ item, position: { ...fallback } });
             }
         }
         if (droppedItems.length > 0) {
