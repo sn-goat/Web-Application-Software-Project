@@ -15,7 +15,7 @@ import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, PathInfo } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
-import { DEFAULT_MOVEMENT_DIRECTIONS } from '@common/player';
+// import { DIAGONAL_MOVEMENT_DIRECTIONS } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { log } from 'console';
 import { Timer } from './timer';
@@ -209,36 +209,41 @@ export class Game implements IGame {
     dropItems(playerId: string): void {
         const player = this.getPlayer(playerId);
         if (!player || !player.inventory.length) return;
-
         const playerPosition = player.position;
         const itemsToProcess = [...player.inventory];
         const droppedItems = [];
-
         for (const item of itemsToProcess) {
-            const directions = DEFAULT_MOVEMENT_DIRECTIONS;
             let dropped = false;
-
-            for (const direction of directions) {
-                if (dropped) break;
-
-                const newX = playerPosition.x + direction.x;
-                const newY = playerPosition.y + direction.y;
-                const newCell = this.map[newY]?.[newX];
-
-                if (
-                    this._canDropItemHere(newCell) && 
-                    !droppedItems.some(dropItem => dropItem.position.x === newX && dropItem.position.y === newY) &&
-                    !this.players.some(p => p.position.x === newX && p.position.y === newY)
-                ) {
-                    this.map[newY][newX].item = item;
-                    console.log(`Dropped item ${this.map[newY][newX].item} at position (${newX}, ${newY})`);
-                    player.removeItemFromInventory(item);
-                    droppedItems.push({
-                        item,
-                        position: { x: newX, y: newY },
-                    });
-                    dropped = true;
+            const maxRadius = Math.max(this.map.length, this.map[0]?.length || 0);
+            let radius = 1;
+            while (!dropped && radius <= maxRadius) {
+                const ringCells: { dx: number; dy: number }[] = [];
+                for (let dx = -radius; dx <= radius; dx++) {
+                    for (let dy = -radius; dy <= radius; dy++) {
+                        if (Math.max(Math.abs(dx), Math.abs(dy)) === radius) {
+                            ringCells.push({ dx, dy });
+                        }
+                    }
                 }
+                for (const cell of ringCells) {
+                    const newX = playerPosition.x + cell.dx;
+                    const newY = playerPosition.y + cell.dy;
+                    const newCell = this.map[newY]?.[newX];
+                    if (
+                        this._canDropItemHere(newCell) &&
+                        !droppedItems.some((dropItem) => dropItem.position.x === newX && dropItem.position.y === newY) &&
+                        !this.players.some((p) => p.position.x === newX && p.position.y === newY)
+                    ) {
+                        this.map[newY][newX].item = item;
+                        // eslint-disable-next-line no-console
+                        console.log(`Dropped item ${this.map[newY][newX].item} at position (${newX}, ${newY})`);
+                        player.removeItemFromInventory(item);
+                        droppedItems.push({ item, position: { x: newX, y: newY } });
+                        dropped = true;
+                        break;
+                    }
+                }
+                radius++;
             }
         }
         if (droppedItems.length > 0) {
