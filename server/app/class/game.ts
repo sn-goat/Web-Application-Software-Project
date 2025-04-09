@@ -2,7 +2,12 @@ import { Fight } from '@app/class/fight';
 import { Player } from '@app/class/player';
 import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import {
-    FIGHT_TURN_DURATION_IN_S, FIGHT_TURN_DURATION_NO_FLEE_IN_S, MOVEMENT_TIMEOUT_IN_MS, THREE_SECONDS_IN_MS, TimerType, TURN_DURATION_IN_S,
+    FIGHT_TURN_DURATION_IN_S,
+    FIGHT_TURN_DURATION_NO_FLEE_IN_S,
+    MOVEMENT_TIMEOUT_IN_MS,
+    THREE_SECONDS_IN_MS,
+    TimerType,
+    TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
 import { Board } from '@app/model/database/board';
 import { GameUtils } from '@app/services/game/game-utils';

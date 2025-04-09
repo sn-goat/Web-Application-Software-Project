@@ -216,7 +216,7 @@ export class GameUtils {
         );
     }
 
-    static findValidDropCell(map: Cell[][], playerPos: Vec2, droppedItems: { position: Vec2 }[], players: any[]): Vec2 | null {
+    static findValidDropCell(map: Cell[][], playerPos: Vec2, droppedItems: { position: Vec2 }[], players: Player[]): Vec2 | null {
         const rows = map.length;
         const cols = map[0].length;
         const queue: Vec2[] = [playerPos];
@@ -231,8 +231,8 @@ export class GameUtils {
                 if (
                     cell &&
                     this.canDropItem(cell) &&
-                    !droppedItems.some(drop => drop.position.x === current.x && drop.position.y === current.y) &&
-                    !players.some(p => p.position.x === current.x && p.position.y === current.y)
+                    !droppedItems.some((drop) => drop.position.x === current.x && drop.position.y === current.y) &&
+                    !players.some((p) => p.position.x === current.x && p.position.y === current.y)
                 ) {
                     return { x: current.x, y: current.y };
                 }
