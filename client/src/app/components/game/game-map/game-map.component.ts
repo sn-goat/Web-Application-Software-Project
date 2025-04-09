@@ -92,9 +92,9 @@ export class GameMapComponent implements OnInit, OnDestroy {
                     return;
                 }
                 if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
-                    const player = this.playerService.getPlayer();
-                    const dx = Math.abs(player.position.x - cell.position.x);
-                    const dy = Math.abs(player.position.y - cell.position.y);
+                    const myPlayer = this.playerService.getPlayer();
+                    const dx = Math.abs(myPlayer.position.x - cell.position.x);
+                    const dy = Math.abs(myPlayer.position.y - cell.position.y);
                     if (dx > 0 && dy > 0) {
                         return;
                     }
@@ -154,9 +154,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     isPlayerAtSpawn(player: IPlayer): boolean {
-        return player &&
-            player.position.x === player.spawnPosition.x &&
-            player.position.y === player.spawnPosition.y;
+        return player && player.position.x === player.spawnPosition.x && player.position.y === player.spawnPosition.y;
     }
 
     onCellHovered(cell: Cell) {

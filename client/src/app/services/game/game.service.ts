@@ -127,10 +127,13 @@ export class GameService {
         const currentCell: Cell = this.map.value[position.y][position.x];
         if (
             currentCell.tile === Tile.OPENED_DOOR &&
-            (currentCell.item !== Item.DEFAULT || currentCell.item !== undefined || currentCell.item !== null)
+            currentCell.item !== Item.DEFAULT &&
+            currentCell.item !== undefined &&
+            currentCell.item !== null
         ) {
             return;
         }
+
         this.socketEmitter.changeDoorState(position, this.playerService.getPlayer().id);
     }
 
