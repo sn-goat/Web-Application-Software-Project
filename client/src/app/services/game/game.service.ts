@@ -93,7 +93,7 @@ export class GameService {
                 newMap[position.y][position.x].item = droppedItem.item;
                 console.log(`Dropped item ${droppedItem.item} at position (${position.x}, ${position.y})`);
             }
-            
+
             this.map.next(newMap);
         });
 
@@ -124,6 +124,13 @@ export class GameService {
     }
 
     toggleDoor(position: Vec2): void {
+        const currentCell: Cell = this.map.value[position.y][position.x];
+        if (
+            currentCell.tile === Tile.OPENED_DOOR &&
+            (currentCell.item !== Item.DEFAULT || currentCell.item !== undefined || currentCell.item !== null)
+        ) {
+            return;
+        }
         this.socketEmitter.changeDoorState(position, this.playerService.getPlayer().id);
     }
 
