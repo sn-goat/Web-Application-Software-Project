@@ -132,7 +132,6 @@ export class Game implements IGame {
         return this;
     }
 
-    // TODO: Ajouter Find possible actions au turn
     configureTurn(): { player: Player; path: Record<string, PathInfo> } {
         const player = this.players[this.currentTurn];
         player.initTurn();

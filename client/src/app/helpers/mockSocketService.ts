@@ -149,7 +149,7 @@ export class MockSocketService {
 
     onInventoryFull() {
         return this.inventoryFull.asObservable();
-    }   
+    }
 
     onMapUpdate() {
         return this.mapUpdate.asObservable();
@@ -259,7 +259,7 @@ export class MockSocketService {
     triggerItemCollected(data: Item) {
         this.itemCollected.next(data);
     }
-    
+
     triggerItemDropped(data: Item) {
         this.itemDropped.next(data);
     }

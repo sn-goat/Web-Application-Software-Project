@@ -55,12 +55,12 @@ describe('GameMapComponent', () => {
             isActivePlayer: new BehaviorSubject(false),
             path: new BehaviorSubject<Map<string, PathInfo> | null>(null),
             sendMove: jasmine.createSpy('sendMove'),
-            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({ 
-                id: 'player1', 
+            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({
+                id: 'player1',
                 position: { x: 5, y: 5 },
                 spawnPosition: { x: 5, y: 5 },
-                inventory: [] 
-            })
+                inventory: [],
+            }),
         };
 
         // Création des mocks pour PlayerService, GameService et FightLogicService
@@ -68,12 +68,13 @@ describe('GameMapComponent', () => {
             isActivePlayer: new BehaviorSubject(false),
             path: new BehaviorSubject<Map<string, PathInfo> | null>(null),
             sendMove: jasmine.createSpy('sendMove'),
-            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({ 
-                id: 'player1', 
+            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({
+                id: 'player1',
                 position: { x: 5, y: 5 },
                 spawnPosition: { x: 5, y: 5 },
-                inventory: [] 
-            })};
+                inventory: [],
+            }),
+        };
         gameServiceMock = {
             isWithinActionRange: jasmine.createSpy('isWithinActionRange'),
             initFight: jasmine.createSpy('initFight'),

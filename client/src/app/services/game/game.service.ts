@@ -24,7 +24,6 @@ export class GameService {
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     journalEntries: BehaviorSubject<Entry[]> = new BehaviorSubject<Entry[]>([]);
-
     private organizerId: string = '';
     private dialog = inject(MatDialog);
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
@@ -294,26 +293,10 @@ export class GameService {
             return possibleActions;
         }
 
-        for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
-            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
-                const cell = this.map.value[newPos.y][newPos.x];
-                if (this.isValidCellForDoor(cell) || this.isValidCellForFight(cell)) {
-                    possibleActions.add(`${newPos.x},${newPos.y}`);
-                }
-            }
-        }
+        this.checkDirectionsForActions(position, DEFAULT_MOVEMENT_DIRECTIONS, possibleActions, true);
 
         if (player.inventory.includes(Item.BOW)) {
-            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
-                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-                if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
-                    const cell = this.map.value[newPos.y][newPos.x];
-                    if (this.isValidCellForFight(cell)) {
-                        possibleActions.add(`${newPos.x},${newPos.y}`);
-                    }
-                }
-            }
+            this.checkDirectionsForActions(position, DIAGONAL_MOVEMENT_DIRECTIONS, possibleActions, false);
         }
 
         return possibleActions;
@@ -331,6 +314,22 @@ export class GameService {
             position: collectedPosition,
             accessCode: this.socketEmitter.getAccessCode(),
         });
+    }
+
+    private checkDirectionsForActions(position: Vec2, directions: Vec2[], possibleActions: Set<string>, checkDoors: boolean): void {
+        for (const dir of directions) {
+            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            if (this.isValidPosition(newPos)) {
+                const cell = this.map.value[newPos.y][newPos.x];
+                if ((checkDoors && this.isValidCellForDoor(cell)) || this.isValidCellForFight(cell)) {
+                    possibleActions.add(`${newPos.x},${newPos.y}`);
+                }
+            }
+        }
+    }
+
+    private isValidPosition(pos: Vec2): boolean {
+        return pos.y >= 0 && pos.y < this.map.value.length && pos.x >= 0 && pos.x < this.map.value[0].length;
     }
 
     private findDefender(avatar: Avatar): IPlayer | null {

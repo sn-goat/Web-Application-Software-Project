@@ -13,7 +13,6 @@ export class PlayerService implements OnDestroy {
     myPlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isActivePlayer: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     path: BehaviorSubject<Map<string, PathInfo>> = new BehaviorSubject<Map<string, PathInfo>>(new Map());
-    // TODO: Ajouter Possible Actions en tant que BehaviorSubject
     subscriptions: Subscription[] = [];
     private isAdmin: boolean = false;
 
@@ -32,7 +31,6 @@ export class PlayerService implements OnDestroy {
 
             this.socketReceiver.onPlayerTurnChanged().subscribe((turn: TurnInfo) => {
                 if (turn.player.id === this.getPlayer().id) {
-                    // TODO: Faire une Update de Possible Actions
                     this.setPath(turn.path);
                     this.setPlayer(turn.player);
                 } else {
@@ -43,7 +41,6 @@ export class PlayerService implements OnDestroy {
 
             this.socketReceiver.onPlayerTurnUpdate().subscribe((data) => {
                 if (data.player.id === this.getPlayer().id) {
-                    // TODO: Faire une Update de Possible Actions
                     this.setPlayer(data.player);
                     this.setPath(data.path);
                     this.setPlayerActive(true);

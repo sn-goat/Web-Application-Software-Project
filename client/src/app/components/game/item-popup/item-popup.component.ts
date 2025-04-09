@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './item-popup.component.html',
     styleUrls: ['./item-popup.component.scss'],
 })
-export class ItemPopup implements OnInit, OnDestroy {
+export class ItemPopupComponent implements OnInit, OnDestroy {
     items: Item[] = [];
     newItem: Item;
     readonly src = DEFAULT_PATH_ITEMS;
@@ -20,14 +20,12 @@ export class ItemPopup implements OnInit, OnDestroy {
     private subscriptions: Subscription[] = [];
 
     constructor(
-        private dialogRef: MatDialogRef<ItemPopup>,
+        private dialogRef: MatDialogRef<ItemPopupComponent>,
         private gameService: GameService,
         @Inject(MAT_DIALOG_DATA) public data: { inventory: Item[]; collectedPosition: Vec2 },
     ) {}
 
     ngOnInit(): void {
-        console.log('Inventory data:', this.data.inventory);
-        console.log('Collected position:', this.data.collectedPosition);
         this.items = this.data.inventory;
         this.newItem = this.items[this.items.length - 1];
         this.collectedPosition = this.data.collectedPosition;
