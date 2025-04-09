@@ -10,7 +10,7 @@ import { GameMapPlayerDetailedComponent } from '@app/components/game/game-map-pl
 import { GameMapPlayerToolsComponent } from '@app/components/game/game-map-player-tools/game-map-player-tools.component';
 import { GameMapPlayerComponent } from '@app/components/game/game-map-player/game-map-player.component';
 import { GameMapComponent } from '@app/components/game/game-map/game-map.component';
-import { ItemPopup } from '@app/components/game/item-popup/item-popup.component';
+import { ItemPopupComponent } from '@app/components/game/item-popup/item-popup.component';
 import { PopupComponent } from '@app/components/popup/popup.component';
 import { Alert } from '@app/constants/enums';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
@@ -98,7 +98,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
             this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer; item: Item; position: Vec2 }) => {
                 const localPlayer = this.playerService.getPlayer();
                 if (localPlayer && payload && payload.player && payload.player.id === localPlayer.id) {
-                    this.dialog.open(ItemPopup, {
+                    this.dialog.open(ItemPopupComponent, {
                         data: {
                             inventory: [...payload.player.inventory, payload.item],
                             collectedPosition: payload.position,

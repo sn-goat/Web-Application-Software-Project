@@ -162,10 +162,7 @@ describe('Game', () => {
             const emitSpy = jest.spyOn(emitter, 'emit');
             game.removePlayer('unknown', 'message');
             expect(game.players).toHaveLength(1);
-            expect(emitSpy).not.toHaveBeenCalledWith(
-                InternalRoomEvents.PlayerRemoved,
-                expect.anything()
-            );
+            expect(emitSpy).not.toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, expect.anything());
         });
     });
 
@@ -247,7 +244,7 @@ describe('Game', () => {
             game.processPath(pathInfo, player1.id);
             expect(game.movementInProgress).toBe(true);
             // Remarque : pour un chemin de 2 positions, on effectue 1 déplacement, d'où (pathInfo.path.length - 1)
-            jest.advanceTimersByTime(MOVEMENT_TIMEOUT_IN_MS * (pathInfo.path.length));
+            jest.advanceTimersByTime(MOVEMENT_TIMEOUT_IN_MS * pathInfo.path.length);
             expect(movePlayerSpy).toHaveBeenCalledTimes(1);
             expect(decrementSpy).toHaveBeenCalledWith(player1, pathInfo.cost / pathInfo.path.length);
             expect(game.movementInProgress).toBe(false);
@@ -318,33 +315,33 @@ describe('Game', () => {
             const cell = createDummyCell({ x: 0, y: 0 }, Tile.FLOOR, undefined, Item.DEFAULT);
             expect((game as any)._canDropItemHere(cell)).toBe(true);
         });
-    
+
         it('should return true when cell has default player and valid tile', () => {
             const cell = createDummyCell({ x: 0, y: 0 }, Tile.ICE, Avatar.Default, Item.DEFAULT);
             expect((game as any)._canDropItemHere(cell)).toBe(true);
         });
-    
+
         it('should return true when cell has player but default item and valid tile', () => {
             const cell = createDummyCell({ x: 0, y: 0 }, Tile.WATER, Avatar.Cleric, Item.DEFAULT);
             expect((game as any)._canDropItemHere(cell)).toBe(true);
         });
-    
+
         it('should return true for all valid tile types', () => {
             const validTiles = [Tile.FLOOR, Tile.ICE, Tile.WATER, Tile.OPENED_DOOR];
-            validTiles.forEach(tile => {
+            validTiles.forEach((tile) => {
                 const cell = createDummyCell({ x: 0, y: 0 }, tile);
                 expect((game as any)._canDropItemHere(cell)).toBe(true);
             });
         });
-    
+
         it('should return false when cell has player, non-default item, and valid tile', () => {
             const cell = createDummyCell({ x: 0, y: 0 }, Tile.FLOOR, Avatar.Cleric, Item.SWORD);
             expect((game as any)._canDropItemHere(cell)).toBe(false);
         });
-    
+
         it('should return false when cell has invalid tile type', () => {
             const invalidTiles = [Tile.WALL, Tile.CLOSED_DOOR];
-            invalidTiles.forEach(tile => {
+            invalidTiles.forEach((tile) => {
                 const cell = createDummyCell({ x: 0, y: 0 }, tile);
                 expect((game as any)._canDropItemHere(cell)).toBe(false);
             });

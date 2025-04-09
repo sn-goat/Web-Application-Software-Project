@@ -15,9 +15,7 @@ import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, PathInfo } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
-// import { DIAGONAL_MOVEMENT_DIRECTIONS } from '@common/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { log } from 'console';
 import { Timer } from './timer';
 
 export class Game implements IGame {
@@ -234,8 +232,6 @@ export class Game implements IGame {
                         !this.players.some((p) => p.position.x === newX && p.position.y === newY)
                     ) {
                         this.map[newY][newX].item = item;
-                        // eslint-disable-next-line no-console
-                        console.log(`Dropped item ${this.map[newY][newX].item} at position (${newX}, ${newY})`);
                         player.removeItemFromInventory(item);
                         droppedItems.push({ item, position: { x: newX, y: newY } });
                         dropped = true;
@@ -294,7 +290,6 @@ export class Game implements IGame {
     }
 
     playerAttack(): void {
-        log(`Player ${this.fight.currentPlayer.name} has attacked`);
         const fightResult = this.fight.playerAttack(this.isDebugMode);
         if (fightResult === null) {
             this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
@@ -386,7 +381,6 @@ export class Game implements IGame {
     private checkForEndTurn(player: Player): void {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
         if (this.isPlayerContinueTurn(player, path.size)) {
-            log(`Player ${player.name} can continue turn`);
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {
             this.endTurn();
@@ -398,21 +392,10 @@ export class Game implements IGame {
     }
 
     private isPlayerCanMove(pathLength: number): boolean {
-        log(`Player can move on: ${pathLength}`);
         return pathLength > 0;
     }
 
     private isPlayerCanMakeAction(player: Player): boolean {
         return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player);
-    }
-
-    private cellHasPlayerToAttack(cell: Cell, player): boolean {
-        const hasPlayer = cell.player !== undefined && cell.player !== Avatar.Default;
-        if (this.isCTF) {
-            const isEnemy = this.getPlayerByAvatar(cell.player).team !== player.team;
-            return hasPlayer && isEnemy;
-        } else {
-            return hasPlayer;
-        }
     }
 }

@@ -36,7 +36,7 @@ describe('GameGateway', () => {
         };
 
         server = {
-            to: jest.fn().mockReturnValue(broadcastOperator)
+            to: jest.fn().mockReturnValue(broadcastOperator),
         } as unknown as jest.Mocked<Server>;
 
         client = {
@@ -395,7 +395,6 @@ describe('GameGateway', () => {
 
             expect(game.movePlayerDebug).toHaveBeenCalledWith(direction, playerId);
         });
-
 
         it('handleChangeDoorState should change door state and broadcast', () => {
             const accessCode = 'game123';

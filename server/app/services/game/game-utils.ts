@@ -13,7 +13,6 @@ export class GameUtils {
             if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
                 const targetCell = map[newPos.y][newPos.x];
                 if (this.isValidCellForAction(targetCell)) {
-                    console.log('Player can make action (cardinal)');
                     return true;
                 }
             }
@@ -174,13 +173,11 @@ export class GameUtils {
     }
     static assignTeams(playersList: Player[]): void {
         const shuffled = [...playersList];
-        // Shuffle players
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         const mid = Math.floor(shuffled.length / 2);
-        // Assign teams
         for (let i = 0; i < shuffled.length; i++) {
             shuffled[i].setTeam(i < mid ? Team.RED : Team.BLUE);
         }
@@ -188,18 +185,18 @@ export class GameUtils {
 
     static normalizeChestItems(map: Cell[][]): void {
         const allItems = Object.values(Item) as Item[];
-        const allowed = allItems.filter(item => item !== Item.CHEST && item !== Item.FLAG && item !== Item.SPAWN);
+        const allowed = allItems.filter((item) => item !== Item.CHEST && item !== Item.FLAG && item !== Item.SPAWN);
         const presentAllowed = new Set<Item>();
-        map.forEach(row => {
-                    row.forEach(cell => {
-                        if (cell.item !== Item.CHEST && cell.item !== Item.FLAG && cell.item !== Item.SPAWN && allowed.includes(cell.item)) {
-                            presentAllowed.add(cell.item);
-                        }
-                    });
-                });
-        const available = allowed.filter(item => !presentAllowed.has(item));
-        map.forEach(row => {
-            row.forEach(cell => {
+        map.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item !== Item.CHEST && cell.item !== Item.FLAG && cell.item !== Item.SPAWN && allowed.includes(cell.item)) {
+                    presentAllowed.add(cell.item);
+                }
+            });
+        });
+        const available = allowed.filter((item) => !presentAllowed.has(item));
+        map.forEach((row) => {
+            row.forEach((cell) => {
                 if (cell.item === Item.CHEST) {
                     if (available.length > 0) {
                         const randomIndex = Math.floor(Math.random() * available.length);
