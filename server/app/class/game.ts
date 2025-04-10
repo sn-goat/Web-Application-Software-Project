@@ -298,13 +298,6 @@ export class Game implements IGame {
         this.fight = new Fight(this.internalEmitter);
     }
 
-    private _canDropItemHere(cell: Cell): boolean {
-        return (
-            (cell.player === undefined || cell.player === Avatar.Default || cell.item === Item.DEFAULT) &&
-            (cell.tile === Tile.FLOOR || cell.tile === Tile.ICE || cell.tile === Tile.WATER || cell.tile === Tile.OPENED_DOOR)
-        );
-    }
-
     private _clearCell(position: Vec2): void {
         this.map[position.y][position.x].player = Avatar.Default;
     }

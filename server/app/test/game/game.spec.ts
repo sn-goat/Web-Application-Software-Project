@@ -310,44 +310,6 @@ describe('Game', () => {
         });
     });
 
-    describe('_canDropItemHere', () => {
-        it('should return true when cell has no player and valid tile', () => {
-            const cell = createDummyCell({ x: 0, y: 0 }, Tile.FLOOR, undefined, Item.DEFAULT);
-            expect((game as any)._canDropItemHere(cell)).toBe(true);
-        });
-
-        it('should return true when cell has default player and valid tile', () => {
-            const cell = createDummyCell({ x: 0, y: 0 }, Tile.ICE, Avatar.Default, Item.DEFAULT);
-            expect((game as any)._canDropItemHere(cell)).toBe(true);
-        });
-
-        it('should return true when cell has player but default item and valid tile', () => {
-            const cell = createDummyCell({ x: 0, y: 0 }, Tile.WATER, Avatar.Cleric, Item.DEFAULT);
-            expect((game as any)._canDropItemHere(cell)).toBe(true);
-        });
-
-        it('should return true for all valid tile types', () => {
-            const validTiles = [Tile.FLOOR, Tile.ICE, Tile.WATER, Tile.OPENED_DOOR];
-            validTiles.forEach((tile) => {
-                const cell = createDummyCell({ x: 0, y: 0 }, tile);
-                expect((game as any)._canDropItemHere(cell)).toBe(true);
-            });
-        });
-
-        it('should return false when cell has player, non-default item, and valid tile', () => {
-            const cell = createDummyCell({ x: 0, y: 0 }, Tile.FLOOR, Avatar.Cleric, Item.SWORD);
-            expect((game as any)._canDropItemHere(cell)).toBe(false);
-        });
-
-        it('should return false when cell has invalid tile type', () => {
-            const invalidTiles = [Tile.WALL, Tile.CLOSED_DOOR];
-            invalidTiles.forEach((tile) => {
-                const cell = createDummyCell({ x: 0, y: 0 }, tile);
-                expect((game as any)._canDropItemHere(cell)).toBe(false);
-            });
-        });
-    });
-
     describe('startTurn and endTurn', () => {
         beforeEach(() => {
             game.players = [player1, player2];
