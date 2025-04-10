@@ -3,12 +3,12 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { Vec2 } from '@common/board';
+import { ChatMessage } from '@common/chat';
 import { Item, Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
+import { Entry } from '@common/journal';
 import { IPlayer, PlayerInput } from '@common/player';
 import { Subject } from 'rxjs';
-import { Entry } from '@common/journal';
-import { ChatMessage } from '@common/chat';
 
 export class MockSocketService {
     gameRoom: IRoom = {
@@ -175,6 +175,7 @@ export class MockSocketService {
     initFight(_player: string, _defender: string): void {}
     debugMove(_position: Vec2, _playerId: string): void {}
     toggleDebug(): void {}
+    inventoryChoice(payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string }): void {}
 
     triggerPlayerJoined(data: IRoom) {
         this.playerJoinedSubject.next(data);

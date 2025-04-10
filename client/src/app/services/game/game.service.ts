@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
@@ -58,7 +57,6 @@ export class GameService {
         });
 
         this.socketReceiver.onDoorStateChanged().subscribe((door) => {
-            console.log('Door state changed:', door);
             const newMap = this.map.value;
             newMap[door.doorPosition.y][door.doorPosition.x].tile = door.newDoorState;
             this.map.next(newMap);
@@ -82,7 +80,6 @@ export class GameService {
             const newMap = this.map.value;
             newMap[position.y][position.x].item = Item.DEFAULT;
             this.map.next(newMap);
-            console.log(`Item retiré de la carte à la position: (${position.x}, ${position.y})`);
         });
 
         this.socketReceiver.onItemDropped().subscribe((data) => {
@@ -90,7 +87,6 @@ export class GameService {
             for (const droppedItem of data.droppedItems) {
                 const position = droppedItem.position;
                 newMap[position.y][position.x].item = droppedItem.item;
-                console.log(`Dropped item ${droppedItem.item} at position (${position.x}, ${position.y})`);
             }
 
             this.map.next(newMap);
@@ -101,7 +97,6 @@ export class GameService {
             const newMap = [...this.map.value];
             newMap[pos.y][pos.x].item = data.item;
             this.map.next(newMap);
-            console.log(`Map mise à jour : inventory of player ${data.player.name} est mis à jour`);
         });
         this.socketReceiver.onJournalEntry().subscribe((entry) => {
             this.journalEntries.next([...this.journalEntries.getValue(), entry]);
@@ -184,7 +179,6 @@ export class GameService {
     }
 
     debugMovePlayer(cell: Cell): void {
-        console.log('Debug move player to cell:', cell);
         if (this.canTeleport(cell)) {
             this.socketEmitter.debugMove(cell.position, this.playerService.getPlayer().id);
         }
