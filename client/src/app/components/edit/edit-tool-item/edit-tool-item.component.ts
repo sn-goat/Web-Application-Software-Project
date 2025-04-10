@@ -8,7 +8,7 @@ import { MapService } from '@app/services/map/map.service';
 import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Board } from '@common/board';
 import { Item } from '@common/enums';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, combineLatest, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-item',
@@ -51,17 +51,12 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
                 this.isDraggable = this.remainingItem > 0;
             });
         } else {
-            this.mapService.nbrItemsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingItems) => {
-                this.remainingItem = remainingItems > 0 && !this.isItemPlaced ? 1 : 0;
-                this.isDraggable = remainingItems > 0 && !this.isItemPlaced;
-            });
-
-            this.mapService
-                .getBoardToSave()
+            combineLatest([this.mapService.nbrItemsToPlace$, this.mapService.getBoardToSave()])
                 .pipe(takeUntil(this.destroy$))
-                .subscribe((board) => {
+                .subscribe(([remainingItems, board]) => {
                     this.isItemPlaced = this.checkIfItemIsOnBoard(board, this.type);
-                    this.isDraggable = this.remainingItem > 0 && !this.isItemPlaced;
+                    this.remainingItem = remainingItems > 0 && !this.isItemPlaced ? 1 : 0;
+                    this.isDraggable = remainingItems > 0 && !this.isItemPlaced;
                 });
         }
     }
