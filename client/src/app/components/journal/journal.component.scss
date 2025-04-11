@@ -1,62 +1,85 @@
+%blurred-gold-border {
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    animation: scrollReveal 1.4s ease-out;
+}
+
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
 .journal-content {
-    padding: 10px ;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     height: 350px;
-  }
-  
-  .filter-button {
-    background: rgba(40, 40, 40, 0.8);
-    border: 1px solid #888;
-    color: #fff;
+}
+
+.filter-button {
+    @extend %blurred-gold-border;
+    background: rgba(60, 60, 60, 0.9);
+
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 10px;
     cursor: pointer;
     font-size: 14px;
-    align-self: flex-start;
+    align-self: center;
     transition: all 0.2s ease;
-    
+
     &:hover {
-      background: rgba(60, 60, 60, 0.9);
-      border-color: #fff;
-      box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        background: rgba(9, 8, 8, 0.9);
+        border-color: #f2e5b8;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
     }
-    
+
     &:active {
-      transform: translateY(1px);
+        transform: translateY(1px);
     }
-  }
-  
-  .messages-container {
+}
+
+.messages-container {
+    @extend %blurred-gold-border;
     flex: 1;
     overflow-y: auto;
     padding-right: 5px;
-    
+
     &::-webkit-scrollbar {
-      width: 6px;
+        width: 6px;
     }
-    
+
     &::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.3);
+        background: rgba(0, 0, 0, 0.3);
     }
-    
+
     &::-webkit-scrollbar-thumb {
-      background: #555;
-      border-radius: 3px;
+        background: #555;
+        border-radius: 3px;
     }
-    
+
     &::-webkit-scrollbar-thumb:hover {
-      background: #777;
+        background: #777;
     }
-    
+
     p {
-      margin: 6px 0;
-      padding: 4px;
-      border-radius: 4px;
-      
-      &:hover {
-        background: rgba(255, 255, 255, 0.1);
-      }
+        margin: 6px 0;
+        padding: 4px;
+        border-radius: 4px;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
     }
-  }
+}

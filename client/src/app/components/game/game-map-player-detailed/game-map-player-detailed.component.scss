@@ -1,36 +1,36 @@
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
-$primary-text: #7ee0d0;
+$primary-text: #f2e5b8;
 $glow-teal: rgba(126, 224, 208, 0.2);
 $glow-gold: rgba(255, 215, 0, 0.2);
 $rectangle-border: 1px solid $primary-text;
-$secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
 $border-radius: 10px;
-$health-color: #ff5252;
-$attribute-color: #7ee0d0;
-$dice-color: #7ee0d0;
-$skill-color: #7ee0d0;
 
 :host {
     display: block;
     height: 100%;
     width: 100%;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 1.6rem; /* Increased from 1.5rem */
+    font-size: 1.6rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    font-family: 'MedievalSharp', cursive;
+    text-shadow: 0 0 5px $glow-teal;
 }
 
 .container {
-    background-color: $secondary-bg;
-    border-radius: $border-radius;
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
     overflow: visible;
-    box-shadow:
-        0 0 10px rgba(0, 0, 0, 0.5),
-        0 0 8px $glow-teal;
+
     color: $primary-text;
 
     .header {
@@ -38,13 +38,12 @@ $skill-color: #7ee0d0;
         align-items: center;
         flex-direction: column;
         justify-content: space-between;
-        background-color: rgba(0, 0, 0, 0.3);
-        border-bottom: 1px solid $glow-teal;
+
         padding: 4px 6px;
 
         h2 {
             margin: 0;
-            font-size: 1.1rem; /* Increased from 1.0rem */
+            font-size: 1rem;
             font-weight: 600;
             color: $primary-text;
             text-transform: uppercase;
@@ -75,8 +74,7 @@ $skill-color: #7ee0d0;
 
         h3 {
             margin: 0 0 2px 0;
-            color: $secondary-text;
-            text-transform: uppercase;
+            color: $primary-text;
             letter-spacing: 0.5px;
             border-bottom: 1px solid rgba($primary-text, 0.3);
             padding-bottom: 1px;
@@ -84,7 +82,7 @@ $skill-color: #7ee0d0;
 
         h4 {
             margin: 0;
-            color: $secondary-text;
+            color: $primary-text;
             font-weight: normal;
             display: inline-block;
         }
@@ -124,12 +122,12 @@ $skill-color: #7ee0d0;
     }
 
     .life {
-        border-color: $health-color;
+        border-color: $primary-text;
         display: flex;
         flex-direction: column;
 
         h3 {
-            color: color-mix(in srgb, $health-color, white 10%);
+            color: color-mix(in srgb, $primary-text, white 10%);
             margin-bottom: 3px !important;
         }
 
@@ -141,12 +139,12 @@ $skill-color: #7ee0d0;
 
             h4 {
                 margin-right: 5px;
-                color: $health-color;
+                color: $primary-text;
             }
 
             p {
-                color: $health-color;
-                text-shadow: 0 0 4px rgba($health-color, 0.5);
+                color: $primary-text;
+                text-shadow: 0 0 4px rgba($primary-text, 0.5);
                 font-weight: bold;
             }
         }
@@ -185,7 +183,7 @@ $skill-color: #7ee0d0;
 
             p {
                 margin: 0;
-                color: $health-color;
+                color: $primary-text;
             }
         }
     }
@@ -207,18 +205,18 @@ $skill-color: #7ee0d0;
     }
 
     .attribute {
-        border-color: $attribute-color;
+        border-color: $primary-text;
 
         h3 {
-            color: color-mix(in srgb, $attribute-color, white 10%);
+            color: color-mix(in srgb, $primary-text, white 10%);
             margin-bottom: 4px;
         }
 
         .speed p,
         .attack p,
         .defense p {
-            color: $attribute-color;
-            text-shadow: 0 0 4px rgba($attribute-color, 0.5);
+            color: $primary-text;
+            text-shadow: 0 0 4px rgba($primary-text, 0.5);
         }
 
         .attributes-container {
@@ -237,10 +235,10 @@ $skill-color: #7ee0d0;
     }
 
     .dices {
-        border-color: $dice-color;
+        border-color: $primary-text;
 
         h3 {
-            color: color-mix(in srgb, $dice-color, white 10%);
+            color: color-mix(in srgb, $primary-text, white 10%);
             margin-bottom: 4px;
         }
 
@@ -265,7 +263,7 @@ $skill-color: #7ee0d0;
                     width: 28px;
                     height: 28px;
                     margin-top: 3px;
-                    border: 1px solid $dice-color;
+                    border: 1px solid $primary-text;
                     border-radius: 2px;
                     background-color: rgba(0, 0, 0, 0.3);
                 }
@@ -274,10 +272,10 @@ $skill-color: #7ee0d0;
     }
 
     .skills {
-        border-color: $skill-color;
+        border-color: $primary-text;
 
         h3 {
-            color: color-mix(in srgb, $skill-color, white 10%);
+            color: color-mix(in srgb, $primary-text, white 10%);
             margin-bottom: 4px;
         }
 
@@ -303,16 +301,16 @@ $skill-color: #7ee0d0;
 
     h3 {
         margin-bottom: 6px !important;
-        font-size: 1.1rem !important; /* Increased from 1.1rem */
+        font-size: 1.1rem !important;
     }
 
     h4,
     p {
-        font-size: 0.95rem !important; /* Increased from 1.0rem */
+        font-size: 0.95rem !important;
     }
 
     .dice-image {
-        width: 45px !important; /* Increased from 42px */
-        height: 45px !important; /* Increased from 42px */
+        width: 45px !important;
+        height: 45px !important;
     }
 }

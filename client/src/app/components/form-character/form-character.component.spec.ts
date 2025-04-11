@@ -14,7 +14,7 @@ import { SocketEmitterService } from '@app/services/socket/socket-emitter.servic
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
-import { ASSET_EXT, ASSET_PATH, Avatar, IRoom } from '@common/game';
+import { ASSET_EXT_STATIC, ASSET_PATH_STATIC, Avatar, IRoom } from '@common/game';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
@@ -187,7 +187,7 @@ describe('FormCharacterComponent', () => {
         component.navigatePortrait('next');
         const expectedNextIndex = (initialIndex + 1) % component.totalPortraits;
         expect(component.currentPortraitIndex).toBe(expectedNextIndex);
-        expect(component.playerInput.avatar).toBe(ASSET_PATH + (expectedNextIndex + 1) + ASSET_EXT);
+        expect(component.playerInput.avatar).toBe(ASSET_PATH_STATIC + (expectedNextIndex + 1) + ASSET_EXT_STATIC);
 
         // Test navigation backward
         component.navigatePortrait('prev');
@@ -257,7 +257,7 @@ describe('FormCharacterComponent', () => {
     });
 
     it('should check if current avatar is taken', () => {
-        component.takenAvatars = [ASSET_PATH + '1' + ASSET_EXT, ASSET_PATH + '3' + ASSET_EXT];
+        component.takenAvatars = [ASSET_PATH_STATIC + '1' + ASSET_EXT_STATIC, ASSET_PATH_STATIC + '3' + ASSET_EXT_STATIC];
 
         // Set to a taken avatar
         component.currentPortraitIndex = 0; // For portrait 1

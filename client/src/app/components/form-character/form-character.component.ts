@@ -8,7 +8,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { RoomService } from '@app/services/room/room.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { ASSET_EXT, ASSET_PATH } from '@common/game';
+import { ASSET_EXT_ANIMATED, ASSET_PATH_ANIMATED, ASSET_EXT_STATIC, ASSET_PATH_STATIC } from '@common/game';
 import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFAULT_DICE, DEFAULT_LIFE_VALUE, DEFAULT_SPEED_VALUE, PlayerInput } from '@common/player';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -38,7 +38,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
 
     playerInput: PlayerInput = {
         name: '',
-        avatar: this.currentPortraitImage,
+        avatar: this.currentPortraitStaticImage,
         life: DEFAULT_LIFE_VALUE,
         speed: DEFAULT_SPEED_VALUE,
         attackPower: DEFAULT_ATTACK_VALUE,
@@ -59,11 +59,15 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
 
     get isCurrentAvatarTaken(): boolean {
-        return this.takenAvatars.includes(this.currentPortraitImage);
+        return this.takenAvatars.includes(this.currentPortraitStaticImage);
     }
 
     get currentPortraitImage(): string {
-        return ASSET_PATH + (this.currentPortraitIndex + 1) + ASSET_EXT;
+        return ASSET_PATH_ANIMATED + (this.currentPortraitIndex + 1) + ASSET_EXT_ANIMATED;
+    }
+
+    get currentPortraitStaticImage(): string {
+        return ASSET_PATH_STATIC + (this.currentPortraitIndex + 1) + ASSET_EXT_STATIC;
     }
 
     ngOnInit(): void {
@@ -98,7 +102,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
         } else if (direction === 'next') {
             this.currentPortraitIndex = (this.currentPortraitIndex + 1) % this.totalPortraits;
         }
-        this.playerInput.avatar = this.currentPortraitImage;
+        this.playerInput.avatar = this.currentPortraitStaticImage;
     }
 
     selectStat(stat: StatBonus) {

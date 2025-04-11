@@ -4,9 +4,7 @@ $primary-text: #7ee0d0;
 $glow-teal: rgba(126, 224, 208, 0.3);
 $secondary-text: #ff6b93;
 $accent-color: #ff6b93;
-$border-radius: 10px;
 $active-player-color: #ff9800;
-
 :host {
     display: block;
     height: 100%;
@@ -14,6 +12,37 @@ $active-player-color: #ff9800;
     overflow: hidden;
     --base-font-size: min(0.9rem, 3.2vw);
     --small-font-size: min(0.75rem, 2.4vw);
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'MedievalSharp', cursive;
+    text-shadow: 0 0 5px $glow-teal;
+}
+
+%blurred-gold-border {
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    animation: scrollReveal 1.4s ease-out;
+}
+
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .player-section {
@@ -29,16 +58,12 @@ $active-player-color: #ff9800;
 }
 
 .player {
+    @extend %blurred-gold-border;
+
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 8px;
-    border-left: 2px solid $primary-text;
-    box-shadow:
-        0 0 8px rgba(0, 0, 0, 0.5),
-        0 0 6px $glow-teal;
     padding: 4px;
     flex: 1;
     min-height: 0;
@@ -47,8 +72,6 @@ $active-player-color: #ff9800;
     box-sizing: border-box;
 
     &.active-player {
-        box-shadow: 0 0 10px rgba($primary-text, 0.6); 
-        border-left: 3px solid $primary-text;
         background-color: rgba(0, 0, 0, 0.5);
     }
 
@@ -65,15 +88,11 @@ $active-player-color: #ff9800;
             width: 30px;
             height: 30px;
             min-width: 30px;
-            border: 1px solid $primary-text;
-            box-shadow: 0 0 6px $glow-teal;
             object-fit: cover;
-            background-color: $secondary-bg;
         }
 
         h3 {
             font-size: min(0.9rem, 3.2vw);
-            color: $primary-text;
             text-shadow: 0 0 5px $glow-teal;
             font-weight: 600;
             text-align: left;
@@ -100,7 +119,6 @@ $active-player-color: #ff9800;
             margin: 10px;
             font-size: min(0.8rem, 2.7vw);
             line-height: 1.1;
-            color: $secondary-text;
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
@@ -124,15 +142,12 @@ $active-player-color: #ff9800;
         }
 
         h3.admin {
-            color: $accent-color;
-            border: 1px solid rgba($accent-color, 0.4);
+            border: 0.5px solid;
             text-shadow: 0 0 4px rgba($accent-color, 0.6);
         }
 
         h3.active {
-            color: $active-player-color;
-            border: 1px solid rgba($active-player-color, 0.4);
-            text-shadow: 0 0 4px rgba($active-player-color, 0.6);
+            border: 1px solid;
             animation: text-pulse 2s ease-in-out infinite;
             font-weight: bold;
         }
@@ -157,7 +172,6 @@ $active-player-color: #ff9800;
     }
 }
 
-/* Player states */
 .player-not-in-game {
     text-decoration: line-through;
     text-decoration-thickness: 3px;
@@ -248,7 +262,7 @@ $active-player-color: #ff9800;
     }
 
     .player-image h3 {
-        font-size: min(1.1rem, 3.7vw); 
+        font-size: min(1.1rem, 3.7vw);
     }
 
     .player-info h3 {

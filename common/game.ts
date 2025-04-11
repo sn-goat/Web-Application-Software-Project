@@ -32,23 +32,25 @@ export interface IFight {
     currentPlayer: IPlayer;
 }
 
-export const ASSET_PATH = './assets/character-animations/portrait';
-export const ASSET_EXT = '.gif';
+export const ASSET_PATH_ANIMATED = './assets/character-animations/portrait';
+export const ASSET_EXT_ANIMATED = '.gif';
+export const ASSET_PATH_STATIC = './assets/portraits/portrait';
+export const ASSET_EXT_STATIC = '.png';
 export const ACCESS_CODE_REGEX = /^\d{4}$/;
 
 export enum Avatar {
-    Dwarf = ASSET_PATH + '1' + ASSET_EXT,
-    Elf = ASSET_PATH + '2' + ASSET_EXT,
-    Rogue = ASSET_PATH + '3' + ASSET_EXT,
-    Knight = ASSET_PATH + '4' + ASSET_EXT,
-    Lancer = ASSET_PATH + '5' + ASSET_EXT,
-    Warlock = ASSET_PATH + '6' + ASSET_EXT,
-    Wizard = ASSET_PATH + '7' + ASSET_EXT,
-    Paladin = ASSET_PATH + '8' + ASSET_EXT,
-    Berserker = ASSET_PATH + '9' + ASSET_EXT,
-    Cleric = ASSET_PATH + '10' + ASSET_EXT,
-    Farmer = ASSET_PATH + '11' + ASSET_EXT,
-    Hermit = ASSET_PATH + '12' + ASSET_EXT,
+    Dwarf = ASSET_PATH_STATIC + '1' + ASSET_EXT_STATIC,
+    Elf = ASSET_PATH_STATIC + '2' + ASSET_EXT_STATIC,
+    Rogue = ASSET_PATH_STATIC + '3' + ASSET_EXT_STATIC,
+    Knight = ASSET_PATH_STATIC + '4' + ASSET_EXT_STATIC,
+    Lancer = ASSET_PATH_STATIC + '5' + ASSET_EXT_STATIC,
+    Warlock = ASSET_PATH_STATIC + '6' + ASSET_EXT_STATIC,
+    Wizard = ASSET_PATH_STATIC + '7' + ASSET_EXT_STATIC,
+    Paladin = ASSET_PATH_STATIC + '8' + ASSET_EXT_STATIC,
+    Berserker = ASSET_PATH_STATIC + '9' + ASSET_EXT_STATIC,
+    Cleric = ASSET_PATH_STATIC + '10' + ASSET_EXT_STATIC,
+    Farmer = ASSET_PATH_STATIC + '11' + ASSET_EXT_STATIC,
+    Hermit = ASSET_PATH_STATIC + '12' + ASSET_EXT_STATIC,
     Default = '',
 }
 

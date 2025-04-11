@@ -37,8 +37,7 @@ body {
         0 0 30px rgba(0, 0, 0, 0.5),
         inset 0 0 10px #d2bb94;
     backdrop-filter: blur(2px);
-      animation: scrollReveal 1.4s ease-out;
-
+    animation: scrollReveal 1.4s ease-out;
 }
 
 .medieval-title {
@@ -131,7 +130,7 @@ body {
 .map-container > * {
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain; // pour images ou canvas
+    object-fit: contain;
 }
 
 .form-container {
