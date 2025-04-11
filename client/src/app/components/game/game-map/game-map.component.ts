@@ -3,6 +3,7 @@ import { BoardCellComponent } from '@app/components/common/board-cell/board-cell
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { PopupService } from '@app/services/popup/popup.service';
 import { Cell, KEYPRESS_D } from '@common/board';
 import { Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
@@ -23,6 +24,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     isActionSelected = false;
     isPlayerTurn = false;
     isDebugMode = false;
+    popupVisible = false;
 
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     pathCells: Set<string> = new Set();
@@ -32,12 +34,13 @@ export class GameMapComponent implements OnInit, OnDestroy {
     private readonly gameService: GameService = inject(GameService);
     private readonly fightLogicService = inject(FightLogicService);
     private readonly playerService = inject(PlayerService);
+    private readonly popupService = inject(PopupService);
     private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
     private subscriptions: Subscription[] = [];
 
     @HostListener('window:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
-        if (event.key.toLowerCase() === KEYPRESS_D) {
+        if (event.key.toLowerCase() === KEYPRESS_D && !this.popupVisible) {
             event.preventDefault();
             this.gameService.toggleDebugMode();
         }
@@ -75,6 +78,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
             this.gameService.isDebugMode.subscribe((isDebugMode) => {
                 this.isDebugMode = isDebugMode;
+            }),
+
+            this.popupService.popupVisible$.subscribe((isVisible) => {
+                this.popupVisible = isVisible;
             }),
         );
         this.getTooltipContent = this.gameService.getCellDescription.bind(this.gameService);
