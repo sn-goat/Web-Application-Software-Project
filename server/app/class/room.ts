@@ -3,6 +3,7 @@ import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTi
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
+import { Item } from '@common/enums';
 import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
@@ -73,6 +74,31 @@ export class Room implements IRoom {
 
         this.internalEmitter.on(InternalFightEvents.End, (fightResult: { winner: Player; loser: Player }) => {
             this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, winner: fightResult.winner, loser: fightResult.loser });
+        });
+
+        this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; position: Vec2 }) => {
+            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {
+                accessCode: this.accessCode,
+                player: payload.player,
+                position: payload.position,
+            });
+        });
+
+        this.internalEmitter.on(InternalTurnEvents.DroppedItem, (payload: { player: Player; droppedItems: { item: Item; position: Vec2 }[] }) => {
+            this.globalEmitter.emit(InternalTurnEvents.DroppedItem, {
+                accessCode: this.accessCode,
+                player: payload.player,
+                droppedItems: payload.droppedItems,
+            });
+        });
+
+        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (payload: { player: Player; item: Item; position: Vec2 }) => {
+            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, {
+                accessCode: this.accessCode,
+                player: payload.player,
+                item: payload.item,
+                position: payload.position,
+            });
         });
     }
 
@@ -153,6 +179,7 @@ export class Room implements IRoom {
     private removePlayerFromGame(playerId: string): void {
         this.game.removePlayerOnMap(playerId);
         this.game.removePlayer(playerId, this.confirmDisconnectMessage);
+        this.game.dropItems(playerId);
 
         if (this.game.players.length < 2) {
             const lastPlayer = this.getPlayers()[0];

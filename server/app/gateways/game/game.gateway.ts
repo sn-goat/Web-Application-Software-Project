@@ -3,16 +3,16 @@ import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { InternalFightEvents, InternalGameEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
+import { JournalService } from '@app/services/journal/journal.service';
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
-import { MAX_FIGHT_WINS, PathInfo, IRoom } from '@common/game';
+import { Item, Tile } from '@common/enums';
+import { IRoom, MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { FightJournal, FightMessage, GameMessage } from '@common/journal';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { JournalService } from '@app/services/journal/journal.service';
-import { GameMessage, FightMessage, FightJournal } from '@common/journal';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -46,14 +46,6 @@ export class GameGateway {
         this.logger.log('Moving player' + payload.player.name + 'to: ' + payload.previousPosition);
         this.server.to(payload.accessCode).emit(TurnEvents.PlayerMoved, { previousPosition: payload.previousPosition, player: payload.player });
     }
-
-    // not used
-    // @OnEvent(InternalTurnEvents.BroadcastDoor)
-    // sendDoorState(payload: { accessCode: string; position: Vec2; newState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR }) {
-    //     this.logger.log('Changing door state at position: ' + payload.position + ' to: ' + payload.newState);
-    //     this.server.to(payload.accessCode).emit(TurnEvents.DoorStateChanged, { position: payload.position, newState: payload.newState });
-
-    // }
 
     @OnEvent(InternalTurnEvents.Update)
     handleUpdateTurn(turn: { player: Player; path: Record<string, PathInfo> }) {
@@ -130,6 +122,34 @@ export class GameGateway {
         this.server.to(playerId).emit(TurnEvents.Start, {});
     }
 
+    @OnEvent(InternalTurnEvents.ItemCollected)
+    handleItemCollected(payload: { accessCode: string; player: Player; position: Vec2 }) {
+        this.logger.log(`Player ${payload.player.name} collected item`);
+        this.server.to(payload.accessCode).emit(TurnEvents.BroadcastItem, {
+            player: payload.player,
+            position: payload.position,
+        });
+    }
+
+    @OnEvent(InternalTurnEvents.InventoryFull)
+    handleInventoryFull(payload: { accessCode: string; player: Player; item: Item; position: Vec2 }) {
+        this.logger.log(`Player ${payload.player.name} inventory is full`);
+        this.server.to(payload.accessCode).emit(TurnEvents.InventoryFull, {
+            player: payload.player,
+            item: payload.item,
+            position: payload.position,
+        });
+    }
+
+    @OnEvent(InternalTurnEvents.DroppedItem)
+    handleDroppedItem(payload: { accessCode: string; player: Player; droppedItems: { item: Item; position: Vec2 }[] }) {
+        this.logger.log(`Player ${payload.player.name} dropped ${payload.droppedItems.length} items`);
+        this.server.to(payload.accessCode).emit(TurnEvents.DroppedItem, {
+            player: payload.player,
+            droppedItems: payload.droppedItems,
+        });
+    }
+
     @SubscribeMessage(GameEvents.Start)
     handleGameStart(client: Socket, accessCode: string) {
         let game: Game = this.gameManager.getGame(accessCode);
@@ -183,9 +203,7 @@ export class GameGateway {
     @SubscribeMessage(TurnEvents.DebugMove)
     debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
-        if (game.isDebugMode) {
-            game.movePlayerDebug(payload.direction, payload.playerId);
-        }
+        game.movePlayerDebug(payload.direction, payload.playerId);
     }
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
@@ -262,5 +280,26 @@ export class GameGateway {
         this.logger.log('Player attack from ' + accessCode);
         const game: Game = this.gameManager.getGame(accessCode);
         game.playerAttack();
+    }
+
+    @SubscribeMessage(TurnEvents.InventoryChoice)
+    handleInventoryChoice(
+        client: Socket,
+        payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string },
+    ): void {
+        const game: Game = this.gameManager.getGame(payload.accessCode);
+        if (!game) return;
+
+        const player = game.getPlayer(payload.playerId);
+        if (player) {
+            player.removeItemFromInventory(payload.itemToThrow);
+            player.addItemToInventory(payload.itemToAdd);
+            game.map[payload.position.y][payload.position.x].item = payload.itemToThrow;
+            this.server.to(payload.accessCode).emit(TurnEvents.MapUpdate, {
+                player,
+                item: payload.itemToThrow,
+                position: payload.position,
+            });
+        }
     }
 }

@@ -2,15 +2,15 @@ import { Injectable } from '@angular/core';
 import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { ChatEvents } from '@common/chat.gateway.events';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
-import { FightEvents, GameEvents, TurnEvents, JournalEvent } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, JournalEvent, TurnEvents } from '@common/game.gateway.events';
+import { Entry } from '@common/journal';
 import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Observable } from 'rxjs';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
-import { Entry } from '@common/journal';
 
 @Injectable({
     providedIn: 'root',
@@ -222,6 +222,37 @@ export class SocketReceiverService {
         });
     }
 
+    onItemCollected(): Observable<{ player: IPlayer; position: Vec2 }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.BroadcastItem, (data: { player: IPlayer; position: Vec2 }) => {
+                observer.next(data);
+            });
+        });
+    }
+
+    onItemDropped(): Observable<{ player: IPlayer; droppedItems: { item: Item; position: Vec2 }[] }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.DroppedItem, (data: { player: IPlayer; droppedItems: { item: Item; position: Vec2 }[] }) => {
+                observer.next(data);
+            });
+        });
+    }
+
+    onInventoryFull(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.InventoryFull, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
+                observer.next(data);
+            });
+        });
+    }
+
+    onMapUpdate(): Observable<{ player: IPlayer; item: Item; position: Vec2 }> {
+        return new Observable((observer) => {
+            this.socket.on(TurnEvents.MapUpdate, (data: { player: IPlayer; item: Item; position: Vec2 }) => {
+                observer.next(data);
+            });
+        });
+    }
     receiveMessageFromServer(): Observable<ChatMessage> {
         return new Observable((observer) => {
             this.socket.on(ChatEvents.RoomMessage, (message: ChatMessage) => {

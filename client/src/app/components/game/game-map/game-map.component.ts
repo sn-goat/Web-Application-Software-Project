@@ -5,8 +5,9 @@ import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { PopupService } from '@app/services/popup/popup.service';
 import { Cell, KEYPRESS_D } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
+import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
 
@@ -89,15 +90,19 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     onLeftClicked(cell: Cell) {
         if (!this.isPlayerTurn) return;
-
         if (this.isActionSelected) {
             if (this.gameService.isWithinActionRange(cell)) {
                 if (this.fightLogicService.isAttackProvocation(cell)) {
                     this.gameService.initFight(cell.player);
                     return;
                 }
-
                 if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
+                    const myPlayer = this.playerService.getPlayer();
+                    const dx = Math.abs(myPlayer.position.x - cell.position.x);
+                    const dy = Math.abs(myPlayer.position.y - cell.position.y);
+                    if (dx > 0 && dy > 0) {
+                        return;
+                    }
                     this.gameService.toggleDoor(cell.position);
                     return;
                 }
@@ -105,7 +110,12 @@ export class GameMapComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.playerService.sendMove(cell.position);
+        const player = this.playerService.getPlayer();
+        if (this.isPlayerAtSpawn(player) && player.inventory.includes(Item.MONSTER_EGG)) {
+            this.gameService.debugMovePlayer(cell);
+        } else {
+            this.playerService.sendMove(cell.position);
+        }
     }
 
     onRightClicked(cell: Cell) {
@@ -145,6 +155,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     isActionCell(cell: Cell): boolean {
         return this.actionCells.has(`${cell.position.x},${cell.position.y}`);
+    }
+
+    isPlayerAtSpawn(player: IPlayer): boolean {
+        return player && player.position.x === player.spawnPosition.x && player.position.y === player.spawnPosition.y;
     }
 
     onCellHovered(cell: Cell) {

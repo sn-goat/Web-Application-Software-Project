@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
-import { GameService } from '@app/services/game/game.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
+import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { Board, Cell } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
@@ -51,11 +51,29 @@ describe('GameMapComponent', () => {
         gameMapServiceMock = jasmine.createSpyObj('GameMapService', ['getGameMap']);
         gameMapServiceMock.getGameMap.and.returnValue(boardSubject);
 
+        playerServiceMock = {
+            isActivePlayer: new BehaviorSubject(false),
+            path: new BehaviorSubject<Map<string, PathInfo> | null>(null),
+            sendMove: jasmine.createSpy('sendMove'),
+            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({
+                id: 'player1',
+                position: { x: 5, y: 5 },
+                spawnPosition: { x: 5, y: 5 },
+                inventory: [],
+            }),
+        };
+
         // Création des mocks pour PlayerService, GameService et FightLogicService
         playerServiceMock = {
             isActivePlayer: new BehaviorSubject(false),
             path: new BehaviorSubject<Map<string, PathInfo> | null>(null),
             sendMove: jasmine.createSpy('sendMove'),
+            getPlayer: jasmine.createSpy('getPlayer').and.returnValue({
+                id: 'player1',
+                position: { x: 5, y: 5 },
+                spawnPosition: { x: 5, y: 5 },
+                inventory: [],
+            }),
         };
         gameServiceMock = {
             isWithinActionRange: jasmine.createSpy('isWithinActionRange'),

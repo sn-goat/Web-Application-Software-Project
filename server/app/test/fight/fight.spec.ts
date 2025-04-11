@@ -20,17 +20,25 @@ describe('Fight', () => {
             id: 'p1',
             speed: 10,
             wins: 0,
+            currentLife: 100,
+            life: 100,
+            pearlUsed: false,
             // For attack, we'll simulate a mock function.
             attack: jest.fn(),
             attemptFlee: jest.fn(),
+            hasItem: jest.fn().mockReturnValue(false), // Add the missing hasItem method
         } as unknown as Player;
 
         player2 = {
             id: 'p2',
             speed: 5,
             wins: 0,
+            currentLife: 100,
+            life: 100,
+            pearlUsed: false,
             attack: jest.fn(),
             attemptFlee: jest.fn(),
+            hasItem: jest.fn().mockReturnValue(false), // Add the missing hasItem method
         } as unknown as Player;
 
         fight = new Fight(fakeEmitter);
@@ -123,6 +131,24 @@ describe('Fight', () => {
             // Ensure both players are set for a fight.
             // For these tests, currentPlayer will be player1 if speeds are equal or higher.
             fight.currentPlayer = player1;
+        });
+
+        it('should not declare a winner when defender has a pearl', () => {
+            // Mock the player having the pearl and not having used it yet
+            (player2.hasItem as jest.Mock).mockReturnValue(true);
+            player2.pearlUsed = false;
+            player2.life = 100;
+
+            // Simulate attack killing the defender
+            (player1.attack as jest.Mock).mockReturnValue(true);
+
+            const result = fight.playerAttack(false);
+
+            // Pearl should be used to save the player
+            expect(player2.pearlUsed).toBe(true);
+            // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+            expect(player2.currentLife).toBe(50); // Math.floor(100/2)
+            expect(result).toBeNull(); // No winner/loser yet
         });
 
         it('should increment wins and return winner/loser when attack kills the opponent (debug mode)', () => {

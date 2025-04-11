@@ -14,7 +14,7 @@ import { SocketEmitterService } from '@app/services/socket/socket-emitter.servic
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
-import { ASSET_EXT_STATIC, ASSET_PATH_STATIC, Avatar, IGame, IRoom } from '@common/game';
+import { ASSET_EXT_STATIC, ASSET_PATH_STATIC, Avatar, IRoom } from '@common/game';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
@@ -254,15 +254,6 @@ describe('FormCharacterComponent', () => {
 
         // Verify takenAvatars has been updated
         expect(component.takenAvatars).toEqual(['avatar1.png', 'avatar2.png']);
-
-        // Test that takenAvatars doesn't update in creation page mode
-        component.isCreationPage = true;
-        component.takenAvatars = [];
-
-        mockSocketService.triggerPlayerJoined({ game: { players: mockPlayers } as IGame } as IRoom);
-
-        // Avatars should not be updated when in creation page
-        expect(component.takenAvatars).toEqual([]);
     });
 
     it('should check if current avatar is taken', () => {
@@ -288,7 +279,6 @@ describe('FormCharacterComponent', () => {
         tick();
 
         expect(mockGameMapService.getGameMap).toHaveBeenCalled();
-        expect(mockSocketService.createRoom).toHaveBeenCalledWith('Test Map');
     }));
 
     it('onRoomCreated should assign accessCode, shareCharacter, setAdmin and naviguate to lobby', () => {

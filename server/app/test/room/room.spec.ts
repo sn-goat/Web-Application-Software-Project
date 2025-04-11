@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { EventEmitter2 } from 'eventemitter2';
-import { Room } from '@app/class/room';
+import { Fight } from '@app/class/fight';
 import { Game } from '@app/class/game';
-import { InternalRoomEvents, InternalTimerEvents, InternalTurnEvents, InternalGameEvents, InternalFightEvents } from '@app/constants/internal-events';
+import { Player } from '@app/class/player';
+import { Room } from '@app/class/room';
+import { Timer } from '@app/class/timer';
+import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Cell, Vec2 } from '@common/board';
-import { Player } from '@app/class/player';
-import { Fight } from '@app/class/fight';
-import { Timer } from '@app/class/timer';
 import { Item, Tile, Visibility } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';
+import { EventEmitter2 } from 'eventemitter2';
 
 const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.DEFAULT, cost: number = 1): Cell => ({
     position: pos,
@@ -48,6 +48,7 @@ interface FakeGame extends Partial<Game> {
     removePlayerFromFight: jest.Mock<any, any>;
     isPlayerTurn: jest.Mock<any, any>;
     endTurn: jest.Mock<any, any>;
+    dropItems: jest.Mock<any, any>;
 }
 
 const createFakeGame = (): FakeGame => {
@@ -67,6 +68,7 @@ const createFakeGame = (): FakeGame => {
         removePlayerFromFight: jest.fn(),
         isPlayerTurn: jest.fn(() => false),
         endTurn: jest.fn(),
+        dropItems: jest.fn(), // ajoutez cette méthode pour corriger l'erreur
     } as FakeGame;
 };
 
@@ -81,6 +83,7 @@ const createPlayer = (id: string, name: string): Player =>
         id,
         name,
         // Adding minimal properties needed by Room; additional properties are not used in Room
+        inventory: [],
     }) as Player;
 
 let player1: Player;

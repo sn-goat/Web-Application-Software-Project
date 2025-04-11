@@ -56,6 +56,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 this.maxPlayers = maxPlayers;
             }),
 
+            this.socketReceiver.onRoomUnlocked().subscribe(() => {
+                this.isRoomLocked = false;
+            }),
+
             this.socketReceiver.onPlayersUpdated().subscribe((players: IPlayer[]) => {
                 this.players = players;
             }),

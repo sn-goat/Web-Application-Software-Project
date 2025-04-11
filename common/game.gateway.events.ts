@@ -33,8 +33,12 @@ export enum TurnEvents {
     DoorStateChanged = 'eventOnDoor',
 
     // BroadcastEnd = 'endPlayerTurn',
-    // BroadcastItem = 'eventItem',
-    // UpdateActions = 'updateActions',
+    BroadcastItem = 'eventItem',
+    DroppedItem = 'droppedItem',
+    InventoryFull = 'inventoryFull',
+    InventoryChoice = 'inventoryChoice',
+    MapUpdate = 'mapUpdate',
+    // UpdateActions = 'updateActions'
 }
 
 export enum FightEvents {

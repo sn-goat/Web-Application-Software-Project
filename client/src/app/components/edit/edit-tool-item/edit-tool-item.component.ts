@@ -6,8 +6,9 @@ import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
 import { MapService } from '@app/services/map/map.service';
 import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
+import { Board } from '@common/board';
 import { Item } from '@common/enums';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, combineLatest, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-item',
@@ -28,6 +29,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     private readonly toolSelectionService = inject(ToolSelectionService);
     private readonly itemSelectionService = inject(ItemApplicatorService);
     private destroy$ = new Subject<void>();
+    private isItemPlaced = false;
 
     ngOnInit() {
         if (this.type === Item.SPAWN) {
@@ -43,13 +45,22 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
             } else {
                 this.isDraggable = false;
             }
-        } else {
+        } else if (this.type === Item.CHEST) {
             this.mapService.nbrItemsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingItems) => {
                 this.remainingItem = remainingItems;
                 this.isDraggable = this.remainingItem > 0;
             });
+        } else {
+            combineLatest([this.mapService.nbrItemsToPlace$, this.mapService.getBoardToSave()])
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(([remainingItems, board]) => {
+                    this.isItemPlaced = this.checkIfItemIsOnBoard(board, this.type);
+                    this.remainingItem = remainingItems > 0 && !this.isItemPlaced ? 1 : 0;
+                    this.isDraggable = remainingItems > 0 && !this.isItemPlaced;
+                });
         }
     }
+
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
@@ -70,5 +81,18 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
 
     getDescription(type: Item): string {
         return ASSETS_DESCRIPTION.get(type) ?? '';
+    }
+
+    private checkIfItemIsOnBoard(board: Board, itemType: Item): boolean {
+        if (!board?.board) return false;
+
+        for (const row of board.board) {
+            for (const cell of row) {
+                if (cell.item === itemType) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

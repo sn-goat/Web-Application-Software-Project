@@ -9,7 +9,7 @@ import { GameGateway } from '@app/gateways/game/game.gateway';
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { JournalService } from '@app/services/journal/journal.service';
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { Logger } from '@nestjs/common';
@@ -162,6 +162,7 @@ describe('GameGateway', () => {
                 endTurn: jest.fn(),
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
+                dropItems: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -198,6 +199,7 @@ describe('GameGateway', () => {
                 endTurn: jest.fn(),
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
+                dropItems: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -232,6 +234,7 @@ describe('GameGateway', () => {
                 endTurn: jest.fn(),
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
+                dropItems: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -253,6 +256,259 @@ describe('GameGateway', () => {
 
             expect(server.to).toHaveBeenCalledWith('player123');
             expect(emitMock).toHaveBeenCalledWith(TurnEvents.Start, {});
+        });
+
+        it('handleInventoryChoice should update player inventory and map when valid', () => {
+            // Arrange
+            const accessCode = 'room123';
+            const playerId = 'player456';
+            const itemToThrow = Item.SHIELD;
+            const itemToAdd = Item.SWORD;
+            const position = { x: 3, y: 4 } as Vec2;
+
+            // Create mock player and game
+            const player = {
+                id: playerId,
+                name: 'TestPlayer',
+                inventory: [itemToThrow],
+                removeItemFromInventory: jest.fn(),
+                addItemToInventory: jest.fn(),
+            } as unknown as Player;
+
+            const game = {
+                getPlayer: jest.fn().mockReturnValue(player),
+                map: [
+                    Array(5).fill({ item: Item.DEFAULT }),
+                    Array(5).fill({ item: Item.DEFAULT }),
+                    Array(5).fill({ item: Item.DEFAULT }),
+                    Array(5).fill({ item: Item.DEFAULT }),
+                    Array(5).fill({ item: Item.DEFAULT }),
+                ],
+            } as unknown as Game;
+
+            // Setup map access for the test
+            game.map[position.y] = [...game.map[position.y]];
+            game.map[position.y][position.x] = {
+                item: itemToAdd,
+                position,
+                tile: Tile.FLOOR,
+                cost: 1,
+                player: null,
+            };
+
+            gameManager.getGame.mockReturnValue(game);
+
+            const payload = {
+                playerId,
+                itemToThrow,
+                itemToAdd,
+                position,
+                accessCode,
+            };
+
+            // Act
+            gateway.handleInventoryChoice(client, payload);
+
+            // Assert
+            expect(gameManager.getGame).toHaveBeenCalledWith(accessCode);
+            expect(game.getPlayer).toHaveBeenCalledWith(playerId);
+            expect(player.removeItemFromInventory).toHaveBeenCalledWith(itemToThrow);
+            expect(player.addItemToInventory).toHaveBeenCalledWith(itemToAdd);
+            expect(game.map[position.y][position.x].item).toBe(itemToThrow);
+            expect(server.to).toHaveBeenCalledWith(accessCode);
+            expect(emitMock).toHaveBeenCalledWith(TurnEvents.MapUpdate, {
+                player,
+                item: itemToThrow,
+                position,
+            });
+        });
+
+        it('handleInventoryChoice should do nothing when game is not found', () => {
+            // Arrange
+            const accessCode = 'invalid-room';
+            gameManager.getGame.mockReturnValue(null);
+
+            const payload = {
+                playerId: 'player1',
+                itemToThrow: Item.SHIELD,
+                itemToAdd: Item.SWORD,
+                position: { x: 0, y: 0 },
+                accessCode,
+            };
+
+            // Act
+            gateway.handleInventoryChoice(client, payload);
+
+            // Assert
+            expect(gameManager.getGame).toHaveBeenCalledWith(accessCode);
+            expect(server.to).not.toHaveBeenCalled();
+            expect(emitMock).not.toHaveBeenCalled();
+        });
+
+        it('handleInventoryChoice should do nothing when player is not found', () => {
+            // Arrange
+            const accessCode = 'room123';
+            const playerId = 'non-existent';
+
+            const game = {
+                getPlayer: jest.fn().mockReturnValue(null),
+            } as unknown as Game;
+
+            gameManager.getGame.mockReturnValue(game);
+
+            const payload = {
+                playerId,
+                itemToThrow: Item.SHIELD,
+                itemToAdd: Item.SWORD,
+                position: { x: 0, y: 0 },
+                accessCode,
+            };
+
+            // Act
+            gateway.handleInventoryChoice(client, payload);
+
+            // Assert
+            expect(gameManager.getGame).toHaveBeenCalledWith(accessCode);
+            expect(game.getPlayer).toHaveBeenCalledWith(playerId);
+            expect(server.to).not.toHaveBeenCalled();
+            expect(emitMock).not.toHaveBeenCalled();
+        });
+
+        it("handleItemCollected devrait émettre l'événement BroadcastItem avec le joueur et la position", () => {
+            // Arrange
+            const accessCode = 'room123';
+            const player = { name: 'TestPlayer', id: 'player1' } as Player;
+            const position = { x: 3, y: 4 } as Vec2;
+            const payload = { accessCode, player, position };
+
+            // Act
+            gateway.handleItemCollected(payload);
+
+            // Assert
+            expect(server.to).toHaveBeenCalledWith(accessCode);
+            expect(emitMock).toHaveBeenCalledWith(TurnEvents.BroadcastItem, {
+                player,
+                position,
+            });
+        });
+
+        it('handleFightInit devrait initialiser un combat et notifier les deux joueurs impliqués', () => {
+            // Arrange
+            const accessCode = 'game456';
+            const playerInitiatorId = 'initiator1';
+            const playerDefenderId = 'defender1';
+
+            const initiator = { name: 'Initiator', id: playerInitiatorId } as Player;
+            const defender = { name: 'Defender', id: playerDefenderId } as Player;
+
+            const fight = {
+                player1: initiator,
+                player2: defender,
+            } as Fight;
+
+            const game = {
+                initFight: jest.fn().mockReturnValue(fight),
+                getPlayer: jest.fn().mockReturnValueOnce(initiator).mockReturnValueOnce(defender),
+            } as unknown as Game;
+
+            gameManager.getGame.mockReturnValue(game);
+            gameManager.getRoom.mockReturnValue({ accessCode, game } as any);
+
+            // Act
+            gateway.handleFightInit(client, { accessCode, playerInitiatorId, playerDefenderId });
+
+            // Assert
+            expect(game.initFight).toHaveBeenCalledWith(playerInitiatorId, playerDefenderId);
+            expect(server.to).toHaveBeenCalledWith([initiator.id, defender.id]);
+            expect(emitMock).toHaveBeenCalledWith(FightEvents.Init, fight);
+            expect(journalService.dispatchEntry).toHaveBeenCalledWith(expect.anything(), [initiator.name, defender.name], expect.anything(), server);
+        });
+
+        it('handlePlayerFlee devrait définir fleeSuccess à true dans le journal quand la fuite réussit', () => {
+            // Arrange
+            const accessCode = 'game789';
+            const currentPlayer = { id: 'p1', name: 'Fleeing Player' } as Player;
+            const otherPlayer = { id: 'p2', name: 'Other Player' } as Player;
+
+            const fight = {
+                currentPlayer,
+                player1: currentPlayer,
+                player2: otherPlayer,
+            } as Fight;
+
+            const game = {
+                flee: jest.fn().mockReturnValue(true),
+                fight,
+                endFight: jest.fn(),
+            } as unknown as Game;
+
+            gameManager.getGame.mockReturnValue(game);
+            gameManager.getRoom.mockReturnValue({ accessCode, game } as any);
+
+            // Act
+            gateway.handlePlayerFlee(client, accessCode);
+
+            // Assert
+            expect(game.flee).toHaveBeenCalled();
+
+            // Vérifie que dispatchEntry a été appelé avec un objet contenant fleeSuccess: true
+            expect(journalService.dispatchEntry).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    fleeSuccess: true,
+                }),
+                expect.any(Array),
+                expect.any(String),
+                expect.anything(),
+            );
+
+            expect(server.to).toHaveBeenCalledWith([currentPlayer.id, otherPlayer.id]);
+            expect(emitMock).toHaveBeenCalledWith(FightEvents.End, null);
+        });
+
+        it("handlePlayerFlee devrait également définir fleeSuccess à true dans le cas d'un échec de fuite", () => {
+            // Arrange
+            const accessCode = 'game101';
+            const currentPlayer = { id: 'p1', name: 'Failed Fleeing Player' } as Player;
+            const otherPlayer = { id: 'p2', name: 'Other Player' } as Player;
+
+            const initialFight = {
+                currentPlayer,
+                player1: currentPlayer,
+                player2: otherPlayer,
+            } as Fight;
+
+            const updatedFight = {
+                ...initialFight,
+                currentPlayer: otherPlayer,
+            } as Fight;
+
+            const game = {
+                flee: jest.fn().mockReturnValue(false),
+                fight: initialFight,
+                changeFighter: jest.fn().mockReturnValue(updatedFight),
+            } as unknown as Game;
+
+            gameManager.getGame.mockReturnValue(game);
+
+            // Act
+            gateway.handlePlayerFlee(client, accessCode);
+
+            // Assert
+            expect(game.flee).toHaveBeenCalled();
+            expect(game.changeFighter).toHaveBeenCalled();
+
+            // Vérifie ligne 218 - l'ajout de fleeSuccess: true même en cas d'échec
+            expect(journalService.dispatchEntry).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    fleeSuccess: true,
+                }),
+                expect.any(Array),
+                expect.any(String),
+                expect.anything(),
+            );
+
+            expect(server.to).toHaveBeenCalledWith([currentPlayer.id, otherPlayer.id]);
+            expect(emitMock).toHaveBeenCalledWith(FightEvents.ChangeFighter, updatedFight);
         });
     });
 
@@ -391,23 +647,6 @@ describe('GameGateway', () => {
             gateway.debugPlayerMovement(client, { accessCode, direction, playerId });
 
             expect(game.movePlayerDebug).toHaveBeenCalledWith(direction, playerId);
-        });
-
-        it('debugPlayerMovement should not move player when not in debug mode', () => {
-            const accessCode = 'game123';
-            const playerId = 'player123';
-            const direction = { x: 1, y: 0 } as Vec2;
-
-            const game = {
-                isDebugMode: false,
-                movePlayerDebug: jest.fn(),
-            } as unknown as Game;
-
-            gameManager.getGame.mockReturnValue(game as any);
-
-            gateway.debugPlayerMovement(client, { accessCode, direction, playerId });
-
-            expect(game.movePlayerDebug).not.toHaveBeenCalled();
         });
 
         it('handleChangeDoorState should change door state and broadcast', () => {

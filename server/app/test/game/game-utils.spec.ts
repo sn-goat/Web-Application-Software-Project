@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable max-params */
+/* eslint-disable max-lines */
 import { Player } from '@app/class/player';
 import { GameUtils } from '@app/services/game/game-utils';
 import { Cell, TILE_COST, Vec2 } from '@common/board';
@@ -39,13 +40,55 @@ describe('GameUtils Comprehensive Tests', () => {
             // Une cellule voisine est considérée valide pour l’action si
             // soit elle possède un joueur (différent de Avatar.Default) soit son tile est CLOSED_DOOR ou OPENED_DOOR.
             board[0][1] = dummyCell(1, 0, Tile.CLOSED_DOOR);
-            const result = GameUtils.isPlayerCanMakeAction(board, { x: 1, y: 1 });
+            const mockPlayer = { position: { x: 1, y: 1 } } as Player;
+            const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
             expect(result).toBe(true);
         });
 
         it('should return false if no neighboring cell is valid for action', () => {
             const board = createBoard(3, 3);
-            const result = GameUtils.isPlayerCanMakeAction(board, { x: 1, y: 1 });
+            const mockPlayer = { position: { x: 1, y: 1 }, inventory: [] } as Player;
+            const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('isPlayerCanMakeAction avec arc', () => {
+        it('devrait détecter une action possible en diagonale quand le joueur possède un arc', () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            // Placer un ennemi en diagonale
+            board[2][2] = dummyCell(2, 2, Tile.FLOOR, Avatar.Knight);
+
+            // Un joueur avec un arc au centre
+            const mockPlayer = {
+                position: { x: 1, y: 1 },
+                inventory: [Item.BOW],
+            } as Player;
+
+            // Act
+            const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
+
+            // Assert
+            expect(result).toBe(true);
+        });
+
+        it("ne devrait pas détecter d'action en diagonale quand le joueur n'a pas d'arc", () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            // Placer un ennemi en diagonale mais aucun ennemi orthogonal
+            board[2][2] = dummyCell(2, 2, Tile.FLOOR, Avatar.Knight);
+
+            // Un joueur sans arc au centre
+            const mockPlayer = {
+                position: { x: 1, y: 1 },
+                inventory: [],
+            } as Player;
+
+            // Act
+            const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
+
+            // Assert
             expect(result).toBe(false);
         });
     });
@@ -319,6 +362,147 @@ describe('GameUtils Comprehensive Tests', () => {
             paths.forEach((value) => {
                 expect(value.cost).toBeLessThanOrEqual(movementPoints);
             });
+        });
+    });
+
+    describe('findValidDropCell', () => {
+        it('devrait trouver une cellule valide autour de la position du joueur', () => {
+            // Arrange
+            const board = createBoard(5, 5);
+            const playerPos: Vec2 = { x: 2, y: 2 };
+            const droppedItems: { position: Vec2 }[] = [];
+            const players: Player[] = [];
+
+            // Act
+            const result = GameUtils.findValidDropCell(board, playerPos, droppedItems, players);
+
+            // Assert
+            expect(result).not.toBeNull();
+            expect(result).toEqual(expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }));
+        });
+
+        it('ne devrait pas trouver de cellule si toutes sont occupées', () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            const playerPos: Vec2 = { x: 1, y: 1 };
+
+            // Rendre toutes les cellules adjacentes non valides
+            // en mettant un joueur ET un item non-DEFAULT
+            for (let y = 0; y < 3; y++) {
+                for (let x = 0; x < 3; x++) {
+                    if (x === 1 && y === 1) continue; // Ignorer la position du joueur
+                    board[y][x] = dummyCell(x, y, Tile.FLOOR, Avatar.Knight, 1, Item.SWORD);
+                }
+            }
+
+            const droppedItems: { position: Vec2 }[] = [];
+            const players: Player[] = [];
+
+            // Act
+            const result = GameUtils.findValidDropCell(board, playerPos, droppedItems, players);
+
+            // Assert
+            expect(result).toBeNull();
+        });
+
+        it('ne devrait pas trouver de cellule si toutes sont occupées', () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            const playerPos: Vec2 = { x: 1, y: 1 };
+            const droppedItems: { position: Vec2 }[] = [];
+            const players: Player[] = [];
+
+            // Mock canDropItem pour forcer un retour false pour toutes les cellules
+            const originalCanDropItem = GameUtils.canDropItem;
+            GameUtils.canDropItem = jest.fn().mockReturnValue(false);
+
+            try {
+                // Act
+                const result = GameUtils.findValidDropCell(board, playerPos, droppedItems, players);
+
+                // Assert
+                expect(result).toBeNull();
+            } finally {
+                // Nettoyer le mock pour éviter d'affecter d'autres tests
+                GameUtils.canDropItem = originalCanDropItem;
+            }
+        });
+
+        it("ne devrait pas utiliser une cellule déjà utilisée pour d'autres objets déposés", () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            const playerPos: Vec2 = { x: 1, y: 1 };
+            const droppedItems: { position: Vec2 }[] = [{ position: { x: 0, y: 1 } }, { position: { x: 2, y: 1 } }, { position: { x: 1, y: 0 } }];
+
+            // Supposons que le joueur est au centre, et trois des quatre cellules orthogonales sont occupées
+            const players: Player[] = [];
+
+            // Act
+            const result = GameUtils.findValidDropCell(board, playerPos, droppedItems, players);
+
+            // Assert
+            expect(result).toEqual({ x: 1, y: 2 }); // Seule cellule disponible
+        });
+
+        it('ne devrait pas utiliser une cellule où se trouve un joueur', () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            const playerPos: Vec2 = { x: 1, y: 1 };
+            const droppedItems: { position: Vec2 }[] = [];
+
+            // Un joueur en (1,0)
+            const players: Player[] = [{ position: { x: 1, y: 0 } } as Player];
+
+            // Act
+            const result = GameUtils.findValidDropCell(board, playerPos, droppedItems, players);
+
+            // Assert
+            expect(result).not.toBeNull();
+            expect(result).not.toEqual({ x: 1, y: 0 });
+        });
+
+        it("devrait trouver une cellule valide même si certaines cellules ne peuvent pas recevoir d'objets", () => {
+            // Arrange
+            const board = createBoard(3, 3);
+            const playerPos: Vec2 = { x: 1, y: 1 };
+
+            // Rendre certaines cellules non valides pour dépôt
+            board[0][0] = dummyCell(0, 0, Tile.WALL); // Mur en (0,0)
+            board[0][1] = dummyCell(0, 1, Tile.CLOSED_DOOR); // Porte fermée en (0,1)
+
+            const droppedItems: { position: Vec2 }[] = [];
+            const players: Player[] = [];
+
+            // Espionner canDropItem pour vérifier qu'il est appelé
+            const canDropItemSpy = jest.spyOn(GameUtils, 'canDropItem');
+
+            // Act
+            const result = GameUtils.findValidDropCell(board, playerPos, droppedItems, players);
+
+            // Assert
+            expect(canDropItemSpy).toHaveBeenCalled();
+            expect(result).not.toBeNull();
+            expect(result).not.toEqual({ x: 0, y: 0 }); // Ne devrait pas être le mur
+            expect(result).not.toEqual({ x: 0, y: 1 }); // Ne devrait pas être la porte fermée
+        });
+    });
+
+    describe('Private methods: isValidCellForAttack', () => {
+        it('devrait retourner true si la cellule contient un avatar non-Default', () => {
+            // Arrange
+            const cell1 = dummyCell(0, 0, Tile.FLOOR, Avatar.Knight);
+            const cell2 = dummyCell(0, 0, Tile.FLOOR, Avatar.Default);
+            const cell3 = dummyCell(0, 0, Tile.FLOOR, undefined);
+
+            // Act
+            const result1 = GameUtils['isValidCellForAttack'](cell1);
+            const result2 = GameUtils['isValidCellForAttack'](cell2);
+            const result3 = GameUtils['isValidCellForAttack'](cell3);
+
+            // Assert
+            expect(result1).toBe(true);
+            expect(result2).toBe(false);
+            expect(result3).toBe(false);
         });
     });
 });

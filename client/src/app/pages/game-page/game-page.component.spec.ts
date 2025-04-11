@@ -67,6 +67,7 @@ describe('GamePageComponent', () => {
         onPlayerTurnChanged: jasmine.createSpy('onPlayerTurnChanged').and.returnValue(of({ name: 'p1' })),
         onLoser: jasmine.createSpy('onLoser').and.returnValue(of({ name: 'p1' })),
         disconnect: jasmine.createSpy('disconnect').and.returnValue('disconnected'),
+        onInventoryFull: jasmine.createSpy('onInventoryFull').and.returnValue(of(null)),
     };
 
     const routerMock = {

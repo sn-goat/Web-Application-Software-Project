@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Player } from '@app/class/player';
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
-    DEFENSE_ICE_DECREMENT,
     DEFAULT_ACTIONS,
     DEFAULT_FLEE_ATTEMPTS,
     DEFAULT_WINS,
+    DEFENSE_ICE_DECREMENT,
     Dice,
     PlayerInput,
     Team,
@@ -163,6 +163,148 @@ describe('Player', () => {
             expect(attacker.position).toEqual(newPos);
             expect(attacker.attackPower).toBe(initialAttackPower);
             expect(attacker.defensePower).toBe(initialDefensePower);
+        });
+    });
+
+    describe("Gestion de l'inventaire", () => {
+        describe('addItemToInventory', () => {
+            it("devrait ajouter un item à l'inventaire et retourner true quand l'inventaire n'est pas plein", () => {
+                expect(attacker.inventory.length).toBe(0);
+                const result = attacker.addItemToInventory(Item.BOW);
+
+                expect(result).toBe(true);
+                expect(attacker.inventory).toContain(Item.BOW);
+                expect(attacker.inventory.length).toBe(1);
+            });
+
+            it("devrait retourner false quand l'inventaire est plein", () => {
+                // Remplir l'inventaire
+                attacker.addItemToInventory(Item.BOW);
+                attacker.addItemToInventory(Item.SHIELD);
+
+                // Tenter d'ajouter un troisième item
+                const result = attacker.addItemToInventory(Item.SWORD);
+
+                expect(result).toBe(false);
+                expect(attacker.inventory).not.toContain(Item.SWORD);
+                expect(attacker.inventory.length).toBe(2);
+            });
+
+            it('devrait augmenter attackPower et réduire defensePower quand SWORD est ajouté', () => {
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+
+                attacker.addItemToInventory(Item.SWORD);
+
+                expect(attacker.attackPower).toBe(initialAttackPower + 1);
+                expect(attacker.defensePower).toBe(initialDefensePower - 1);
+            });
+
+            it('devrait augmenter defensePower et réduire speed quand SHIELD est ajouté', () => {
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.addItemToInventory(Item.SHIELD);
+
+                expect(attacker.defensePower).toBe(initialDefensePower + 2);
+                expect(attacker.speed).toBe(initialSpeed - 1);
+            });
+
+            it('ne devrait pas modifier les stats quand un autre item est ajouté', () => {
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.addItemToInventory(Item.BOW);
+
+                expect(attacker.attackPower).toBe(initialAttackPower);
+                expect(attacker.defensePower).toBe(initialDefensePower);
+                expect(attacker.speed).toBe(initialSpeed);
+            });
+        });
+
+        describe('removeItemFromInventory', () => {
+            beforeEach(() => {
+                // Initialiser l'inventaire pour les tests de suppression
+                attacker.inventory = [Item.SWORD, Item.SHIELD];
+                // Ajuster les stats comme si les items avaient été ajoutés normalement
+                attacker.attackPower += 1; // Pour SWORD
+                attacker.defensePower -= 1; // Pour SWORD
+                attacker.defensePower += 2; // Pour SHIELD
+                attacker.speed -= 1; // Pour SHIELD
+            });
+
+            it("devrait retirer un item de l'inventaire et retourner true quand l'item existe", () => {
+                const result = attacker.removeItemFromInventory(Item.SWORD);
+
+                expect(result).toBe(true);
+                expect(attacker.inventory).not.toContain(Item.SWORD);
+                expect(attacker.inventory.length).toBe(1);
+            });
+
+            it("devrait retourner false quand l'item n'existe pas dans l'inventaire", () => {
+                const result = attacker.removeItemFromInventory(Item.BOW);
+
+                expect(result).toBe(false);
+                expect(attacker.inventory.length).toBe(2);
+            });
+
+            it('devrait réduire attackPower et augmenter defensePower quand SWORD est retiré', () => {
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+
+                attacker.removeItemFromInventory(Item.SWORD);
+
+                expect(attacker.attackPower).toBe(initialAttackPower - 1);
+                expect(attacker.defensePower).toBe(initialDefensePower + 1);
+            });
+
+            it('devrait réduire defensePower et augmenter speed quand SHIELD est retiré', () => {
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.removeItemFromInventory(Item.SHIELD);
+
+                expect(attacker.defensePower).toBe(initialDefensePower - 2);
+                expect(attacker.speed).toBe(initialSpeed + 1);
+            });
+
+            it('ne devrait pas modifier les stats quand un autre item est retiré', () => {
+                // D'abord ajouter un item qui n'affecte pas les stats
+                attacker.inventory.push(Item.BOW);
+
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.removeItemFromInventory(Item.BOW);
+
+                expect(attacker.attackPower).toBe(initialAttackPower);
+                expect(attacker.defensePower).toBe(initialDefensePower);
+                expect(attacker.speed).toBe(initialSpeed);
+            });
+        });
+
+        describe('hasItem', () => {
+            it("devrait retourner true quand le joueur possède l'item", () => {
+                attacker.inventory = [Item.SWORD, Item.BOW];
+
+                expect(attacker.hasItem(Item.SWORD)).toBe(true);
+                expect(attacker.hasItem(Item.BOW)).toBe(true);
+            });
+
+            it("devrait retourner false quand le joueur ne possède pas l'item", () => {
+                attacker.inventory = [Item.SWORD];
+
+                expect(attacker.hasItem(Item.SHIELD)).toBe(false);
+                expect(attacker.hasItem(Item.BOW)).toBe(false);
+            });
+
+            it("devrait retourner false quand l'inventaire est vide", () => {
+                attacker.inventory = [];
+
+                expect(attacker.hasItem(Item.SWORD)).toBe(false);
+            });
         });
     });
 });

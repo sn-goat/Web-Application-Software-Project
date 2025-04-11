@@ -1,5 +1,5 @@
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
     DEFAULT_ACTIONS,
@@ -31,11 +31,14 @@ export class Player implements IPlayer {
     currentLife: number;
     diceResult: number;
     team?: Team;
+    inventory: Item[];
+    pearlUsed: boolean;
 
     private readonly dice4 = 4;
     private readonly dice6 = 6;
     private readonly minDiceValue = 1;
     private readonly fleeThreshold = 0.3;
+    private readonly maxInventorySize = 2;
 
     private currentDamage: number;
 
@@ -51,6 +54,8 @@ export class Player implements IPlayer {
         this.defensePower = player.defensePower;
         this.wins = DEFAULT_WINS;
         this.team = null;
+        this.inventory = [];
+        this.pearlUsed = false;
     }
 
     attemptFlee(): boolean {
@@ -76,6 +81,7 @@ export class Player implements IPlayer {
         this.fleeAttempts = DEFAULT_FLEE_ATTEMPTS;
         this.currentLife = this.life;
         this.diceResult = 0;
+        this.pearlUsed = false;
     }
 
     attack(isDebugMode: boolean, playerDefender: Player): boolean {
@@ -85,9 +91,46 @@ export class Player implements IPlayer {
     }
 
     updatePosition(position: Vec2, fieldType: Tile): void {
-        this.attackPower = fieldType === Tile.ICE ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
-        this.defensePower = fieldType === Tile.ICE ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
+        if (fieldType === Tile.ICE && !this.hasItem(Item.LEATHER_BOOT)) {
+            this.attackPower = fieldType === Tile.ICE ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
+            this.defensePower = fieldType === Tile.ICE ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
+        }
         this.position = position;
+    }
+
+    addItemToInventory(item: Item): boolean {
+        if (this.inventory.length < this.maxInventorySize) {
+            this.inventory.push(item);
+            if (item === Item.SWORD) {
+                this.attackPower += 1;
+                this.defensePower -= 1;
+            } else if (item === Item.SHIELD) {
+                this.defensePower += 2;
+                this.speed -= 1;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    removeItemFromInventory(item: Item): boolean {
+        const index = this.inventory.indexOf(item);
+        if (index !== -1) {
+            this.inventory.splice(index, 1);
+            if (item === Item.SWORD) {
+                this.attackPower -= 1;
+                this.defensePower += 1;
+            } else if (item === Item.SHIELD) {
+                this.defensePower -= 2;
+                this.speed += 1;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    hasItem(item: Item): boolean {
+        return this.inventory.includes(item);
     }
 
     getDamage(): number {

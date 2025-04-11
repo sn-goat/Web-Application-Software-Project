@@ -260,15 +260,53 @@ describe('GameService', () => {
         expect(service.isActionSelected.value).toBe(!current);
     });
 
-    it('should call changeDoorState when toggling door', () => {
-        const position = { x: 2, y: 2 };
+    it('should call changeDoorState when toggling door without items', () => {
+        const initialMap: Cell[][] = [
+            [{ position: { x: 0, y: 0 } } as Cell, { position: { x: 1, y: 0 } } as Cell],
+            [
+                { position: { x: 0, y: 1 } } as Cell,
+                {
+                    position: { x: 1, y: 1 },
+                    tile: Tile.OPENED_DOOR,
+                    item: Item.DEFAULT,
+                } as Cell,
+            ],
+        ];
+        service.map.next(initialMap);
+        const position = { x: 1, y: 1 };
         playerServiceMock.getPlayer.and.returnValue(testPlayer);
         spyOn(socketServiceMock, 'changeDoorState');
+
         service.toggleDoor(position);
         expect(socketServiceMock.changeDoorState).toHaveBeenCalledWith(position, testPlayer.id);
     });
 
+    it('should not call changeDoorState when trying to close a door with an item on it', () => {
+        const initialMap: Cell[][] = [
+            [{ position: { x: 0, y: 0 } } as Cell, { position: { x: 1, y: 0 } } as Cell],
+            [
+                { position: { x: 0, y: 1 } } as Cell,
+                {
+                    position: { x: 1, y: 1 },
+                    tile: Tile.OPENED_DOOR,
+                    item: Item.BOW,
+                } as Cell,
+            ],
+        ];
+        service.map.next(initialMap);
+
+        const position = { x: 1, y: 1 };
+        playerServiceMock.getPlayer.and.returnValue(testPlayer);
+        spyOn(socketServiceMock, 'changeDoorState');
+        spyOn(console, 'log'); // To prevent actual console logs during test
+
+        service.toggleDoor(position);
+
+        expect(socketServiceMock.changeDoorState).not.toHaveBeenCalled();
+    });
+
     it('should return false for isWithinActionRange when cell is not adjacent', () => {
+        testPlayer.inventory = [Item.MONSTER_EGG];
         service.activePlayer.next(testPlayer);
         const positiveResult = service.isWithinActionRange(adjacentCell);
         expect(positiveResult).toBeTrue();
@@ -467,13 +505,15 @@ describe('GameService', () => {
     });
 
     it('findPossibleActions should return possible actions for players and doors', () => {
+        testPlayer.inventory = [Item.MONSTER_EGG];
+        service.playingPlayers.next([testPlayer]);
         const initialMap: Cell[][] = [
             [
-                { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
+                { player: testPlayer.avatar, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
                 { player: Avatar.Default, tile: Tile.WALL, position: { x: 1, y: 0 } } as Cell,
             ],
             [
-                { player: Avatar.Wizard, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
+                { player: testPlayer.avatar, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
                 { player: Avatar.Default, tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 } } as Cell,
             ],
         ];
@@ -485,6 +525,8 @@ describe('GameService', () => {
     });
 
     it('findPossibleActions should return an empty set if no actions available', () => {
+        testPlayer.inventory = [Item.MONSTER_EGG];
+        service.playingPlayers.next([testPlayer]);
         const initialMap: Cell[][] = [
             [
                 { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,

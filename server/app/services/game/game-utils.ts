@@ -6,13 +6,25 @@ import { Avatar, PathInfo } from '@common/game';
 import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, Team } from '@common/player';
 
 export class GameUtils {
-    static isPlayerCanMakeAction(map: Cell[][], position: Vec2): boolean {
-        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
-        for (const dir of directions) {
+    static isPlayerCanMakeAction(map: Cell[][], player: Player): boolean {
+        const position: Vec2 = player.position;
+        for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
             const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
             if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
-                if (this.isValidCellForAction(map[newPos.y][newPos.x])) {
+                const targetCell = map[newPos.y][newPos.x];
+                if (this.isValidCellForAction(targetCell)) {
                     return true;
+                }
+            }
+        }
+        if (player.inventory.includes(Item.BOW)) {
+            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
+                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+                if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
+                    const targetCell = map[newPos.y][newPos.x];
+                    if (this.isValidCellForAttack(targetCell)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -161,17 +173,84 @@ export class GameUtils {
     }
     static assignTeams(playersList: Player[]): void {
         const shuffled = [...playersList];
-        // Shuffle players
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
         const mid = Math.floor(shuffled.length / 2);
-        // Assign teams
         for (let i = 0; i < shuffled.length; i++) {
             shuffled[i].setTeam(i < mid ? Team.RED : Team.BLUE);
         }
     }
+
+    static normalizeChestItems(map: Cell[][]): void {
+        const allItems = Object.values(Item) as Item[];
+        const allowed = allItems.filter((item) => item !== Item.CHEST && item !== Item.FLAG && item !== Item.SPAWN);
+        const presentAllowed = new Set<Item>();
+        map.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item !== Item.CHEST && cell.item !== Item.FLAG && cell.item !== Item.SPAWN && allowed.includes(cell.item)) {
+                    presentAllowed.add(cell.item);
+                }
+            });
+        });
+        const available = allowed.filter((item) => !presentAllowed.has(item));
+        map.forEach((row) => {
+            row.forEach((cell) => {
+                if (cell.item === Item.CHEST) {
+                    if (available.length > 0) {
+                        const randomIndex = Math.floor(Math.random() * available.length);
+                        const newItem = available[randomIndex];
+                        cell.item = newItem;
+                        available.splice(randomIndex, 1);
+                    }
+                }
+            });
+        });
+    }
+
+    static canDropItem(cell: Cell): boolean {
+        return (
+            (cell.player === undefined || cell.player === Avatar.Default || cell.item === Item.DEFAULT) &&
+            (cell.tile === Tile.FLOOR || cell.tile === Tile.ICE || cell.tile === Tile.WATER || cell.tile === Tile.OPENED_DOOR)
+        );
+    }
+
+    static findValidDropCell(map: Cell[][], playerPos: Vec2, droppedItems: { position: Vec2 }[], players: Player[]): Vec2 | null {
+        const rows = map.length;
+        const cols = map[0].length;
+        const queue: Vec2[] = [playerPos];
+        const visited = new Set<string>();
+        const key = (vec: Vec2) => `${vec.x},${vec.y}`;
+        visited.add(key(playerPos));
+
+        while (queue.length > 0) {
+            const current = queue.shift();
+            if (!(current.x === playerPos.x && current.y === playerPos.y)) {
+                const cell = map[current.y]?.[current.x];
+                if (
+                    cell &&
+                    this.canDropItem(cell) &&
+                    !droppedItems.some((drop) => drop.position.x === current.x && drop.position.y === current.y) &&
+                    !players.some((p) => p.position.x === current.x && p.position.y === current.y)
+                ) {
+                    return { x: current.x, y: current.y };
+                }
+            }
+            for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
+                const newX = current.x + dir.x;
+                const newY = current.y + dir.y;
+                const newPos: Vec2 = { x: newX, y: newY };
+                const newKey = key(newPos);
+                if (newX >= 0 && newY >= 0 && newX < cols && newY < rows && !visited.has(newKey)) {
+                    visited.add(newKey);
+                    queue.push(newPos);
+                }
+            }
+        }
+        return null;
+    }
+
     private static vec2Key(vec: Vec2): string {
         return `${vec.x},${vec.y}`;
     }
@@ -206,5 +285,9 @@ export class GameUtils {
 
     private static isValidCellForAction(cell: Cell): boolean {
         return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+    }
+
+    private static isValidCellForAttack(cell: Cell): boolean {
+        return cell.player !== undefined && cell.player !== Avatar.Default;
     }
 }

@@ -1,0 +1,22 @@
+.popup-container {
+  padding: 20px;
+  h2, p {
+    color: #000;
+  }
+  .items {
+    display: flex;
+    flex-wrap: wrap;
+    .item {
+      margin: 10px;
+      cursor: pointer;
+      img {
+        max-width: 100px;
+      }
+      span {
+        display: block;
+        text-align: center;
+      }
+    }
+  }
+}
+
