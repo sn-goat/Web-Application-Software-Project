@@ -356,10 +356,6 @@ export class Game implements IGame {
 
     private checkForEndTurn(player: Player): void {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
-        if (this.inventoryFull) {
-            // Prevent ending the turn if the inventory is full
-            return;
-        }
         if (this.isPlayerContinueTurn(player, path.size)) {
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {

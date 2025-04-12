@@ -300,7 +300,6 @@ export class GameGateway {
                 position: payload.position,
             });
             
-            // Vérifier la fin du tour après résolution du problème d'inventaire plein
             if (game.pendingEndTurn) {
                 game.endTurn();
             }
