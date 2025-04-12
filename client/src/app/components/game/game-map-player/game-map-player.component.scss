@@ -49,8 +49,6 @@ h4 {
     height: 100%;
     box-sizing: border-box;
     justify-content: space-between;
-    padding: 4px;
-    gap: 5px;
     overflow: hidden;
 }
 
@@ -121,6 +119,18 @@ h4 {
             animation: text-pulse 2s ease-in-out infinite;
             font-weight: bold;
         }
+
+        .flag-icon {
+        width: 20px;
+        height: auto;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+        animation: flagWiggle 2.5s infinite ease-in-out;
+    }
+    @keyframes flagWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(25deg); }
+}
     }
 }
 

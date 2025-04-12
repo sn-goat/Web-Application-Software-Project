@@ -298,6 +298,10 @@ export class GameGateway {
                 item: payload.itemToThrow,
                 position: payload.position,
             });
+            this.server.to(payload.accessCode).emit(TurnEvents.DroppedItem, {
+                player,
+                droppedItems: [{ item: payload.itemToThrow, position: payload.position }],
+            });
         }
     }
 }
