@@ -299,7 +299,7 @@ export class GameGateway {
                 item: payload.itemToThrow,
                 position: payload.position,
             });
-            
+
             if (game.pendingEndTurn) {
                 game.endTurn();
             }
