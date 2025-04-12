@@ -3,7 +3,7 @@
         <mat-card-title>Tuiles</mat-card-title>
     </mat-card-header>
     <mat-card-content class="content">
-        @for(tile of tiles; track tile){ @if(tile !== tileType.FLOOR && tile !== tileType.OPENED_DOOR ){
+        @for(tile of tiles; track tile){ @if(tile !== tileType.Floor && tile !== tileType.OpenedDoor ){
         <app-edit-tool-tile [type]="tile"></app-edit-tool-tile>
         } }
     </mat-card-content>

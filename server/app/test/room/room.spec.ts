@@ -12,7 +12,7 @@ import { Item, Tile, Visibility } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 
-const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.DEFAULT, cost: number = 1): Cell => ({
+const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.Default, cost: number = 1): Cell => ({
     position: pos,
     tile,
     item,
@@ -25,10 +25,10 @@ const dummyBoard: Board = {
     description: 'Dummy board',
     size: 2,
     isCTF: false,
-    visibility: Visibility.PUBLIC, // adjust according to your Visibility type
+    visibility: Visibility.Public, // adjust according to your Visibility type
     board: [
-        [createDummyCell({ x: 0, y: 0 }, Tile.FLOOR), createDummyCell({ x: 1, y: 0 }, Tile.CLOSED_DOOR)],
-        [createDummyCell({ x: 0, y: 1 }, Tile.ICE), createDummyCell({ x: 1, y: 1 }, Tile.WATER)],
+        [createDummyCell({ x: 0, y: 0 }, Tile.Floor), createDummyCell({ x: 1, y: 0 }, Tile.ClosedDoor)],
+        [createDummyCell({ x: 0, y: 1 }, Tile.Ice), createDummyCell({ x: 1, y: 1 }, Tile.Water)],
     ],
     updatedAt: new Date(), // Added to satisfy required property
     createdAt: new Date(),

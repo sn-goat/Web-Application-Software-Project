@@ -57,7 +57,7 @@ export class GameGateway {
     handleEndTurn(payload: { accessCode: string; player: Player; path: Record<string, PathInfo> }) {
         this.logger.log('Changing turn to player: ' + payload.player.name);
         this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { player: payload.player, path: payload.path });
-        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.player.name], GameMessage.START_TURN, this.server);
+        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.player.name], GameMessage.StartTurn, this.server);
     }
 
     @OnEvent(InternalFightEvents.ChangeFighter)
@@ -74,7 +74,7 @@ export class GameGateway {
             accessCode: payload.accessCode,
             damage: attacker.getDamage(),
         };
-        this.journalService.dispatchEntry(fightJournal, [attacker.name], FightMessage.ATTACK, this.server);
+        this.journalService.dispatchEntry(fightJournal, [attacker.name], FightMessage.Attack, this.server);
     }
 
     @OnEvent(InternalFightEvents.End)
@@ -87,26 +87,26 @@ export class GameGateway {
             accessCode: payload.accessCode,
             damage: attacker.getDamage(),
         };
-        this.journalService.dispatchEntry(fightJournal, [attacker.name], FightMessage.ATTACK, this.server);
+        this.journalService.dispatchEntry(fightJournal, [attacker.name], FightMessage.Attack, this.server);
 
         const game: Game = this.gameManager.getGame(payload.accessCode);
         this.server.to(payload.winner.id).emit(FightEvents.Winner, payload.winner);
-        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.WINNER_FIGHT, this.server);
+        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.WinnerFight, this.server);
 
         this.server.to(payload.loser.id).emit(FightEvents.Loser, payload.loser);
-        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.loser.name], GameMessage.LOSER_FIGHT, this.server);
+        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.loser.name], GameMessage.LoserFight, this.server);
 
         this.journalService.dispatchEntry(
             this.gameManager.getRoom(payload.accessCode),
             [payload.winner.name, payload.loser.name],
-            GameMessage.END_FIGHT,
+            GameMessage.EndFight,
             this.server,
         );
 
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
         if (payload.winner.wins >= MAX_FIGHT_WINS) {
             this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);
-            this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.END_GAME, this.server);
+            this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.EndGame, this.server);
             this.gameManager.closeRoom(payload.accessCode);
         } else if (game.isPlayerTurn(payload.loser.id)) {
             game.endTurn();
@@ -160,14 +160,12 @@ export class GameGateway {
         game = game.configureGame();
         if (game) {
             this.server.to(accessCode).emit(GameEvents.GameStarted, game);
-            // game.startTurn();
         } else {
             this.logger.error('Game could not be configured for access code: ' + accessCode);
             client.emit(GameEvents.Error, 'Il vous faut un nombre de joueurs pair pour commencer la partie.');
         }
     }
 
-    // Duplication de code ??
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
@@ -186,9 +184,9 @@ export class GameGateway {
 
             const room: IRoom = this.gameManager.getRoom(accessCode);
             if (room.game.isDebugMode) {
-                this.journalService.dispatchEntry(room, [game.getPlayer(room.organizerId).name], GameMessage.ACTIVATE_DEBUG_MODE, this.server);
+                this.journalService.dispatchEntry(room, [game.getPlayer(room.organizerId).name], GameMessage.ActivateDebugMode, this.server);
             } else {
-                this.journalService.dispatchEntry(room, [game.getPlayer(room.organizerId).name], GameMessage.DEACTIVATE_DEBUG_MODE, this.server);
+                this.journalService.dispatchEntry(room, [game.getPlayer(room.organizerId).name], GameMessage.DeactivateDebugMode, this.server);
             }
         }
     }
@@ -212,10 +210,10 @@ export class GameGateway {
         const sendingInfo = game.changeDoorState(payload.doorPosition, payload.playerId);
         const room: IRoom = this.gameManager.getRoom(payload.accessCode);
 
-        if (sendingInfo.newDoorState === Tile.OPENED_DOOR) {
-            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.OPEN_DOOR, this.server);
-        } else if (sendingInfo.newDoorState === Tile.CLOSED_DOOR) {
-            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.CLOSE_DOOR, this.server);
+        if (sendingInfo.newDoorState === Tile.OpenedDoor) {
+            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.OpenDoor, this.server);
+        } else if (sendingInfo.newDoorState === Tile.ClosedDoor) {
+            this.journalService.dispatchEntry(room, [room.game.players[room.game.currentTurn].name], GameMessage.CloseDoor, this.server);
         }
         this.server
             .to(payload.accessCode)
@@ -238,7 +236,7 @@ export class GameGateway {
         this.journalService.dispatchEntry(
             this.gameManager.getRoom(payload.accessCode),
             [game.getPlayer(payload.playerInitiatorId).name, game.getPlayer(payload.playerDefenderId).name],
-            GameMessage.START_FIGHT,
+            GameMessage.StartFight,
             this.server,
         );
     }
@@ -254,23 +252,23 @@ export class GameGateway {
             defender: fight.currentPlayer.id === fight.player1.id ? fight.player2 : fight.player1,
             accessCode,
         };
-        this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.FLEE_ATTEMPT, this.server);
+        this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.FleeAttempt, this.server);
 
         if (game.flee()) {
             this.server.to([game.fight.player1.id, game.fight.player2.id]).emit(FightEvents.End, null);
             fightJournal = { ...fightJournal, fleeSuccess: true };
-            this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.FLEE_SUCCESS, this.server);
+            this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.FleeSuccess, this.server);
             game.endFight();
             this.journalService.dispatchEntry(
                 this.gameManager.getRoom(accessCode),
                 [fightJournal.attacker.name, fightJournal.defender.name],
-                GameMessage.END_FIGHT,
+                GameMessage.EndFight,
                 this.server,
             );
         } else {
             fight = game.changeFighter();
             fightJournal = { ...fightJournal, fleeSuccess: true };
-            this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.FLEE_FAILURE, this.server);
+            this.journalService.dispatchEntry(fightJournal, [fight.currentPlayer.name], FightMessage.FleeFailure, this.server);
             this.server.to([fight.player1.id, fight.player2.id]).emit(FightEvents.ChangeFighter, fight);
         }
     }

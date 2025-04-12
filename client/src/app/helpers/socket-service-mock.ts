@@ -213,7 +213,7 @@ export class MockSocketService {
         this.startTurnSubject.next(null);
     }
 
-    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }) {
+    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }) {
         this.doorSubject.next(data);
     }
 

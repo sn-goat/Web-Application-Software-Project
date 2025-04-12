@@ -90,7 +90,7 @@ describe('FormDialogComponent', () => {
             size: 10,
             isCTF: false,
             board: [],
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.Private,
             image: '',
         });
     });

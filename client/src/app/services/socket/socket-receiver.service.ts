@@ -160,7 +160,7 @@ export class SocketReceiverService {
         });
     }
 
-    onDoorStateChanged(): Observable<{ doorPosition: Vec2; newDoorState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }> {
+    onDoorStateChanged(): Observable<{ doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.DoorStateChanged, (data) => {
                 observer.next(data);

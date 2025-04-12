@@ -262,8 +262,8 @@ describe('GameGateway', () => {
             // Arrange
             const accessCode = 'room123';
             const playerId = 'player456';
-            const itemToThrow = Item.SHIELD;
-            const itemToAdd = Item.SWORD;
+            const itemToThrow = Item.Shield;
+            const itemToAdd = Item.Sword;
             const position = { x: 3, y: 4 } as Vec2;
 
             // Create mock player and game
@@ -278,11 +278,11 @@ describe('GameGateway', () => {
             const game = {
                 getPlayer: jest.fn().mockReturnValue(player),
                 map: [
-                    Array(5).fill({ item: Item.DEFAULT }),
-                    Array(5).fill({ item: Item.DEFAULT }),
-                    Array(5).fill({ item: Item.DEFAULT }),
-                    Array(5).fill({ item: Item.DEFAULT }),
-                    Array(5).fill({ item: Item.DEFAULT }),
+                    Array(5).fill({ item: Item.Default }),
+                    Array(5).fill({ item: Item.Default }),
+                    Array(5).fill({ item: Item.Default }),
+                    Array(5).fill({ item: Item.Default }),
+                    Array(5).fill({ item: Item.Default }),
                 ],
             } as unknown as Game;
 
@@ -291,7 +291,7 @@ describe('GameGateway', () => {
             game.map[position.y][position.x] = {
                 item: itemToAdd,
                 position,
-                tile: Tile.FLOOR,
+                tile: Tile.Floor,
                 cost: 1,
                 player: null,
             };
@@ -330,8 +330,8 @@ describe('GameGateway', () => {
 
             const payload = {
                 playerId: 'player1',
-                itemToThrow: Item.SHIELD,
-                itemToAdd: Item.SWORD,
+                itemToThrow: Item.Shield,
+                itemToAdd: Item.Sword,
                 position: { x: 0, y: 0 },
                 accessCode,
             };
@@ -358,8 +358,8 @@ describe('GameGateway', () => {
 
             const payload = {
                 playerId,
-                itemToThrow: Item.SHIELD,
-                itemToAdd: Item.SWORD,
+                itemToThrow: Item.Shield,
+                itemToAdd: Item.Sword,
                 position: { x: 0, y: 0 },
                 accessCode,
             };
@@ -655,7 +655,7 @@ describe('GameGateway', () => {
             const doorPosition = { x: 5, y: 5 } as Vec2;
             const sendingInfo = {
                 doorPosition,
-                newDoorState: Tile.OPENED_DOOR,
+                newDoorState: Tile.OpenedDoor,
             };
 
             const game = {

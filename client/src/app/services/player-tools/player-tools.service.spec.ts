@@ -33,37 +33,36 @@ describe('PlayerToolsService', () => {
         });
     });
 
-    it('should add an item if it is not DEFAULT', (done) => {
+    it('should add an item if it is not Default', (done) => {
         // Initial items should be empty
         service.items$.pipe(take(1)).subscribe((items) => {
             expect(items.length).toBe(0);
         });
 
-        service.addItem(Item.BOW);
+        service.addItem(Item.Bow);
         service.items$.pipe(take(1)).subscribe((items) => {
             expect(items.length).toBe(1);
-            expect(items[0]).toBe(Item.BOW);
+            expect(items[0]).toBe(Item.Bow);
         });
 
         // Add second item
-        service.addItem(Item.SWORD);
+        service.addItem(Item.Sword);
         service.items$.pipe(take(1)).subscribe((items) => {
             expect(items.length).toBe(2);
-            expect(items).toEqual([Item.BOW, Item.SWORD]);
+            expect(items).toEqual([Item.Bow, Item.Sword]);
         });
 
         // Adding a new item when 2 are already there should pop le dernier et ajouter le nouvel item
-        service.addItem(Item.SHIELD);
+        service.addItem(Item.Shield);
         service.items$.pipe(take(1)).subscribe((items) => {
             expect(items.length).toBe(2);
-            // La logique: items[0] reste, items[1] devient la nouvelle valeur
-            expect(items).toEqual([Item.BOW, Item.SHIELD]);
+            expect(items).toEqual([Item.Bow, Item.Shield]);
             done();
         });
     });
 
-    it('should not add DEFAULT item', (done) => {
-        service.addItem(Item.DEFAULT);
+    it('should not add Default item', (done) => {
+        service.addItem(Item.Default);
         service.items$.pipe(take(1)).subscribe((items) => {
             expect(items.length).toBe(0);
             done();
@@ -71,18 +70,15 @@ describe('PlayerToolsService', () => {
     });
 
     it('should remove an item correctly', (done) => {
-        // Pré-remplissage de quelques items
-        service.addItem(Item.BOW);
-        service.addItem(Item.SWORD);
+        service.addItem(Item.Bow);
+        service.addItem(Item.Sword);
 
-        // Vérifier que les items ont été ajoutés
         service.items$.pipe(take(1)).subscribe((items) => {
             expect(items.length).toBe(2);
 
-            // Suppression d'un item
-            service.removeItem(Item.BOW);
+            service.removeItem(Item.Bow);
             service.items$.pipe(take(1)).subscribe((updatedItems) => {
-                expect(updatedItems).toEqual([Item.SWORD]);
+                expect(updatedItems).toEqual([Item.Sword]);
                 done();
             });
         });

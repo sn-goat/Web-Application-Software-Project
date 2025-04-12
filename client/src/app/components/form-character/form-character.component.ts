@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/playerConst';
+import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/player-constants';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { RoomService } from '@app/services/room/room.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { ASSET_EXT_ANIMATED, ASSET_PATH_ANIMATED, ASSET_EXT_STATIC, ASSET_PATH_STATIC } from '@common/game';
+import { ASSET_EXT_ANIMATED, ASSET_EXT_STATIC, ASSET_PATH_ANIMATED, ASSET_PATH_STATIC } from '@common/game';
 import { DEFAULT_ATTACK_VALUE, DEFAULT_DEFENSE_VALUE, DEFAULT_DICE, DEFAULT_LIFE_VALUE, DEFAULT_SPEED_VALUE, PlayerInput } from '@common/player';
 import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
@@ -28,28 +28,16 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     @Input() accessCode: string = '';
     diceToImageLink = diceToImageLink;
 
-    totalPortraits = MAX_PORTRAITS;
-    currentPortraitIndex = 0;
-
+    playerInput: PlayerInput;
     lifeSelected: boolean = false;
     speedSelected: boolean = false;
     attackSelected: boolean = false;
     defenseSelected: boolean = false;
-
-    playerInput: PlayerInput = {
-        name: '',
-        avatar: this.currentPortraitStaticImage,
-        life: DEFAULT_LIFE_VALUE,
-        speed: DEFAULT_SPEED_VALUE,
-        attackPower: DEFAULT_ATTACK_VALUE,
-        defensePower: DEFAULT_DEFENSE_VALUE,
-        attackDice: DEFAULT_DICE,
-        defenseDice: DEFAULT_DICE,
-    };
-
-    takenAvatars: string[] = [];
     isRoomLocked: boolean = false;
 
+    private takenAvatars: string[] = [];
+    private totalPortraits = MAX_PORTRAITS;
+    private currentPortraitIndex = 0;
     private subscriptions: Subscription[] = [];
     private readonly gameMapService = inject(GameMapService);
     private readonly roomService = inject(RoomService);
@@ -71,6 +59,16 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.playerInput = {
+            name: '',
+            avatar: this.currentPortraitImage,
+            life: DEFAULT_LIFE_VALUE,
+            speed: DEFAULT_SPEED_VALUE,
+            attackPower: DEFAULT_ATTACK_VALUE,
+            defensePower: DEFAULT_DEFENSE_VALUE,
+            attackDice: DEFAULT_DICE,
+            defenseDice: DEFAULT_DICE,
+        };
         this.subscriptions.push(
             this.roomService.connected.subscribe((connectedPlayers) => {
                 if (!this.isCreationPage) {

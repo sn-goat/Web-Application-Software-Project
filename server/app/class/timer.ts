@@ -2,15 +2,13 @@ import { InternalEvents } from '@app/constants/internal-events';
 import { TimerType } from '@app/gateways/game/game.gateway.constants';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-const ONE_SECOND_IN_MS = 1000;
-
 export class Timer {
     type: string;
     remainingTime: number;
     pausedTime: number;
     intervalId: NodeJS.Timeout;
     private eventEmitter: EventEmitter2;
-
+    private readonly secondInMs = 1000;
     constructor(eventEmitter: EventEmitter2) {
         this.eventEmitter = eventEmitter;
     }
@@ -38,7 +36,7 @@ export class Timer {
             }
 
             this.remainingTime -= 1;
-        }, ONE_SECOND_IN_MS);
+        }, this.secondInMs);
 
         this.intervalId = intervalId;
     }

@@ -13,7 +13,7 @@ import { BoardService } from '@app/services/board/board.service';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { MapService } from '@app/services/map/map.service';
 import { Board } from '@common/board';
-import { Size, Visibility } from '@common/enums';
+import { Visibility } from '@common/enums';
 import { firstValueFrom } from 'rxjs';
 
 type SortingCategories = 'updatedAt' | 'createdAt' | 'name' | 'size';
@@ -74,7 +74,7 @@ export class MapListComponent implements OnInit {
     }
 
     isAllMapsHidden(): boolean {
-        return this.isCreationPage && this.items.every((map) => map.visibility !== Visibility.PUBLIC);
+        return this.isCreationPage && this.items.every((map) => map.visibility !== Visibility.Public);
     }
 
     getFilteredAndSortedItems(): Board[] {
@@ -130,7 +130,7 @@ export class MapListComponent implements OnInit {
 
     toggleVisibility(map: Board): void {
         this.boardService.toggleVisibility(map.name).subscribe(() => {
-            map.visibility = map.visibility === Visibility.PUBLIC ? Visibility.PRIVATE : Visibility.PUBLIC;
+            map.visibility = map.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
             this.cdr.detectChanges();
         });
     }
@@ -151,13 +151,6 @@ export class MapListComponent implements OnInit {
     handleImageError(event: Event): void {
         const target = event.target as HTMLImageElement;
         target.src = 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba';
-    }
-
-    getSizeClass(mapSize: number): string {
-        if (mapSize <= Size.SMALL) return 'size-small';
-        if (mapSize <= Size.MEDIUM) return 'size-medium';
-        if (mapSize <= Size.LARGE) return 'size-large';
-        return 'size-default';
     }
 
     async warning(message: string): Promise<void> {

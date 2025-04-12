@@ -32,17 +32,14 @@ describe('GameMapPlayerDetailedComponent', () => {
     } as IPlayer;
 
     beforeEach(async () => {
-        // Création d'un BehaviorSubject pour simuler l'émission de myPlayer$
         myPlayerSubject = new BehaviorSubject<IPlayer | null>(mockPlayer);
         unsubscribeSpy = jasmine.createSpy('unsubscribe');
 
-        // On spy sur la méthode unsubscribe afin de vérifier la désinscription (optionnel)
         spyOn(Subscription.prototype, 'unsubscribe').and.callFake(() => {
             unsubscribeSpy();
             return undefined;
         });
 
-        // Création du mock pour PlayerService avec la propriété myPlayer$
         playerServiceMock = jasmine.createSpyObj('PlayerService', [], {
             myPlayer: myPlayerSubject.asObservable(),
         });
@@ -68,7 +65,6 @@ describe('GameMapPlayerDetailedComponent', () => {
     });
 
     it('should initialize myPlayer and maxHealth during ngOnInit', () => {
-        // Dès l'initialisation, le subject émet mockPlayer
         expect(component.myPlayer).toEqual(mockPlayer);
         expect(component.maxHealth).toBe(mockPlayer.life);
     });

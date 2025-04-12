@@ -91,9 +91,9 @@ export class Player implements IPlayer {
     }
 
     updatePosition(position: Vec2, fieldType: Tile): void {
-        if (fieldType === Tile.ICE && !this.hasItem(Item.LEATHER_BOOT)) {
-            this.attackPower = fieldType === Tile.ICE ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
-            this.defensePower = fieldType === Tile.ICE ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
+        if (fieldType === Tile.Ice && !this.hasItem(Item.LeatherBoot)) {
+            this.attackPower = fieldType === Tile.Ice ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
+            this.defensePower = fieldType === Tile.Ice ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
         }
         this.position = position;
     }
@@ -101,10 +101,10 @@ export class Player implements IPlayer {
     addItemToInventory(item: Item): boolean {
         if (this.inventory.length < this.maxInventorySize) {
             this.inventory.push(item);
-            if (item === Item.SWORD) {
+            if (item === Item.Sword) {
                 this.attackPower += 1;
                 this.defensePower -= 1;
-            } else if (item === Item.SHIELD) {
+            } else if (item === Item.Shield) {
                 this.defensePower += 2;
                 this.speed -= 1;
             }
@@ -117,10 +117,10 @@ export class Player implements IPlayer {
         const index = this.inventory.indexOf(item);
         if (index !== -1) {
             this.inventory.splice(index, 1);
-            if (item === Item.SWORD) {
+            if (item === Item.Sword) {
                 this.attackPower -= 1;
                 this.defensePower += 1;
-            } else if (item === Item.SHIELD) {
+            } else if (item === Item.Shield) {
                 this.defensePower -= 2;
                 this.speed += 1;
             }
