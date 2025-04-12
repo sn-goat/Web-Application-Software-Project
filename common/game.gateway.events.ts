@@ -7,6 +7,7 @@ export enum GameEvents {
     DebugStateChanged = 'debugStateChanged',
 
     GameEnded = 'gameEnded',
+    Winner = 'gameWinner',
 
     Error = 'error',
 

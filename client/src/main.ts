@@ -12,7 +12,7 @@ import { JoinRoomComponent } from '@app/pages/joinRoom-page/join-room.component'
 import { LobbyComponent } from '@app/pages/lobby-page/lobby.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MapMakerComponent } from '@app/pages/edit-page/map-maker.component';
-import { StatsComponent } from '@app/components/stats/stats.component';
+import { StatsPageComponent } from '@app/pages/stats-page/stats-page.component';
 
 Component({
     template: `
@@ -29,7 +29,7 @@ const routes: Routes = [
     { path: 'lobby', component: LobbyComponent },
     { path: 'joindre', component: JoinRoomComponent },
     { path: 'admin', component: AdminPageComponent },
-    { path: 'stats', component: StatsComponent },
+    { path: 'stats', component: StatsPageComponent },
     { path: '**', redirectTo: '/accueil' },
 ];
 

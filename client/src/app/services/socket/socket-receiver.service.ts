@@ -113,10 +113,18 @@ export class SocketReceiverService {
         });
     }
 
-    onGameEnded(): Observable<IPlayer> {
+    onGameWinner(): Observable<IPlayer> {
         return new Observable((observer) => {
-            this.socket.once(GameEvents.GameEnded, (winner: IPlayer) => {
+            this.socket.once(GameEvents.Winner, (winner: IPlayer) => {
                 observer.next(winner);
+            });
+        });
+    }
+
+    onGameEnded(): Observable<void> {
+        return new Observable((observer) => {
+            this.socket.once(GameEvents.GameEnded, (data) => {
+                observer.next(data);
             });
         });
     }

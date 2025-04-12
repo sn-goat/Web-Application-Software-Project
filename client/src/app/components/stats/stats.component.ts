@@ -9,7 +9,7 @@ import { GameService } from '@app/services/game/game.service';
 import { PlayerStats } from '@common/player';
 import { Stats } from '@common/stats';
 import { Subscription } from 'rxjs';
-// import { mockCTFStats } from '@app/mocks/stats.mock';
+// import { mockCTFStats } from '@app/components/stats/stats.mock';
 
 type StatPlayer = PlayerStats & { isDisconnected: boolean };
 

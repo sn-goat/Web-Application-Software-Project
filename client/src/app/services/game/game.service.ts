@@ -224,6 +224,28 @@ export class GameService {
         });
     }
 
+    async confirmAndQuitGame(): Promise<boolean> {
+        return new Promise((resolve) => {
+            const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                width: '350px',
+                data: {
+                    title: 'Quitter la partie',
+                    message: 'Êtes-vous sûr de vouloir quitter cette partie ?',
+                    confirmText: 'Quitter',
+                    cancelText: 'Annuler',
+                },
+            });
+
+            dialogRef.afterClosed().subscribe((result) => {
+                if (result === true) {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }
+
     getCellDescription(cell: Cell): string {
         if (cell.player) {
             const currentPlayers = this.playingPlayers.value;

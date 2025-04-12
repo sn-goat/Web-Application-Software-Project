@@ -85,13 +85,10 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
             this.socketReceiver.onPlayerRemoved().subscribe((message: string) => {
                 this.warning(message);
             }),
-            this.socketReceiver.onStatsUpdate().subscribe(() => {
-                this.router.navigate(['/stats']);
-            }),
 
-            this.socketReceiver.onGameEnded().subscribe((winner) => {
-                this.warning(`${winner.name} a remporté la partie avec 3 victoires!`);
-                timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/accueil']));
+            this.socketReceiver.onGameWinner().subscribe((winner) => {
+                this.warningEndGame(`${winner.name} a remporté la partie avec 3 victoires!`);
+                timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/stats']));
             }),
         );
     }
@@ -124,6 +121,10 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         this.openDialog(message, Alert.WARNING).then(() => {
             this.router.navigate(['/acceuil']);
         });
+    }
+
+    private warningEndGame(message: string): void {
+        this.openDialog(message, Alert.WARNING);
     }
 
     private async openDialog(message: string, type: Alert): Promise<boolean> {

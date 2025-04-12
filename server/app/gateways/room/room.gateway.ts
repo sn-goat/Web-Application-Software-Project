@@ -10,6 +10,7 @@ import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessa
 import { Server, Socket } from 'socket.io';
 import { JournalService } from '@app/services/journal/journal.service';
 import { GameMessage } from '@common/journal';
+import { GameEvents } from '@common/game.gateway.events';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -23,6 +24,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     ) {}
     @OnEvent(InternalRoomEvents.CloseRoom)
     handleClosingRoom(accessCode: string): void {
+        this.server.to(accessCode).emit(GameEvents.GameEnded);
         this.gameManager.closeRoom(accessCode);
     }
 
