@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */ // TODO: fix this
 import { Fight } from '@app/class/fight';
 import { Player } from '@app/class/player';
 import {
@@ -26,7 +27,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Timer } from './timer';
 import { IPlayer } from '@common/player';
 import { Stats } from '@common/stats';
-import { GameStatsUtils } from '@app/services/game/game-stats-utils';
+import { GameStatsUtils } from '@app/services/game/game-utils-stats';
 
 export class Game implements IGame, GameStats {
     internalEmitter: EventEmitter2;
@@ -42,8 +43,6 @@ export class Game implements IGame, GameStats {
     pendingEndTurn: boolean;
     maxPlayers: number;
 
-    private continueMovement: boolean;
-
     gameDuration: string;
     tilesVisited: Set<Vec2>;
     doorsHandled: Set<Vec2>;
@@ -55,6 +54,8 @@ export class Game implements IGame, GameStats {
     timeEndOfGame: Date;
 
     stats: Stats;
+
+    private continueMovement: boolean;
 
     constructor(internalEmitter: EventEmitter2, board: Board) {
         this.internalEmitter = internalEmitter;
@@ -383,7 +384,7 @@ export class Game implements IGame, GameStats {
 
     private getDoorsNumber(map: Cell[][]): number {
         return map.reduce((count, row) => {
-            return count + row.filter((cell) => cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR).length;
+            return count + row.filter((cell) => cell.tile === Tile.ClosedDoor || cell.tile === Tile.OpenedDoor).length;
         }, 0);
     }
 

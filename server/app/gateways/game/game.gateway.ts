@@ -70,36 +70,7 @@ export class GameGateway {
     @OnEvent(InternalStatsEvents.DispatchStats)
     handleStats(payload: { accessCode: string; stats: Stats }) {
         this.logger.log('Dispatching stats for game: ' + payload.accessCode);
-
-        const serializableStats = {
-            gameStats: {
-                doorsHandledPercentage: payload.stats.gameStats.doorsHandledPercentage,
-                gameDuration: payload.stats.gameStats.gameDuration,
-                tilesVisitedPercentage: payload.stats.gameStats.tilesVisitedPercentage,
-            },
-            playersStats: payload.stats.playersStats.map((player) => ({
-                name: player.name,
-                fleeSuccess: player.fleeSuccess,
-                givenDamage: player.givenDamage,
-                takenDamage: player.takenDamage,
-                wins: player.wins,
-                losses: player.losses,
-                tilesVisitedPercentage: player.tilesVisitedPercentage,
-                totalFights: player.totalFights,
-            })),
-            disconnectedPlayersStats: payload.stats.disconnectedPlayersStats.map((player) => ({
-                name: player.name,
-                fleeSuccess: player.fleeSuccess,
-                givenDamage: player.givenDamage,
-                takenDamage: player.takenDamage,
-                wins: player.wins,
-                losses: player.losses,
-                tilesVisitedPercentage: player.tilesVisitedPercentage,
-                totalFights: player.totalFights,
-            })),
-        };
-
-        this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, serializableStats);
+        this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, payload.stats);
     }
 
     @OnEvent(InternalFightEvents.ChangeFighter)

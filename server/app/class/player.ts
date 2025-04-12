@@ -1,5 +1,5 @@
 import { Vec2 } from '@common/board';
-import { Item, Tile, Item } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
     DEFAULT_ACTIONS,
@@ -120,6 +120,8 @@ export class Player implements IPlayer {
     addItemToInventory(item: Item): boolean {
         if (this.inventory.length < this.maxInventorySize) {
             this.inventory.push(item);
+            this.itemsPicked.add(item);
+
             if (item === Item.Sword) {
                 this.attackPower += 1;
                 this.defensePower -= 1;

@@ -6,12 +6,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { GameService } from '@app/services/game/game.service';
-import { PlayerStats } from '@common/player';
-import { Stats } from '@common/stats';
+import { Stats, StatPlayer /* , mockCTFStats */ } from '@common/stats';
 import { Subscription } from 'rxjs';
-// import { mockCTFStats } from '@app/components/stats/stats.mock';
-
-type StatPlayer = PlayerStats & { isDisconnected: boolean };
 
 @Component({
     selector: 'app-stats',

@@ -25,9 +25,9 @@ export interface GameStats {
     doorsHandledPercentage?: string;
     flagsCaptured?: Set<string>;
     flagsCapturedCount?: number;
-    disconnectedPlayers: IPlayer[];
-    tilesNumber: number;
-    doorsNumber: number;
+    disconnectedPlayers?: IPlayer[];
+    tilesNumber?: number;
+    doorsNumber?: number;
     timeStartOfGame?: Date;
     timeEndOfGame?: Date;
 }
