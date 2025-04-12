@@ -67,6 +67,7 @@ describe('GamePageComponent', () => {
         onPlayerTurnChanged: jasmine.createSpy('onPlayerTurnChanged').and.returnValue(of({ name: 'p1' })),
         onLoser: jasmine.createSpy('onLoser').and.returnValue(of({ name: 'p1' })),
         disconnect: jasmine.createSpy('disconnect').and.returnValue('disconnected'),
+        onInventoryFull: jasmine.createSpy('onInventoryFull').and.returnValue(of(null)),
     };
 
     const routerMock = {
@@ -101,7 +102,6 @@ describe('GamePageComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(GamePageComponent);
         component = fixture.componentInstance;
-        // Assigner le headerBar avec le stub
         component.headerBar = headerBarStub as unknown as HeaderBarComponent;
         fixture.detectChanges();
     });
@@ -145,16 +145,13 @@ describe('GamePageComponent', () => {
 
     describe('ngAfterViewInit', () => {
         it('should override headerBar.getBack and call original method when confirmed', fakeAsync(async () => {
-            // Définir la méthode getBack originale avec un spy retournant "ORIGINAL"
             const originalGetBack = jasmine.createSpy('originalGetBack').and.returnValue(Promise.resolve('ORIGINAL'));
             headerBarStub.getBack = originalGetBack;
 
-            // Appeler ngAfterViewInit qui surcharge getBack
             component.ngAfterViewInit();
 
-            // Simuler l'appel à la méthode surchargée
             await component.headerBar.getBack();
-            tick(); // simuler l'attente dans les promises
+            tick();
 
             expect(gameServiceMock.confirmAndAbandonGame).toHaveBeenCalled();
         }));

@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
 import { MapService } from '@app/services/map/map.service';
+import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { Vec2 } from '@common/board';
 import { Item } from '@common/enums';
 
@@ -15,7 +15,7 @@ export class EditEventHandlerService {
 
     handleMouseDown(event: MouseEvent, rect: DOMRect) {
         const currentCoord = this.screenToBoard(event.pageX, event.pageY, rect);
-        if (this.mapService.getCellItem(currentCoord.x, currentCoord.y) !== Item.DEFAULT) {
+        if (this.mapService.getCellItem(currentCoord.x, currentCoord.y) !== Item.Default) {
             this.itemApplicatorService.handleMouseDown(event, rect);
         } else {
             this.tileApplicatorService.handleMouseDown(event, rect);

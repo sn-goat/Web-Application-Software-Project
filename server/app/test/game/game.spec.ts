@@ -3,14 +3,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Game } from '@app/class/game';
-import { Board } from '@app/model/database/board';
-import { Cell, Vec2 } from '@common/board';
-import { Player } from '@app/class/player';
 import { Fight } from '@app/class/fight';
+import { Game } from '@app/class/game';
+import { Player } from '@app/class/player';
 import { Timer } from '@app/class/timer';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -18,13 +15,16 @@ import {
     THREE_SECONDS_IN_MS,
     TimerType,
 } from '@app/gateways/game/game.gateway.constants';
-import { Avatar, IGame, PathInfo, TurnInfo } from '@common/game';
-import { Item, Tile, Visibility } from '@common/enums';
-import { getLobbyLimit } from '@common/lobby-limits';
+import { Board } from '@app/model/database/board';
 import { GameUtils } from '@app/services/game/game-utils';
+import { Cell, Vec2 } from '@common/board';
+import { Item, Tile, Visibility } from '@common/enums';
+import { Avatar, PathInfo } from '@common/game';
+import { getLobbyLimit } from '@common/lobby-limits';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // --- Create a dummy board that conforms to the Board interface ---
-const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.DEFAULT, cost: number = 1): Cell => ({
+const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.Default, cost: number = 1): Cell => ({
     position: pos,
     tile,
     item,
@@ -37,10 +37,10 @@ const dummyBoard: Board = {
     description: 'Dummy board',
     size: 2,
     isCTF: false,
-    visibility: Visibility.PUBLIC, // adjust according to your Visibility type
+    visibility: Visibility.Public, // adjust according to your Visibility type
     board: [
-        [createDummyCell({ x: 0, y: 0 }, Tile.FLOOR), createDummyCell({ x: 1, y: 0 }, Tile.CLOSED_DOOR)],
-        [createDummyCell({ x: 0, y: 1 }, Tile.ICE), createDummyCell({ x: 1, y: 1 }, Tile.WATER)],
+        [createDummyCell({ x: 0, y: 0 }, Tile.Floor), createDummyCell({ x: 1, y: 0 }, Tile.ClosedDoor)],
+        [createDummyCell({ x: 0, y: 1 }, Tile.Ice), createDummyCell({ x: 1, y: 1 }, Tile.Water)],
     ],
     updatedAt: new Date(), // Added to satisfy required property
     createdAt: new Date(),
@@ -62,7 +62,7 @@ jest.spyOn(GameUtils, 'findPossiblePaths').mockImplementation(
     (map: Cell[][], pos: Vec2, pts: number) => new Map<string, PathInfo>([['key', { path: [pos], cost: 1 }]]),
 );
 jest.spyOn(GameUtils, 'findValidSpawn').mockImplementation((map: Cell[][], pos: Vec2) => pos);
-jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockImplementation((map: Cell[][], pos: Vec2) => true);
+jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockImplementation((map: Cell[][], player: Player) => true);
 
 // --- Create dummy players ---
 const createDummyPlayer = (id: string): Player => {
@@ -82,6 +82,7 @@ const createDummyPlayer = (id: string): Player => {
         attack: jest.fn(),
         attemptFlee: jest.fn(),
         name: 'DummyPlayer',
+        inventory: [],
     } as unknown as Player;
 };
 
@@ -156,10 +157,12 @@ describe('Game', () => {
 
         it('removePlayer should do nothing if player not found', () => {
             game.addPlayer(player1);
+            // Ajout d'une fonction factice pour dropItems afin d'éviter l'erreur lorsqu'aucun joueur n'est trouvé
+            game.dropItems = jest.fn();
             const emitSpy = jest.spyOn(emitter, 'emit');
             game.removePlayer('unknown', 'message');
             expect(game.players).toHaveLength(1);
-            expect(emitSpy).not.toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, expect.anything(), expect.anything());
+            expect(emitSpy).not.toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, expect.anything());
         });
     });
 
@@ -240,9 +243,10 @@ describe('Game', () => {
             jest.useFakeTimers();
             game.processPath(pathInfo, player1.id);
             expect(game.movementInProgress).toBe(true);
-            jest.advanceTimersByTime(MOVEMENT_TIMEOUT_IN_MS * (pathInfo.path.length + 1));
-            expect(movePlayerSpy).toHaveBeenCalledTimes(2);
-            expect(decrementSpy).toHaveBeenCalledWith(player1, pathInfo.cost);
+            // Remarque : pour un chemin de 2 positions, on effectue 1 déplacement, d'où (pathInfo.path.length - 1)
+            jest.advanceTimersByTime(MOVEMENT_TIMEOUT_IN_MS * pathInfo.path.length);
+            expect(movePlayerSpy).toHaveBeenCalledTimes(1);
+            expect(decrementSpy).toHaveBeenCalledWith(player1, pathInfo.cost / pathInfo.path.length);
             expect(game.movementInProgress).toBe(false);
         });
 
@@ -356,11 +360,11 @@ describe('Game', () => {
 
     describe('changeDoorState', () => {
         it('should toggle door state and decrement action', () => {
-            // dummyBoard.board[0][1] initially has Tile.CLOSED_DOOR.
+            // dummyBoard.board[0][1] initially has Tile.ClosedDoor.
             player1.actions = 2;
             game.addPlayer(player1);
             const result = game.changeDoorState({ x: 1, y: 0 }, player1.id);
-            expect(result.newDoorState).toBe(Tile.OPENED_DOOR);
+            expect(result.newDoorState).toBe(Tile.OpenedDoor);
             expect(player1.actions).toBe(1);
         });
     });
@@ -417,6 +421,8 @@ describe('Game', () => {
         it('should move loser to spawn, end fight and emit event when attack kills opponent', () => {
             const fightResult = { winner: player1, loser: player2 };
             jest.spyOn(game.fight, 'playerAttack').mockReturnValue(fightResult);
+            // Stub de dropItems pour éviter l'erreur sur player.inventory
+            game.dropItems = jest.fn();
             const moveSpy = jest.spyOn(game as any, 'movePlayerToSpawn').mockImplementation(() => {});
             const endFightSpy = jest.spyOn(game, 'endFight').mockImplementation(() => {});
             const emitSpy = jest.spyOn(emitter, 'emit');
@@ -443,10 +449,10 @@ describe('Game', () => {
             player1.position = { x: 0, y: 0 };
             player1.spawnPosition = { x: 1, y: 1 };
             dummyBoard.board[0][0].player = player1.avatar as Avatar;
-            dummyBoard.board[1][1].item = Item.DEFAULT;
+            dummyBoard.board[1][1].item = Item.Default;
             game.removePlayerOnMap(player1.id);
             expect(dummyBoard.board[0][0].player).toBe(Avatar.Default);
-            expect(dummyBoard.board[1][1].item).toBe(Item.DEFAULT);
+            expect(dummyBoard.board[1][1].item).toBe(Item.Default);
         });
 
         it('removePlayerFromFight should emit End event with fight removal result', () => {
@@ -478,6 +484,254 @@ describe('Game', () => {
             const endTurnSpy = jest.spyOn(game, 'endTurn').mockImplementation(() => {});
             (game as any).endTurnRequested();
             expect(endTurnSpy).toHaveBeenCalled();
+        });
+    });
+});
+
+describe('Tests spécifiques pour les méthodes demandées', () => {
+    let game: Game;
+    let emitter: EventEmitter2;
+    let player: Player;
+    let inventoryPlayer: Player;
+
+    beforeEach(() => {
+        emitter = new EventEmitter2();
+        game = new Game(emitter, dummyBoard);
+        player = createDummyPlayer('player-test');
+
+        // Joueur avec inventaire pour les tests de dépôt d'objets
+        inventoryPlayer = createDummyPlayer('inventory-player');
+        inventoryPlayer.inventory = [Item.Sword, Item.Shield];
+        inventoryPlayer.position = { x: 0, y: 0 };
+        inventoryPlayer.spawnPosition = { x: 1, y: 1 };
+
+        // Mock pour removeItemFromInventory
+        inventoryPlayer.removeItemFromInventory = jest.fn((item) => {
+            inventoryPlayer.inventory = inventoryPlayer.inventory.filter((i) => i !== item);
+            return true; // Return boolean to match the expected method signature
+        });
+    });
+
+    describe('dropItems', () => {
+        it("devrait déposer tous les objets de l'inventaire du joueur", () => {
+            // Arrange
+            game.addPlayer(inventoryPlayer);
+            const findValidDropCellSpy = jest
+                .spyOn(GameUtils, 'findValidDropCell')
+                .mockReturnValueOnce({ x: 0, y: 1 })
+                .mockReturnValueOnce({ x: 1, y: 0 });
+            const emitSpy = jest.spyOn(emitter, 'emit');
+
+            // Act
+            game.dropItems(inventoryPlayer.id);
+
+            // Assert
+            expect(game.map[0][1].item).toBe(Item.Shield);
+            expect(game.map[1][0].item).toBe(Item.Sword);
+            expect(inventoryPlayer.inventory).toHaveLength(0);
+            expect(emitSpy).toHaveBeenCalledWith(
+                InternalTurnEvents.DroppedItem,
+                expect.objectContaining({
+                    player: inventoryPlayer,
+                    droppedItems: expect.arrayContaining([
+                        { item: Item.Sword, position: { x: 0, y: 1 } },
+                        { item: Item.Shield, position: { x: 1, y: 0 } },
+                    ]),
+                }),
+            );
+        });
+
+        it("devrait utiliser la position de spawn comme fallback si aucune cellule valide n'est trouvée", () => {
+            // Arrange
+            game.addPlayer(inventoryPlayer);
+            jest.spyOn(GameUtils, 'findValidDropCell').mockReturnValue(null);
+
+            // Act
+            game.dropItems(inventoryPlayer.id);
+
+            // Assert
+            expect(game.map[1][1].item).toBe(Item.Shield); // Le deuxième item remplace le premier à la même position
+            expect(inventoryPlayer.inventory).toHaveLength(0);
+        });
+
+        it("ne devrait rien faire si le joueur n'existe pas", () => {
+            // Act
+            const emitSpy = jest.spyOn(emitter, 'emit');
+            game.dropItems('non-existent');
+
+            // Assert
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+
+        it("ne devrait rien faire si l'inventaire du joueur est vide", () => {
+            // Arrange
+            inventoryPlayer.inventory = [];
+            game.addPlayer(inventoryPlayer);
+            const emitSpy = jest.spyOn(emitter, 'emit');
+
+            // Act
+            game.dropItems(inventoryPlayer.id);
+
+            // Assert
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('_handleItemCollection', () => {
+        beforeEach(() => {
+            // Préparation d'un joueur qui peut ajouter des items à son inventaire
+            player.addItemToInventory = jest.fn().mockImplementation((item) => {
+                if (player.inventory.length < 2) {
+                    player.inventory.push(item);
+                    return true;
+                }
+                return false;
+            });
+        });
+
+        it("devrait collecter l'objet et émettre ItemCollected quand l'inventaire n'est pas plein", () => {
+            // Arrange
+            const position = { x: 0, y: 1 };
+            game.map[1][0].item = Item.Sword;
+            const emitSpy = jest.spyOn(emitter, 'emit');
+
+            // Act
+            (game as any)._handleItemCollection(position, player);
+
+            // Assert
+            expect(player.addItemToInventory).toHaveBeenCalledWith(Item.Sword);
+            expect(game.map[1][0].item).toBe(Item.Default);
+            expect(emitSpy).toHaveBeenCalledWith(InternalTurnEvents.ItemCollected, { player, position });
+            expect((game as any).continueMovement).toBe(false);
+        });
+
+        it("devrait émettre InventoryFull quand l'inventaire est plein", () => {
+            // Arrange
+            const position = { x: 0, y: 1 };
+            game.map[1][0].item = Item.Sword;
+            player.addItemToInventory = jest.fn().mockReturnValue(false);
+            const emitSpy = jest.spyOn(emitter, 'emit');
+
+            // Act
+            (game as any)._handleItemCollection(position, player);
+
+            // Assert
+            expect(player.addItemToInventory).toHaveBeenCalledWith(Item.Sword);
+            expect(game.map[1][0].item).toBe(Item.Sword); // L'objet reste à sa place
+            expect(emitSpy).toHaveBeenCalledWith(InternalTurnEvents.InventoryFull, { player, item: Item.Sword, position });
+            expect((game as any).continueMovement).toBe(false);
+        });
+
+        it('ne devrait rien faire pour un objet DEFAULT', () => {
+            // Arrange
+            const position = { x: 0, y: 0 };
+            game.map[0][0].item = Item.Default;
+            const emitSpy = jest.spyOn(emitter, 'emit');
+
+            // Act
+            (game as any)._handleItemCollection(position, player);
+
+            // Assert
+            expect(player.addItemToInventory).not.toHaveBeenCalled();
+            expect(emitSpy).not.toHaveBeenCalled();
+            expect((game as any).continueMovement).toBe(true);
+        });
+    });
+
+    describe('endTurnRequested', () => {
+        it('devrait mettre pendingEndTurn à true si un mouvement est en cours', () => {
+            // Arrange
+            game.movementInProgress = true;
+            const endTurnSpy = jest.spyOn(game, 'endTurn').mockImplementation();
+
+            // Act
+            (game as any).endTurnRequested();
+
+            // Assert
+            expect(game.pendingEndTurn).toBe(true);
+            expect(endTurnSpy).not.toHaveBeenCalled();
+        });
+
+        it("devrait appeler endTurn si aucun mouvement n'est en cours", () => {
+            // Arrange
+            game.movementInProgress = false;
+            const endTurnSpy = jest.spyOn(game, 'endTurn').mockImplementation();
+
+            // Act
+            (game as any).endTurnRequested();
+
+            // Assert
+            expect(endTurnSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('isPlayerContinueTurn', () => {
+        it('devrait retourner true si pendingEndTurn est true', () => {
+            // Arrange
+            game.pendingEndTurn = true;
+
+            // Act & Assert
+            expect((game as any).isPlayerContinueTurn(player, 0)).toBe(true);
+        });
+
+        it('devrait retourner true si le joueur peut se déplacer', () => {
+            // Arrange
+            game.pendingEndTurn = false;
+
+            // Act & Assert
+            expect((game as any).isPlayerContinueTurn(player, 5)).toBe(true);
+        });
+
+        it('devrait retourner true si le joueur peut faire une action', () => {
+            // Arrange
+            game.pendingEndTurn = false;
+            player.actions = 2;
+            jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockReturnValue(true);
+
+            // Act & Assert
+            expect((game as any).isPlayerContinueTurn(player, 0)).toBe(true);
+        });
+
+        it("devrait retourner false si le joueur ne peut ni se déplacer ni faire d'action", () => {
+            // Arrange
+            game.pendingEndTurn = false;
+            player.actions = 0;
+            jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockReturnValue(false);
+
+            // Act & Assert
+            expect((game as any).isPlayerContinueTurn(player, 0)).toBe(false);
+        });
+    });
+
+    describe('movePlayerToSpawn', () => {
+        beforeEach(() => {
+            // Préparer un mock pour movePlayer
+            jest.spyOn(game, 'movePlayer').mockImplementation();
+        });
+
+        it("devrait déplacer le joueur vers sa position d'origine", () => {
+            // Arrange
+            player.spawnPosition = { x: 1, y: 1 };
+
+            // Act
+            (game as any).movePlayerToSpawn(player);
+
+            // Assert
+            expect(game.movePlayer).toHaveBeenCalledWith(player.spawnPosition, player);
+        });
+
+        it('devrait trouver une nouvelle position si le spawn est occupé par un autre joueur', () => {
+            // Arrange
+            player.spawnPosition = { x: 1, y: 1 };
+            game.map[1][1].player = Avatar.Knight; // Un autre joueur est sur la position d'origine
+            const findValidSpawnSpy = jest.spyOn(GameUtils, 'findValidSpawn').mockReturnValue({ x: 0, y: 0 });
+
+            // Act
+            (game as any).movePlayerToSpawn(player);
+
+            // Assert
+            expect(findValidSpawnSpy).toHaveBeenCalledWith(game.map, player.spawnPosition);
+            expect(game.movePlayer).toHaveBeenCalledWith({ x: 0, y: 0 }, player);
         });
     });
 });

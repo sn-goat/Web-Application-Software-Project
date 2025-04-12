@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Player } from '@app/class/player';
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { Item, Tile } from '@common/enums';
 import {
     ATTACK_ICE_DECREMENT,
-    DEFENSE_ICE_DECREMENT,
     DEFAULT_ACTIONS,
     DEFAULT_FLEE_ATTEMPTS,
     DEFAULT_WINS,
+    DEFENSE_ICE_DECREMENT,
     Dice,
     PlayerInput,
     Team,
@@ -81,8 +81,8 @@ describe('Player', () => {
 
     describe('setTeam / getTeam', () => {
         it('should set and get the team correctly using the enum', () => {
-            attacker.setTeam(Team.RED);
-            expect(attacker.getTeam()).toBe(Team.RED);
+            attacker.setTeam(Team.Red);
+            expect(attacker.getTeam()).toBe(Team.Red);
         });
     });
 
@@ -144,25 +144,167 @@ describe('Player', () => {
     });
 
     describe('updatePosition', () => {
-        it('should update position and reduce powers when field is ICE', () => {
+        it('should update position and reduce powers when field is Ice', () => {
             const initialAttackPower = attacker.attackPower;
             const initialDefensePower = attacker.defensePower;
             const newPos: Vec2 = { x: 5, y: 5 };
-            attacker.updatePosition(newPos, Tile.ICE);
+            attacker.updatePosition(newPos, Tile.Ice);
             expect(attacker.position).toEqual(newPos);
             expect(attacker.attackPower).toBe(initialAttackPower - ATTACK_ICE_DECREMENT);
             expect(attacker.defensePower).toBe(initialDefensePower - DEFENSE_ICE_DECREMENT);
         });
 
-        it('should update position without reducing powers when field is not ICE', () => {
+        it('should update position without reducing powers when field is not Ice', () => {
             const initialAttackPower = attacker.attackPower;
             const initialDefensePower = attacker.defensePower;
             const newPos: Vec2 = { x: 2, y: 3 };
-            // Use a different Tile value, for example FLOOR.
-            attacker.updatePosition(newPos, Tile.FLOOR);
+            // Use a different Tile value, for example Floor.
+            attacker.updatePosition(newPos, Tile.Floor);
             expect(attacker.position).toEqual(newPos);
             expect(attacker.attackPower).toBe(initialAttackPower);
             expect(attacker.defensePower).toBe(initialDefensePower);
+        });
+    });
+
+    describe("Gestion de l'inventaire", () => {
+        describe('addItemToInventory', () => {
+            it("devrait ajouter un item à l'inventaire et retourner true quand l'inventaire n'est pas plein", () => {
+                expect(attacker.inventory.length).toBe(0);
+                const result = attacker.addItemToInventory(Item.Bow);
+
+                expect(result).toBe(true);
+                expect(attacker.inventory).toContain(Item.Bow);
+                expect(attacker.inventory.length).toBe(1);
+            });
+
+            it("devrait retourner false quand l'inventaire est plein", () => {
+                // Remplir l'inventaire
+                attacker.addItemToInventory(Item.Bow);
+                attacker.addItemToInventory(Item.Shield);
+
+                // Tenter d'ajouter un troisième item
+                const result = attacker.addItemToInventory(Item.Sword);
+
+                expect(result).toBe(false);
+                expect(attacker.inventory).not.toContain(Item.Sword);
+                expect(attacker.inventory.length).toBe(2);
+            });
+
+            it('devrait augmenter attackPower et réduire defensePower quand Sword est ajouté', () => {
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+
+                attacker.addItemToInventory(Item.Sword);
+
+                expect(attacker.attackPower).toBe(initialAttackPower + 1);
+                expect(attacker.defensePower).toBe(initialDefensePower - 1);
+            });
+
+            it('devrait augmenter defensePower et réduire speed quand Shield est ajouté', () => {
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.addItemToInventory(Item.Shield);
+
+                expect(attacker.defensePower).toBe(initialDefensePower + 2);
+                expect(attacker.speed).toBe(initialSpeed - 1);
+            });
+
+            it('ne devrait pas modifier les stats quand un autre item est ajouté', () => {
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.addItemToInventory(Item.Bow);
+
+                expect(attacker.attackPower).toBe(initialAttackPower);
+                expect(attacker.defensePower).toBe(initialDefensePower);
+                expect(attacker.speed).toBe(initialSpeed);
+            });
+        });
+
+        describe('removeItemFromInventory', () => {
+            beforeEach(() => {
+                // Initialiser l'inventaire pour les tests de suppression
+                attacker.inventory = [Item.Sword, Item.Shield];
+                // Ajuster les stats comme si les items avaient été ajoutés normalement
+                attacker.attackPower += 1; // Pour Sword
+                attacker.defensePower -= 1; // Pour Sword
+                attacker.defensePower += 2; // Pour Shield
+                attacker.speed -= 1; // Pour Shield
+            });
+
+            it("devrait retirer un item de l'inventaire et retourner true quand l'item existe", () => {
+                const result = attacker.removeItemFromInventory(Item.Sword);
+
+                expect(result).toBe(true);
+                expect(attacker.inventory).not.toContain(Item.Sword);
+                expect(attacker.inventory.length).toBe(1);
+            });
+
+            it("devrait retourner false quand l'item n'existe pas dans l'inventaire", () => {
+                const result = attacker.removeItemFromInventory(Item.Bow);
+
+                expect(result).toBe(false);
+                expect(attacker.inventory.length).toBe(2);
+            });
+
+            it('devrait réduire attackPower et augmenter defensePower quand Sword est retiré', () => {
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+
+                attacker.removeItemFromInventory(Item.Sword);
+
+                expect(attacker.attackPower).toBe(initialAttackPower - 1);
+                expect(attacker.defensePower).toBe(initialDefensePower + 1);
+            });
+
+            it('devrait réduire defensePower et augmenter speed quand Shield est retiré', () => {
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.removeItemFromInventory(Item.Shield);
+
+                expect(attacker.defensePower).toBe(initialDefensePower - 2);
+                expect(attacker.speed).toBe(initialSpeed + 1);
+            });
+
+            it('ne devrait pas modifier les stats quand un autre item est retiré', () => {
+                // D'abord ajouter un item qui n'affecte pas les stats
+                attacker.inventory.push(Item.Bow);
+
+                const initialAttackPower = attacker.attackPower;
+                const initialDefensePower = attacker.defensePower;
+                const initialSpeed = attacker.speed;
+
+                attacker.removeItemFromInventory(Item.Bow);
+
+                expect(attacker.attackPower).toBe(initialAttackPower);
+                expect(attacker.defensePower).toBe(initialDefensePower);
+                expect(attacker.speed).toBe(initialSpeed);
+            });
+        });
+
+        describe('hasItem', () => {
+            it("devrait retourner true quand le joueur possède l'item", () => {
+                attacker.inventory = [Item.Sword, Item.Bow];
+
+                expect(attacker.hasItem(Item.Sword)).toBe(true);
+                expect(attacker.hasItem(Item.Bow)).toBe(true);
+            });
+
+            it("devrait retourner false quand le joueur ne possède pas l'item", () => {
+                attacker.inventory = [Item.Sword];
+
+                expect(attacker.hasItem(Item.Shield)).toBe(false);
+                expect(attacker.hasItem(Item.Bow)).toBe(false);
+            });
+
+            it("devrait retourner false quand l'inventaire est vide", () => {
+                attacker.inventory = [];
+
+                expect(attacker.hasItem(Item.Sword)).toBe(false);
+            });
         });
     });
 });

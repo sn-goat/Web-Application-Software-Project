@@ -2,14 +2,14 @@ import { Vec2 } from './board';
 import { Item } from './enums';
 
 export interface PlayerInput {
-    name: string,
-    avatar: string,
-    life: number,
-    speed: number,
-    attackPower: number,
-    defensePower: number,
-    attackDice: Dice,
-    defenseDice: Dice,
+    name: string;
+    avatar: string;
+    life: number;
+    speed: number;
+    attackPower: number;
+    defensePower: number;
+    attackDice: Dice;
+    defenseDice: Dice;
 }
 export interface PlayerInfo {
     id: string;
@@ -30,8 +30,8 @@ export interface PlayerAttributes {
 }
 
 export enum Team {
-    RED = 'Rouge',
-    BLUE = 'Bleu',
+    Red = 'Rouge',
+    Blue = 'Bleu',
 }
 
 export interface GameStats {
@@ -40,6 +40,7 @@ export interface GameStats {
     movementPts: number;
     position: Vec2;
     spawnPosition: Vec2;
+    inventory: Item[];
 }
 
 export interface PlayerStats {
@@ -83,13 +84,11 @@ export const DEFAULT_MOVEMENT_DIRECTIONS: Vec2[] = [
     { x: 0, y: -1 }, // Up
     { x: -1, y: 0 }, // Left
 ];
-export const DIAGONAL_MOVEMENT_DIRECTIONS: Vec2[] = [
-    { x: 0, y: 1 }, // Vertical movement
-    { x: 0, y: -1 },
-    { x: 1, y: 0 }, // Horizontal movement
-    { x: -1, y: 0 },
-    { x: 1, y: 1 }, // Diagonal movement
-    { x: -1, y: -1 },
-    { x: -1, y: 1 },
-    { x: 1, y: -1 },
+export const DIAGONAL_POSITIONS: Vec2[] = [
+    { x: 1, y: 1 }, // Down-Right
+    { x: -1, y: -1 }, // Up-Left
+    { x: -1, y: 1 }, // Down-Left
+    { x: 1, y: -1 }, // Up-Right
 ];
+export const DIAGONAL_MOVEMENT_DIRECTIONS: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS.concat(DIAGONAL_POSITIONS);
+

@@ -75,6 +75,7 @@ describe('GameMapInfoComponent', () => {
             fleeAttempts: 2,
             currentLife: 100,
             diceResult: 0,
+            inventory: [],
         };
 
         activePlayerSubject.next(testPlayer);
@@ -102,6 +103,7 @@ describe('GameMapInfoComponent', () => {
                 fleeAttempts: 2,
                 currentLife: 100,
                 diceResult: 0,
+                inventory: [],
             },
             {
                 id: '2',
@@ -121,6 +123,7 @@ describe('GameMapInfoComponent', () => {
                 fleeAttempts: 2,
                 currentLife: 100,
                 diceResult: 0,
+                inventory: [],
             },
         ];
 

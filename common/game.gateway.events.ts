@@ -10,12 +10,6 @@ export enum GameEvents {
     Winner = 'gameWinner',
 
     Error = 'error',
-
-    // Create = 'createGame',
-    // Configure = 'configureGame',
-    // EndDebug = 'endDebug',
-    // AssignSpawn = 'assignSpawn',
-    // BroadcastEndDebugState = 'endDebug',
 }
 
 export enum TurnEvents {
@@ -33,9 +27,11 @@ export enum TurnEvents {
     ChangeDoorState = 'changeDoorState',
     DoorStateChanged = 'eventOnDoor',
 
-    // BroadcastEnd = 'endPlayerTurn',
-    // BroadcastItem = 'eventItem',
-    // UpdateActions = 'updateActions',
+    BroadcastItem = 'eventItem',
+    DroppedItem = 'droppedItem',
+    InventoryFull = 'inventoryFull',
+    InventoryChoice = 'inventoryChoice',
+    MapUpdate = 'mapUpdate',
 }
 
 export enum FightEvents {
@@ -50,8 +46,6 @@ export enum FightEvents {
     End = 'endFight',
     Winner = 'winner',
     Loser = 'loser',
-
-    // FailedFlee = 'failedFlee',
 }
 
 export enum StatsEvents {
@@ -62,4 +56,3 @@ export enum JournalEvent {
     Add = 'addJournalEntry',
     Clear = 'clearJournal',
 }
-

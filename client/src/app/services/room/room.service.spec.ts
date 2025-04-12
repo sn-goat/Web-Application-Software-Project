@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { MockSocketService } from '@app/helpers/mockSocketService';
+import { MockSocketService } from '@app/helpers/socket-service-mock';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { IGame, IRoom } from '@common/game';
 import { IPlayer } from '@common/player';

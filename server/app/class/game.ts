@@ -42,6 +42,8 @@ export class Game implements IGame, GameStats {
     pendingEndTurn: boolean;
     maxPlayers: number;
 
+    private continueMovement: boolean;
+
     gameDuration: string;
     tilesVisited: Set<Vec2>;
     doorsHandled: Set<Vec2>;
@@ -113,6 +115,7 @@ export class Game implements IGame, GameStats {
     }
 
     removePlayer(playerId: string, message: string): void {
+        this.dropItems(playerId);
         const index = this.players.findIndex((p) => p.id === playerId);
         if (index < 0) {
             return;
@@ -140,6 +143,10 @@ export class Game implements IGame, GameStats {
         return this.players.find((p) => p.id === playerId);
     }
 
+    getPlayerByAvatar(avatar: Avatar): Player {
+        return this.players.find((p) => p.avatar === avatar);
+    }
+
     isGameFull(): boolean {
         return this.players.length >= this.maxPlayers;
     }
@@ -152,6 +159,7 @@ export class Game implements IGame, GameStats {
             GameUtils.assignTeams(this.players);
         }
         this.hasStarted = true;
+        GameUtils.normalizeChestItems(this.map);
         this.players = GameUtils.sortPlayersBySpeed(this.players);
         const allSpawns = GameUtils.getAllSpawnPoints(this.map);
         const usedSpawnPoints = GameUtils.assignSpawnPoints(this.players, allSpawns, this.map);
@@ -180,7 +188,13 @@ export class Game implements IGame, GameStats {
                     this.decrementMovement(player, pathInfo.cost);
                 } else {
                     this.movePlayer(path[index], player);
-                    index++;
+                    if (!this.continueMovement) {
+                        clearInterval(interval);
+                        this.movementInProgress = false;
+                        this.decrementMovement(player, index + 1);
+                    } else {
+                        index++;
+                    }
                 }
             }, MOVEMENT_TIMEOUT_IN_MS);
         }
@@ -198,11 +212,10 @@ export class Game implements IGame, GameStats {
 
     movePlayer(position: Vec2, player: Player): void {
         const previousPosition = player.position;
-        this.map[previousPosition.y][previousPosition.x].player = Avatar.Default;
-        this.map[position.y][position.x].player = player.avatar as Avatar;
-        const fieldType = this.map[position.y][position.x].tile;
-        player.updatePosition(position, fieldType);
-        this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
+        this._clearCell(previousPosition);
+        this._setPlayerInCell(position, player);
+        this._handleItemCollection(position, player);
+        this._updatePlayerPositionAndNotify(previousPosition, position, player);
     }
 
     movePlayerDebug(direction: Vec2, playerId: string): void {
@@ -228,6 +241,32 @@ export class Game implements IGame, GameStats {
         this.startTurn();
     }
 
+    dropItems(playerId: string): void {
+        const player = this.getPlayer(playerId);
+        if (!player || !player.inventory.length) return;
+        const playerPos = player.position;
+        const droppedItems = [];
+        for (const item of [...player.inventory]) {
+            const dropPos = GameUtils.findValidDropCell(this.map, playerPos, droppedItems, this.players);
+            if (dropPos) {
+                this.map[dropPos.y][dropPos.x].item = item;
+                player.removeItemFromInventory(item);
+                droppedItems.push({ item, position: dropPos });
+            } else {
+                const fallback = player.spawnPosition || playerPos;
+                this.map[fallback.y][fallback.x].item = item;
+                player.removeItemFromInventory(item);
+                droppedItems.push({ item, position: { ...fallback } });
+            }
+        }
+        if (droppedItems.length > 0) {
+            this.internalEmitter.emit(InternalTurnEvents.DroppedItem, {
+                player,
+                droppedItems,
+            });
+        }
+    }
+
     isPlayerTurn(playerId: string): boolean {
         return this.players[this.currentTurn].id === playerId;
     }
@@ -237,11 +276,11 @@ export class Game implements IGame, GameStats {
         return this.isDebugMode;
     }
 
-    changeDoorState(doorPosition: Vec2, playerId: string): { doorPosition: Vec2; newDoorState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR } {
+    changeDoorState(doorPosition: Vec2, playerId: string): { doorPosition: Vec2; newDoorState: Tile.OpenedDoor | Tile.ClosedDoor } {
         const door = this.map[doorPosition.y][doorPosition.x];
         this.doorsHandled.add(doorPosition);
         const player = this.getPlayer(playerId);
-        door.tile = door.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
+        door.tile = door.tile === Tile.ClosedDoor ? Tile.OpenedDoor : Tile.ClosedDoor;
         this.decrementAction(player);
         return { doorPosition, newDoorState: door.tile };
     }
@@ -274,6 +313,7 @@ export class Game implements IGame, GameStats {
         if (fightResult === null) {
             this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
         } else {
+            this.dropItems(fightResult.loser.id);
             this.movePlayerToSpawn(fightResult.loser);
             this.endFight();
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
@@ -286,7 +326,7 @@ export class Game implements IGame, GameStats {
     removePlayerOnMap(playerId: string): void {
         const player = this.getPlayer(playerId);
         this.map[player.position.y][player.position.x].player = Avatar.Default;
-        this.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
+        this.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.Default;
     }
     removePlayerFromFight(playerId: string): void {
         const fightResult = this.fight.handleFightRemoval(playerId);
@@ -295,6 +335,42 @@ export class Game implements IGame, GameStats {
 
     endFight(): void {
         this.fight = new Fight(this.internalEmitter);
+    }
+
+    private _clearCell(position: Vec2): void {
+        this.map[position.y][position.x].player = Avatar.Default;
+    }
+
+    private _setPlayerInCell(position: Vec2, player: Player): void {
+        this.map[position.y][position.x].player = player.avatar as Avatar;
+    }
+
+    private _handleItemCollection(position: Vec2, player: Player): void {
+        const cell = this.map[position.y][position.x];
+        this.continueMovement = true;
+        if (cell.item !== Item.Default && cell.item !== Item.Spawn) {
+            if (player.addItemToInventory(cell.item)) {
+                cell.item = Item.Default;
+                this.internalEmitter.emit(InternalTurnEvents.ItemCollected, {
+                    player,
+                    position,
+                });
+                this.continueMovement = false;
+            } else {
+                this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
+                    player,
+                    item: cell.item,
+                    position,
+                });
+                this.continueMovement = false;
+            }
+        }
+    }
+
+    private _updatePlayerPositionAndNotify(previousPosition: Vec2, newPosition: Vec2, player: Player): void {
+        const fieldType = this.map[newPosition.y][newPosition.x].tile;
+        player.updatePosition(newPosition, fieldType);
+        this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
     }
 
     private startGameTimer(): void {
@@ -346,6 +422,6 @@ export class Game implements IGame, GameStats {
     }
 
     private isPlayerCanMakeAction(player: Player): boolean {
-        return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player.position);
+        return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player);
     }
 }

@@ -20,10 +20,12 @@ export enum InternalStatsEvents {
 
 export enum InternalTurnEvents {
     Move = 'playerMove',
-    // BroadcastDoor = 'doorBroadcast', never used
     Update = 'updateTurn',
     Start = 'startTurn',
     ChangeTurn = 'ChangeTurn',
+    ItemCollected = 'itemCollected',
+    InventoryFull = 'inventoryFull',
+    DroppedItem = 'droppedItem',
 }
 
 export enum InternalEvents {

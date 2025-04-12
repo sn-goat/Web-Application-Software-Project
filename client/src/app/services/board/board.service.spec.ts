@@ -30,7 +30,7 @@ describe('BoardService', () => {
             size: 10,
             isCTF: true,
             description: 'Test Description',
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
         } as Board;
 
@@ -66,7 +66,7 @@ describe('BoardService', () => {
             size: 12,
             isCTF: false,
             description: 'New Board Description',
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
             board: [],
         };
@@ -88,12 +88,12 @@ describe('BoardService', () => {
         };
 
         service.toggleVisibility('Test Board').subscribe((board) => {
-            expect(board.visibility).toBe(Visibility.PUBLIC);
+            expect(board.visibility).toBe(Visibility.Public);
         });
 
         const req = httpMock.expectOne(`${apiUrl}/visibility/Test Board`);
         expect(req.request.method).toBe('PATCH');
-        req.flush({ ...mockBoard, visibility: Visibility.PUBLIC });
+        req.flush({ ...mockBoard, visibility: Visibility.Public });
     });
 
     it('should delete a board by name', () => {

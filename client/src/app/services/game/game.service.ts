@@ -8,10 +8,10 @@ import { SocketReceiverService } from '@app/services/socket/socket-receiver.serv
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, getAvatarName } from '@common/game';
-import { DEFAULT_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
-import { BehaviorSubject } from 'rxjs';
 import { Entry } from '@common/journal';
 import { Stats } from '@common/stats';
+import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -78,6 +78,29 @@ export class GameService {
             this.resetGame();
         });
 
+        this.socketReceiver.onItemCollected().subscribe((data) => {
+            const position = data.position;
+            const newMap = this.map.value;
+            newMap[position.y][position.x].item = Item.Default;
+            this.map.next(newMap);
+        });
+
+        this.socketReceiver.onItemDropped().subscribe((data) => {
+            const newMap = [...this.map.value];
+            for (const droppedItem of data.droppedItems) {
+                const position = droppedItem.position;
+                newMap[position.y][position.x].item = droppedItem.item;
+            }
+
+            this.map.next(newMap);
+        });
+
+        this.socketReceiver.onMapUpdate().subscribe((data: { player: IPlayer; item: Item; position: Vec2 }) => {
+            const pos = data.position;
+            const newMap = [...this.map.value];
+            newMap[pos.y][pos.x].item = data.item;
+            this.map.next(newMap);
+        });
         this.socketReceiver.onJournalEntry().subscribe((entry) => {
             this.journalEntries.next([...this.journalEntries.getValue(), entry]);
         });
@@ -102,16 +125,34 @@ export class GameService {
     }
 
     toggleDoor(position: Vec2): void {
+        const currentCell: Cell = this.map.value[position.y][position.x];
+        if (
+            currentCell.tile === Tile.OpenedDoor &&
+            currentCell.item !== Item.Default &&
+            currentCell.item !== undefined &&
+            currentCell.item !== null
+        ) {
+            return;
+        }
+
         this.socketEmitter.changeDoorState(position, this.playerService.getPlayer().id);
     }
 
     isWithinActionRange(cell: Cell): boolean {
-        if (!this.isValidCellForAction(cell)) return false;
+        if (!this.isValidCellForFight(cell) && !this.isValidCellForDoor(cell)) {
+            return false;
+        }
         const playerPos = this.activePlayer.value?.position;
-        if (!playerPos) return false;
+        if (!playerPos) {
+            return false;
+        }
         const actionPos = cell.position;
         const dx = Math.abs(playerPos.x - actionPos.x);
         const dy = Math.abs(playerPos.y - actionPos.y);
+        const player = this.activePlayer.value;
+        if (player && player.inventory.includes(Item.Bow)) {
+            return dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
+        }
         return dx + dy === 1;
     }
 
@@ -153,9 +194,9 @@ export class GameService {
     canTeleport(cell: Cell): boolean {
         return (
             (cell.player === undefined || cell.player === Avatar.Default) &&
-            cell.tile !== Tile.WALL &&
-            cell.tile !== Tile.CLOSED_DOOR &&
-            cell.tile !== Tile.OPENED_DOOR
+            cell.tile !== Tile.Wall &&
+            cell.tile !== Tile.ClosedDoor &&
+            cell.tile !== Tile.OpenedDoor
         );
     }
 
@@ -215,11 +256,25 @@ export class GameService {
             });
 
             dialogRef.afterClosed().subscribe((result) => {
-                if (result === true) {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
+                resolve(result);
+            });
+        });
+    }
+
+    async confirmAndQuitGame(): Promise<boolean> {
+        return new Promise((resolve) => {
+            const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+                width: '350px',
+                data: {
+                    title: 'Quitter la partie',
+                    message: 'Êtes-vous sûr de vouloir quitter cette partie ?',
+                    confirmText: 'Quitter',
+                    cancelText: 'Annuler',
+                },
+            });
+
+            dialogRef.afterClosed().subscribe((result) => {
+                resolve(result);
             });
         });
     }
@@ -255,7 +310,7 @@ export class GameService {
         }
         const tileDesc = this.getTileDescription(cell.tile);
         let desc = tileDesc;
-        if (cell.item && cell.item !== (Item.DEFAULT as unknown as Item)) {
+        if (cell.item && cell.item !== (Item.Default as unknown as Item)) {
             const itemDesc = this.getItemDescription(cell.item);
             desc += ', ' + itemDesc;
         }
@@ -272,15 +327,17 @@ export class GameService {
 
     findPossibleActions(position: Vec2): Set<string> {
         const possibleActions = new Set<string>();
-        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
-        for (const dir of directions) {
-            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
-            if (newPos.y >= 0 && newPos.y < this.map.value.length && newPos.x >= 0 && newPos.x < this.map.value[0].length) {
-                if (this.isValidCellForAction(this.map.value[newPos.y][newPos.x])) {
-                    possibleActions.add(`${newPos.x},${newPos.y}`);
-                }
-            }
+        const player = this.activePlayer.value;
+        if (!player) {
+            return possibleActions;
         }
+
+        this.checkDirectionsForActions(position, DEFAULT_MOVEMENT_DIRECTIONS, possibleActions, true);
+
+        if (player.inventory.includes(Item.Bow)) {
+            this.checkDirectionsForActions(position, DIAGONAL_MOVEMENT_DIRECTIONS, possibleActions, false);
+        }
+
         return possibleActions;
     }
 
@@ -288,15 +345,46 @@ export class GameService {
         return this.organizerId;
     }
 
+    handleInventoryChoice(collectedPosition: Vec2, itemToThrow: Item, itemToAdd: Item): void {
+        this.socketEmitter.inventoryChoice({
+            playerId: this.playerService.getPlayer().id,
+            itemToThrow,
+            itemToAdd,
+            position: collectedPosition,
+            accessCode: this.socketEmitter.getAccessCode(),
+        });
+    }
+
+    private checkDirectionsForActions(position: Vec2, directions: Vec2[], possibleActions: Set<string>, checkDoors: boolean): void {
+        for (const dir of directions) {
+            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+            if (this.isValidPosition(newPos)) {
+                const cell = this.map.value[newPos.y][newPos.x];
+                if ((checkDoors && this.isValidCellForDoor(cell)) || this.isValidCellForFight(cell)) {
+                    possibleActions.add(`${newPos.x},${newPos.y}`);
+                }
+            }
+        }
+    }
+
+    private isValidPosition(pos: Vec2): boolean {
+        return pos.y >= 0 && pos.y < this.map.value.length && pos.x >= 0 && pos.x < this.map.value[0].length;
+    }
+
     private findDefender(avatar: Avatar): IPlayer | null {
         return this.playingPlayers.value.find((player) => player.avatar === avatar) ?? null;
     }
-    private isValidCellForAction(cell: Cell): boolean {
+
+    private isValidCellForDoor(cell: Cell): boolean {
+        return cell.tile === Tile.ClosedDoor || cell.tile === Tile.OpenedDoor;
+    }
+
+    private isValidCellForFight(cell: Cell): boolean {
         const myPlayer = this.playerService.getPlayer();
         const defender = this.findDefender(cell.player);
         if (defender) {
             return !defender.team || myPlayer.team !== defender.team;
         }
-        return cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+        return false;
     }
 }

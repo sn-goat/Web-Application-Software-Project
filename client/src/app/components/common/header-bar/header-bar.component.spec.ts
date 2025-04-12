@@ -40,12 +40,11 @@ describe('HeaderBarComponent', () => {
 
     it('should navigate to backUrl when getBack is called', () => {
         component.backUrl = 'accueil';
-        component.showDialog = false; // S'assurer que le dialog n'est pas affiché
+        component.showDialog = false;
         component.getBack();
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/accueil']);
     });
 
-    // Test pour les lignes 27-29 : Dialogue avec confirmation
     it('should show dialog and navigate when confirmed', async () => {
         component.backUrl = 'admin';
         component.showDialog = true;
@@ -58,7 +57,6 @@ describe('HeaderBarComponent', () => {
         expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin']);
     });
 
-    // Test pour les lignes 27-29 : Dialogue sans confirmation
     it('should show dialog and not navigate when cancelled', async () => {
         component.backUrl = 'admin';
         component.showDialog = true;
@@ -70,9 +68,7 @@ describe('HeaderBarComponent', () => {
         expect(routerSpy.navigate).not.toHaveBeenCalled();
     });
 
-    // Test pour les lignes 37-44 : Méthode openDialog
     it('should return dialog result from openDialog', async () => {
-        // Test avec résultat positif
         dialogRefSpyObj.afterClosed.and.returnValue(of(true));
 
         const result = await (component as any).openDialog('Test message', Alert.CONFIRM);

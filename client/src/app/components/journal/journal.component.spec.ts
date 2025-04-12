@@ -22,14 +22,14 @@ describe('JournalComponent', () => {
     const testPlayerId = 'player123';
     const mockEntries: Entry[] = [
         {
-            messageType: GameMessage.QUIT,
-            message: GameMessage.QUIT + 'Jean',
+            messageType: GameMessage.Quit,
+            message: GameMessage.Quit + 'Jean',
             accessCode: 'ABC123',
             playersInvolved: ['otherPlayer456'],
         },
         {
-            messageType: GameMessage.START_TURN,
-            message: GameMessage.START_TURN + 'vous',
+            messageType: GameMessage.StartTurn,
+            message: GameMessage.StartTurn + 'vous',
             accessCode: 'ABC123',
             playersInvolved: [testPlayerId],
         },
@@ -78,16 +78,16 @@ describe('JournalComponent', () => {
             component.isFilterActive = false;
 
             const entryNotInvolved: Entry = {
-                messageType: GameMessage.OPEN_DOOR,
-                message: GameMessage.OPEN_DOOR + 'Marie',
+                messageType: GameMessage.OpenDoor,
+                message: GameMessage.OpenDoor + 'Marie',
                 accessCode: 'ABC123',
                 playersInvolved: ['someOtherId'],
             };
             expect(component.shouldDisplayEntry(entryNotInvolved)).toBeTrue();
 
             const entryInvolved: Entry = {
-                messageType: FightMessage.ATTACK,
-                message: FightMessage.ATTACK + 'vous',
+                messageType: FightMessage.Attack,
+                message: FightMessage.Attack + 'vous',
                 accessCode: 'ABC123',
                 playersInvolved: [testPlayerId],
             };
@@ -98,8 +98,8 @@ describe('JournalComponent', () => {
             component.isFilterActive = true;
 
             const entryNotInvolved: Entry = {
-                messageType: GameMessage.CLOSE_DOOR,
-                message: GameMessage.CLOSE_DOOR + 'Pierre',
+                messageType: GameMessage.CloseDoor,
+                message: GameMessage.CloseDoor + 'Pierre',
                 accessCode: 'ABC123',
                 playersInvolved: ['someOtherId'],
             };
@@ -120,8 +120,8 @@ describe('JournalComponent', () => {
     it('should update entries when new entries are emitted', () => {
         const newEntries: Entry[] = [
             {
-                messageType: GameMessage.END_GAME,
-                message: GameMessage.END_GAME + 'Marie',
+                messageType: GameMessage.EndGame,
+                message: GameMessage.EndGame + 'Marie',
                 accessCode: 'ABC123',
                 playersInvolved: ['otherPlayer789'],
             },

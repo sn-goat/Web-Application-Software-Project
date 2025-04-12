@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { Alert } from '@app/constants/enums';
-import { diceToImageLink } from '@app/constants/playerConst';
+import { diceToImageLink } from '@app/constants/player-constants';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { RoomService } from '@app/services/room/room.service';
@@ -54,6 +54,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
             this.roomService.maxPlayer.subscribe((maxPlayers) => {
                 this.maxPlayers = maxPlayers;
+            }),
+
+            this.socketReceiver.onRoomUnlocked().subscribe(() => {
+                this.isRoomLocked = false;
             }),
 
             this.socketReceiver.onPlayersUpdated().subscribe((players: IPlayer[]) => {

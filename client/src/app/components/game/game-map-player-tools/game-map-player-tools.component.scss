@@ -1,6 +1,6 @@
 $primary-bg: #1a1625;
 $secondary-bg: #12101b;
-$primary-text: #7ee0d0;
+$primary-text: #f2e5b8;
 $glow-teal: rgba(126, 224, 208, 0.2);
 $secondary-text: #c7ebf0;
 $accent-color: #ff6b93;
@@ -25,7 +25,14 @@ $border-radius: 5px;
     box-sizing: border-box;
     gap: 5px;
 }
-
+h1,
+h2,
+h3,
+h4,
+p {
+    font-family: 'MedievalSharp', cursive;
+    text-shadow: 0 0 5px $glow-teal;
+}
 .player-tools {
     background-color: rgba(0, 0, 0, 0.3);
     border-radius: $border-radius;
@@ -38,7 +45,6 @@ $border-radius: 5px;
         0 0 10px rgba(0, 0, 0, 0.5),
         0 0 8px $glow-teal;
     color: $primary-text;
-    font-family: 'Rajdhani', sans-serif;
     padding: 1px;
 
     h2 {
@@ -233,9 +239,8 @@ $border-radius: 5px;
         }
 
         p {
-            font-size: 0.9rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            font-family: 'Digital-7', 'Orbitron', monospace;
             color: $primary-text;
             text-shadow: 0 0 5px rgba($primary-text, 0.6);
             margin: 0;
@@ -244,8 +249,8 @@ $border-radius: 5px;
             &::after {
                 content: '';
                 display: inline-block;
-                width: 3px;
-                height: 3px;
+                width: 7px;
+                height: 7px;
                 background-color: $primary-text;
                 border-radius: 50%;
                 margin: 0 2px;
@@ -256,6 +261,8 @@ $border-radius: 5px;
     }
 
     .buttons {
+        font-family: 'MedievalSharp', cursive;
+
         flex: 1;
         padding: 3px;
         border-radius: 8px;
@@ -270,6 +277,8 @@ $border-radius: 5px;
     }
 
     .button {
+        font-family: 'MedievalSharp', cursive;
+
         padding: 0 10px;
         height: 35%;
         min-height: 25px;
@@ -278,9 +287,7 @@ $border-radius: 5px;
         border-radius: 5px;
         color: $secondary-bg;
         font-weight: bold;
-        font-size: 1rem;
-        font-family: 'Rajdhani', sans-serif;
-        text-transform: uppercase;
+        font-size: 1.3rem;
         letter-spacing: 1px;
         cursor: pointer;
         transition: all 0.2s ease;
@@ -359,7 +366,9 @@ $border-radius: 5px;
 }
 
 .timer {
-    font-size: 0.9rem;
+    font-family: 'MedievalSharp', cursive;
+
+    font-size: 2.1rem;
     color: $primary-text;
     font-weight: bold;
     text-shadow: 0 0 5px $glow-teal;

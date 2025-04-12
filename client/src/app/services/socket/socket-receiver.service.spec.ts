@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 import { TestBed } from '@angular/core/testing';
-import { FakeSocket } from '@app/helpers/fakeSocket';
+import { FakeSocket } from '@app/helpers/fake-socket';
 import { Tile } from '@common/enums';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
 import { IPlayer } from '@common/player';
@@ -205,7 +205,7 @@ describe('SocketReceiverService', () => {
     });
 
     it('should emit on door update', (done) => {
-        const data = { doorPosition: { x: 1, y: 1 }, newDoorState: Tile.CLOSED_DOOR as Tile.CLOSED_DOOR | Tile.OPENED_DOOR };
+        const data = { doorPosition: { x: 1, y: 1 }, newDoorState: Tile.ClosedDoor as Tile.ClosedDoor | Tile.OpenedDoor };
         service.onDoorStateChanged().subscribe((received) => {
             expect(received).toEqual(data);
             done();

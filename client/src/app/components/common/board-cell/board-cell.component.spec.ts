@@ -59,7 +59,7 @@ describe('BoardCellComponent', () => {
         expect(component.fileType).toBe('.png');
     });
     it('should get item description', () => {
-        expect(component.getItemDescription(Item.BOW)).toContain('Arc');
+        expect(component.getItemDescription(Item.Bow)).toContain('Arc');
     });
 
     it('should call event.preventDefault when isInGameView is true', () => {

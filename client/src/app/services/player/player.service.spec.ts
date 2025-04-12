@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TestBed } from '@angular/core/testing';
-import { MockSocketService } from '@app/helpers/mockSocketService';
+import { MockSocketService } from '@app/helpers/socket-service-mock';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
@@ -101,7 +101,6 @@ describe('PlayerService', () => {
         movePath.set('1,1', dummyPathInfo);
         service.setPath(movePath);
 
-        // Création de l'espion sur movePlayer
         spyOn(socketServiceMock, 'movePlayer');
 
         // Call sendMove with the position corresponding to key "1,1".
@@ -114,7 +113,6 @@ describe('PlayerService', () => {
         // Clear any existing path
         service.setPath(new Map());
 
-        // Création de l'espion sur movePlayer
         spyOn(socketServiceMock, 'movePlayer');
 
         service.sendMove({ x: 5, y: 5 });

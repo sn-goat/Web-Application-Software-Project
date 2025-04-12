@@ -121,7 +121,6 @@ export class MapService {
     }
 
     setBoardToFirstValue() {
-        // Créer une copie profonde de firstBoardValue
         const savedBoard: Board = JSON.parse(JSON.stringify(this.firstBoardValue));
 
         const maxMapObject: number = BOARD_SIZE_MAPPING[this.firstBoardValue.size as Size];
@@ -145,7 +144,7 @@ export class MapService {
             description: '',
             size: 0,
             isCTF: false,
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.Private,
             board: [],
             updatedAt: new Date(),
         } as Partial<Board> as Board);
@@ -157,7 +156,7 @@ export class MapService {
         for (let i = 0; i < this.firstBoardValue.size; i++) {
             const row = [];
             for (let j = 0; j < this.firstBoardValue.size; j++) {
-                row.push({ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: j, y: i }, cost: TILE_COST.get(Tile.FLOOR) as number });
+                row.push({ tile: Tile.Floor, item: Item.Default, position: { x: j, y: i }, cost: TILE_COST.get(Tile.Floor) as number });
             }
             boardGame.push(row);
         }
@@ -170,10 +169,10 @@ export class MapService {
     private parseBoard(board: Board) {
         board.board.forEach((row) => {
             row.forEach((cell) => {
-                if (cell.item !== Item.DEFAULT) {
-                    if (cell.item === Item.SPAWN) {
+                if (cell.item !== Item.Default) {
+                    if (cell.item === Item.Spawn) {
                         this.decreaseSpawnsToPlace();
-                    } else if (cell.item === Item.FLAG) {
+                    } else if (cell.item === Item.Flag) {
                         this.setHasFlagOnBoard(true);
                     } else {
                         this.decreaseItemsToPlace();

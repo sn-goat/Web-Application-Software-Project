@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { JournalService } from '@app/services/journal/journal.service';
 import { IRoom } from '@common/game';
 import { JournalEvent } from '@common/game.gateway.events';
 import { FightJournal, FightMessage, GameMessage } from '@common/journal';
 import { IPlayer, Team } from '@common/player';
 import { Server } from 'socket.io';
-import { JournalService } from '@app/services/journal/journal.service';
 
 describe('JournalService', () => {
     let journalService: JournalService;
@@ -30,7 +30,7 @@ describe('JournalService', () => {
             life: 10,
             attackDice: 'D6',
             defenseDice: 'D4',
-            team: Team.RED,
+            team: Team.Red,
             actions: 1,
             wins: 0,
             movementPts: 2,
@@ -39,6 +39,7 @@ describe('JournalService', () => {
             fleeAttempts: 2,
             currentLife: 10,
             diceResult: 5,
+            inventory: [],
         };
 
         const player2: IPlayer = {
@@ -51,7 +52,7 @@ describe('JournalService', () => {
             life: 8,
             attackDice: 'D4',
             defenseDice: 'D6',
-            team: Team.BLUE,
+            team: Team.Blue,
             actions: 1,
             wins: 0,
             movementPts: 3,
@@ -60,6 +61,7 @@ describe('JournalService', () => {
             fleeAttempts: 2,
             currentLife: 8,
             diceResult: 3,
+            inventory: [],
         };
 
         mockRoom = {
@@ -94,12 +96,12 @@ describe('JournalService', () => {
     });
 
     describe('dispatchEntry', () => {
-        it('should process game entry and emit to room for GameMessage.START_TURN', () => {
+        it('should process game entry and emit to room for GameMessage.StartTurn', () => {
             const playerNames = ['Player One'];
-            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.START_TURN, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.StartTurn, mockServer as Server);
 
             expect(result).toBeDefined();
-            expect(result.messageType).toBe(GameMessage.START_TURN);
+            expect(result.messageType).toBe(GameMessage.StartTurn);
             expect(result.accessCode).toBe('room123');
             expect(result.playersInvolved).toContain('player1');
             expect(mockServer.to).toHaveBeenCalledWith('room123');
@@ -110,48 +112,48 @@ describe('JournalService', () => {
 
         it('should process game entry with two players', () => {
             const playerNames = ['Player One', 'Player Two'];
-            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.START_FIGHT, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.StartFight, mockServer as Server);
 
             expect(result).toBeDefined();
-            expect(result.messageType).toBe(GameMessage.START_FIGHT);
+            expect(result.messageType).toBe(GameMessage.StartFight);
             expect(result.message).toContain('Player One et Player Two');
             expect(journalService.journalMap.get('room123').length).toBe(1);
         });
 
-        it('should process game entry for END_GAME message with one player', () => {
+        it('should process game entry for EndGame message with one player', () => {
             const playerNames = ['Player One'];
-            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.END_GAME, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.EndGame, mockServer as Server);
 
             expect(result).toBeDefined();
-            expect(result.messageType).toBe(GameMessage.END_GAME);
+            expect(result.messageType).toBe(GameMessage.EndGame);
             expect(result.message).toContain('Les joueurs actifs sont');
             expect(journalService.journalMap.get('room123').length).toBe(1);
         });
 
-        it('should process game entry for QUIT message', () => {
+        it('should process game entry for Quit message', () => {
             const playerNames = ['Player One'];
-            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.QUIT, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.Quit, mockServer as Server);
 
             expect(result).toBeDefined();
-            expect(result.messageType).toBe(GameMessage.QUIT);
+            expect(result.messageType).toBe(GameMessage.Quit);
             expect(result.playersInvolved).toContain('');
             expect(journalService.journalMap.get('room123').length).toBe(1);
         });
 
         it('should return null if too many players involved in game message', () => {
             const playerNames = ['Player One', 'Player Two', 'Player Three'];
-            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.START_TURN, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, playerNames, GameMessage.StartTurn, mockServer as Server);
 
             expect(result).toBeNull();
             expect(journalService.journalMap.has('room123')).toBeFalsy();
         });
 
-        it('should process fight entry for ATTACK message', () => {
+        it('should process fight entry for Attack message', () => {
             const playerNames = ['Player One', 'Player Two'];
-            const result = journalService.dispatchEntry(mockFightJournal, playerNames, FightMessage.ATTACK, mockServer as Server);
+            const result = journalService.dispatchEntry(mockFightJournal, playerNames, FightMessage.Attack, mockServer as Server);
 
             expect(result).toBeDefined();
-            expect(result.messageType).toBe(FightMessage.ATTACK);
+            expect(result.messageType).toBe(FightMessage.Attack);
             expect(result.message).toContain('inflige 10 points');
             expect(mockServer.to).toHaveBeenCalledWith('player1');
             expect(mockServer.to).toHaveBeenCalledWith('player2');
@@ -159,12 +161,12 @@ describe('JournalService', () => {
             expect(journalService.journalMap.get('room123').length).toBe(1);
         });
 
-        it('should process fight entry for non-ATTACK fight message', () => {
+        it('should process fight entry for non-Attack fight message', () => {
             const playerNames = ['Player One'];
-            const result = journalService.dispatchEntry(mockFightJournal, playerNames, FightMessage.FLEE_ATTEMPT, mockServer as Server);
+            const result = journalService.dispatchEntry(mockFightJournal, playerNames, FightMessage.FleeAttempt, mockServer as Server);
 
             expect(result).toBeDefined();
-            expect(result.messageType).toBe(FightMessage.FLEE_ATTEMPT);
+            expect(result.messageType).toBe(FightMessage.FleeAttempt);
             expect(result.message).toContain('Player One');
             expect(journalService.journalMap.get('room123').length).toBe(1);
         });
@@ -177,7 +179,7 @@ describe('JournalService', () => {
             };
 
             const playerNames = ['Player One'];
-            const result = journalService.dispatchEntry(invalidFightJournal, playerNames, FightMessage.ATTACK, mockServer as Server);
+            const result = journalService.dispatchEntry(invalidFightJournal, playerNames, FightMessage.Attack, mockServer as Server);
 
             expect(result).toBeNull();
         });
@@ -193,22 +195,22 @@ describe('JournalService', () => {
             };
 
             const playerNames = ['Player One'];
-            const result = journalService.dispatchEntry(invalidRoom, playerNames, GameMessage.START_TURN, mockServer as Server);
+            const result = journalService.dispatchEntry(invalidRoom, playerNames, GameMessage.StartTurn, mockServer as Server);
 
             expect(result).toBeNull();
         });
 
         it('should return null if currentPlayers is null', () => {
-            const result = journalService.dispatchEntry(mockRoom, null, GameMessage.START_TURN, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, null, GameMessage.StartTurn, mockServer as Server);
             expect(result).toBeNull();
         });
 
         it('should correctly record entries in the journalMap for existing room', () => {
             // First entry
-            journalService.dispatchEntry(mockRoom, ['Player One'], GameMessage.START_TURN, mockServer as Server);
+            journalService.dispatchEntry(mockRoom, ['Player One'], GameMessage.StartTurn, mockServer as Server);
 
             // Second entry for same room
-            const result = journalService.dispatchEntry(mockRoom, ['Player One'], GameMessage.PICK_ITEM, mockServer as Server);
+            const result = journalService.dispatchEntry(mockRoom, ['Player One'], GameMessage.PickItem, mockServer as Server);
 
             expect(journalService.journalMap.get('room123').length).toBe(2);
             expect(journalService.journalMap.get('room123')[1]).toBe(result);

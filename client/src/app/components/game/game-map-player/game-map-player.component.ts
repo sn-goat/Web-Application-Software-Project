@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
 import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
@@ -12,13 +11,10 @@ import { Subscription } from 'rxjs';
     styleUrl: './game-map-player.component.scss',
 })
 export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
-    readonly srcAvatar: string = DEFAULT_PATH_AVATARS;
-    readonly fileType: string = DEFAULT_FILE_TYPE;
-
     players: IPlayer[] = [];
-    playersInGame: IPlayer[];
     activePlayer: IPlayer | null;
     getOrganizerId: () => string;
+    private playersInGame: IPlayer[];
     private readonly gameService: GameService = inject(GameService);
     private subscriptions: Subscription[] = [];
 

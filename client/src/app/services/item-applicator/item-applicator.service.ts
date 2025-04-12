@@ -26,7 +26,7 @@ export class ItemApplicatorService {
 
     handleMouseDown(event: MouseEvent, rect: DOMRect) {
         const cellPosition = this.screenToBoard(event.pageX, event.pageY, rect);
-        if (this.mapService.getCellItem(cellPosition.x, cellPosition.y) !== Item.DEFAULT) {
+        if (this.mapService.getCellItem(cellPosition.x, cellPosition.y) !== Item.Default) {
             if (event.button === 0) {
                 this.oldItemPos = cellPosition;
             } else if (event.button === 2) {
@@ -49,15 +49,15 @@ export class ItemApplicatorService {
         this.oldItemPos = { x: -1, y: -1 };
     }
 
-    setBackToContainer(item: Item = Item.DEFAULT) {
+    setBackToContainer(item: Item = Item.Default) {
         this.isBackToContainer = item === this.selectedItem;
     }
 
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
         if (
-            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.WALL &&
-            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.OPENED_DOOR &&
-            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.CLOSED_DOOR
+            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.Wall &&
+            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.OpenedDoor &&
+            this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.ClosedDoor
         ) {
             if (oldItemPos.x !== -1 && oldItemPos.y !== -1) {
                 this.deleteItem(oldItemPos.x, oldItemPos.y);
@@ -67,29 +67,29 @@ export class ItemApplicatorService {
     }
 
     private applyItem(col: number, row: number) {
-        if (this.selectedItem === Item.SPAWN) {
+        if (this.selectedItem === Item.Spawn) {
             this.mapService.decreaseSpawnsToPlace();
-        } else if (this.selectedItem === Item.FLAG) {
+        } else if (this.selectedItem === Item.Flag) {
             this.mapService.setHasFlagOnBoard(true);
         } else {
             this.mapService.decreaseItemsToPlace();
         }
 
-        if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
+        if (this.mapService.getCellItem(col, row) !== Item.Default) {
             this.deleteItem(col, row);
         }
         this.mapService.setCellItem(col, row, this.selectedItem as Item);
     }
 
     private deleteItem(col: number, row: number) {
-        if (this.mapService.getCellItem(col, row) === Item.SPAWN) {
+        if (this.mapService.getCellItem(col, row) === Item.Spawn) {
             this.mapService.increaseSpawnsToPlace();
-        } else if (this.mapService.getCellItem(col, row) === Item.FLAG) {
+        } else if (this.mapService.getCellItem(col, row) === Item.Flag) {
             this.mapService.setHasFlagOnBoard(false);
         } else {
             this.mapService.increaseItemsToPlace();
         }
-        this.mapService.setCellItem(col, row, Item.DEFAULT);
+        this.mapService.setCellItem(col, row, Item.Default);
     }
 
     private screenToBoard(x: number, y: number, rect: DOMRect): Vec2 {

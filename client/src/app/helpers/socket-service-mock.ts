@@ -3,12 +3,12 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
 import { Vec2 } from '@common/board';
-import { Tile } from '@common/enums';
+import { ChatMessage } from '@common/chat';
+import { Item, Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
+import { Entry } from '@common/journal';
 import { IPlayer, PlayerInput } from '@common/player';
 import { Subject } from 'rxjs';
-import { Entry } from '@common/journal';
-import { ChatMessage } from '@common/chat';
 
 export class MockSocketService {
     gameRoom: IRoom = {
@@ -34,6 +34,10 @@ export class MockSocketService {
     private doorSubject = new Subject<unknown>();
     private endOfGame = new Subject<unknown>();
     private gameStartedError = new Subject<string>();
+    private itemCollected = new Subject<Item>();
+    private itemDropped = new Subject<Item>();
+    private mapUpdate = new Subject<unknown>();
+    private inventoryFull = new Subject<unknown>();
 
     private journalSubject = new Subject<Entry[]>();
     private chatSubject = new Subject<ChatMessage>();
@@ -135,6 +139,22 @@ export class MockSocketService {
         return this.gameStartedError.asObservable();
     }
 
+    onItemCollected() {
+        return this.itemCollected.asObservable();
+    }
+
+    onItemDropped() {
+        return this.itemDropped.asObservable();
+    }
+
+    onInventoryFull() {
+        return this.inventoryFull.asObservable();
+    }
+
+    onMapUpdate() {
+        return this.mapUpdate.asObservable();
+    }
+
     createRoom(_mapName: string): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
@@ -155,6 +175,7 @@ export class MockSocketService {
     initFight(_player: string, _defender: string): void {}
     debugMove(_position: Vec2, _playerId: string): void {}
     toggleDebug(): void {}
+    inventoryChoice(payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string }): void {}
 
     triggerPlayerJoined(data: IRoom) {
         this.playerJoinedSubject.next(data);
@@ -192,7 +213,7 @@ export class MockSocketService {
         this.startTurnSubject.next(null);
     }
 
-    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR }) {
+    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }) {
         this.doorSubject.next(data);
     }
 
@@ -234,6 +255,22 @@ export class MockSocketService {
 
     triggerEndOfGame() {
         this.endOfGame.next(null);
+    }
+
+    triggerItemCollected(data: Item) {
+        this.itemCollected.next(data);
+    }
+
+    triggerItemDropped(data: Item) {
+        this.itemDropped.next(data);
+    }
+
+    triggerMapUpdate(data: unknown) {
+        this.mapUpdate.next(data);
+    }
+
+    triggerInventoryFull(data: unknown) {
+        this.inventoryFull.next(data);
     }
 
     getAccessCode() {

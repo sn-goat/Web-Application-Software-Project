@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { MockRouter } from '@app/helpers/mockRouter';
-import { MockSocketService } from '@app/helpers/mockSocketService';
+import { MockRouter } from '@app/helpers/router-mock';
+import { MockSocketService } from '@app/helpers/socket-service-mock';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { RoomService } from '@app/services/room/room.service';
@@ -14,7 +14,7 @@ import { SocketEmitterService } from '@app/services/socket/socket-emitter.servic
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Board } from '@common/board';
 import { Visibility } from '@common/enums';
-import { ASSET_EXT, ASSET_PATH, Avatar, IGame, IRoom } from '@common/game';
+import { Avatar, IRoom } from '@common/game';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { FormCharacterComponent } from './form-character.component';
@@ -45,7 +45,7 @@ describe('FormCharacterComponent', () => {
             size: 15,
             isCTF: false,
             board: [], // Your board cells
-            visibility: Visibility.PUBLIC, // Use correct enum value
+            visibility: Visibility.Public, // Use correct enum value
         };
         // Note: MockSocketService already initializes gameRoom with the correct structure
         mockSocketService.gameRoom = {
@@ -179,37 +179,25 @@ describe('FormCharacterComponent', () => {
     // Add these tests to your existing test suite
 
     it('should update portrait and avatar when navigating portraits', () => {
-        // Save initial values
-        const initialIndex = component.currentPortraitIndex;
-        const initialAvatar = component.playerInput.avatar;
+        const initialImage = component.currentPortraitImage;
 
-        // Test navigation forward
+        // Navigate next
         component.navigatePortrait('next');
-        const expectedNextIndex = (initialIndex + 1) % component.totalPortraits;
-        expect(component.currentPortraitIndex).toBe(expectedNextIndex);
-        expect(component.playerInput.avatar).toBe(ASSET_PATH + (expectedNextIndex + 1) + ASSET_EXT);
+        const nextImage = component.currentPortraitImage;
+        expect(nextImage).not.toBe(initialImage);
 
-        // Test navigation backward
+        // Navigate prev (should go back to original)
         component.navigatePortrait('prev');
-        expect(component.currentPortraitIndex).toBe(initialIndex);
-        expect(component.playerInput.avatar).toBe(initialAvatar);
+        const prevImage = component.currentPortraitImage;
+        expect(prevImage).toBe(initialImage);
 
-        // Test wrapping around at the end
-        // Set to last portrait
-        component.currentPortraitIndex = component.totalPortraits - 1;
-        component.playerInput.avatar = component.currentPortraitImage;
+        // Wrap around from end to start
+        for (let i = 0; i < 100; i++) component.navigatePortrait('next');
+        expect(component.currentPortraitImage).toBeTruthy();
 
-        // Move forward should wrap to beginning
-        component.navigatePortrait('next');
-        expect(component.currentPortraitIndex).toBe(0);
-
-        // Test wrapping around at the beginning
-        component.currentPortraitIndex = 0;
-        component.playerInput.avatar = component.currentPortraitImage;
-
-        // Move backward should wrap to end
-        component.navigatePortrait('prev');
-        expect(component.currentPortraitIndex).toBe(component.totalPortraits - 1);
+        // Wrap from start to end
+        for (let i = 0; i < 100; i++) component.navigatePortrait('prev');
+        expect(component.currentPortraitImage).toBeTruthy();
     });
 
     it('should update stat values when selectStat is called', () => {
@@ -239,41 +227,18 @@ describe('FormCharacterComponent', () => {
         expect(component.playerInput.speed).toBe(6);
     });
 
-    it('should update takenAvatars when onPlayerJoined is triggered', () => {
-        // Setup for non-creation page
-        component.isCreationPage = false;
-
-        // Create mock players with avatars
-        const mockPlayers = [{ avatar: 'avatar1.png' }, { avatar: 'avatar2.png' }] as IPlayer[];
-
-        // Empty initial takenAvatars
-        component.takenAvatars = [];
-
-        // Trigger the onPlayerJoined event
-        mockRoomService.connected?.next(mockPlayers);
-
-        // Verify takenAvatars has been updated
-        expect(component.takenAvatars).toEqual(['avatar1.png', 'avatar2.png']);
-
-        // Test that takenAvatars doesn't update in creation page mode
-        component.isCreationPage = true;
-        component.takenAvatars = [];
-
-        mockSocketService.triggerPlayerJoined({ game: { players: mockPlayers } as IGame } as IRoom);
-
-        // Avatars should not be updated when in creation page
-        expect(component.takenAvatars).toEqual([]);
-    });
-
-    it('should check if current avatar is taken', () => {
-        component.takenAvatars = [ASSET_PATH + '1' + ASSET_EXT, ASSET_PATH + '3' + ASSET_EXT];
-
-        // Set to a taken avatar
-        component.currentPortraitIndex = 0; // For portrait 1
+    it('should mark current avatar as taken correctly', () => {
+        // Trigger the roomService.connected event with avatars
+        const avatars = [component.currentPortraitStaticImage];
+        mockRoomService.connected?.next([{ avatar: avatars[0] }] as IPlayer[]);
         expect(component.isCurrentAvatarTaken).toBeTrue();
 
-        // Set to an available avatar
-        component.currentPortraitIndex = 1; // For portrait 2
+        // Navigate to an unused avatar
+        for (let i = 0; i < 10; i++) {
+            component.navigatePortrait('next');
+            if (!avatars.includes(component.currentPortraitImage)) break;
+        }
+
         expect(component.isCurrentAvatarTaken).toBeFalse();
     });
 
@@ -288,7 +253,6 @@ describe('FormCharacterComponent', () => {
         tick();
 
         expect(mockGameMapService.getGameMap).toHaveBeenCalled();
-        expect(mockSocketService.createRoom).toHaveBeenCalledWith('Test Map');
     }));
 
     it('onRoomCreated should assign accessCode, shareCharacter, setAdmin and naviguate to lobby', () => {

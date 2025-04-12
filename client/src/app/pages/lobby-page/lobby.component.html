@@ -1,43 +1,55 @@
-<div class="container justified">
-    <div class="access-code-container">
-        <h1>Lobby de partie: {{ accessCode }}</h1>
-        @if (isAdmin) {
-        <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
-            {{ isRoomLocked ? 'Unlock' : 'Lock' }}
-        </button>
-        }
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polytopia - Salle d'attente</title>
 
-        <button (click)="disconnect()">Disconnect</button>
+        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="background-gif" style="background-image: url('assets/backgrounds/lobby.gif')"></div>
+        <h1 class="medieval-title">Salle d'attente</h1>
+        <div class="container justified">
+            <div class="main-content">
+                <div class="left-column">
+                    <div class="access-code-container">
+                        <h1>Code d'accès à la partie: {{ accessCode }}</h1>
+                        @if (isAdmin) {
+                        <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
+                            {{ isRoomLocked ? 'Verouiller la salle' : 'Déverouiller la salle' }}
+                        </button>
+                        }
 
-        @if (isAdmin) {
-        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">Démarrer partie!</button>
-        }
-    </div>
+                        <button (click)="disconnect()">Déconnexion</button>
 
-    <div class="players-list">
-        <h2>Liste de joueurs</h2>
-        <ul>
-            @for (player of players; track player.id) {
-            <li>
-                <img class="avatar-image" [src]="player.avatar" alt="Avatar" />
-                <span [ngStyle]="{ color: players[0].id === player.id ? 'yellow' : 'inherit' }">
-                    <strong>{{ player.name }}</strong>
-                </span>
+                        @if (isAdmin) {
+                        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">Démarrer la partie</button>
+                        }
+                    </div>
 
-                @if (isAdmin && player.id !== getPlayerId()) {
-                <button (click)="expelPlayer(player.id)">Bannir</button>
-                }
-            </li>
-            }
-        </ul>
-    </div>
+                    <div class="players-list">
+                        <h2>Liste de joueurs</h2>
+                        <ul>
+                            @for (player of players; track player.id) {
+                            <li>
+                                <img class="avatar-image" [src]="player.avatar" alt="Avatar" />
+                                <span [ngStyle]="{ color: players[0].id === player.id ? 'yellow' : 'inherit' }">
+                                    <strong>{{ player.name }}</strong>
+                                </span>
 
-    <!-- <div class="chat-box">
-        <h2>Zone de chat</h2>
-        <div class="chat-messages">
-            <div class="message"><strong>[Admin]</strong>: Bonjour à tous!</div>
+                                @if (isAdmin && player.id !== getPlayerId()) {
+                                <button (click)="expelPlayer(player.id)">Bannir</button>
+                                }
+                            </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <app-chat></app-chat>
+                </div>
+            </div>
         </div>
-        <input type="text" placeholder="Tapez votre message..." disabled />
-    </div> -->
-    <app-chat></app-chat>
-</div>
+    </body>
+</html>

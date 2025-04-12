@@ -4,12 +4,12 @@ import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { GameManagerService } from '@app/services/game/games-manager.service';
+import { JournalService } from '@app/services/journal/journal.service';
 import { PlayerInput } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
-import { JournalService } from '@app/services/journal/journal.service';
 
 describe('RoomGateway', () => {
     let gateway: RoomGateway;
