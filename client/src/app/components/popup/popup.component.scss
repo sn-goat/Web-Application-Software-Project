@@ -15,15 +15,23 @@ $rectangle-border: 1px solid $primary-text;
     color: #f2e5b8;
     font-family: 'MedievalSharp', cursive;
     border: 3px solid var(--scroll-gold);
+    backdrop-filter: blur(2px);
+    padding: 10px;
     box-shadow:
         0 0 30px rgba(0, 0, 0, 0.5),
         inset 0 0 10px #d2bb94;
-    backdrop-filter: blur(2px);
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px $primary-text;
     z-index: 1000;
-    animation: fadeIn 0.3s ease-in-out;
+    animation: scrollReveal 1.4s ease-in-out;
+}
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .popup-header {
@@ -36,16 +44,18 @@ $rectangle-border: 1px solid $primary-text;
 
 .close-popup {
     font-family: 'MedievalSharp', cursive;
-    background: transparent;
-    border: 1.1px solid $primary-text;
-    border-radius: 50%;
-    color: $primary-text;
-    cursor: pointer;
-    font-size: 18px;
+    background-color: transparent;
+    color: #f2e5b8;
+    border-radius: 8px;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
     &:hover {
-        background: #f2e5b8;
-        color: #000000;
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        background: #d4af37;
+        color: black;
     }
 }
 

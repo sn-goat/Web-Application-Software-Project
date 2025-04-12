@@ -16,42 +16,13 @@ p {
     font-family: 'MedievalSharp', cursive;
 }
 
-.game-map-info {
-    position: fixed;
-    bottom: 60px;
-    left: 20px;
-    width: 400px;
-    height: 500px;
-    border: $rectangle-border;
-    color: $primary-text;
-    border-radius: 8px;
-    box-shadow: 0 0 10px $primary-text;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease-in-out;
-    background: rgba(0, 0, 0, 0.9);
-}
-
 :host {
     display: block;
     height: 100%;
     width: 100%;
 }
-.close-popup {
-    font-family: 'MedievalSharp', cursive;
-    background: rgba(0, 0, 0, 0.9);
-    border: 1.1px solid $primary-text;
-    border-radius: 50%;
-    color: $primary-text;
-    cursor: pointer;
-    font-size: 18px;
-    &:hover {
-        background: #f2e5b8;
-        color: #000000;
-        box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-    }
-}
+
 .container {
-    background-color: rgba(0, 0, 0, 0.3);
     border-radius: $border-radius;
     height: 100%;
     display: flex;
@@ -60,32 +31,6 @@ p {
     border-radius: 8px;
     color: #f2e5b8;
     font-family: 'MedievalSharp', cursive;
-    border: 3px solid var(--scroll-gold);
-    box-shadow:
-        0 0 30px rgba(0, 0, 0, 0.5),
-        inset 0 0 10px #d2bb94;
-    backdrop-filter: blur(2px);
-    background: rgba(0, 0, 0, 0.9);
-
-    .header {
-        background-color: rgba(0, 0, 0, 0.3);
-        border-bottom: 1px solid $glow-teal;
-        padding: 12px 15px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        text-align: center;
-        align-items: center;
-        h2 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 600;
-            text-align: center;
-            color: $primary-text;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px $glow-teal;
-        }
-    }
 
     .content {
         flex-grow: 1;

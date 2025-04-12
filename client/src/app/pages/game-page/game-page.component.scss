@@ -126,7 +126,7 @@ body {
     @extend %blurred-gold-border;
     background: rgba(60, 60, 60, 0.9);
     width: 100%;
-    height: 35px; 
+    height: 35px;
 
     font-size: 0.75rem;
     font-weight: 600;
@@ -185,38 +185,52 @@ body {
     bottom: 60px;
     left: 20px;
     width: 300px;
+    border-radius: 10px;
     @extend %blurred-gold-border;
+    background: rgba(0, 0, 0, 0.9);
 
     padding: 10px;
-    border-radius: 8px;
     z-index: 1000;
-    animation: fadeIn 0.3s ease-in-out;
 }
 
 .popup-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: center; // center the content
+    position: relative;
     padding-bottom: 5px;
-    @extend %blurred-gold-border;
-}
+    border-bottom: #d2bb94 1.5px solid;
 
-.close-popup {
-    @extend %blurred-gold-border;
-
-    cursor: pointer;
-    font-size: 18px;
-}
-
-/* 🔹 Keyframes */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+    span {
+        font-size: 1.2rem;
+        font-family: 'MedievalSharp', cursive;
+        color: #f2e5b8;
+        pointer-events: none;
     }
-    to {
-        opacity: 1;
+
+    .close-popup {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: transparent;
+        cursor: pointer;
+        font-size: 18px;
+            border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+        &:hover {
+            background: $scroll-gold;
+            color: black;
+        }
     }
 }
+
 
 app-game-map-player-detailed,
 app-game-map-info {
@@ -258,12 +272,10 @@ app-game-map-player {
     z-index: 100;
     padding: 20px;
     box-sizing: border-box;
-    animation: fadeIn 0.3s ease-in-out;
 
     app-game-fight-interface {
         width: 100%;
         max-width: 800px;
-        animation: slideIn 0.4s ease-out;
     }
 }
 
@@ -293,25 +305,5 @@ app-game-map-player {
     100% {
         background: rgba(255, 0, 0, 0.4);
         box-shadow: 0 0 20px rgba(255, 0, 0, 1);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
     }
 }
