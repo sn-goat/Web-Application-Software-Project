@@ -78,6 +78,10 @@ export class GameGateway {
     @OnEvent(InternalStatsEvents.DispatchStats)
     handleStats(payload: { accessCode: string; stats: Stats }) {
         this.logger.log('Dispatching stats for game: ');
+        this.logger.log('Game stats: ' + payload.accessCode);
+        this.logger.log('Stats doors handled(%): ' + payload.stats.gameStats.doorsHandledPercentage);
+        this.logger.log('Stats game duration: ' + payload.stats.gameStats.gameDuration);
+        this.logger.log('Stats total tiles visited(%): ' + payload.stats.gameStats.tilesVisitedPercentage);
         payload.stats.playersStats.forEach((player) => {
             this.logger.log('Player stats: ' + player.name);
             this.logger.log('Stats flee success: ' + player.fleeSuccess);
@@ -88,12 +92,46 @@ export class GameGateway {
             this.logger.log('Stats tiles visited(%): ' + player.tilesVisitedPercentage);
             this.logger.log('Stats total fights: ' + player.totalFights);
         });
-        this.logger.log('Game stats: ' + payload.accessCode);
-        this.logger.log('Stats doors handled (%): ' + payload.stats.gameStats.doorsHandledPercentage);
-        this.logger.log('Stats game duration: ' + payload.stats.gameStats.gameDuration);
-        this.logger.log('Stats total tiles visited(%): ' + payload.stats.gameStats.tilesVisitedPercentage);
+        payload.stats.disconnectedPlayersStats.forEach((player) => {
+            this.logger.log('Disconnected player stats: ' + player.name);
+            this.logger.log('Stats flee success: ' + player.fleeSuccess);
+            this.logger.log('Stats given damage: ' + player.givenDamage);
+            this.logger.log('Stats taken damage: ' + player.takenDamage);
+            this.logger.log('Stats wins: ' + player.wins);
+            this.logger.log('Stats losses: ' + player.losses);
+            this.logger.log('Stats tiles visited(%): ' + player.tilesVisitedPercentage);
+            this.logger.log('Stats total fights: ' + player.totalFights);
+        });
 
-        this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, payload.stats);
+        const serializableStats = {
+            gameStats: {
+                doorsHandledPercentage: payload.stats.gameStats.doorsHandledPercentage,
+                gameDuration: payload.stats.gameStats.gameDuration,
+                tilesVisitedPercentage: payload.stats.gameStats.tilesVisitedPercentage,
+            },
+            playersStats: payload.stats.playersStats.map((player) => ({
+                name: player.name,
+                fleeSuccess: player.fleeSuccess,
+                givenDamage: player.givenDamage,
+                takenDamage: player.takenDamage,
+                wins: player.wins,
+                losses: player.losses,
+                tilesVisitedPercentage: player.tilesVisitedPercentage,
+                totalFights: player.totalFights,
+            })),
+            disconnectedPlayersStats: payload.stats.disconnectedPlayersStats.map((player) => ({
+                name: player.name,
+                fleeSuccess: player.fleeSuccess,
+                givenDamage: player.givenDamage,
+                takenDamage: player.takenDamage,
+                wins: player.wins,
+                losses: player.losses,
+                tilesVisitedPercentage: player.tilesVisitedPercentage,
+                totalFights: player.totalFights,
+            })),
+        };
+
+        this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, serializableStats);
     }
 
     @OnEvent(InternalFightEvents.ChangeFighter)
@@ -141,10 +179,10 @@ export class GameGateway {
 
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
         if (payload.winner.wins >= MAX_FIGHT_WINS) {
-            this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);
             this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.END_GAME, this.server);
+            // this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);
             game.dispatchGameStats();
-            this.gameManager.closeRoom(payload.accessCode);
+            // this.gameManager.closeRoom(payload.accessCode);
         } else if (game.isPlayerTurn(payload.loser.id)) {
             game.endTurn();
         } else {
@@ -176,7 +214,6 @@ export class GameGateway {
         }
     }
 
-    // Duplication de code ??
     @SubscribeMessage(GameEvents.Ready)
     handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
         const game: Game = this.gameManager.getGame(payload.accessCode);

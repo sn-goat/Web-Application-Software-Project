@@ -11,6 +11,7 @@ import { Avatar, IGame, getAvatarName } from '@common/game';
 import { DEFAULT_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 import { Entry } from '@common/journal';
+import { Stats } from '@common/stats';
 
 @Injectable({
     providedIn: 'root',
@@ -23,6 +24,7 @@ export class GameService {
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     journalEntries: BehaviorSubject<Entry[]> = new BehaviorSubject<Entry[]>([]);
+    stats: BehaviorSubject<Stats | null> = new BehaviorSubject<Stats | null>(null);
 
     private organizerId: string = '';
     private dialog = inject(MatDialog);
@@ -75,8 +77,13 @@ export class GameService {
         this.socketReceiver.onGameEnded().subscribe(() => {
             this.resetGame();
         });
+
         this.socketReceiver.onJournalEntry().subscribe((entry) => {
             this.journalEntries.next([...this.journalEntries.getValue(), entry]);
+        });
+
+        this.socketReceiver.onStatsUpdate().subscribe((stats) => {
+            this.stats.next(stats);
         });
     }
 
@@ -191,6 +198,8 @@ export class GameService {
         this.isDebugMode.next(false);
         this.isActionSelected.next(false);
         this.initialPlayers.next([]);
+        this.journalEntries.next([]);
+        this.stats.next(null);
     }
 
     async confirmAndAbandonGame(): Promise<boolean> {

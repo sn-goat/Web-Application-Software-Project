@@ -4,13 +4,14 @@ import { ChatMessage } from '@common/chat';
 import { ChatEvents } from '@common/chat.gateway.events';
 import { Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
-import { FightEvents, GameEvents, TurnEvents, JournalEvent } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, TurnEvents, JournalEvent, StatsEvents } from '@common/game.gateway.events';
 import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Observable } from 'rxjs';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
 import { Entry } from '@common/journal';
+import { Stats } from '@common/stats';
 
 @Injectable({
     providedIn: 'root',
@@ -218,6 +219,14 @@ export class SocketReceiverService {
         return new Observable((observer) => {
             this.socket.on(FightEvents.Loser, (loser) => {
                 observer.next(loser);
+            });
+        });
+    }
+
+    onStatsUpdate(): Observable<Stats> {
+        return new Observable((observer) => {
+            this.socket.on(StatsEvents.StatsUpdate, (stats: Stats) => {
+                observer.next(stats);
             });
         });
     }
