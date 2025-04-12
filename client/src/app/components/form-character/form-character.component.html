@@ -1,7 +1,7 @@
 <div class="popup">
     <div class="popup-content">
         <div class="portrait-container">
-            <button class="arrow-button" (click)="navigatePortrait('prev')">←</button>
+            <button class="arrow-button" (click)="navigatePortrait('prev')">↑</button>
             <div class="portrait-display">
                 @if (isCurrentAvatarTaken) {
                 <img [src]="currentPortraitImage" alt="Portrait" class="portrait-image taken" />
@@ -9,7 +9,7 @@
                 <img [src]="currentPortraitImage" alt="Portrait" class="portrait-image" />
                 }
             </div>
-            <button class="arrow-button" (click)="navigatePortrait('next')">→</button>
+            <button class="arrow-button" (click)="navigatePortrait('next')">↓</button>
         </div>
         @if(isCurrentAvatarTaken) {
         <p style="color: red">Avatar déjà sélectionné par un autre joueur</p>
