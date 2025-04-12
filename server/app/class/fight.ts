@@ -51,7 +51,7 @@ export class Fight implements IFight {
                 return null;
             } else {
                 defender.losses += 1;
-            attacker.wins += 1;
+                attacker.wins += 1;
                 return { winner: attacker, loser: defender };
             }
         }

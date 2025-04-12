@@ -102,8 +102,6 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, serializableStats);
     }
 
-    
-
     @OnEvent(InternalFightEvents.ChangeFighter)
     changeFighter(payload: { accessCode: string; fight: Fight }) {
         this.logger.log('Switching turn to player: ' + payload.fight.currentPlayer.name);
