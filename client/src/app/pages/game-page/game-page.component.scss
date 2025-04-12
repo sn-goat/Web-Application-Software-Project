@@ -116,7 +116,6 @@ body {
 }
 
 .chat-info-container {
-    @extend %blurred-gold-border;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -127,9 +126,9 @@ body {
     @extend %blurred-gold-border;
     background: rgba(60, 60, 60, 0.9);
     width: 100%;
-    height: 35px; /* Restored original height */
+    height: 35px; 
 
-    font-size: 0.75rem; 
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -142,7 +141,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 5px; 
+    padding: 0 5px;
 }
 
 /* Hover Effect */
@@ -186,12 +185,10 @@ body {
     bottom: 60px;
     left: 20px;
     width: 300px;
-    min-height: 400px;
     @extend %blurred-gold-border;
 
     padding: 10px;
     border-radius: 8px;
-
     z-index: 1000;
     animation: fadeIn 0.3s ease-in-out;
 }

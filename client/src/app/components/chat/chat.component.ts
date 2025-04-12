@@ -12,9 +12,11 @@ import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/cor
 })
 export class ChatComponent implements AfterViewChecked {
     @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
+    @ViewChild('chatHistory') chatHistory!: ElementRef;
 
     newMessage: string = '';
     myPlayer: IPlayer | null = null;
+    private previousMessageCount: number = 0;
 
     constructor(
         private readonly playerService: PlayerService,
@@ -26,7 +28,11 @@ export class ChatComponent implements AfterViewChecked {
     }
 
     ngAfterViewChecked(): void {
-        this.scrollToBottom();
+        const currentMessages = this.chatService.chatHistory();
+        if (currentMessages.length > this.previousMessageCount) {
+            this.scrollToBottom();
+            this.previousMessageCount = currentMessages.length;
+        }
     }
 
     scrollToBottom(): void {
