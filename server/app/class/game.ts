@@ -29,6 +29,7 @@ export class Game implements IGame {
     fight: Fight;
     timer: Timer;
     movementInProgress: boolean;
+    inventoryFull: boolean;
     pendingEndTurn: boolean;
     maxPlayers: number;
 
@@ -45,6 +46,7 @@ export class Game implements IGame {
         this.timer = new Timer(internalEmitter);
         this.fight = new Fight(internalEmitter);
         this.movementInProgress = false;
+        this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = getLobbyLimit(board.size);
 
@@ -80,6 +82,7 @@ export class Game implements IGame {
         this.players = [];
         this.hasStarted = false;
         this.movementInProgress = false;
+        this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = 0;
     }
@@ -316,15 +319,15 @@ export class Game implements IGame {
                     player,
                     position,
                 });
-                this.continueMovement = false;
             } else {
+                this.inventoryFull = true;
                 this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
                     player,
                     item: cell.item,
                     position,
                 });
-                this.continueMovement = false;
             }
+            this.continueMovement = false;
         }
     }
 
@@ -344,7 +347,7 @@ export class Game implements IGame {
     }
 
     private endTurnRequested(): void {
-        if (this.movementInProgress) {
+        if (this.movementInProgress || this.inventoryFull) {
             this.pendingEndTurn = true;
         } else {
             this.endTurn();
@@ -353,6 +356,10 @@ export class Game implements IGame {
 
     private checkForEndTurn(player: Player): void {
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
+        if (this.inventoryFull) {
+            // Prevent ending the turn if the inventory is full
+            return;
+        }
         if (this.isPlayerContinueTurn(player, path.size)) {
             this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
         } else {

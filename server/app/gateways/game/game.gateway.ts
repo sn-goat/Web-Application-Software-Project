@@ -292,12 +292,18 @@ export class GameGateway {
         if (player) {
             player.removeItemFromInventory(payload.itemToThrow);
             player.addItemToInventory(payload.itemToAdd);
+            game.inventoryFull = false;
             game.map[payload.position.y][payload.position.x].item = payload.itemToThrow;
             this.server.to(payload.accessCode).emit(TurnEvents.MapUpdate, {
                 player,
                 item: payload.itemToThrow,
                 position: payload.position,
             });
+            
+            // Vérifier la fin du tour après résolution du problème d'inventaire plein
+            if (game.pendingEndTurn) {
+                game.endTurn();
+            }
         }
     }
 }
