@@ -4,8 +4,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { MockRouter } from '@app/helpers/mockRouter';
-import { MockSocketService } from '@app/helpers/mockSocketService';
+import { MockRouter } from '@app/helpers/router-mock';
+import { MockSocketService } from '@app/helpers/socket-service-mock';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { RoomService } from '@app/services/room/room.service';
@@ -84,7 +84,6 @@ describe('LobbyComponent', () => {
 
     it('should navigate home if current player is removed', fakeAsync(() => {
         spyOn(window, 'confirm').and.returnValue(true);
-        // simulate removal such that current player is not in the list
         socketServiceMock.triggerPlayerRemoved();
         component.disconnect();
         tick();
@@ -101,8 +100,7 @@ describe('LobbyComponent', () => {
 
     it('toggleRoomLock should call unlockRoom if room is locked', () => {
         spyOn(socketServiceMock, 'unlockRoom');
-        // Forcer l'état: la room est verrouillée et il y a moins de joueurs que maxPlayers
-        component.maxPlayers = 5; // s'assurer que 1 < maxPlayers
+        component.maxPlayers = 5;
         component.isRoomLocked = true;
         component.accessCode = 'XYZ';
         component.toggleRoomLock();
@@ -121,24 +119,18 @@ describe('LobbyComponent', () => {
     });
 
     it('toggleRoomLock should do nothing if players count is greater or equal to maxPlayers', () => {
-        // Créer des espions sur lockRoom et unlockRoom
         spyOn(socketServiceMock, 'lockRoom');
         spyOn(socketServiceMock, 'unlockRoom');
-        // On force maxPlayers et le nombre de joueurs à être égaux ou supérieurs
         component.maxPlayers = 3;
         component.players = [{ id: 'player1' } as IPlayer, { id: 'player2' } as IPlayer, { id: 'player3' } as IPlayer];
         component.accessCode = 'XYZ';
-        // On définit isRoomLocked à l'une ou l'autre valeur (peu importe)
         component.isRoomLocked = false;
 
-        // Appel de la méthode toggleRoomLock qui doit retourner immédiatement sans rien faire.
         component.toggleRoomLock();
 
-        // Vérifier qu'aucune méthode n'est appelée
         expect(socketServiceMock.lockRoom).not.toHaveBeenCalled();
         expect(socketServiceMock.unlockRoom).not.toHaveBeenCalled();
 
-        // La valeur de isRoomLocked ne doit pas changer
         expect(component.isRoomLocked).toBeFalse();
     });
 

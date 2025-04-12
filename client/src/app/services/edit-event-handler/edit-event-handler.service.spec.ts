@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
-import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { EditEventHandlerService } from '@app/services/edit-event-handler/edit-event-handler.service';
 import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
 import { MapService } from '@app/services/map/map.service';
+import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { Item } from '@common/enums';
 
 describe('EditEventHandlerService', () => {
@@ -36,7 +36,7 @@ describe('EditEventHandlerService', () => {
 
     describe('handleMouseDown', () => {
         it('should call itemApplicatorService when cell is not default', () => {
-            mapService.getCellItem.and.returnValue(Item.FLAG);
+            mapService.getCellItem.and.returnValue(Item.Flag);
             const event = new MouseEvent('mousedown');
             const rect = new DOMRect(0, 0, 500, 500);
 
@@ -47,7 +47,7 @@ describe('EditEventHandlerService', () => {
         });
 
         it('should call tileApplicatorService when cell is default', () => {
-            mapService.getCellItem.and.returnValue(Item.DEFAULT);
+            mapService.getCellItem.and.returnValue(Item.Default);
             const event = new MouseEvent('mousedown');
             const rect = new DOMRect(0, 0, 500, 500);
 

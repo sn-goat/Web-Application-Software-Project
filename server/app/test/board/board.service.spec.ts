@@ -73,7 +73,7 @@ describe('BoardService', () => {
         const boards = await boardModel.find({});
         expect(boards.length).toBe(1);
         expect(boards[0].name).toBe(VALID_BOARD.name);
-        expect(boards[0].visibility).toBe(Visibility.PRIVATE);
+        expect(boards[0].visibility).toBe(Visibility.Private);
     });
 
     it('addBoard() should reject an empty board', async () => {
@@ -92,7 +92,7 @@ describe('BoardService', () => {
         const board = createBoard(SIZE_10);
         for (let i = 0; i < MOREHALFSIZE; i++) {
             for (let j = 0; j < MOREHALFSIZE; j++) {
-                placeTile(board, Tile.WALL, { x: i, y: j });
+                placeTile(board, Tile.Wall, { x: i, y: j });
             }
         }
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual(
@@ -112,20 +112,20 @@ describe('BoardService', () => {
 
     it('addBoard() should reject a board with doors placed on the edge', async () => {
         const board = createBoard(SIZE_10);
-        placeTile(board, Tile.CLOSED_DOOR, { x: 9, y: 3 });
+        placeTile(board, Tile.ClosedDoor, { x: 9, y: 3 });
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Jeu invalide: Des portes sont placées sur les rebords du jeu');
     });
 
     it('addBoard() should reject a board with an incorrect door structure', async () => {
         const board = createBoard(SIZE_10);
-        placeTile(board, Tile.OPENED_DOOR, { x: 5, y: 5 });
-        placeTile(board, Tile.WALL, { x: 6, y: 5 });
-        placeTile(board, Tile.WALL, { x: 5, y: 6 });
+        placeTile(board, Tile.OpenedDoor, { x: 5, y: 5 });
+        placeTile(board, Tile.Wall, { x: 6, y: 5 });
+        placeTile(board, Tile.Wall, { x: 5, y: 6 });
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual("Jeu invalide: Des portes n'ont pas de structure valide");
 
-        placeTile(board, Tile.WALL, { x: 5, y: 4 });
-        placeTile(board, Tile.ICE, { x: 4, y: 5 });
-        placeTile(board, Tile.FLOOR, { x: 6, y: 5 });
+        placeTile(board, Tile.Wall, { x: 5, y: 4 });
+        placeTile(board, Tile.Ice, { x: 4, y: 5 });
+        placeTile(board, Tile.Floor, { x: 6, y: 5 });
         await service.addBoard({ ...VALID_BOARD, board });
         const validBoard = await service.getBoard(VALID_BOARD.name);
         expect(validBoard.board).toEqual(board);
@@ -133,11 +133,11 @@ describe('BoardService', () => {
 
     it('updateBoard() should correcty update a valid board', async () => {
         const boardToStore = createBoard(SIZE_10);
-        placeTile(boardToStore, Tile.WALL, { x: 3, y: 3 });
+        placeTile(boardToStore, Tile.Wall, { x: 3, y: 3 });
         await service.addBoard({ ...VALID_BOARD, board: boardToStore });
 
         const updatedBoard = createBoard(SIZE_10);
-        placeTile(updatedBoard, Tile.ICE, { x: 3, y: 3 });
+        placeTile(updatedBoard, Tile.Ice, { x: 3, y: 3 });
 
         const storedBoard = await service.getBoard(VALID_BOARD.name);
         const updatedBoardObject = { ...storedBoard, _id: storedBoard._id, board: updatedBoard };
@@ -158,7 +158,7 @@ describe('BoardService', () => {
         const updatedBoard = createBoard(SIZE_10);
         for (let i = 0; i < MOREHALFSIZE; i++) {
             for (let j = 0; j < MOREHALFSIZE; j++) {
-                placeTile(updatedBoard, Tile.WALL, { x: i, y: j });
+                placeTile(updatedBoard, Tile.Wall, { x: i, y: j });
             }
         }
 

@@ -34,7 +34,7 @@ describe('ChatGateway', () => {
             life: 10,
             attackDice: 'D6',
             defenseDice: 'D4',
-            team: Team.RED,
+            team: Team.Red,
             actions: 1,
             wins: 0,
             movementPts: 2,

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
 
-import { FakeSocket } from '@app/helpers/fakeSocket';
+import { FakeSocket } from '@app/helpers/fake-socket';
 import { Vec2 } from '@common/board';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';

@@ -238,10 +238,10 @@ export class Game implements IGame {
         return this.isDebugMode;
     }
 
-    changeDoorState(doorPosition: Vec2, playerId: string): { doorPosition: Vec2; newDoorState: Tile.OPENED_DOOR | Tile.CLOSED_DOOR } {
+    changeDoorState(doorPosition: Vec2, playerId: string): { doorPosition: Vec2; newDoorState: Tile.OpenedDoor | Tile.ClosedDoor } {
         const door = this.map[doorPosition.y][doorPosition.x];
         const player = this.getPlayer(playerId);
-        door.tile = door.tile === Tile.CLOSED_DOOR ? Tile.OPENED_DOOR : Tile.CLOSED_DOOR;
+        door.tile = door.tile === Tile.ClosedDoor ? Tile.OpenedDoor : Tile.ClosedDoor;
         this.decrementAction(player);
         return { doorPosition, newDoorState: door.tile };
     }
@@ -287,7 +287,7 @@ export class Game implements IGame {
     removePlayerOnMap(playerId: string): void {
         const player = this.getPlayer(playerId);
         this.map[player.position.y][player.position.x].player = Avatar.Default;
-        this.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.DEFAULT;
+        this.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.Default;
     }
     removePlayerFromFight(playerId: string): void {
         const fightResult = this.fight.handleFightRemoval(playerId);
@@ -309,9 +309,9 @@ export class Game implements IGame {
     private _handleItemCollection(position: Vec2, player: Player): void {
         const cell = this.map[position.y][position.x];
         this.continueMovement = true;
-        if (cell.item !== Item.DEFAULT && cell.item !== Item.SPAWN) {
+        if (cell.item !== Item.Default && cell.item !== Item.Spawn) {
             if (player.addItemToInventory(cell.item)) {
-                cell.item = Item.DEFAULT;
+                cell.item = Item.Default;
                 this.internalEmitter.emit(InternalTurnEvents.ItemCollected, {
                     player,
                     position,

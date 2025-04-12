@@ -6,7 +6,6 @@ import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Item } from '@common/enums';
-import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -16,7 +15,6 @@ import { Subscription } from 'rxjs';
 })
 export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     items: Item[] = [];
-    players: IPlayer[];
     timer: string = '';
     isActivePlayer: boolean = false;
     playerHasAction: boolean = false;

@@ -17,7 +17,7 @@ export class FormDialogComponent {
     readonly data: GameFormData = {
         name: '',
         description: '',
-        size: Size.SMALL,
+        size: Size.Small,
         isCTF: false,
     };
     private readonly dialogRef: MatDialogRef<FormDialogComponent> = inject(MatDialogRef);
@@ -44,7 +44,7 @@ export class FormDialogComponent {
             ...this.data,
             name: this.data.name.trim(),
             board: [],
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.Private,
             image: '',
         } as Board);
     }

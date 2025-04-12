@@ -32,12 +32,12 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     private isItemPlaced = false;
 
     ngOnInit() {
-        if (this.type === Item.SPAWN) {
+        if (this.type === Item.Spawn) {
             this.mapService.nbrSpawnsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingSpawns) => {
                 this.remainingItem = remainingSpawns;
                 this.isDraggable = this.remainingItem > 0;
             });
-        } else if (this.type === Item.FLAG) {
+        } else if (this.type === Item.Flag) {
             if (this.mapService.isModeCTF()) {
                 this.mapService.hasFlagOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((isFlagPlaced) => {
                     this.isDraggable = !isFlagPlaced;
@@ -45,7 +45,7 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
             } else {
                 this.isDraggable = false;
             }
-        } else if (this.type === Item.CHEST) {
+        } else if (this.type === Item.Chest) {
             this.mapService.nbrItemsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingItems) => {
                 this.remainingItem = remainingItems;
                 this.isDraggable = this.remainingItem > 0;

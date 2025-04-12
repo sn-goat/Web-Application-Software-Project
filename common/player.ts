@@ -2,14 +2,14 @@ import { Vec2 } from './board';
 import { Item } from './enums';
 
 export interface PlayerInput {
-    name: string,
-    avatar: string,
-    life: number,
-    speed: number,
-    attackPower: number,
-    defensePower: number,
-    attackDice: Dice,
-    defenseDice: Dice,
+    name: string;
+    avatar: string;
+    life: number;
+    speed: number;
+    attackPower: number;
+    defensePower: number;
+    attackDice: Dice;
+    defenseDice: Dice;
 }
 export interface PlayerInfo {
     id: string;
@@ -30,8 +30,8 @@ export interface PlayerAttributes {
 }
 
 export enum Team {
-    RED = 'Rouge',
-    BLUE = 'Bleu',
+    Red = 'Rouge',
+    Blue = 'Bleu',
 }
 
 export interface GameStats {

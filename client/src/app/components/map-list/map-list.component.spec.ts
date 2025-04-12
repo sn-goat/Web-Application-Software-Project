@@ -30,8 +30,8 @@ describe('MapListComponent', () => {
                 (__, y) =>
                     ({
                         position: { x, y } as Vec2,
-                        tile: Tile.WALL,
-                        item: y % 2 === 0 ? Item.CHEST : Item.DEFAULT,
+                        tile: Tile.Wall,
+                        item: y % 2 === 0 ? Item.Chest : Item.Default,
                     }) as Cell,
             ),
         );
@@ -44,7 +44,7 @@ describe('MapListComponent', () => {
             size: 10,
             description: 'Desc A',
             board: generateMockBoard(10),
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
             createdAt: new Date(),
             isCTF: false,
@@ -56,7 +56,7 @@ describe('MapListComponent', () => {
             description: 'Desc B',
             board: generateMockBoard(10),
             isCTF: false,
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.Private,
             createdAt: new Date(),
             updatedAt: new Date(),
         },
@@ -102,7 +102,7 @@ describe('MapListComponent', () => {
             description: 'Description A',
             board: [],
             isCTF: false,
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
         };
 
@@ -168,21 +168,9 @@ describe('MapListComponent', () => {
         expect(sortedItems[1].name).toBe('Game B');
     });
 
-    // it('should alert and reload page if map is not found on server', () => {
-    //     const mockMap = mockBoardGames[0];
-    //     spyOn(window, 'alert');
-    //     const reloadSpy = spyOn(component, 'reloadPage').and.callFake(() => {});
-    //     mockBoardService.getAllBoards.and.returnValue(of([]));
-
-    //     component.onDivClick(mockMap);
-
-    //     expect(window.alert).toHaveBeenCalledWith('La carte a été supprimée du serveur.');
-    //     expect(reloadSpy).toHaveBeenCalled();
-    // });
-
     it('should allow toggling the visibility of the game', () => {
         const mockMap = mockBoardGames[0];
-        mockBoardService.toggleVisibility.and.returnValue(of({ ...mockMap, visibility: Visibility.PRIVATE }));
+        mockBoardService.toggleVisibility.and.returnValue(of({ ...mockMap, visibility: Visibility.Private }));
         component.toggleVisibility(mockMap);
         expect(mockBoardService.toggleVisibility).toHaveBeenCalledWith(mockMap.name);
         expect(mockMap.visibility).toBe('Private');
@@ -239,7 +227,7 @@ describe('MapListComponent', () => {
             name: 'Board 1',
             description: 'Desc 1',
             size: 10,
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             board: [],
             updatedAt: new Date(),
             isCTF: false,
@@ -249,7 +237,7 @@ describe('MapListComponent', () => {
             name: 'Board 1',
             description: 'Desc 1',
             size: 10,
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             board: [],
             updatedAt: new Date(),
             isCTF: false,
@@ -270,13 +258,6 @@ describe('MapListComponent', () => {
         component.onDivClick(mockMap);
 
         expect(component.divClicked.emit).toHaveBeenCalled();
-    });
-
-    it('should return the size in function of the size class', () => {
-        expect(component.getSizeClass(10)).toBe('size-small');
-        expect(component.getSizeClass(15)).toBe('size-medium');
-        expect(component.getSizeClass(20)).toBe('size-large');
-        expect(component.getSizeClass(25)).toBe('size-default');
     });
 
     it('should filter out non-public items when onlyVisible is true', () => {

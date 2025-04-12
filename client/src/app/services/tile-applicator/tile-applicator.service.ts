@@ -38,15 +38,14 @@ export class TileApplicatorService {
     handleMouseDown(event: MouseEvent, rect: DOMRect) {
         this.previousCoord = { x: event.pageX, y: event.pageY };
         const cellPosition = this.screenToBoard(this.previousCoord.x, this.previousCoord.y, rect);
-        if (this.mapService.getCellItem(cellPosition.x, cellPosition.y) === Item.DEFAULT) {
-            if (event.button === 2) {
-                this.isTilesBeingDeleted = true;
-            }
-            if (event.button === 0) {
-                this.isTilesBeingApplied = true;
-            }
-            this.updateTile(cellPosition.x, cellPosition.y);
+        if (!(this.mapService.getCellItem(cellPosition.x, cellPosition.y) === Item.Default)) {
+            return;
         }
+
+        this.isTilesBeingDeleted = event.button === 2 ? true : this.isTilesBeingDeleted;
+        this.isTilesBeingApplied = event.button === 0 ? true : this.isTilesBeingApplied;
+
+        this.updateTile(cellPosition.x, cellPosition.y);
     }
 
     handleMouseUp(event: MouseEvent) {
@@ -76,7 +75,7 @@ export class TileApplicatorService {
         const sy = Math.sign(endY - startY);
         let err = dx - dy;
 
-        const seen: Set<string> = new Set();
+        const tilesVisited: Set<string> = new Set();
 
         while (x !== endX || y !== endY) {
             if (!this.isOnBoard(x, y, rect)) {
@@ -85,7 +84,7 @@ export class TileApplicatorService {
                 break;
             }
 
-            this.processTile(x, y, rect, seen);
+            this.processTile(x, y, rect, tilesVisited);
 
             const e2 = 2 * err;
             if (e2 > -dy) {
@@ -99,17 +98,17 @@ export class TileApplicatorService {
         }
 
         if (this.isOnBoard(endX, endY, rect)) {
-            this.processTile(endX, endY, rect, seen);
+            this.processTile(endX, endY, rect, tilesVisited);
         }
     }
 
-    private processTile(x: number, y: number, rect: DOMRect, seen: Set<string>): void {
+    private processTile(x: number, y: number, rect: DOMRect, tilesVisited: Set<string>): void {
         const tileCoord = this.screenToBoard(x, y, rect);
         const tileCoordKey = JSON.stringify(tileCoord);
 
-        if (!seen.has(tileCoordKey)) {
+        if (!tilesVisited.has(tileCoordKey)) {
             this.updateTile(tileCoord.x, tileCoord.y);
-            seen.add(tileCoordKey);
+            tilesVisited.add(tileCoordKey);
         }
     }
 
@@ -123,9 +122,9 @@ export class TileApplicatorService {
 
     private applyTile(col: number, row: number) {
         if (this.selectedTile !== null) {
-            if (this.selectedTile === Tile.WALL) {
+            if (this.selectedTile === Tile.Wall) {
                 this.applyWall(col, row);
-            } else if (this.selectedTile === Tile.CLOSED_DOOR) {
+            } else if (this.selectedTile === Tile.ClosedDoor) {
                 this.applyDoor(col, row);
             } else {
                 this.mapService.setCellTile(col, row, this.selectedTile as Tile);
@@ -134,27 +133,27 @@ export class TileApplicatorService {
     }
 
     private revertToFLOOR(col: number, row: number) {
-        if (this.mapService.getCellTile(col, row) !== Tile.FLOOR) {
-            this.mapService.setCellTile(col, row, Tile.FLOOR);
+        if (this.mapService.getCellTile(col, row) !== Tile.Floor) {
+            this.mapService.setCellTile(col, row, Tile.Floor);
         }
     }
 
     private applyDoor(col: number, row: number) {
-        if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
-            this.mapService.setCellItem(col, row, Item.DEFAULT);
+        if (this.mapService.getCellItem(col, row) !== Item.Default) {
+            this.mapService.setCellItem(col, row, Item.Default);
         }
-        if (this.mapService.getCellTile(col, row) === Tile.CLOSED_DOOR) {
-            this.mapService.setCellTile(col, row, Tile.OPENED_DOOR);
+        if (this.mapService.getCellTile(col, row) === Tile.ClosedDoor) {
+            this.mapService.setCellTile(col, row, Tile.OpenedDoor);
         } else {
-            this.mapService.setCellTile(col, row, Tile.CLOSED_DOOR);
+            this.mapService.setCellTile(col, row, Tile.ClosedDoor);
         }
     }
 
     private applyWall(col: number, row: number) {
-        if (this.mapService.getCellItem(col, row) !== Item.DEFAULT) {
-            this.mapService.setCellItem(col, row, Item.DEFAULT);
+        if (this.mapService.getCellItem(col, row) !== Item.Default) {
+            this.mapService.setCellItem(col, row, Item.Default);
         }
-        this.mapService.setCellTile(col, row, Tile.WALL);
+        this.mapService.setCellTile(col, row, Tile.Wall);
     }
 
     private screenToBoard(x: number, y: number, rect: DOMRect): Vec2 {

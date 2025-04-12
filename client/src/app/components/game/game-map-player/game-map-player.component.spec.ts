@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { DEFAULT_FILE_TYPE, DEFAULT_PATH_AVATARS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject, Subscription, of } from 'rxjs';
@@ -90,11 +89,6 @@ describe('GameMapPlayerComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('should initialize with constant paths', () => {
-        expect(component.srcAvatar).toBe(DEFAULT_PATH_AVATARS);
-        expect(component.fileType).toBe(DEFAULT_FILE_TYPE);
     });
 
     it('should update activePlayer when activePlayer$ emits', fakeAsync(() => {

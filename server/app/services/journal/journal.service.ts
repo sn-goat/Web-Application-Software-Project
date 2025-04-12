@@ -1,8 +1,8 @@
-import { Entry, GameMessage, FightMessage, FightJournal } from '@common/journal';
-import { Injectable, Logger } from '@nestjs/common';
 import { IRoom } from '@common/game';
-import { Server } from 'socket.io';
 import { JournalEvent } from '@common/game.gateway.events';
+import { Entry, FightJournal, FightMessage, GameMessage } from '@common/journal';
+import { Injectable, Logger } from '@nestjs/common';
+import { Server } from 'socket.io';
 
 @Injectable()
 export class JournalService {
@@ -48,7 +48,7 @@ export class JournalService {
         if (currentPlayers.length === 2) {
             messageFormat = '[' + currDate + ']: ' + messageType + ' ' + currentPlayers.join(' et ');
         } else if (currentPlayers.length === 1) {
-            if (messageType === GameMessage.END_GAME) {
+            if (messageType === GameMessage.EndGame) {
                 messageFormat =
                     '[' +
                     currDate +
@@ -71,7 +71,7 @@ export class JournalService {
             messageType,
             message: messageFormat,
             accessCode: room.accessCode,
-            playersInvolved: [messageType === GameMessage.QUIT ? '' : room.game.players.find((player) => player.name === currentPlayers[0]).id],
+            playersInvolved: [messageType === GameMessage.Quit ? '' : room.game.players.find((player) => player.name === currentPlayers[0]).id],
         };
 
         return newMessage;
@@ -86,7 +86,7 @@ export class JournalService {
         const currDate = new Date().toTimeString().split(' ')[0];
         let messageFormat: string;
 
-        if (messageType === FightMessage.ATTACK) {
+        if (messageType === FightMessage.Attack) {
             messageFormat =
                 '[' +
                 currDate +

@@ -11,8 +11,7 @@ import { Avatar } from '@common/game';
 import { Team } from '@common/player';
 
 describe('GameUtils Comprehensive Tests', () => {
-    // Utilitaire pour créer une cellule factice
-    const dummyCell = (x: number, y: number, tile: Tile, player?: any, cost: number = 1, item: Item = Item.DEFAULT): Cell => ({
+    const dummyCell = (x: number, y: number, tile: Tile, player?: any, cost: number = 1, item: Item = Item.Default): Cell => ({
         tile,
         player,
         cost,
@@ -20,8 +19,7 @@ describe('GameUtils Comprehensive Tests', () => {
         item,
     });
 
-    // Utilitaire pour créer un plateau (board)
-    const createBoard = (rows: number, cols: number, defaultTile: Tile = Tile.FLOOR): Cell[][] => {
+    const createBoard = (rows: number, cols: number, defaultTile: Tile = Tile.Floor): Cell[][] => {
         const board: Cell[][] = [];
         for (let y = 0; y < rows; y++) {
             const row: Cell[] = [];
@@ -33,13 +31,12 @@ describe('GameUtils Comprehensive Tests', () => {
         return board;
     };
 
-    // Tests pour isPlayerCanMakeAction
     describe('isPlayerCanMakeAction', () => {
         it('should return true if at least one neighboring cell is valid for action', () => {
             const board = createBoard(3, 3);
             // Une cellule voisine est considérée valide pour l’action si
-            // soit elle possède un joueur (différent de Avatar.Default) soit son tile est CLOSED_DOOR ou OPENED_DOOR.
-            board[0][1] = dummyCell(1, 0, Tile.CLOSED_DOOR);
+            // soit elle possède un joueur (différent de Avatar.Default) soit son tile est ClosedDoor ou OpenedDoor.
+            board[0][1] = dummyCell(1, 0, Tile.ClosedDoor);
             const mockPlayer = { position: { x: 1, y: 1 } } as Player;
             const result = GameUtils.isPlayerCanMakeAction(board, mockPlayer);
             expect(result).toBe(true);
@@ -58,12 +55,12 @@ describe('GameUtils Comprehensive Tests', () => {
             // Arrange
             const board = createBoard(3, 3);
             // Placer un ennemi en diagonale
-            board[2][2] = dummyCell(2, 2, Tile.FLOOR, Avatar.Knight);
+            board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Knight);
 
             // Un joueur avec un arc au centre
             const mockPlayer = {
                 position: { x: 1, y: 1 },
-                inventory: [Item.BOW],
+                inventory: [Item.Bow],
             } as Player;
 
             // Act
@@ -77,7 +74,7 @@ describe('GameUtils Comprehensive Tests', () => {
             // Arrange
             const board = createBoard(3, 3);
             // Placer un ennemi en diagonale mais aucun ennemi orthogonal
-            board[2][2] = dummyCell(2, 2, Tile.FLOOR, Avatar.Knight);
+            board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Knight);
 
             // Un joueur sans arc au centre
             const mockPlayer = {
@@ -93,7 +90,6 @@ describe('GameUtils Comprehensive Tests', () => {
         });
     });
 
-    // Tests pour findPossiblePaths
     describe('findPossiblePaths', () => {
         it('should return reachable paths within movement points and not include starting cell', () => {
             const board = createBoard(3, 3);
@@ -104,24 +100,21 @@ describe('GameUtils Comprehensive Tests', () => {
         });
     });
 
-    // Tests pour findValidSpawn
     describe('findValidSpawn', () => {
         it('should return a valid spawn cell from the start position', () => {
             const board = createBoard(3, 3);
-            // Marquer la cellule (2,2) comme spawn valide
-            board[2][2] = dummyCell(2, 2, Tile.FLOOR, Avatar.Default, 1, Item.SPAWN);
+            board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Default, 1, Item.Spawn);
             const spawn = GameUtils.findValidSpawn(board, { x: 2, y: 2 });
             expect(spawn).toEqual({ x: 2, y: 2 });
         });
 
         it('should return null if no valid spawn cell is found', () => {
-            const board = createBoard(3, 3, Tile.WALL);
+            const board = createBoard(3, 3, Tile.Wall);
             const spawn = GameUtils.findValidSpawn(board, { x: 1, y: 1 });
             expect(spawn).toBeNull();
         });
     });
 
-    // Tests pour sortPlayersBySpeed
     describe('sortPlayersBySpeed', () => {
         it('should sort players in descending order of speed', () => {
             const players: Player[] = [{ speed: 5 } as Player, { speed: 10 } as Player, { speed: 7 } as Player];
@@ -132,12 +125,11 @@ describe('GameUtils Comprehensive Tests', () => {
         });
     });
 
-    // Tests pour getAllSpawnPoints
     describe('getAllSpawnPoints', () => {
         it('should return coordinates for all spawn cells in the board', () => {
             const board = createBoard(3, 3);
-            board[0][0].item = Item.SPAWN;
-            board[2][2].item = Item.SPAWN;
+            board[0][0].item = Item.Spawn;
+            board[2][2].item = Item.Spawn;
             const spawnPoints = GameUtils.getAllSpawnPoints(board);
             expect(spawnPoints).toEqual([
                 { x: 0, y: 0 },
@@ -146,7 +138,6 @@ describe('GameUtils Comprehensive Tests', () => {
         });
     });
 
-    // Tests pour assignSpawnPoints
     describe('assignSpawnPoints', () => {
         it('should assign spawn points to players and update the map', () => {
             const players: Player[] = [
@@ -158,8 +149,8 @@ describe('GameUtils Comprehensive Tests', () => {
                 { x: 1, y: 1 },
             ];
             const board = createBoard(3, 3);
-            board[0][0].item = Item.SPAWN;
-            board[1][1].item = Item.SPAWN;
+            board[0][0].item = Item.Spawn;
+            board[1][1].item = Item.Spawn;
             const usedSpawnPoints = GameUtils.assignSpawnPoints(players, spawnPoints, board);
             expect(usedSpawnPoints.length).toBe(2);
             expect(players[0].spawnPosition).toBeDefined();
@@ -173,16 +164,15 @@ describe('GameUtils Comprehensive Tests', () => {
         });
     });
 
-    // Tests pour removeUnusedSpawnPoints
     describe('removeUnusedSpawnPoints', () => {
-        it('should update cells not used as spawn points to have item DEFAULT', () => {
+        it('should update cells not used as spawn points to have item Default', () => {
             const board = createBoard(3, 3);
-            board[0][0].item = Item.SPAWN;
-            board[1][1].item = Item.SPAWN;
+            board[0][0].item = Item.Spawn;
+            board[1][1].item = Item.Spawn;
             const usedSpawnPoints: Vec2[] = [{ x: 0, y: 0 }];
             GameUtils.removeUnusedSpawnPoints(board, usedSpawnPoints);
-            expect(board[0][0].item).toBe(Item.SPAWN);
-            expect(board[1][1].item).toBe(Item.DEFAULT);
+            expect(board[0][0].item).toBe(Item.Spawn);
+            expect(board[1][1].item).toBe(Item.Default);
         });
     });
 
@@ -198,24 +188,24 @@ describe('GameUtils Comprehensive Tests', () => {
             return Array.from({ length: n }, () => new MockPlayer());
         }
 
-        it('should assign half players to RED and half to BLUE (even count)', () => {
+        it('should assign half players to Red and half to Blue (even count)', () => {
             const players = createMockPlayers(6);
             GameUtils.assignTeams(players as any);
 
-            const redCount = players.filter((p) => p.team === Team.RED).length;
-            const blueCount = players.filter((p) => p.team === Team.BLUE).length;
+            const redCount = players.filter((p) => p.team === Team.Red).length;
+            const blueCount = players.filter((p) => p.team === Team.Blue).length;
 
             expect(redCount).toBe(3);
             expect(blueCount).toBe(3);
             players.forEach((p) => expect(p.setTeam).toHaveBeenCalledTimes(1));
         });
 
-        it('should assign floor(n/2) to RED and rest to BLUE (odd count)', () => {
+        it('should assign floor(n/2) to Red and rest to Blue (odd count)', () => {
             const players = createMockPlayers(5);
             GameUtils.assignTeams(players as any);
 
-            const redCount = players.filter((p) => p.team === Team.RED).length;
-            const blueCount = players.filter((p) => p.team === Team.BLUE).length;
+            const redCount = players.filter((p) => p.team === Team.Red).length;
+            const blueCount = players.filter((p) => p.team === Team.Blue).length;
 
             expect(redCount).toBe(2);
             expect(blueCount).toBe(3);
@@ -233,7 +223,6 @@ describe('GameUtils Comprehensive Tests', () => {
         });
     });
 
-    // Tests pour les méthodes privées via accès par crochets
     describe('Private Methods', () => {
         it('vec2Key should return a string key from a Vec2', () => {
             const key = GameUtils['vec2Key']({ x: 3, y: 5 });
@@ -246,39 +235,37 @@ describe('GameUtils Comprehensive Tests', () => {
         });
 
         it('isOccupiedByPlayer should return true if cell has a player different from Avatar.Default', () => {
-            const cell = dummyCell(0, 0, Tile.FLOOR, Avatar.Cleric, 1);
+            const cell = dummyCell(0, 0, Tile.Floor, Avatar.Cleric, 1);
             const result = GameUtils['isOccupiedByPlayer'](cell);
             expect(result).toBe(true);
         });
 
         it('isValidSpawn should return true if cell is valid for spawn', () => {
-            const cell = dummyCell(0, 0, Tile.FLOOR, Avatar.Default, 1);
+            const cell = dummyCell(0, 0, Tile.Floor, Avatar.Default, 1);
             const result = GameUtils['isValidSpawn'](cell);
             expect(result).toBe(true);
         });
 
         it('isValidCellForAction should return true if cell has a non-default player or is a door', () => {
-            const cell1 = dummyCell(0, 0, Tile.FLOOR, Avatar.Cleric, 1);
+            const cell1 = dummyCell(0, 0, Tile.Floor, Avatar.Cleric, 1);
             expect(GameUtils['isValidCellForAction'](cell1)).toBe(true);
-            const cell2 = dummyCell(0, 0, Tile.CLOSED_DOOR, undefined, 1);
+            const cell2 = dummyCell(0, 0, Tile.ClosedDoor, undefined, 1);
             expect(GameUtils['isValidCellForAction'](cell2)).toBe(true);
-            const cell3 = dummyCell(0, 0, Tile.OPENED_DOOR, undefined, 1);
+            const cell3 = dummyCell(0, 0, Tile.OpenedDoor, undefined, 1);
             expect(GameUtils['isValidCellForAction'](cell3)).toBe(true);
-            const cell4 = dummyCell(0, 0, Tile.FLOOR, Avatar.Default, 1);
+            const cell4 = dummyCell(0, 0, Tile.Floor, Avatar.Default, 1);
             expect(GameUtils['isValidCellForAction'](cell4)).toBe(false);
         });
 
         it('getTileCost should return Infinity if cell is missing or occupied', () => {
-            // Si cell est null
             expect(GameUtils['getTileCost'](null)).toBe(Infinity);
-            // Si cell est occupée par un joueur non Default
-            const cell = dummyCell(0, 0, Tile.FLOOR, Avatar.Cleric, 2);
+            const cell = dummyCell(0, 0, Tile.Floor, Avatar.Cleric, 2);
             expect(GameUtils['getTileCost'](cell)).toBe(Infinity);
         });
 
         it('getTileCost should return the cost from TILE_COST if defined, otherwise cell.cost, when cell is not occupied', () => {
-            const cell = dummyCell(0, 0, Tile.FLOOR, undefined, 3);
-            const tileCost = TILE_COST.get(Tile.FLOOR);
+            const cell = dummyCell(0, 0, Tile.Floor, undefined, 3);
+            const tileCost = TILE_COST.get(Tile.Floor);
             const expected = tileCost !== undefined ? tileCost : cell.cost;
             expect(GameUtils['getTileCost'](cell)).toBe(expected);
         });
@@ -317,10 +304,10 @@ describe('GameUtils Comprehensive Tests', () => {
         it('should not return paths that require moving through obstacles', () => {
             const board = createBoard(3, 3);
             // Mark all adjacent cells around {x:1, y:1} as obstacles by simulating them as occupied by a non-default avatar.
-            board[0][1] = dummyCell(1, 0, Tile.FLOOR, Avatar.Cleric);
-            board[1][0] = dummyCell(0, 1, Tile.FLOOR, Avatar.Cleric);
-            board[1][2] = dummyCell(2, 1, Tile.FLOOR, Avatar.Cleric);
-            board[2][1] = dummyCell(1, 2, Tile.FLOOR, Avatar.Cleric);
+            board[0][1] = dummyCell(1, 0, Tile.Floor, Avatar.Cleric);
+            board[1][0] = dummyCell(0, 1, Tile.Floor, Avatar.Cleric);
+            board[1][2] = dummyCell(2, 1, Tile.Floor, Avatar.Cleric);
+            board[2][1] = dummyCell(1, 2, Tile.Floor, Avatar.Cleric);
             const movementPoints = 3;
             const paths = GameUtils.findPossiblePaths(board, { x: 1, y: 1 }, movementPoints);
             // With surrounding obstacles, no move should be possible.
@@ -391,7 +378,7 @@ describe('GameUtils Comprehensive Tests', () => {
             for (let y = 0; y < 3; y++) {
                 for (let x = 0; x < 3; x++) {
                     if (x === 1 && y === 1) continue; // Ignorer la position du joueur
-                    board[y][x] = dummyCell(x, y, Tile.FLOOR, Avatar.Knight, 1, Item.SWORD);
+                    board[y][x] = dummyCell(x, y, Tile.Floor, Avatar.Knight, 1, Item.Sword);
                 }
             }
 
@@ -467,8 +454,8 @@ describe('GameUtils Comprehensive Tests', () => {
             const playerPos: Vec2 = { x: 1, y: 1 };
 
             // Rendre certaines cellules non valides pour dépôt
-            board[0][0] = dummyCell(0, 0, Tile.WALL); // Mur en (0,0)
-            board[0][1] = dummyCell(0, 1, Tile.CLOSED_DOOR); // Porte fermée en (0,1)
+            board[0][0] = dummyCell(0, 0, Tile.Wall); // Mur en (0,0)
+            board[0][1] = dummyCell(0, 1, Tile.ClosedDoor); // Porte fermée en (0,1)
 
             const droppedItems: { position: Vec2 }[] = [];
             const players: Player[] = [];
@@ -490,9 +477,9 @@ describe('GameUtils Comprehensive Tests', () => {
     describe('Private methods: isValidCellForAttack', () => {
         it('devrait retourner true si la cellule contient un avatar non-Default', () => {
             // Arrange
-            const cell1 = dummyCell(0, 0, Tile.FLOOR, Avatar.Knight);
-            const cell2 = dummyCell(0, 0, Tile.FLOOR, Avatar.Default);
-            const cell3 = dummyCell(0, 0, Tile.FLOOR, undefined);
+            const cell1 = dummyCell(0, 0, Tile.Floor, Avatar.Knight);
+            const cell2 = dummyCell(0, 0, Tile.Floor, Avatar.Default);
+            const cell3 = dummyCell(0, 0, Tile.Floor, undefined);
 
             // Act
             const result1 = GameUtils['isValidCellForAttack'](cell1);

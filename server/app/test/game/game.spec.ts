@@ -24,7 +24,7 @@ import { getLobbyLimit } from '@common/lobby-limits';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 // --- Create a dummy board that conforms to the Board interface ---
-const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.DEFAULT, cost: number = 1): Cell => ({
+const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.Default, cost: number = 1): Cell => ({
     position: pos,
     tile,
     item,
@@ -37,10 +37,10 @@ const dummyBoard: Board = {
     description: 'Dummy board',
     size: 2,
     isCTF: false,
-    visibility: Visibility.PUBLIC, // adjust according to your Visibility type
+    visibility: Visibility.Public, // adjust according to your Visibility type
     board: [
-        [createDummyCell({ x: 0, y: 0 }, Tile.FLOOR), createDummyCell({ x: 1, y: 0 }, Tile.CLOSED_DOOR)],
-        [createDummyCell({ x: 0, y: 1 }, Tile.ICE), createDummyCell({ x: 1, y: 1 }, Tile.WATER)],
+        [createDummyCell({ x: 0, y: 0 }, Tile.Floor), createDummyCell({ x: 1, y: 0 }, Tile.ClosedDoor)],
+        [createDummyCell({ x: 0, y: 1 }, Tile.Ice), createDummyCell({ x: 1, y: 1 }, Tile.Water)],
     ],
     updatedAt: new Date(), // Added to satisfy required property
     createdAt: new Date(),
@@ -360,11 +360,11 @@ describe('Game', () => {
 
     describe('changeDoorState', () => {
         it('should toggle door state and decrement action', () => {
-            // dummyBoard.board[0][1] initially has Tile.CLOSED_DOOR.
+            // dummyBoard.board[0][1] initially has Tile.ClosedDoor.
             player1.actions = 2;
             game.addPlayer(player1);
             const result = game.changeDoorState({ x: 1, y: 0 }, player1.id);
-            expect(result.newDoorState).toBe(Tile.OPENED_DOOR);
+            expect(result.newDoorState).toBe(Tile.OpenedDoor);
             expect(player1.actions).toBe(1);
         });
     });
@@ -449,10 +449,10 @@ describe('Game', () => {
             player1.position = { x: 0, y: 0 };
             player1.spawnPosition = { x: 1, y: 1 };
             dummyBoard.board[0][0].player = player1.avatar as Avatar;
-            dummyBoard.board[1][1].item = Item.DEFAULT;
+            dummyBoard.board[1][1].item = Item.Default;
             game.removePlayerOnMap(player1.id);
             expect(dummyBoard.board[0][0].player).toBe(Avatar.Default);
-            expect(dummyBoard.board[1][1].item).toBe(Item.DEFAULT);
+            expect(dummyBoard.board[1][1].item).toBe(Item.Default);
         });
 
         it('removePlayerFromFight should emit End event with fight removal result', () => {
@@ -501,7 +501,7 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
 
         // Joueur avec inventaire pour les tests de dépôt d'objets
         inventoryPlayer = createDummyPlayer('inventory-player');
-        inventoryPlayer.inventory = [Item.SWORD, Item.SHIELD];
+        inventoryPlayer.inventory = [Item.Sword, Item.Shield];
         inventoryPlayer.position = { x: 0, y: 0 };
         inventoryPlayer.spawnPosition = { x: 1, y: 1 };
 
@@ -526,16 +526,16 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.dropItems(inventoryPlayer.id);
 
             // Assert
-            expect(game.map[0][1].item).toBe(Item.SHIELD);
-            expect(game.map[1][0].item).toBe(Item.SWORD);
+            expect(game.map[0][1].item).toBe(Item.Shield);
+            expect(game.map[1][0].item).toBe(Item.Sword);
             expect(inventoryPlayer.inventory).toHaveLength(0);
             expect(emitSpy).toHaveBeenCalledWith(
                 InternalTurnEvents.DroppedItem,
                 expect.objectContaining({
                     player: inventoryPlayer,
                     droppedItems: expect.arrayContaining([
-                        { item: Item.SWORD, position: { x: 0, y: 1 } },
-                        { item: Item.SHIELD, position: { x: 1, y: 0 } },
+                        { item: Item.Sword, position: { x: 0, y: 1 } },
+                        { item: Item.Shield, position: { x: 1, y: 0 } },
                     ]),
                 }),
             );
@@ -550,7 +550,7 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.dropItems(inventoryPlayer.id);
 
             // Assert
-            expect(game.map[1][1].item).toBe(Item.SHIELD); // Le deuxième item remplace le premier à la même position
+            expect(game.map[1][1].item).toBe(Item.Shield); // Le deuxième item remplace le premier à la même position
             expect(inventoryPlayer.inventory).toHaveLength(0);
         });
 
@@ -592,15 +592,15 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
         it("devrait collecter l'objet et émettre ItemCollected quand l'inventaire n'est pas plein", () => {
             // Arrange
             const position = { x: 0, y: 1 };
-            game.map[1][0].item = Item.SWORD;
+            game.map[1][0].item = Item.Sword;
             const emitSpy = jest.spyOn(emitter, 'emit');
 
             // Act
             (game as any)._handleItemCollection(position, player);
 
             // Assert
-            expect(player.addItemToInventory).toHaveBeenCalledWith(Item.SWORD);
-            expect(game.map[1][0].item).toBe(Item.DEFAULT);
+            expect(player.addItemToInventory).toHaveBeenCalledWith(Item.Sword);
+            expect(game.map[1][0].item).toBe(Item.Default);
             expect(emitSpy).toHaveBeenCalledWith(InternalTurnEvents.ItemCollected, { player, position });
             expect((game as any).continueMovement).toBe(false);
         });
@@ -608,7 +608,7 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
         it("devrait émettre InventoryFull quand l'inventaire est plein", () => {
             // Arrange
             const position = { x: 0, y: 1 };
-            game.map[1][0].item = Item.SWORD;
+            game.map[1][0].item = Item.Sword;
             player.addItemToInventory = jest.fn().mockReturnValue(false);
             const emitSpy = jest.spyOn(emitter, 'emit');
 
@@ -616,16 +616,16 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             (game as any)._handleItemCollection(position, player);
 
             // Assert
-            expect(player.addItemToInventory).toHaveBeenCalledWith(Item.SWORD);
-            expect(game.map[1][0].item).toBe(Item.SWORD); // L'objet reste à sa place
-            expect(emitSpy).toHaveBeenCalledWith(InternalTurnEvents.InventoryFull, { player, item: Item.SWORD, position });
+            expect(player.addItemToInventory).toHaveBeenCalledWith(Item.Sword);
+            expect(game.map[1][0].item).toBe(Item.Sword); // L'objet reste à sa place
+            expect(emitSpy).toHaveBeenCalledWith(InternalTurnEvents.InventoryFull, { player, item: Item.Sword, position });
             expect((game as any).continueMovement).toBe(false);
         });
 
         it('ne devrait rien faire pour un objet DEFAULT', () => {
             // Arrange
             const position = { x: 0, y: 0 };
-            game.map[0][0].item = Item.DEFAULT;
+            game.map[0][0].item = Item.Default;
             const emitSpy = jest.spyOn(emitter, 'emit');
 
             // Act

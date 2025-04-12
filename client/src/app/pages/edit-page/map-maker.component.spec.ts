@@ -26,7 +26,7 @@ describe('MapMakerComponent', () => {
         isCTF: false,
         size: 10,
         board: [],
-        visibility: Visibility.PUBLIC,
+        visibility: Visibility.Public,
         updatedAt: new Date(),
     };
 
@@ -103,11 +103,9 @@ describe('MapMakerComponent', () => {
     });
 
     it('should not navigate when confirmReturn is called and cancelled', () => {
-        // Simuler la fermeture de la boîte de dialogue (confirmation annulée)
         spyOn<any>(component, 'openDialog').and.returnValue(dialogRefStub);
         component.confirmReturn();
         expect(mockRouter.navigate).not.toHaveBeenCalled();
-        // reset est stubée globalement, pas besoin de vérifier ici
     });
 
     it('should set the board name through the setter', () => {
@@ -145,10 +143,7 @@ describe('MapMakerComponent', () => {
     });
 
     it('should save board, alert success, navigate and reset when confirmed and save is successful', fakeAsync(() => {
-        // Création de l'espion sur reset AVANT son appel dans checkIfReadyToSave
-
         mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
-        // Simuler deux appels à openDialog : le premier pour la confirmation, le deuxième pour l’alerte de succès
         spyOn<any>(component, 'openDialog').and.returnValues(Promise.resolve(true), Promise.resolve(true));
         spyOn(component, 'saveBoard').and.returnValue(Promise.resolve('BoardSaved'));
 
@@ -165,7 +160,7 @@ describe('MapMakerComponent', () => {
             isCTF: false,
             size: 10,
             board: [],
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
         };
         const boardSubject = new BehaviorSubject<Board>(boardWithoutId);
@@ -185,7 +180,7 @@ describe('MapMakerComponent', () => {
             isCTF: false,
             size: 10,
             board: [],
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
         };
         const boardSubject = new BehaviorSubject<Board>(boardWithoutId);
@@ -203,7 +198,7 @@ describe('MapMakerComponent', () => {
             name: 'Existing Board',
             description: 'New board description',
             board: [],
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             isCTF: false,
             size: 10,
             updatedAt: new Date(),
@@ -223,7 +218,7 @@ describe('MapMakerComponent', () => {
             name: 'New Board',
             description: 'New board description',
             board: [],
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             isCTF: false,
             size: 10,
             updatedAt: new Date(),
@@ -246,7 +241,7 @@ describe('MapMakerComponent', () => {
             isCTF: false,
             size: 10,
             board: [],
-            visibility: Visibility.PUBLIC,
+            visibility: Visibility.Public,
             updatedAt: new Date(),
         };
         mockMapService.getBoardToSave.and.returnValue(new BehaviorSubject(boardWithEmptyName));
@@ -256,24 +251,19 @@ describe('MapMakerComponent', () => {
     });
 
     it('should navigate and reset when confirmReturn is called and confirmed', async () => {
-        // Utiliser un mock qui retourne une promesse résolue avec true
         spyOn<any>(component, 'openDialog').and.returnValue(Promise.resolve(true));
 
-        // Appeler la méthode et attendre sa complétion
         await component.confirmReturn();
 
-        // Vérifier que navigate a été appelé avec le bon argument
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/admin']);
     });
 
-    // Test pour ngOnInit()
     it('should call setBoardToFirstValue on ngOnInit', () => {
         mockMapService.setBoardToFirstValue.calls.reset();
         component.ngOnInit();
         expect(mockMapService.setBoardToFirstValue).toHaveBeenCalled();
     });
 
-    // Test pour la méthode reset()
     it('should call setBoardToFirstValue when reset is confirmed', async () => {
         spyOn<any>(component, 'openDialog').and.returnValue(Promise.resolve(true));
         await component.reset();
@@ -287,7 +277,6 @@ describe('MapMakerComponent', () => {
         expect(mockMapService.setBoardToFirstValue).not.toHaveBeenCalled();
     });
 
-    // Test pour la méthode openDialog()
     it('should return proper dialog result from openDialog', async () => {
         const dialogRef = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
         dialogRef.afterClosed.and.returnValue(of(true));
@@ -295,7 +284,6 @@ describe('MapMakerComponent', () => {
 
         const result = await component['openDialog']('Test message', Alert.CONFIRM);
 
-        // Ajouté les propriétés manquantes qui sont dans l'implémentation réelle
         expect(component['dialog'].open).toHaveBeenCalledWith(jasmine.any(Function), {
             data: { type: Alert.CONFIRM, message: 'Test message' },
             disableClose: true,
@@ -306,7 +294,6 @@ describe('MapMakerComponent', () => {
         expect(result).toBeTrue();
     });
 
-    // Test pour les scénarios d'erreur dans saveBoard()
     it('should handle generic error in saveBoard when error has no message', async () => {
         const genericError = { status: 500 };
         spyOn(component['boardService'], 'addBoard').and.returnValue(throwError(() => genericError));
@@ -331,7 +318,7 @@ describe('MapMakerComponent', () => {
 
     it('should not call saveBoard when name is invalid', async () => {
         mockMapService.isReadyToSave.and.returnValue({ isValid: true, error: '' });
-        const boardWithEmptyName = { ...mockBoard, name: '   ' }; // nom avec des espaces uniquement
+        const boardWithEmptyName = { ...mockBoard, name: '   ' };
         const boardSubject = new BehaviorSubject<Board>(boardWithEmptyName);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
@@ -351,47 +338,39 @@ describe('MapMakerComponent', () => {
         expect(saveBoardSpy).not.toHaveBeenCalled();
     });
 
-    // Test pour une erreur sans propriété 'message' dans error.error
     it('should handle error without message property', async () => {
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-        // Erreur avec propriété 'error' mais sans 'message'
         const errorWithoutMessage = { error: {} };
         spyOn(component['boardService'], 'updateBoard').and.returnValue(throwError(() => errorWithoutMessage));
 
         await expectAsync(component.saveBoard()).toBeRejectedWith('An unknown error occurred');
     });
 
-    // Test pour une erreur qui est un objet sans propriété 'error'
     it('should handle error object without error property', async () => {
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-        // Erreur qui est un objet sans propriété 'error'
         const genericErrorObject = { status: 500, statusText: 'Internal Server Error' };
         spyOn(component['boardService'], 'updateBoard').and.returnValue(throwError(() => genericErrorObject));
 
         await expectAsync(component.saveBoard()).toBeRejectedWith('An unknown error occurred');
     });
 
-    // Test pour une erreur qui n'est pas un objet
     it('should handle non-object error', async () => {
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-        // Erreur qui est une chaîne de caractères
         spyOn(component['boardService'], 'updateBoard').and.returnValue(throwError(() => 'Simple string error'));
 
         await expectAsync(component.saveBoard()).toBeRejectedWith('An unknown error occurred');
     });
 
-    // Test pour une erreur null
     it('should handle null error', async () => {
         const boardSubject = new BehaviorSubject<Board>(mockBoard);
         mockMapService.getBoardToSave.and.returnValue(boardSubject);
 
-        // Erreur null
         spyOn(component['boardService'], 'updateBoard').and.returnValue(throwError(() => null));
 
         await expectAsync(component.saveBoard()).toBeRejectedWith('An unknown error occurred');

@@ -31,7 +31,7 @@ describe('EditToolItemComponent', () => {
             nbrItemsToPlace$: nbrItemsSubject.asObservable(),
             hasFlagOnBoard$: hasFlagSubject.asObservable(),
         });
-        // By default, for FLAG type, assume we are in CTF mode.
+        // By default, for Flag type, assume we are in CTF mode.
         mockMapService.isModeCTF.and.returnValue(true);
 
         // Create spies for the other services.
@@ -55,9 +55,9 @@ describe('EditToolItemComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('ngOnInit for SPAWN type', () => {
-        it('should update remainingItem and isDraggable for SPAWN', () => {
-            component.type = Item.SPAWN;
+    describe('ngOnInit for Spawn type', () => {
+        it('should update remainingItem and isDraggable for Spawn', () => {
+            component.type = Item.Spawn;
             // Simulate a new value for the number of spawns.
             nbrSpawnsSubject.next(3);
             component.ngOnInit();
@@ -73,23 +73,23 @@ describe('EditToolItemComponent', () => {
         });
     });
 
-    describe('ngOnInit for FLAG type', () => {
-        it('should update isDraggable for FLAG when in CTF mode and no flag is placed', () => {
-            component.type = Item.FLAG;
+    describe('ngOnInit for Flag type', () => {
+        it('should update isDraggable for Flag when in CTF mode and no flag is placed', () => {
+            component.type = Item.Flag;
             hasFlagSubject.next(false);
             component.ngOnInit();
             expect(component.isDraggable).toBeTrue();
         });
 
-        it('should update isDraggable for FLAG when in CTF mode and flag is placed', () => {
-            component.type = Item.FLAG;
+        it('should update isDraggable for Flag when in CTF mode and flag is placed', () => {
+            component.type = Item.Flag;
             hasFlagSubject.next(true);
             component.ngOnInit();
             expect(component.isDraggable).toBeFalse();
         });
 
-        it('should set isDraggable to false for FLAG when not in CTF mode', () => {
-            component.type = Item.FLAG;
+        it('should set isDraggable to false for Flag when not in CTF mode', () => {
+            component.type = Item.Flag;
             mockMapService.isModeCTF.and.returnValue(false);
             component.ngOnInit();
             expect(component.isDraggable).toBeFalse();
@@ -97,8 +97,8 @@ describe('EditToolItemComponent', () => {
     });
 
     describe('ngOnInit for other types', () => {
-        it('should update remainingItem and isDraggable for non-SPAWN/FLAG types', () => {
-            component.type = Item.CHEST;
+        it('should update remainingItem and isDraggable for non-Spawn/Flag types', () => {
+            component.type = Item.Chest;
             nbrItemsSubject.next(7);
             component.ngOnInit();
 
@@ -114,9 +114,9 @@ describe('EditToolItemComponent', () => {
 
     describe('onDragStart', () => {
         it('should call updateSelectedItem with the component type', () => {
-            component.type = Item.CHEST;
+            component.type = Item.Chest;
             component.onDragStart();
-            expect(mockToolSelectionService.updateSelectedItem).toHaveBeenCalledWith(Item.CHEST);
+            expect(mockToolSelectionService.updateSelectedItem).toHaveBeenCalledWith(Item.Chest);
         });
     });
 
@@ -124,10 +124,10 @@ describe('EditToolItemComponent', () => {
         it('should prevent default and call setBackToContainer with the type', () => {
             const event = new MouseEvent('dragenter');
             spyOn(event, 'preventDefault');
-            component.type = Item.CHEST;
+            component.type = Item.Chest;
             component.onDragEnter(event);
             expect(event.preventDefault).toHaveBeenCalled();
-            expect(mockItemApplicatorService.setBackToContainer).toHaveBeenCalledWith(Item.CHEST);
+            expect(mockItemApplicatorService.setBackToContainer).toHaveBeenCalledWith(Item.Chest);
         });
     });
 
@@ -143,8 +143,8 @@ describe('EditToolItemComponent', () => {
 
     describe('getDescription', () => {
         it('should return the correct description if available', () => {
-            const expected = ASSETS_DESCRIPTION.get(Item.CHEST) ?? '';
-            expect(component.getDescription(Item.CHEST)).toBe(expected);
+            const expected = ASSETS_DESCRIPTION.get(Item.Chest) ?? '';
+            expect(component.getDescription(Item.Chest)).toBe(expected);
         });
         it('should return an empty string if description is not found', () => {
             expect(component.getDescription('floor' as Item)).toBe('');

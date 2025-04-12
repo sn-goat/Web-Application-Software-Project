@@ -7,11 +7,11 @@ import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
+import { MapMakerComponent } from '@app/pages/edit-page/map-maker.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
-import { JoinRoomComponent } from '@app/pages/joinRoom-page/join-room.component';
+import { JoinRoomComponent } from '@app/pages/join-room-page/join-room.component';
 import { LobbyComponent } from '@app/pages/lobby-page/lobby.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { MapMakerComponent } from '@app/pages/edit-page/map-maker.component';
 
 Component({
     template: `
