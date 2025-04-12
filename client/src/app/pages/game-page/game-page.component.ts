@@ -106,8 +106,8 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
                             collectedPosition: payload.position,
                         },
                         disableClose: true,
-                        width: '500px',
-                        height: '500px',
+                        width: 'auto',
+                        height: 'auto',
                     });
                 }
             }),
