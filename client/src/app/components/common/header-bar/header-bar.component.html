@@ -1,5 +1,5 @@
-<mat-toolbar>
+@if(!isGamePage){<mat-toolbar>
     <button mat-icon-button class="backButton" aria-label="Retour" (click)="getBack()">
         <mat-icon>arrow_circle_left</mat-icon>
-    </button>
-</mat-toolbar>
+    </button> </mat-toolbar
+>}@else{<button class="backButton quitter" aria-label="Retour" (click)="getBack()">Quitter</button>}

@@ -144,7 +144,7 @@ h4 {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     font-size: 0.7rem;
-                    color: white;
+                    color: $primary-text;
                     text-shadow: 0 0 2px black;
                 }
             }
@@ -183,7 +183,7 @@ h4 {
         .dice-value {
             font-size: 1.8rem;
             font-weight: bold;
-            color: white;
+            color:$primary-text;
         }
     }
 }
