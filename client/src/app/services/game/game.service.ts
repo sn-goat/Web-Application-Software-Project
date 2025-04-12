@@ -78,7 +78,7 @@ export class GameService {
         this.socketReceiver.onItemCollected().subscribe((data) => {
             const position = data.position;
             const newMap = this.map.value;
-            newMap[position.y][position.x].item = Item.DEFAULT;
+            newMap[position.y][position.x].item = Item.Default;
             this.map.next(newMap);
         });
 
@@ -120,8 +120,8 @@ export class GameService {
     toggleDoor(position: Vec2): void {
         const currentCell: Cell = this.map.value[position.y][position.x];
         if (
-            currentCell.tile === Tile.OPENED_DOOR &&
-            currentCell.item !== Item.DEFAULT &&
+            currentCell.tile === Tile.OpenedDoor &&
+            currentCell.item !== Item.Default &&
             currentCell.item !== undefined &&
             currentCell.item !== null
         ) {
@@ -143,7 +143,7 @@ export class GameService {
         const dx = Math.abs(playerPos.x - actionPos.x);
         const dy = Math.abs(playerPos.y - actionPos.y);
         const player = this.activePlayer.value;
-        if (player && player.inventory.includes(Item.BOW)) {
+        if (player && player.inventory.includes(Item.Bow)) {
             return dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
         }
         return dx + dy === 1;
@@ -187,9 +187,9 @@ export class GameService {
     canTeleport(cell: Cell): boolean {
         return (
             (cell.player === undefined || cell.player === Avatar.Default) &&
-            cell.tile !== Tile.WALL &&
-            cell.tile !== Tile.CLOSED_DOOR &&
-            cell.tile !== Tile.OPENED_DOOR
+            cell.tile !== Tile.Wall &&
+            cell.tile !== Tile.ClosedDoor &&
+            cell.tile !== Tile.OpenedDoor
         );
     }
 
@@ -247,11 +247,7 @@ export class GameService {
             });
 
             dialogRef.afterClosed().subscribe((result) => {
-                if (result === true) {
-                    resolve(true);
-                } else {
-                    resolve(false);
-                }
+                resolve(result);
             });
         });
     }
@@ -265,7 +261,7 @@ export class GameService {
         }
         const tileDesc = this.getTileDescription(cell.tile);
         let desc = tileDesc;
-        if (cell.item && cell.item !== (Item.DEFAULT as unknown as Item)) {
+        if (cell.item && cell.item !== (Item.Default as unknown as Item)) {
             const itemDesc = this.getItemDescription(cell.item);
             desc += ', ' + itemDesc;
         }
@@ -289,7 +285,7 @@ export class GameService {
 
         this.checkDirectionsForActions(position, DEFAULT_MOVEMENT_DIRECTIONS, possibleActions, true);
 
-        if (player.inventory.includes(Item.BOW)) {
+        if (player.inventory.includes(Item.Bow)) {
             this.checkDirectionsForActions(position, DIAGONAL_MOVEMENT_DIRECTIONS, possibleActions, false);
         }
 
@@ -331,7 +327,7 @@ export class GameService {
     }
 
     private isValidCellForDoor(cell: Cell): boolean {
-        return cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+        return cell.tile === Tile.ClosedDoor || cell.tile === Tile.OpenedDoor;
     }
 
     private isValidCellForFight(cell: Cell): boolean {

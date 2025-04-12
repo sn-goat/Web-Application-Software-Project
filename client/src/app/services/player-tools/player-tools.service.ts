@@ -22,7 +22,7 @@ export class PlayerToolsService {
 
     addItem(item: Item): void {
         const items = this.items.value;
-        if (item !== Item.DEFAULT) {
+        if (item !== Item.Default) {
             if (items.length < 2) {
                 items.push(item);
             } else {

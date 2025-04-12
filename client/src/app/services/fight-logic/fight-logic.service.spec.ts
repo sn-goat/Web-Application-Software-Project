@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { TestBed } from '@angular/core/testing';
-import { MockSocketService } from '@app/helpers/mockSocketService';
+import { MockSocketService } from '@app/helpers/socket-service-mock';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -12,7 +12,6 @@ import { IFight } from '@common/game';
 import { FightInfo, IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
 
-// Définition unique des joueurs de test
 const testPlayer1 = {
     id: 'player1',
     name: 'Player One',
@@ -53,7 +52,6 @@ const fightInfo = {
     diceResult: 3,
 } as FightInfo;
 
-// Fonction utilitaire pour créer un combat de test
 function createTestFight(): IFight {
     return {
         player1: { ...testPlayer1, ...fightInfo },
@@ -65,7 +63,6 @@ function createTestFight(): IFight {
 describe('FightLogicService', () => {
     let service: FightLogicService;
 
-    // Mocks des services dépendants
     const socketServiceMock = new MockSocketService();
 
     const gameServiceMock = {

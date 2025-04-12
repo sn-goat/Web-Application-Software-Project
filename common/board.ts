@@ -32,12 +32,12 @@ export type Validation = {
 };
 
 export const TILE_COST = new Map<Tile, number>([
-    [Tile.ICE, 0],
-    [Tile.WATER, 2],
-    [Tile.WALL, Infinity],
-    [Tile.FLOOR, 1],
-    [Tile.CLOSED_DOOR, Infinity],
-    [Tile.OPENED_DOOR, 1],
+    [Tile.Ice, 0],
+    [Tile.Water, 2],
+    [Tile.Wall, Infinity],
+    [Tile.Floor, 1],
+    [Tile.ClosedDoor, Infinity],
+    [Tile.OpenedDoor, 1],
 ]);
 
 export const LEFT_CLICK = 0;

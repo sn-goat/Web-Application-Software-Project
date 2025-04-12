@@ -17,7 +17,7 @@ export class GameUtils {
                 }
             }
         }
-        if (player.inventory.includes(Item.BOW)) {
+        if (player.inventory.includes(Item.Bow)) {
             for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
                 const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
                 if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
@@ -127,7 +127,7 @@ export class GameUtils {
         const spawnPoints: Vec2[] = [];
         map.forEach((row, y) => {
             row.forEach((cell, x) => {
-                if (cell.item === Item.SPAWN) {
+                if (cell.item === Item.Spawn) {
                     spawnPoints.push({ x, y });
                 }
             });
@@ -162,10 +162,10 @@ export class GameUtils {
     static removeUnusedSpawnPoints(map: Cell[][], usedSpawnPoints: Vec2[]): void {
         map.forEach((row, y) => {
             row.forEach((cell, x) => {
-                if (cell.item === Item.SPAWN) {
+                if (cell.item === Item.Spawn) {
                     const isUsed = usedSpawnPoints.some((point) => point.x === x && point.y === y);
                     if (!isUsed) {
-                        cell.item = Item.DEFAULT;
+                        cell.item = Item.Default;
                     }
                 }
             });
@@ -179,17 +179,17 @@ export class GameUtils {
         }
         const mid = Math.floor(shuffled.length / 2);
         for (let i = 0; i < shuffled.length; i++) {
-            shuffled[i].setTeam(i < mid ? Team.RED : Team.BLUE);
+            shuffled[i].setTeam(i < mid ? Team.Red : Team.Blue);
         }
     }
 
     static normalizeChestItems(map: Cell[][]): void {
         const allItems = Object.values(Item) as Item[];
-        const allowed = allItems.filter((item) => item !== Item.CHEST && item !== Item.FLAG && item !== Item.SPAWN);
+        const allowed = allItems.filter((item) => item !== Item.Chest && item !== Item.Flag && item !== Item.Spawn);
         const presentAllowed = new Set<Item>();
         map.forEach((row) => {
             row.forEach((cell) => {
-                if (cell.item !== Item.CHEST && cell.item !== Item.FLAG && cell.item !== Item.SPAWN && allowed.includes(cell.item)) {
+                if (cell.item !== Item.Chest && cell.item !== Item.Flag && cell.item !== Item.Spawn && allowed.includes(cell.item)) {
                     presentAllowed.add(cell.item);
                 }
             });
@@ -197,7 +197,7 @@ export class GameUtils {
         const available = allowed.filter((item) => !presentAllowed.has(item));
         map.forEach((row) => {
             row.forEach((cell) => {
-                if (cell.item === Item.CHEST) {
+                if (cell.item === Item.Chest) {
                     if (available.length > 0) {
                         const randomIndex = Math.floor(Math.random() * available.length);
                         const newItem = available[randomIndex];
@@ -211,8 +211,8 @@ export class GameUtils {
 
     static canDropItem(cell: Cell): boolean {
         return (
-            (cell.player === undefined || cell.player === Avatar.Default || cell.item === Item.DEFAULT) &&
-            (cell.tile === Tile.FLOOR || cell.tile === Tile.ICE || cell.tile === Tile.WATER || cell.tile === Tile.OPENED_DOOR)
+            (cell.player === undefined || cell.player === Avatar.Default || cell.item === Item.Default) &&
+            (cell.tile === Tile.Floor || cell.tile === Tile.Ice || cell.tile === Tile.Water || cell.tile === Tile.OpenedDoor)
         );
     }
 
@@ -276,15 +276,15 @@ export class GameUtils {
 
     private static isValidSpawn(cell: Cell): boolean {
         return (
-            cell.tile !== Tile.WALL &&
-            cell.tile !== Tile.CLOSED_DOOR &&
-            cell.tile !== Tile.OPENED_DOOR &&
+            cell.tile !== Tile.Wall &&
+            cell.tile !== Tile.ClosedDoor &&
+            cell.tile !== Tile.OpenedDoor &&
             (cell.player === Avatar.Default || cell.player === undefined)
         );
     }
 
     private static isValidCellForAction(cell: Cell): boolean {
-        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.CLOSED_DOOR || cell.tile === Tile.OPENED_DOOR;
+        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.ClosedDoor || cell.tile === Tile.OpenedDoor;
     }
 
     private static isValidCellForAttack(cell: Cell): boolean {

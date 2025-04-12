@@ -23,7 +23,6 @@ describe('GameFightInterfaceComponent', () => {
             } as IFight),
         });
         const playerSpy = jasmine.createSpyObj('PlayerService', ['getPlayer']);
-        // Ensuite, définissez la valeur de retour par défaut :
         playerSpy.getPlayer.and.returnValue({ id: '1', name: 'Player1' });
         const socketSpy = jasmine.createSpyObj('SocketService', ['onFightTimerUpdate'], { onFightTimerUpdate: () => of(30) });
 
@@ -56,7 +55,6 @@ describe('GameFightInterfaceComponent', () => {
     });
 
     it('should set fight data correctly on init when player is player2', () => {
-        // Définir la valeur de retour avant d'émettre le combat
         playerService.getPlayer.and.returnValue({ id: '2', name: 'Player2' } as IPlayer);
         fightLogicService.fight.next({
             player1: { id: '1', name: 'Player1', currentLife: 80, life: 100 },
@@ -91,7 +89,6 @@ describe('GameFightInterfaceComponent', () => {
     });
 
     it('should compute default life percentages when life properties are undefined', () => {
-        // On simule le cas d'un joueur dont currentLife et life sont undefined.
         playerService.getPlayer.and.returnValue({ id: '1', name: 'Player1' } as IPlayer);
         fightLogicService.fight.next({
             player1: { id: '1', name: 'Player1', avatar: 'defaultAvatar', currentLife: undefined, life: 4 } as unknown as IPlayer,
@@ -100,10 +97,7 @@ describe('GameFightInterfaceComponent', () => {
         } as IFight);
         fixture.detectChanges();
 
-        // Pour myPlayer, comme currentLife vaut undefined -> default à 0,
-        // et life vaut undefined -> default à 1, on obtient (0/1)*100 = 0.
         expect(component.lifePercentMyPlayer).toBe(0);
-        // De même pour opponent.
         expect(component.lifePercentOpponent).toBe(0);
     });
 });

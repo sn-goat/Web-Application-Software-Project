@@ -5,7 +5,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { MockSocketService } from '@app/helpers/mockSocketService';
+import { MockSocketService } from '@app/helpers/socket-service-mock';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -54,20 +54,13 @@ describe('GameService', () => {
 
         service = TestBed.inject(GameService);
 
-        // Prépare un joueur de test et une configuration de carte minimale
         testPlayer = { id: 'p-test', avatar: Avatar.Cleric, position: { x: 1, y: 1 } } as IPlayer;
-        // Cellule adjacente à (1,1): distance de Manhattan = 1
-        adjacentCell = { position: { x: 2, y: 1 }, player: Avatar.Default, tile: Tile.CLOSED_DOOR, cost: 1 } as Cell;
-        // Cellule non adjacente: distance > 1
+        adjacentCell = { position: { x: 2, y: 1 }, player: Avatar.Default, tile: Tile.ClosedDoor, cost: 1 } as Cell;
         nonAdjacentCell = { position: { x: 3, y: 3 } };
-        // Cellule téléportable : pas de joueur et tile différent de WALL, CLOSED_DOOR, OPENED_DOOR
-        teleportableCell = { player: undefined, tile: 'FLOOR', position: { x: 0, y: 0 } };
-        // Cellule non téléportable : par exemple, tile = WALL
-        nonTeleportableCell = { player: undefined, tile: Tile.WALL, position: { x: 0, y: 1 } };
+        teleportableCell = { player: undefined, tile: 'Floor', position: { x: 0, y: 0 } };
+        nonTeleportableCell = { player: undefined, tile: Tile.Wall, position: { x: 0, y: 1 } };
 
-        // Pour tester initFight, préparer playingPlayers
         service.playingPlayers.next([testPlayer]);
-        // Initialiser le jeu pour définir accessCode et organizerId
         testGame = {
             map: [],
             players: [testPlayer],
@@ -159,14 +152,13 @@ describe('GameService', () => {
         playerServiceMock.isActive.and.returnValue(true);
         playerServiceMock.getPlayer.and.returnValue(player);
 
-        // On crée un tableau 2D pouvant gérer les positions (0,0) et (1,1)
         const initialMap: Cell[][] = [
             [
                 {
                     player: Avatar.Wizard,
                     position: { x: 0, y: 0 },
                     tile: 'Floor',
-                    item: Item.DEFAULT,
+                    item: Item.Default,
                     cost: 3,
                 } as Cell,
                 { player: Avatar.Default, position: { x: 1, y: 0 } } as Cell,
@@ -189,7 +181,6 @@ describe('GameService', () => {
         service.endTurn();
 
         expect(service.isActionSelected.value).toBe(false);
-        // Vérifie que la méthode endTurn du MockSocketService a été appelée
         expect(socketServiceMock.endTurn).toHaveBeenCalled();
     });
 
@@ -212,9 +203,7 @@ describe('GameService', () => {
     });
 
     it('should init fight when defender is found and player exists', () => {
-        // Arrange: faire en sorte que getPlayer retourne testPlayer
         playerServiceMock.getPlayer.and.returnValue(testPlayer);
-        // Ajoute un autre joueur possédant l\'avatar recherché pour initFight
         const defender = {
             id: 'p-def',
             name: 'Defender',
@@ -243,7 +232,6 @@ describe('GameService', () => {
 
     it('should not init fight when no defender is found', () => {
         playerServiceMock.getPlayer.and.returnValue(testPlayer);
-        // Seul testPlayer est présent et ne correspond pas à l\'avatar recherché
         service.playingPlayers.next([testPlayer]);
         spyOn(socketServiceMock, 'initFight');
 
@@ -267,8 +255,8 @@ describe('GameService', () => {
                 { position: { x: 0, y: 1 } } as Cell,
                 {
                     position: { x: 1, y: 1 },
-                    tile: Tile.OPENED_DOOR,
-                    item: Item.DEFAULT,
+                    tile: Tile.OpenedDoor,
+                    item: Item.Default,
                 } as Cell,
             ],
         ];
@@ -288,8 +276,8 @@ describe('GameService', () => {
                 { position: { x: 0, y: 1 } } as Cell,
                 {
                     position: { x: 1, y: 1 },
-                    tile: Tile.OPENED_DOOR,
-                    item: Item.BOW,
+                    tile: Tile.OpenedDoor,
+                    item: Item.Bow,
                 } as Cell,
             ],
         ];
@@ -306,7 +294,7 @@ describe('GameService', () => {
     });
 
     it('should return false for isWithinActionRange when cell is not adjacent', () => {
-        testPlayer.inventory = [Item.MONSTER_EGG];
+        testPlayer.inventory = [Item.MonsterEgg];
         service.activePlayer.next(testPlayer);
         const positiveResult = service.isWithinActionRange(adjacentCell);
         expect(positiveResult).toBeTrue();
@@ -336,7 +324,6 @@ describe('GameService', () => {
     it('should call debugMove if cell can be teleported (debugMovePlayer)', () => {
         spyOn(socketServiceMock, 'debugMove');
         playerServiceMock.getPlayer.and.returnValue({ id: 'p1' } as IPlayer);
-        // Pour cell téléportable, canTeleport devrait retourner true
         service.debugMovePlayer(teleportableCell);
         expect(socketServiceMock.debugMove).toHaveBeenCalledWith(teleportableCell.position, 'p1');
     });
@@ -363,18 +350,18 @@ describe('GameService', () => {
 
     it('should update map tile when broadcast door event occurs', () => {
         const initialMap: Cell[][] = [
-            [{ tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell, { tile: Tile.CLOSED_DOOR, position: { x: 1, y: 0 } } as Cell],
-            [{ tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell, { tile: Tile.FLOOR, position: { x: 1, y: 1 } } as Cell],
+            [{ tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell, { tile: Tile.ClosedDoor, position: { x: 1, y: 0 } } as Cell],
+            [{ tile: Tile.Floor, position: { x: 0, y: 1 } } as Cell, { tile: Tile.Floor, position: { x: 1, y: 1 } } as Cell],
         ];
         service.map.next(initialMap);
 
         const payload = {
             doorPosition: { x: 1, y: 0 },
-            newDoorState: Tile.OPENED_DOOR,
-        } as { doorPosition: Vec2; newDoorState: Tile.CLOSED_DOOR | Tile.OPENED_DOOR };
+            newDoorState: Tile.OpenedDoor,
+        } as { doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor };
 
         socketServiceMock.triggerDoorStateChanged(payload);
-        expect(service.map.value[0][1].tile).toBe(Tile.OPENED_DOOR);
+        expect(service.map.value[0][1].tile).toBe(Tile.OpenedDoor);
     });
 
     it('should toggle action mode when end fight event is received', () => {
@@ -384,15 +371,14 @@ describe('GameService', () => {
     });
 
     it('should call onMove and update map/activePlayer when broadcast move event is received', () => {
-        // Préparer une carte 2x2
         const initialMap: Cell[][] = [
             [
-                { player: Avatar.Wizard, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
-                { player: Avatar.Default, tile: Tile.FLOOR, position: { x: 1, y: 0 } } as Cell,
+                { player: Avatar.Wizard, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
+                { player: Avatar.Default, tile: Tile.Floor, position: { x: 1, y: 0 } } as Cell,
             ],
             [
-                { player: Avatar.Default, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
-                { player: Avatar.Default, tile: Tile.FLOOR, position: { x: 1, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.Floor, position: { x: 0, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.Floor, position: { x: 1, y: 1 } } as Cell,
             ],
         ];
         service.map.next(initialMap);
@@ -416,7 +402,7 @@ describe('GameService', () => {
         testPlayer.avatar = Avatar.Wizard;
         const cell: Cell = {
             player: testPlayer.avatar,
-            tile: Tile.FLOOR,
+            tile: Tile.Floor,
             position: { x: 0, y: 0 },
         } as Cell;
         const expected = 'Joueur: ' + testPlayer.name + ' Avatar: Wizard';
@@ -425,20 +411,19 @@ describe('GameService', () => {
 
     it('should return tile description when cell has no player and no item', () => {
         const cell: Cell = {
-            tile: Tile.FLOOR,
+            tile: Tile.Floor,
             position: { x: 0, y: 1 },
         } as Cell;
-        const expected = service.getTileDescription(Tile.FLOOR);
+        const expected = service.getTileDescription(Tile.Floor);
         expect(service.getCellDescription(cell)).toEqual(expected);
     });
 
     it('should append item description when cell has an item', () => {
         spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
         spyOn(service, 'getItemDescription').and.returnValue('ItemDesc');
-        // Utiliser un item non default pour déclencher l'ajout de la description d'item
         const cell: Cell = {
-            tile: Tile.FLOOR,
-            item: Item.BOW,
+            tile: Tile.Floor,
+            item: Item.Bow,
             position: { x: 1, y: 2 },
         } as Cell;
         const expected = 'TileDesc, ItemDesc';
@@ -449,8 +434,8 @@ describe('GameService', () => {
         spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
         spyOn(service, 'getItemDescription').and.returnValue('ItemDesc');
         const cell: Cell = {
-            tile: Tile.FLOOR,
-            item: Item.BOW,
+            tile: Tile.Floor,
+            item: Item.Bow,
             position: { x: 1, y: 2 },
         } as Cell;
         const expected = 'TileDesc, ItemDesc';
@@ -460,9 +445,9 @@ describe('GameService', () => {
     it('should append item description when cell contains a non-default item', () => {
         spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
         spyOn(service, 'getItemDescription').and.returnValue('ItemDesc');
-        const nonDefaultItem = Item.BOW;
+        const nonDefaultItem = Item.Bow;
         const cell: Cell = {
-            tile: Tile.FLOOR,
+            tile: Tile.Floor,
             item: nonDefaultItem,
             position: { x: 1, y: 2 },
         } as Cell;
@@ -474,11 +459,10 @@ describe('GameService', () => {
         spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
         spyOn(service, 'getItemDescription');
         const cell: Cell = {
-            tile: Tile.FLOOR,
-            item: Item.DEFAULT, // Cette valeur est considérée comme default
+            tile: Tile.Floor,
+            item: Item.Default,
             position: { x: 1, y: 2 },
         } as Cell;
-        // Dans ce cas, la description ne doit contenir que la description du tile
         const expected = 'TileDesc';
         expect(service.getCellDescription(cell)).toEqual(expected);
         expect(service.getItemDescription).not.toHaveBeenCalled();
@@ -491,30 +475,29 @@ describe('GameService', () => {
 
     it('should return item description when a description exists', () => {
         spyOn(ASSETS_DESCRIPTION, 'get').and.callFake((item: Item) => {
-            // pour Item.BOW, on retournera une description personnalisée
-            return item === Item.BOW ? 'Bow Description' : undefined;
+            return item === Item.Bow ? 'Bow Description' : undefined;
         });
-        const result = service.getItemDescription(Item.BOW);
+        const result = service.getItemDescription(Item.Bow);
         expect(result).toEqual('Bow Description');
     });
 
     it('should return default description when no description exists', () => {
         spyOn(ASSETS_DESCRIPTION, 'get').and.returnValue(undefined);
-        const result = service.getItemDescription(Item.BOW);
+        const result = service.getItemDescription(Item.Bow);
         expect(result).toEqual('Aucune description');
     });
 
     it('findPossibleActions should return possible actions for players and doors', () => {
-        testPlayer.inventory = [Item.MONSTER_EGG];
+        testPlayer.inventory = [Item.MonsterEgg];
         service.playingPlayers.next([testPlayer]);
         const initialMap: Cell[][] = [
             [
-                { player: testPlayer.avatar, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
-                { player: Avatar.Default, tile: Tile.WALL, position: { x: 1, y: 0 } } as Cell,
+                { player: testPlayer.avatar, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
+                { player: Avatar.Default, tile: Tile.Wall, position: { x: 1, y: 0 } } as Cell,
             ],
             [
-                { player: testPlayer.avatar, tile: Tile.FLOOR, position: { x: 0, y: 1 } } as Cell,
-                { player: Avatar.Default, tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 } } as Cell,
+                { player: testPlayer.avatar, tile: Tile.Floor, position: { x: 0, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.ClosedDoor, position: { x: 1, y: 1 } } as Cell,
             ],
         ];
         service.map.next(initialMap);
@@ -525,16 +508,16 @@ describe('GameService', () => {
     });
 
     it('findPossibleActions should return an empty set if no actions available', () => {
-        testPlayer.inventory = [Item.MONSTER_EGG];
+        testPlayer.inventory = [Item.MonsterEgg];
         service.playingPlayers.next([testPlayer]);
         const initialMap: Cell[][] = [
             [
-                { player: Avatar.Cleric, tile: Tile.FLOOR, position: { x: 0, y: 0 } } as Cell,
-                { player: Avatar.Default, tile: Tile.WALL, position: { x: 1, y: 0 } } as Cell,
+                { player: Avatar.Cleric, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
+                { player: Avatar.Default, tile: Tile.Wall, position: { x: 1, y: 0 } } as Cell,
             ],
             [
-                { player: Avatar.Default, tile: Tile.WALL, position: { x: 0, y: 1 } } as Cell,
-                { player: Avatar.Default, tile: Tile.CLOSED_DOOR, position: { x: 1, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.Wall, position: { x: 0, y: 1 } } as Cell,
+                { player: Avatar.Default, tile: Tile.ClosedDoor, position: { x: 1, y: 1 } } as Cell,
             ],
         ];
         service.map.next(initialMap);

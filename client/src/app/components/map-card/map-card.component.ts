@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { Alert } from '@app/constants/enums';
 import {
+    DEFAULT_FILE_TYPE,
     DEFAULT_PATH_DELETE,
     DEFAULT_PATH_EDIT,
     DEFAULT_PATH_ITEMS,
@@ -33,7 +34,7 @@ export class MapCardComponent {
     readonly srcDelete = DEFAULT_PATH_DELETE;
     readonly srcVisible = DEFAULT_PATH_VISIBLE;
     readonly srcNotVisible = DEFAULT_PATH_NOT_VISIBLE;
-    readonly fileType = '.png';
+    readonly fileType = DEFAULT_FILE_TYPE;
     private readonly dialog = inject(MatDialog);
 
     onEdit(): void {

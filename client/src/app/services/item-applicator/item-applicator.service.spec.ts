@@ -46,14 +46,14 @@ describe('ItemApplicatorService', () => {
 
     describe('Tool Selection', () => {
         it('should update selected item from ToolSelectionService', () => {
-            (toolSelectionService.selectedItem$ as BehaviorSubject<Item>).next(Item.SPAWN);
-            expect(service['selectedItem']).toBe(Item.SPAWN);
+            (toolSelectionService.selectedItem$ as BehaviorSubject<Item>).next(Item.Spawn);
+            expect(service['selectedItem']).toBe(Item.Spawn);
         });
     });
 
     describe('Mouse Events', () => {
         it('should handle mouse down and set old item position', () => {
-            mapService.getCellItem.and.returnValue(Item.FLAG);
+            mapService.getCellItem.and.returnValue(Item.Flag);
             const event = new MouseEvent('mousedown', { button: 0 });
             const rect = new DOMRect(0, 0, 500, 500);
 
@@ -68,7 +68,7 @@ describe('ItemApplicatorService', () => {
 
         it('should handle right-click (mouse down) for item deletion', () => {
             spyOn(service as any, 'deleteItem');
-            mapService.getCellItem.and.returnValue(Item.FLAG);
+            mapService.getCellItem.and.returnValue(Item.Flag);
 
             const event = new MouseEvent('mousedown', { button: 2 });
             const rect = new DOMRect(0, 0, 500, 500);
@@ -105,60 +105,60 @@ describe('ItemApplicatorService', () => {
 
     describe('Item Placement & Deletion', () => {
         it('should correctly apply an item', () => {
-            mapService.getCellItem.and.returnValue(Item.DEFAULT);
-            service['selectedItem'] = Item.FLAG;
+            mapService.getCellItem.and.returnValue(Item.Default);
+            service['selectedItem'] = Item.Flag;
 
             service['applyItem'](3, 3);
-            expect(mapService.setCellItem).toHaveBeenCalledWith(3, 3, Item.FLAG);
+            expect(mapService.setCellItem).toHaveBeenCalledWith(3, 3, Item.Flag);
             expect(mapService.setHasFlagOnBoard).toHaveBeenCalledWith(true);
         });
 
         it('should correctly delete an item', () => {
-            mapService.getCellItem.and.returnValue(Item.SPAWN);
+            mapService.getCellItem.and.returnValue(Item.Spawn);
 
             service['deleteItem'](2, 2);
             expect(mapService.increaseSpawnsToPlace).toHaveBeenCalled();
-            expect(mapService.setCellItem).toHaveBeenCalledWith(2, 2, Item.DEFAULT);
+            expect(mapService.setCellItem).toHaveBeenCalledWith(2, 2, Item.Default);
         });
 
-        it('should unset the flag on the board when deleting a FLAG item', () => {
-            mapService.getCellItem.and.returnValue(Item.FLAG);
+        it('should unset the flag on the board when deleting a Flag item', () => {
+            mapService.getCellItem.and.returnValue(Item.Flag);
 
             service['deleteItem'](5, 5);
 
             expect(mapService.setHasFlagOnBoard).toHaveBeenCalledWith(false);
-            expect(mapService.setCellItem).toHaveBeenCalledWith(5, 5, Item.DEFAULT);
+            expect(mapService.setCellItem).toHaveBeenCalledWith(5, 5, Item.Default);
         });
 
-        it('should decrease spawns when placing a SPAWN item', () => {
-            mapService.getCellItem.and.returnValue(Item.DEFAULT);
-            service['selectedItem'] = Item.SPAWN;
+        it('should decrease spawns when placing a Spawn item', () => {
+            mapService.getCellItem.and.returnValue(Item.Default);
+            service['selectedItem'] = Item.Spawn;
 
             service['applyItem'](3, 3);
 
             expect(mapService.decreaseSpawnsToPlace).toHaveBeenCalled();
-            expect(mapService.setCellItem).toHaveBeenCalledWith(3, 3, Item.SPAWN);
+            expect(mapService.setCellItem).toHaveBeenCalledWith(3, 3, Item.Spawn);
         });
 
         it('should decrease items to place when placing a generic item', () => {
-            mapService.getCellItem.and.returnValue(Item.DEFAULT);
-            service['selectedItem'] = Item.DEFAULT;
+            mapService.getCellItem.and.returnValue(Item.Default);
+            service['selectedItem'] = Item.Default;
 
             service['applyItem'](2, 2);
 
             expect(mapService.decreaseItemsToPlace).toHaveBeenCalled();
-            expect(mapService.setCellItem).toHaveBeenCalledWith(2, 2, Item.DEFAULT);
+            expect(mapService.setCellItem).toHaveBeenCalledWith(2, 2, Item.Default);
         });
 
         it('should delete the existing item if the cell is occupied', () => {
             spyOn(service as any, 'deleteItem');
-            mapService.getCellItem.and.returnValue(Item.FLAG);
-            service['selectedItem'] = Item.SPAWN;
+            mapService.getCellItem.and.returnValue(Item.Flag);
+            service['selectedItem'] = Item.Spawn;
 
             service['applyItem'](1, 1);
 
             expect(service['deleteItem']).toHaveBeenCalledWith(1, 1);
-            expect(mapService.setCellItem).toHaveBeenCalledWith(1, 1, Item.SPAWN);
+            expect(mapService.setCellItem).toHaveBeenCalledWith(1, 1, Item.Spawn);
         });
     });
 
@@ -166,7 +166,7 @@ describe('ItemApplicatorService', () => {
         it('should not apply an item on a wall tile', () => {
             spyOn(service as any, 'applyItem');
 
-            mapService.getCellTile.and.returnValue(Tile.WALL);
+            mapService.getCellTile.and.returnValue(Tile.Wall);
             service['updatePosition']({ x: 1, y: 1 }, { x: 2, y: 2 });
 
             expect(service['applyItem']).not.toHaveBeenCalled();
@@ -175,7 +175,7 @@ describe('ItemApplicatorService', () => {
         it('should apply an item if the tile is not a wall or door', () => {
             spyOn(service as any, 'applyItem');
 
-            mapService.getCellTile.and.returnValue(Tile.FLOOR);
+            mapService.getCellTile.and.returnValue(Tile.Floor);
             service['updatePosition']({ x: 1, y: 1 }, { x: 2, y: 2 });
 
             expect(service['applyItem']).toHaveBeenCalledWith(2, 2);
@@ -185,7 +185,7 @@ describe('ItemApplicatorService', () => {
             spyOn(service as any, 'deleteItem');
             spyOn(service as any, 'applyItem');
 
-            mapService.getCellTile.and.returnValue(Tile.FLOOR);
+            mapService.getCellTile.and.returnValue(Tile.Floor);
             service['updatePosition']({ x: 1, y: 1 }, { x: 2, y: 2 });
 
             expect(service['deleteItem']).toHaveBeenCalledWith(1, 1);
@@ -195,26 +195,26 @@ describe('ItemApplicatorService', () => {
 
     describe('Container Behavior', () => {
         it('should set isBackToContainer based on selectedItem', () => {
-            service['selectedItem'] = Item.SPAWN;
-            service.setBackToContainer(Item.SPAWN);
+            service['selectedItem'] = Item.Spawn;
+            service.setBackToContainer(Item.Spawn);
             expect(service['isBackToContainer']).toBeTrue();
         });
 
         it('should set isBackToContainer to false when item does not match selectedItem', () => {
-            service['selectedItem'] = Item.FLAG;
-            service.setBackToContainer(Item.SPAWN);
+            service['selectedItem'] = Item.Flag;
+            service.setBackToContainer(Item.Spawn);
             expect(service['isBackToContainer']).toBeFalse();
         });
     });
 
     it('should set isBackToContainer to false when item does not match selectedItem', () => {
-        service['selectedItem'] = Item.FLAG;
-        service.setBackToContainer(Item.SPAWN);
+        service['selectedItem'] = Item.Flag;
+        service.setBackToContainer(Item.Spawn);
         expect(service['isBackToContainer']).toBeFalse();
     });
 
     it('should set isBackToContainer to false when called with default item', () => {
-        service['selectedItem'] = Item.SPAWN;
+        service['selectedItem'] = Item.Spawn;
         service.setBackToContainer();
         expect(service['isBackToContainer']).toBeFalse();
     });

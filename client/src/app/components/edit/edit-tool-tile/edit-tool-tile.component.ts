@@ -43,6 +43,6 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     }
 
     shouldShowAbove(type: Tile): boolean {
-        return type === Tile.ICE || type === Tile.WATER;
+        return type === Tile.Ice || type === Tile.Water;
     }
 }

@@ -19,19 +19,18 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
 })
 export class GameMapComponent implements OnInit, OnDestroy {
     boardGame: Cell[][] = [];
-    leftSelectedCell: Cell | null = null;
-    rightSelectedCell: Cell | null = null;
 
     isActionSelected = false;
     isPlayerTurn = false;
-    isDebugMode = false;
     popupVisible = false;
 
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
-    pathCells: Set<string> = new Set();
-    actionCells: Set<string> = new Set();
-    highlightedPathCells: Set<string> = new Set();
     getTooltipContent: (cell: Cell) => string;
+    private isDebugMode = false;
+    private highlightedPathCells: Set<string> = new Set();
+    private actionCells: Set<string> = new Set();
+    private pathCells: Set<string> = new Set();
+    private rightSelectedCell: Cell | null = null;
     private readonly gameService: GameService = inject(GameService);
     private readonly fightLogicService = inject(FightLogicService);
     private readonly playerService = inject(PlayerService);
@@ -96,7 +95,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
                     this.gameService.initFight(cell.player);
                     return;
                 }
-                if (cell.tile === Tile.OPENED_DOOR || cell.tile === Tile.CLOSED_DOOR) {
+                if (cell.tile === Tile.OpenedDoor || cell.tile === Tile.ClosedDoor) {
                     const myPlayer = this.playerService.getPlayer();
                     const dx = Math.abs(myPlayer.position.x - cell.position.x);
                     const dy = Math.abs(myPlayer.position.y - cell.position.y);
@@ -111,7 +110,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
         }
 
         const player = this.playerService.getPlayer();
-        if (this.isPlayerAtSpawn(player) && player.inventory.includes(Item.MONSTER_EGG)) {
+        if (this.isPlayerAtSpawn(player) && player.inventory.includes(Item.MonsterEgg)) {
             this.gameService.debugMovePlayer(cell);
         } else {
             this.playerService.sendMove(cell.position);
@@ -121,28 +120,21 @@ export class GameMapComponent implements OnInit, OnDestroy {
     onRightClicked(cell: Cell) {
         if (this.isDebugMode && this.isPlayerTurn) {
             this.gameService.debugMovePlayer(cell);
-        } else {
-            if (
-                this.rightSelectedCell &&
-                cell.position.x === this.rightSelectedCell.position.x &&
-                cell.position.y === this.rightSelectedCell.position.y
-            ) {
-                this.rightSelectedCell = null;
-            } else {
-                this.rightSelectedCell = cell;
-            }
+            return;
         }
+
+        this.rightSelectedCell =
+            this.rightSelectedCell && cell.position.x === this.rightSelectedCell.position.x && cell.position.y === this.rightSelectedCell.position.y
+                ? null
+                : cell;
     }
 
     getCellTooltip(cell: Cell): string | null {
-        if (
-            this.rightSelectedCell &&
+        return this.rightSelectedCell &&
             cell.position.x === this.rightSelectedCell.position.x &&
             cell.position.y === this.rightSelectedCell.position.y
-        ) {
-            return this.getTooltipContent(cell);
-        }
-        return null;
+            ? this.getTooltipContent(cell)
+            : null;
     }
 
     isPathCell(cell: Cell): boolean {

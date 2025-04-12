@@ -3,16 +3,15 @@
 import { TestBed } from '@angular/core/testing';
 import { BehaviorSubject } from 'rxjs';
 
-import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { MapService } from '@app/services/map/map.service';
 import { MouseEditorService } from '@app/services/mouse-editor/mouse-editor.service';
+import { TileApplicatorService } from '@app/services/tile-applicator/tile-applicator.service';
 import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 
 import { Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 
 const boardSize = 10;
-// Rectangles utilisés dans certains tests (dimensions différentes pour simuler différents contextes)
 const dummyRect: DOMRect = new DOMRect(0, 0, 100, 100);
 const rect: DOMRect = new DOMRect(0, 0, 200, 200);
 
@@ -22,14 +21,12 @@ describe('TileApplicatorService', () => {
     let mouseEditorServiceSpy: jasmine.SpyObj<MouseEditorService>;
     let toolSelectionServiceSpy: jasmine.SpyObj<ToolSelectionService>;
 
-    // On utilise ici des BehaviorSubject pour que les Observables aient une valeur initiale
     let currentCoordSubject: BehaviorSubject<Vec2>;
     let selectedTileSubject: BehaviorSubject<Tile | null>;
 
     beforeEach(() => {
         currentCoordSubject = new BehaviorSubject<Vec2>({ x: 0, y: 0 });
-        // Pour simuler le comportement initial (premier fichier émettait Tile.WALL)
-        selectedTileSubject = new BehaviorSubject<Tile | null>(Tile.WALL);
+        selectedTileSubject = new BehaviorSubject<Tile | null>(Tile.Wall);
 
         mouseEditorServiceSpy = jasmine.createSpyObj('MouseEditorService', [], {
             currentCoord$: currentCoordSubject.asObservable(),
@@ -50,76 +47,57 @@ describe('TileApplicatorService', () => {
         });
         service = TestBed.inject(TileApplicatorService);
 
-        // Simuler l'émission initiale comme dans le premier fichier
-        selectedTileSubject.next(Tile.WALL);
+        selectedTileSubject.next(Tile.Wall);
         currentCoordSubject.next({ x: 0, y: 0 });
     });
 
-    // Fonction utilitaire pour créer un faux MouseEvent (utilisé dans le premier ensemble de tests)
     function createFakeMouseEvent(button: number, pageX: number, pageY: number): MouseEvent {
         return { button, pageX, pageY } as MouseEvent;
     }
 
-    // ================== Tests issus du premier fichier ==================
     describe('handleMouseDown', () => {
-        it('should handle left-click (button 0) and apply tile when cell item is DEFAULT', () => {
-            // Pour un clic gauche aux coordonnées (15,25)
+        it('should handle left-click (button 0) and apply tile when cell item is Default', () => {
             const event = createFakeMouseEvent(0, 15, 25);
-            // La méthode screenToBoard calcule :
-            // cellWidth = 100/10 = 10, donc tileX = floor(15/10)=1 et tileY = floor(25/10)=2.
             const updateTileSpy = spyOn<any>(service, 'updateTile').and.callThrough();
 
-            // On configure getCellItem pour retourner DEFAULT
-            mapServiceSpy.getCellItem.and.returnValue(Item.DEFAULT);
+            mapServiceSpy.getCellItem.and.returnValue(Item.Default);
 
             service.handleMouseDown(event, dummyRect);
 
-            // Vérifie que previousCoord est mise à jour
             expect((service as any).previousCoord).toEqual({ x: 15, y: 25 });
-            // Pour un clic gauche, le flag d'application doit être activé
             expect((service as any).isTilesBeingApplied).toBeTrue();
-            // On vérifie que updateTile est appelée avec les coordonnées de la cellule calculée (1,2)
             expect(updateTileSpy).toHaveBeenCalledWith(1, 2);
         });
 
-        it('should handle right-click (button 2) and delete tile when cell item is DEFAULT', () => {
-            // Pour un clic droit aux coordonnées (35,45)
+        it('should handle right-click (button 2) and delete tile when cell item is Default', () => {
             const event = createFakeMouseEvent(2, 35, 45);
             const updateTileSpy = spyOn<any>(service, 'updateTile').and.callThrough();
 
-            mapServiceSpy.getCellItem.and.returnValue(Item.DEFAULT);
+            mapServiceSpy.getCellItem.and.returnValue(Item.Default);
 
             service.handleMouseDown(event, dummyRect);
 
-            // screenToBoard(35,45,dummyRect) donne : { x: floor(35/10)=3, y: floor(45/10)=4 }
             expect((service as any).previousCoord).toEqual({ x: 35, y: 45 });
-            // Pour un clic droit, le flag de suppression doit être activé
             expect((service as any).isTilesBeingDeleted).toBeTrue();
             expect(updateTileSpy).toHaveBeenCalledWith(3, 4);
         });
 
-        it('should not update tile if cell item is not DEFAULT', () => {
-            // Forcer getCellItem à retourner autre chose que DEFAULT
-            mapServiceSpy.getCellItem.and.returnValue(Item.FLAG);
+        it('should not update tile if cell item is not Default', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Flag);
             const event = createFakeMouseEvent(0, 50, 50);
             const updateTileSpy = spyOn<any>(service, 'updateTile').and.callThrough();
 
             service.handleMouseDown(event, dummyRect);
 
-            // previousCoord doit être mise à jour même si la cellule n'est pas vide
             expect((service as any).previousCoord).toEqual({ x: 50, y: 50 });
-            // Aucun flag ne doit être activé
             expect((service as any).isTilesBeingApplied).toBeFalse();
             expect((service as any).isTilesBeingDeleted).toBeFalse();
-            // updateTile ne doit pas être appelée
             expect(updateTileSpy).not.toHaveBeenCalled();
         });
     });
 
     describe('processLine final coordinate branch', () => {
         it('should call updateTile for the final coordinate when starting point is off-board', () => {
-            // Configuration pour simuler une trajectoire où previousCoord est hors du plateau
-            // et currentCoord est dans le plateau.
             (service as any).previousCoord = { x: -10, y: -10 };
             (service as any).currentCoord = { x: 10, y: 10 };
             (service as any).isTilesBeingApplied = true;
@@ -127,15 +105,12 @@ describe('TileApplicatorService', () => {
 
             service.handleMouseMove(dummyRect);
 
-            // La méthode screenToBoard convertit (10,10) en { x: 1, y: 1 } (car 10/10=1)
             expect(updateTileSpy).toHaveBeenCalledWith(1, 1);
-            // Les flags doivent être réinitialisés
             expect((service as any).isTilesBeingApplied).toBeFalse();
             expect((service as any).isTilesBeingDeleted).toBeFalse();
         });
     });
 
-    // ================== Tests issus du second fichier ==================
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
@@ -268,7 +243,6 @@ describe('TileApplicatorService', () => {
             (service as any).isTilesBeingApplied = true;
             (service as any).isTilesBeingDeleted = true;
 
-            // Reconfigurer isOnBoard pour retourner false si x > 200 ou y > 200
             const isOnBoardSpy = service['isOnBoard'] as jasmine.Spy;
             isOnBoardSpy.and.callFake((x: number, y: number) => x < 200 && y < 200);
 
@@ -334,8 +308,8 @@ describe('TileApplicatorService', () => {
             expect(applyDoorSpy).not.toHaveBeenCalled();
         });
 
-        it('should call applyWall if selectedTile is WALL', () => {
-            (service as any).selectedTile = Tile.WALL;
+        it('should call applyWall if selectedTile is Wall', () => {
+            (service as any).selectedTile = Tile.Wall;
 
             const applyWallSpy = spyOn<any>(service, 'applyWall');
 
@@ -345,8 +319,8 @@ describe('TileApplicatorService', () => {
             expect(mapServiceSpy.setCellTile).not.toHaveBeenCalled();
         });
 
-        it('should call applyDoor if selectedTile is CLOSED_DOOR', () => {
-            (service as any).selectedTile = Tile.CLOSED_DOOR;
+        it('should call applyDoor if selectedTile is ClosedDoor', () => {
+            (service as any).selectedTile = Tile.ClosedDoor;
 
             const applyDoorSpy = spyOn<any>(service, 'applyDoor');
 
@@ -357,25 +331,25 @@ describe('TileApplicatorService', () => {
         });
 
         it('should directly set the cell tile for any other tile value', () => {
-            (service as any).selectedTile = Tile.FLOOR;
+            (service as any).selectedTile = Tile.Floor;
 
             (service as any).applyTile(4, 4);
 
-            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(4, 4, Tile.FLOOR);
+            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(4, 4, Tile.Floor);
         });
     });
 
     describe('revertToFLOOR', () => {
-        it('should set cell tile to FLOOR if current tile is not FLOOR', () => {
-            mapServiceSpy.getCellTile.and.returnValue(Tile.WALL);
+        it('should set cell tile to Floor if current tile is not Floor', () => {
+            mapServiceSpy.getCellTile.and.returnValue(Tile.Wall);
 
             (service as any).revertToFLOOR(5, 5);
 
-            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(5, 5, Tile.FLOOR);
+            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(5, 5, Tile.Floor);
         });
 
-        it('should not set cell tile if current tile is already FLOOR', () => {
-            mapServiceSpy.getCellTile.and.returnValue(Tile.FLOOR);
+        it('should not set cell tile if current tile is already Floor', () => {
+            mapServiceSpy.getCellTile.and.returnValue(Tile.Floor);
 
             (service as any).revertToFLOOR(6, 6);
 
@@ -384,60 +358,60 @@ describe('TileApplicatorService', () => {
     });
 
     describe('applyDoor', () => {
-        it('should clear the cell item if it is not DEFAULT', () => {
-            mapServiceSpy.getCellItem.and.returnValue(Item.SPAWN);
+        it('should clear the cell item if it is not Default', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Spawn);
 
             (service as any).applyDoor(7, 7);
 
-            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(7, 7, Item.DEFAULT);
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(7, 7, Item.Default);
         });
 
-        it('should not clear the cell item if it is DEFAULT', () => {
-            mapServiceSpy.getCellItem.and.returnValue(Item.DEFAULT);
+        it('should not clear the cell item if it is Default', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Default);
 
             (service as any).applyDoor(8, 8);
 
             expect(mapServiceSpy.setCellItem).not.toHaveBeenCalled();
         });
 
-        it('should set tile to OPENED_DOOR if current tile is CLOSED_DOOR', () => {
-            mapServiceSpy.getCellTile.and.returnValue(Tile.CLOSED_DOOR);
+        it('should set tile to OpenedDoor if current tile is ClosedDoor', () => {
+            mapServiceSpy.getCellTile.and.returnValue(Tile.ClosedDoor);
 
             (service as any).applyDoor(9, 9);
 
-            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(9, 9, Tile.OPENED_DOOR);
+            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(9, 9, Tile.OpenedDoor);
         });
 
-        it('should set tile to CLOSED_DOOR if current tile is not CLOSED_DOOR', () => {
-            mapServiceSpy.getCellTile.and.returnValue(Tile.FLOOR);
+        it('should set tile to ClosedDoor if current tile is not ClosedDoor', () => {
+            mapServiceSpy.getCellTile.and.returnValue(Tile.Floor);
 
             (service as any).applyDoor(0, 0);
 
-            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(0, 0, Tile.CLOSED_DOOR);
+            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(0, 0, Tile.ClosedDoor);
         });
     });
 
     describe('applyWall', () => {
-        it('should clear the cell item if it is not DEFAULT', () => {
-            mapServiceSpy.getCellItem.and.returnValue(Item.CHEST);
+        it('should clear the cell item if it is not Default', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Chest);
 
             (service as any).applyWall(1, 2);
 
-            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(1, 2, Item.DEFAULT);
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(1, 2, Item.Default);
         });
 
-        it('should not clear the cell item if it is DEFAULT', () => {
-            mapServiceSpy.getCellItem.and.returnValue(Item.DEFAULT);
+        it('should not clear the cell item if it is Default', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Default);
 
             (service as any).applyWall(2, 3);
 
             expect(mapServiceSpy.setCellItem).not.toHaveBeenCalled();
         });
 
-        it('should set tile to WALL', () => {
+        it('should set tile to Wall', () => {
             (service as any).applyWall(3, 4);
 
-            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(3, 4, Tile.WALL);
+            expect(mapServiceSpy.setCellTile).toHaveBeenCalledWith(3, 4, Tile.Wall);
         });
     });
 
@@ -451,7 +425,6 @@ describe('TileApplicatorService', () => {
             const result = (service as any).screenToBoard(x, y, rect);
 
             expect(result).toEqual({ x: Math.floor(50 / cellWidth), y: Math.floor(60 / cellHeight) });
-            // Par exemple, avec cellWidth = 20 et cellHeight = 20 : floor(50/20)=2, floor(60/20)=3
             expect(result).toEqual({ x: 2, y: 3 });
         });
     });

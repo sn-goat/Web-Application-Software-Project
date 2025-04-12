@@ -15,7 +15,7 @@ describe('MapCardComponent', () => {
         description: 'Test Description',
         board: [],
         isCTF: false,
-        visibility: Visibility.PUBLIC,
+        visibility: Visibility.Public,
         updatedAt: new Date(),
         createdAt: new Date(),
     };
@@ -40,15 +40,6 @@ describe('MapCardComponent', () => {
         component.onEdit();
         expect(component.edit.emit).toHaveBeenCalledWith(mockBoard);
     });
-
-    // it('should confirm before emitting delete event', () => {
-    //     spyOn(window, 'confirm').and.returnValue(true);
-    //     spyOn(component.delete, 'emit');
-
-    //     component.onDelete();
-    //     expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete "Test Map"?');
-    //     expect(component.delete.emit).toHaveBeenCalledWith(mockBoard);
-    // });
 
     it('should not emit delete event if confirmation is cancelled', () => {
         spyOn(window, 'confirm').and.returnValue(false);

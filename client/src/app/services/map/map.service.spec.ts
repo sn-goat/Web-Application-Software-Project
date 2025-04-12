@@ -10,20 +10,18 @@ import { BehaviorSubject } from 'rxjs';
 
 describe('MapService', () => {
     let service: MapService;
-    // On utilisera un board "dummy" pour simuler le contenu du localStorage.
     const dummyBoard: Board = {
         _id: 'dummyId',
         name: 'Dummy Board',
         description: 'Dummy description',
-        size: 10, // on choisit une taille qui existe dans BOARD_SIZE_MAPPING
+        size: 10,
         board: [],
         isCTF: false,
-        visibility: Visibility.PUBLIC,
+        visibility: Visibility.Public,
         updatedAt: new Date(),
     };
 
     beforeEach(() => {
-        // On simule le localStorage pour le test
         spyOn(localStorage, 'getItem').and.callFake((key: string) => {
             return key === 'firstBoardValue' ? JSON.stringify(dummyBoard) : null;
         });
@@ -33,7 +31,6 @@ describe('MapService', () => {
             providers: [MapService],
         });
         service = TestBed.inject(MapService);
-        // On appelle setBoardToFirstValue afin d'initialiser boardToSave et les compteurs.
         service.setBoardToFirstValue();
     });
 
@@ -41,7 +38,6 @@ describe('MapService', () => {
         expect(service).toBeTruthy();
     });
 
-    /* ==== Tests sur les BehaviorSubject pour les compteurs et le flag ==== */
     it('should increase and decrease spawns to place', () => {
         const initial = service['nbrSpawnsToPlace'].value;
         service.increaseSpawnsToPlace();
@@ -65,25 +61,20 @@ describe('MapService', () => {
         expect(service['hasFlagOnBoard'].value).toBeFalse();
     });
 
-    /* ==== Test de la méthode isReadyToSave ==== */
     describe('isReadyToSave', () => {
         it('should return an error message when spawns or items remain to be placed', () => {
-            // On s'assure que les compteurs sont > 0 en laissant setBoardToFirstValue tel quel.
             const validation: Validation = service.isReadyToSave();
             expect(validation.isValid).toBeFalse();
             expect(validation.error).toContain('Vous devez placer');
         });
 
         it('should return valid when no spawns, no items to place and flag is set for CTF', () => {
-            // Pour tester la validation positive, on force les compteurs à 0.
             service['nbrSpawnsToPlace'].next(0);
             service['nbrItemsToPlace'].next(0);
-            // On teste d'abord pour un mode non-CTF
             let validation: Validation = service.isReadyToSave();
             expect(validation.isValid).toBeTrue();
             expect(validation.error).toBe('');
 
-            // Pour le mode CTF, si le drapeau est placé, la validation est également valide.
             service.getBoardToSave().value.isCTF = true;
             service.setHasFlagOnBoard(true);
             validation = service.isReadyToSave();
@@ -92,10 +83,8 @@ describe('MapService', () => {
         });
 
         it('should return error for CTF mode when flag is not placed', () => {
-            // On force le mode CTF et on s'assure que le flag n'est pas posé.
             service.getBoardToSave().value.isCTF = true;
             service.setHasFlagOnBoard(false);
-            // On met aussi les compteurs à 0 pour ne pas interférer avec l\'erreur du flag
             service['nbrSpawnsToPlace'].next(0);
             service['nbrItemsToPlace'].next(0);
             const validation: Validation = service.isReadyToSave();
@@ -104,7 +93,6 @@ describe('MapService', () => {
         });
     });
 
-    /* ==== Test de setMapData et getters associés ==== */
     it('setMapData should update firstBoardValue and localStorage', () => {
         const newBoard: Board = {
             _id: 'newId',
@@ -113,7 +101,7 @@ describe('MapService', () => {
             size: 4,
             board: [],
             isCTF: true,
-            visibility: Visibility.PRIVATE,
+            visibility: Visibility.Private,
             updatedAt: new Date(),
         };
         service.setMapData(newBoard);
@@ -127,7 +115,6 @@ describe('MapService', () => {
         expect(bs instanceof BehaviorSubject).toBeTrue();
     });
 
-    /* ==== Test de la modification des propriétés du board ==== */
     it('setBoardName should update board name', () => {
         const newName = 'Updated Board Name';
         service.setBoardName(newName);
@@ -145,14 +132,13 @@ describe('MapService', () => {
     });
 
     it('getCellTile should return the correct tile at specified coordinates', () => {
-        // On s'assure qu'une board est générée (générée par setBoardToFirstValue)
         const cellTile = service.getCellTile(0, 0);
-        expect(cellTile).toEqual(Tile.FLOOR);
+        expect(cellTile).toEqual(Tile.Floor);
     });
 
     it('getCellItem should return the correct item at specified coordinates', () => {
         const cellItem = service.getCellItem(0, 0);
-        expect(cellItem).toEqual(Item.DEFAULT);
+        expect(cellItem).toEqual(Item.Default);
     });
 
     it('isModeCTF should return the isCTF flag from boardToSave', () => {
@@ -161,7 +147,6 @@ describe('MapService', () => {
     });
 
     it('setCellTile should update the tile of the specified cell', () => {
-        // Préparation d'une grille complète pour être sûr de la structure
         const board = service.getBoardToSave().value;
         board.board = Array(board.size)
             .fill(null)
@@ -169,17 +154,16 @@ describe('MapService', () => {
                 Array(board.size)
                     .fill(null)
                     .map((__, colIndex) => ({
-                        tile: Tile.FLOOR,
-                        item: Item.DEFAULT,
+                        tile: Tile.Floor,
+                        item: Item.Default,
                         position: { x: colIndex, y: rowIndex },
                         cost: 1,
                         player: Avatar.Default,
                     })),
             );
-        // On remet à jour boardToSave avec cette grille
         service['boardToSave'].next(board);
-        service.setCellTile(1, 1, Tile.WALL);
-        expect(service.getBoardToSave().value.board[1][1].tile).toEqual(Tile.WALL);
+        service.setCellTile(1, 1, Tile.Wall);
+        expect(service.getBoardToSave().value.board[1][1].tile).toEqual(Tile.Wall);
     });
 
     it('setCellItem should update the item of the specified cell', () => {
@@ -190,109 +174,93 @@ describe('MapService', () => {
                 Array(board.size)
                     .fill(null)
                     .map((__, colIndex) => ({
-                        tile: Tile.FLOOR,
-                        item: Item.DEFAULT,
+                        tile: Tile.Floor,
+                        item: Item.Default,
                         position: { x: colIndex, y: rowIndex },
                         cost: 1,
                         player: Avatar.Default,
                     })),
             );
         service['boardToSave'].next(board);
-        service.setCellItem(2, 0, Item.FLAG);
-        expect(service.getBoardToSave().value.board[0][2].item).toEqual(Item.FLAG);
+        service.setCellItem(2, 0, Item.Flag);
+        expect(service.getBoardToSave().value.board[0][2].item).toEqual(Item.Flag);
     });
 
-    /* ==== Tests sur la génération et le parsing du board ==== */
     describe('setBoardToFirstValue', () => {
         it('should make a deep copy of firstBoardValue when setting boardToSave', () => {
-            // Setup: Créer un firstBoardValue avec une structure spécifique
             const originalBoard: Board = {
                 _id: 'original',
                 name: 'Original Board',
                 description: 'Original description',
                 size: 5,
-                board: [[{ tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default }]],
+                board: [[{ tile: Tile.Floor, item: Item.Default, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default }]],
                 isCTF: false,
-                visibility: Visibility.PUBLIC,
+                visibility: Visibility.Public,
                 updatedAt: new Date(),
             };
 
-            // Mettre en place firstBoardValue
             service['firstBoardValue'] = originalBoard;
 
-            // Appeler setBoardToFirstValue
             service.setBoardToFirstValue();
 
-            // Vérifier que boardToSave a une copie profonde (et non une référence)
             const savedBoard = service.getBoardToSave().value;
 
-            // Modifier firstBoardValue
             service['firstBoardValue'].name = 'Modified Original';
 
-            // Vérifier que la modification de firstBoardValue n'affecte pas boardToSave
             expect(savedBoard.name).not.toEqual('Modified Original');
             expect(savedBoard.name).toEqual('Original Board');
         });
 
         it('should call generateBoard when firstBoardValue has no board array', () => {
-            // Setup: Créer un firstBoardValue sans tableau board
             const emptyBoard: Board = {
                 _id: 'empty',
                 name: 'Empty Board',
                 description: 'No board array',
                 size: 5,
-                board: [], // tableau vide
+                board: [],
                 isCTF: false,
-                visibility: Visibility.PUBLIC,
+                visibility: Visibility.Public,
                 updatedAt: new Date(),
             };
 
             service['firstBoardValue'] = emptyBoard;
 
-            // Espionner generateBoard
             const generateSpy = spyOn<any>(service, 'generateBoard').and.callThrough();
 
-            // Appeler setBoardToFirstValue
             service.setBoardToFirstValue();
 
-            // Vérifier que generateBoard a été appelé
             expect(generateSpy).toHaveBeenCalled();
         });
 
         it('should parse items in the board correctly', () => {
-            // Utiliser Size.SMALL (10) qui existe certainement dans BOARD_SIZE_MAPPING
             const boardSize = 10;
 
-            // Setup: Board avec items spécifiques mais taille valide
             const boardWithItems: Board = {
                 _id: 'items',
                 name: 'Board with Items',
                 description: 'Has items',
                 size: boardSize,
                 board: [
-                    // Garder une board 2x2 pour simplicité avec les mêmes items
                     [
-                        { tile: Tile.FLOOR, item: Item.SPAWN, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default },
-                        { tile: Tile.FLOOR, item: Item.FLAG, position: { x: 1, y: 0 }, cost: 1, player: Avatar.Default },
+                        { tile: Tile.Floor, item: Item.Spawn, position: { x: 0, y: 0 }, cost: 1, player: Avatar.Default },
+                        { tile: Tile.Floor, item: Item.Flag, position: { x: 1, y: 0 }, cost: 1, player: Avatar.Default },
                     ],
                     [
-                        { tile: Tile.WALL, item: Item.BOW, position: { x: 0, y: 1 }, cost: 1, player: Avatar.Default },
-                        { tile: Tile.FLOOR, item: Item.DEFAULT, position: { x: 1, y: 1 }, cost: 1, player: Avatar.Default },
+                        { tile: Tile.Wall, item: Item.Bow, position: { x: 0, y: 1 }, cost: 1, player: Avatar.Default },
+                        { tile: Tile.Floor, item: Item.Default, position: { x: 1, y: 1 }, cost: 1, player: Avatar.Default },
                     ],
                 ],
                 isCTF: true,
-                visibility: Visibility.PUBLIC,
+                visibility: Visibility.Public,
                 updatedAt: new Date(),
             };
 
             service['firstBoardValue'] = boardWithItems;
 
-            // Espionner les méthodes
             const decreaseSpawnsSpy = spyOn(service, 'decreaseSpawnsToPlace').and.callThrough();
             const decreaseItemsSpy = spyOn(service, 'decreaseItemsToPlace').and.callThrough();
             const setFlagSpy = spyOn(service, 'setHasFlagOnBoard').and.callThrough();
 
-            // Réinitialiser avec une taille valide
             const maxItems = BOARD_SIZE_MAPPING[boardSize as Size];
             service['nbrSpawnsToPlace'].next(maxItems);
             service['nbrItemsToPlace'].next(maxItems);
@@ -300,7 +268,6 @@ describe('MapService', () => {
 
             service.setBoardToFirstValue();
 
-            // Vérifications
             expect(decreaseSpawnsSpy).toHaveBeenCalledTimes(1);
             expect(decreaseItemsSpy).toHaveBeenCalledTimes(1);
             expect(setFlagSpy).toHaveBeenCalledWith(true);

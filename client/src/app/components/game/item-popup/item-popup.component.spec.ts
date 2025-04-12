@@ -12,7 +12,7 @@ describe('ItemPopupComponent', () => {
     let fakeGameService: jasmine.SpyObj<GameService>;
 
     const testData = {
-        inventory: [Item.SWORD, Item.BOW, Item.LEATHER_BOOT],
+        inventory: [Item.Sword, Item.Bow, Item.LeatherBoot],
         collectedPosition: { x: 1, y: 2 } as Vec2,
     };
 
@@ -42,7 +42,7 @@ describe('ItemPopupComponent', () => {
     });
 
     it('should call gameService.handleInventoryChoice and close the dialog when an item is selected', () => {
-        const selectedItem = Item.SWORD;
+        const selectedItem = Item.Sword;
         component.selectItemToThrow(selectedItem);
         expect(fakeGameService.handleInventoryChoice).toHaveBeenCalledWith(
             testData.collectedPosition,
