@@ -17,6 +17,7 @@ export class HeaderBarComponent {
     @Input() backUrl: string = 'accueil';
     @Input() showDialog: boolean = false;
     @Input() message: string = 'Êtes-vous sûre de vouloir revenir en arrière?';
+    @Input() isGamePage: boolean = false;
 
     constructor(
         private router: Router,

@@ -1,22 +1,80 @@
-.popup-container {
-  padding: 20px;
-  h2, p {
-    color: #000;
-  }
-  .items {
-    display: flex;
-    flex-wrap: wrap;
-    .item {
-      margin: 10px;
-      cursor: pointer;
-      img {
-        max-width: 100px;
-      }
-      span {
-        display: block;
-        text-align: center;
-      }
-    }
-  }
+$scroll-gold: #d4af37;
+
+%blurred-gold-border {
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    animation: scrollReveal 1.4s ease-out;
 }
 
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.popup-container {
+    @extend %blurred-gold-border;
+    padding: 24px 32px;
+    min-width: 380px;
+    background-color: rgba(12, 9, 18, 0.95);
+    text-align: center;
+    animation: scrollReveal 0.6s ease-out;
+
+    h2 {
+        @extend %blurred-gold-border;
+    }
+
+    p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+        color: #f2e5b8;
+    }
+
+    .items {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            @extend %blurred-gold-border;
+
+            img {
+                max-width: 70px;
+                max-height: 70px;
+                margin-bottom: 8px;
+                filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+            }
+
+            span {
+                font-family: 'MedievalSharp', cursive;
+                font-size: 1rem;
+                color: #f2e5b8;
+                text-align: center;
+            }
+
+            &:hover {
+                border-color: $scroll-gold;
+                background-color: rgba(255, 217, 0, 0.05);
+                box-shadow: 0 0 10px $scroll-gold;
+                transform: scale(1.05);
+            }
+        }
+    }
+}

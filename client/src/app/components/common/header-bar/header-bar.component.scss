@@ -30,3 +30,22 @@ mat-toolbar {
   background-color: transparent;
   margin-bottom: 16px;
 }
+
+.quitter{
+    border-radius: 10%;
+    width: 100%;
+    max-width: 160px;
+    align-self: center;
+    padding: 10px 16px;
+    margin-top: 8px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'MedievalSharp', cursive;
+
+
+        &:hover {
+            background: #b5942f;
+        }
+    }

@@ -1,8 +1,4 @@
-$primary-bg: #1a1625;
-$secondary-bg: #12101b;
-$primary-text: #7ee0d0;
 $glow-teal: rgba(126, 224, 208, 0.3);
-$secondary-text: #ff6b93;
 $accent-color: #ff6b93;
 $active-player-color: #ff9800;
 :host {
@@ -20,6 +16,7 @@ h3,
 h4 {
     font-family: 'MedievalSharp', cursive;
     text-shadow: 0 0 5px $glow-teal;
+    line-height: 1.1;
 }
 
 %blurred-gold-border {
@@ -52,105 +49,88 @@ h4 {
     height: 100%;
     box-sizing: border-box;
     justify-content: space-between;
-    padding: 4px;
-    gap: 5px;
     overflow: hidden;
 }
 
 .player {
     @extend %blurred-gold-border;
-
+    flex: 1 1 0;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    padding: 4px;
-    flex: 1;
+    justify-content: flex-start;
+    padding: 6px;
     min-height: 0;
-    width: 100%;
-    max-width: 100%;
     box-sizing: border-box;
-
-    &.active-player {
-        background-color: rgba(0, 0, 0, 0.5);
-    }
+    flex-wrap: wrap;
 
     .player-image {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 6px;
-        width: 45%;
+        justify-content: center;
+        gap: 4px;
+        flex: 2 1 0; // give it more space to grow
         min-width: 0;
-        overflow: hidden;
-
-        img {
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            min-width: 30px;
-            object-fit: cover;
-        }
 
         h3 {
-            font-size: min(0.9rem, 3.2vw);
-            text-shadow: 0 0 5px $glow-teal;
-            font-weight: 600;
-            text-align: left;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-break: break-word;
+            overflow: visible;
+            text-overflow: unset;
+            height: auto;
+            text-align: center;
+            font-size: min(0.85rem, 2.8vw);
             margin: 0;
-            max-width: calc(100% - 36px);
+            padding: 0 4px;
+            width: 100%;
         }
     }
 
     .player-info {
-        width: 50%;
-        padding: 2px;
+        flex: 1 1 0;
+        flex-shrink: 1;
         text-align: center;
         display: flex;
         flex-direction: column;
-        justify-content: center;
         align-items: center;
-        gap: 2px;
-        overflow: hidden;
+        gap: 4px;
 
         h3 {
-            margin: 10px;
-            font-size: min(0.8rem, 2.7vw);
-            line-height: 1.1;
-            font-weight: 500;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-align: center;
-            width: 100%;
-            height: fit-content;
-        }
-
-        h3.admin,
-        h3.active {
-            font-size: min(0.75rem, 2.5vw);
-            padding: 1px 3px;
-            margin-bottom: 2px;
-            border-radius: 3px;
-            display: inline-block;
-            width: auto;
-            height: auto;
-            max-width: 100%;
-            line-height: 1;
+            font-size: min(0.75rem, 2.3vw);
+            margin: 0;
         }
 
         h3.admin {
+            padding-top: 2px;
             border: 0.5px solid;
             text-shadow: 0 0 4px rgba($accent-color, 0.6);
+            border-radius: 8px;
+        }
+        h3.admin,
+        h3.active {
+            font-size: min(0.75rem, 2.4vw);
+            padding: 1px 4px;
         }
 
         h3.active {
             border: 1px solid;
+            border-radius: 8px;
             animation: text-pulse 2s ease-in-out infinite;
             font-weight: bold;
         }
+
+        .flag-icon {
+        width: 20px;
+        height: auto;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+        animation: flagWiggle 2.5s infinite ease-in-out;
+    }
+    @keyframes flagWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(25deg); }
+}
     }
 }
 
@@ -206,117 +186,5 @@ h4 {
         opacity: 0.6;
         border-color: rgba($active-player-color, 0.2);
         box-shadow: 0 0 2px rgba($active-player-color, 0.2);
-    }
-}
-
-:host[style*="--player-count='1'"] .player-section,
-:host[style*="--player-count='2'"] .player-section {
-    height: 100%;
-}
-
-:host[style*="--player-count='3'"] .player-section,
-:host[style*="--player-count='4'"] .player-section {
-    height: 100%;
-}
-
-:host[style*="--player-count='5'"] .player-section,
-:host[style*="--player-count='6'"] .player-section,
-:host[style*="--player-count='7'"] .player-section,
-:host[style*="--player-count='8'"] .player-section {
-    height: 100%;
-}
-
-:host[style*="--player-count='1'"] .player {
-    height: 100%;
-}
-:host[style*="--player-count='2'"] .player {
-    height: 50%;
-}
-:host[style*="--player-count='3'"] .player {
-    height: 33.3%;
-}
-:host[style*="--player-count='4'"] .player {
-    height: 25%;
-}
-:host[style*="--player-count='5'"] .player {
-    height: 20%;
-}
-:host[style*="--player-count='6'"] .player {
-    height: 16.6%;
-}
-:host[style*="--player-count='7'"] .player {
-    height: 14.3%;
-}
-:host[style*="--player-count='8'"] .player {
-    height: 12.5%;
-}
-
-:host[style*="--player-count='1'"] .player,
-:host[style*="--player-count='2'"] .player {
-    padding: 8px;
-    margin-bottom: 5px;
-
-    .player-image img {
-        width: 36px;
-        height: 36px;
-    }
-
-    .player-image h3 {
-        font-size: min(1.1rem, 3.7vw);
-    }
-
-    .player-info h3 {
-        font-size: min(0.95rem, 3.2vw);
-    }
-}
-
-:host[style*="--player-count='3'"] .player,
-:host[style*="--player-count='4'"] .player {
-    padding: 5px;
-
-    .player-image img {
-        width: 30px;
-        height: 30px;
-    }
-
-    .player-image h3 {
-        font-size: min(0.9rem, 3vw);
-    }
-
-    .player-info h3 {
-        font-size: min(0.8rem, 2.7vw);
-    }
-}
-
-:host[style*="--player-count='5'"],
-:host[style*="--player-count='6'"],
-:host[style*="--player-count='7'"],
-:host[style*="--player-count='8'"] {
-    .player {
-        padding: 4px;
-
-        .player-image {
-            gap: 4px;
-
-            img {
-                width: 24px;
-                height: 24px;
-            }
-
-            h3 {
-                font-size: min(0.8rem, 2.7vw);
-            }
-        }
-
-        .player-info h3 {
-            font-size: min(0.75rem, 2.5vw);
-            margin-bottom: 0;
-        }
-
-        .player-info h3.admin,
-        .player-info h3.active {
-            font-size: min(0.7rem, 2.4vw);
-            padding: 1px 2px;
-        }
     }
 }
