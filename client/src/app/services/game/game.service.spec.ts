@@ -16,6 +16,8 @@ import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, IRoom, TurnInfo } from '@common/game';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject } from 'rxjs';
+import { Stats, mockStandardStats } from '@common/stats';
+import { Entry, GameMessage } from '@common/journal';
 
 describe('GameService', () => {
     let service: GameService;
@@ -99,6 +101,23 @@ describe('GameService', () => {
         spyOn(service, 'setGame');
         socketServiceMock.triggerOnGameStarted(testGame);
         expect(service.setGame).toHaveBeenCalledWith(testGame);
+    });
+
+    it('should add entry on Journal event', () => {
+        const mockEntry: Entry = {
+            messageType: GameMessage.Quit,
+            message: GameMessage.Quit + 'Jean',
+            accessCode: 'ABC123',
+            playersInvolved: ['otherPlayer456'],
+        };
+        socketServiceMock.triggerOnJournalEntry(mockEntry);
+        expect(service.journalEntries.value).toEqual([mockEntry]);
+    });
+
+    it('should update stats on Stats event', () => {
+        const stats: Stats = mockStandardStats;
+        socketServiceMock.triggerOnStatsUpdate(stats);
+        expect(service.stats.value).toEqual(stats);
     });
 
     it('should correctly call setDebugMode on debugModeChanged event', () => {
@@ -190,6 +209,15 @@ describe('GameService', () => {
         dialogMock.open.and.returnValue(dialogRefMock);
 
         const result = await service.confirmAndAbandonGame();
+        expect(result).toBeTrue();
+    });
+
+    it('should confirm and quit game (resolve true)', async () => {
+        const dialogRefMock = jasmine.createSpyObj('MatDialogRef<ConfirmationDialogComponent>>', ['afterClosed']);
+        dialogRefMock.afterClosed.and.returnValue(new BehaviorSubject<boolean>(true));
+        dialogMock.open.and.returnValue(dialogRefMock);
+
+        const result = await service.confirmAndQuitGame();
         expect(result).toBeTrue();
     });
 

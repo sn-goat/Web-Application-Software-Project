@@ -62,12 +62,12 @@ describe('GamePageComponent', () => {
         onWinner: jasmine.createSpy('onWinner').and.returnValue(of({ id: 'player1' })),
         onTimerUpdate: jasmine.createSpy('onTimerUpdate').and.returnValue(of({ remainingTime: 60 })),
         onTurnSwitch: jasmine.createSpy('onTurnSwitch').and.returnValue(of({ player: { id: 'player1', name: 'testPlayer' } })),
-        onGameEnded: jasmine.createSpy('onGameEnded').and.returnValue(of({ id: 'player1', name: 'testPlayer' })),
         onPlayerRemoved: jasmine.createSpy('onPlayerRemoved').and.returnValue(of('error')),
         onPlayerTurnChanged: jasmine.createSpy('onPlayerTurnChanged').and.returnValue(of({ name: 'p1' })),
         onLoser: jasmine.createSpy('onLoser').and.returnValue(of({ name: 'p1' })),
         disconnect: jasmine.createSpy('disconnect').and.returnValue('disconnected'),
         onInventoryFull: jasmine.createSpy('onInventoryFull').and.returnValue(of(null)),
+        onGameWinner: jasmine.createSpy('onGameWinner').and.returnValue(of({ name: 'p1' })),
     };
 
     const routerMock = {

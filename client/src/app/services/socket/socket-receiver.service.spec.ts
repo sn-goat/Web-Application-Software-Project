@@ -4,12 +4,14 @@
 import { TestBed } from '@angular/core/testing';
 import { FakeSocket } from '@app/helpers/fake-socket';
 import { Tile } from '@common/enums';
-import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, TurnEvents, StatsEvents, JournalEvent } from '@common/game.gateway.events';
 import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
 import { SocketReceiverService } from './socket-receiver.service';
+import { mockStandardStats } from '@common/stats';
+import { Entry, GameMessage } from '@common/journal';
 
 describe('SocketReceiverService', () => {
     let service: SocketReceiverService;
@@ -42,6 +44,20 @@ describe('SocketReceiverService', () => {
             done();
         });
         fakeSocket.onceCallbacks[RoomEvents.RoomCreated](room);
+    });
+
+    it('should emit on journal event', (done) => {
+        const mockEntry: Entry = {
+            messageType: GameMessage.Quit,
+            message: GameMessage.Quit + 'Jean',
+            accessCode: 'ABC123',
+            playersInvolved: ['otherPlayer456'],
+        };
+        service.onJournalEntry().subscribe((receivedEntry) => {
+            expect(receivedEntry).toEqual(mockEntry);
+            done();
+        });
+        fakeSocket.callbacks[JournalEvent.Add](mockEntry);
     });
 
     it('should emit player joined room', (done) => {
@@ -141,13 +157,30 @@ describe('SocketReceiverService', () => {
         fakeSocket.callbacks[GameEvents.DebugStateChanged](isDebug);
     });
 
-    it('should emit on game end', (done) => {
-        const winner = { id: 'p1' } as IPlayer;
-        service.onGameEnded().subscribe((received) => {
+    it('should emit on stats update', (done) => {
+        const stats = mockStandardStats;
+        service.onStatsUpdate().subscribe((received) => {
+            expect(received).toEqual(stats);
+            done();
+        });
+        fakeSocket.callbacks[StatsEvents.StatsUpdate](stats);
+    });
+
+    it('should emit on game winner', (done) => {
+        const winner = { id: 'winner' } as IPlayer;
+        service.onGameWinner().subscribe((received) => {
             expect(received).toEqual(winner);
             done();
         });
-        fakeSocket.onceCallbacks[GameEvents.GameEnded](winner);
+        fakeSocket.onceCallbacks[GameEvents.Winner](winner);
+    });
+
+    it('should emit on game ended', (done) => {
+        service.onGameEnded().subscribe((received) => {
+            expect(received).toBeUndefined();
+            done();
+        });
+        fakeSocket.onceCallbacks[GameEvents.GameEnded](undefined);
     });
 
     it('should emit on player turn changed with path as Map', (done) => {

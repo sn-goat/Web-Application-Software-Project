@@ -45,15 +45,15 @@ export interface GameStats {
 
 export interface PlayerStats {
     name: string;
-    takenDamage: number;
-    givenDamage: number;
+    takenDamage?: number;
+    givenDamage?: number;
     itemsPicked?: Set<Item>;
     itemsPickedCount?: number;
     tilesVisited?: Set<Vec2>;
     tilesVisitedPercentage?: string;
     wins: number;
-    losses: number;
-    fleeSuccess: number; 
+    losses?: number;
+    fleeSuccess?: number; 
     totalFights?: number;
 }
 

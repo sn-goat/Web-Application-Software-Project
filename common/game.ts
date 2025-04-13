@@ -18,7 +18,7 @@ export interface IGame {
 }
 
 export interface GameStats {
-    gameDuration: string;
+    gameDuration?: string;
     tilesVisitedPercentage?: string;
     tilesVisited?: Set<Vec2>;
     doorsHandled?: Set<Vec2>;

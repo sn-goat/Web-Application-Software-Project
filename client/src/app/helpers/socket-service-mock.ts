@@ -9,6 +9,7 @@ import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
 import { Entry } from '@common/journal';
 import { IPlayer, PlayerInput } from '@common/player';
 import { Subject } from 'rxjs';
+import { Stats } from '@common/stats';
 
 export class MockSocketService {
     gameRoom: IRoom = {
@@ -38,9 +39,11 @@ export class MockSocketService {
     private itemDropped = new Subject<Item>();
     private mapUpdate = new Subject<unknown>();
     private inventoryFull = new Subject<unknown>();
+    private gameWinner = new Subject<unknown>();
 
-    private journalSubject = new Subject<Entry[]>();
+    private journalSubject = new Subject<Entry>();
     private chatSubject = new Subject<ChatMessage>();
+    private statsSubject = new Subject<Stats>();
 
     private turnUpdateSubject = new Subject<TurnInfo>();
     private fightInitSubject = new Subject<IFight>();
@@ -61,6 +64,14 @@ export class MockSocketService {
 
     onJournalEntry() {
         return this.journalSubject.asObservable();
+    }
+
+    onStatsUpdate() {
+        return this.statsSubject.asObservable();
+    }
+
+    onGameWinner() {
+        return this.gameWinner.asObservable();
     }
 
     receiveMessageFromServer() {
@@ -179,6 +190,14 @@ export class MockSocketService {
 
     triggerPlayerJoined(data: IRoom) {
         this.playerJoinedSubject.next(data);
+    }
+
+    triggerOnJournalEntry(data: Entry) {
+        this.journalSubject.next(data);
+    }
+
+    triggerOnStatsUpdate(data: Stats) {
+        this.statsSubject.next(data);
     }
 
     triggerOnPlayersUpdated(data: IPlayer[]) {
