@@ -94,6 +94,11 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this.socketReceiver.onGameWinner().subscribe((winner) => {
                 this.warningEndGame(`${winner.name} a remporté la partie avec 3 victoires!`);
+                if (winner.team) {
+                    this.warningEndGame(`${winner.name} a rapporté le drapeau à son point de départ. L'équipe ${winner.team} remporte la partie`);
+                } else {
+                    this.warningEndGame(`${winner.name} a remporté la partie avec 3 victoires!`);
+                }
                 timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/stats']));
             }),
 

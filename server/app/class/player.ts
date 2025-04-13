@@ -157,6 +157,11 @@ export class Player implements IPlayer {
     getDamage(): number {
         return this.currentDamage;
     }
+
+    isCtfWinner(): boolean {
+        return this.inventory.includes(Item.Flag) && this.position.x === this.spawnPosition.x && this.position.y === this.spawnPosition.y;
+    }
+
     private initiateAttack(isDebugMode: boolean): number {
         this.diceResult = isDebugMode ? this.diceToNumber(this.attackDice) : Math.floor(Math.random() * this.diceToNumber(this.attackDice)) + 1;
         return this.diceResult + this.attackPower;

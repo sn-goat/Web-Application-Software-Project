@@ -112,6 +112,13 @@ export class Room implements IRoom {
                 position: payload.position,
             });
         });
+
+        this.internalEmitter.on(InternalGameEvents.Winner, (player: Player) => {
+            this.globalEmitter.emit(InternalGameEvents.Winner, {
+                accessCode: this.accessCode,
+                player,
+            });
+        });
     }
 
     setLock(isLocked: boolean): void {

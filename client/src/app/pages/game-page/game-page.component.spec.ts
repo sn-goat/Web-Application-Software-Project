@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
@@ -9,7 +10,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Cell } from '@common/board';
-import { IPlayer } from '@common/player';
+import { IPlayer, Team } from '@common/player';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { GamePageComponent } from './game-page.component';
 
@@ -21,6 +22,7 @@ describe('GamePageComponent', () => {
     const isDebugModeSubject = new BehaviorSubject<boolean>(false);
     const playingPlayersSubject = new BehaviorSubject<IPlayer[]>([]);
     const initialPlayersSubject = new BehaviorSubject<IPlayer[]>([]);
+    const onGameWinnerSubject = new BehaviorSubject<IPlayer>({} as IPlayer);
 
     const gameServiceMock = {
         getAccessCode: jasmine.createSpy('getAccessCode').and.returnValue('ACCESS123'),
@@ -67,7 +69,7 @@ describe('GamePageComponent', () => {
         onLoser: jasmine.createSpy('onLoser').and.returnValue(of({ name: 'p1' })),
         disconnect: jasmine.createSpy('disconnect').and.returnValue('disconnected'),
         onInventoryFull: jasmine.createSpy('onInventoryFull').and.returnValue(of(null)),
-        onGameWinner: jasmine.createSpy('onGameWinner').and.returnValue(of({ name: 'p1' })),
+        onGameWinner: jasmine.createSpy('onGameWinner').and.returnValue(onGameWinnerSubject),
     };
 
     const routerMock = {
@@ -126,6 +128,20 @@ describe('GamePageComponent', () => {
         isDebugModeSubject.next(true);
         expect(component.debugMode).toBeTrue();
     });
+
+    it('should display the correct message and navigate after game ends with team winner', fakeAsync(() => {
+        const warningSpy = spyOn<any>(component, 'warning');
+        const winner = { name: 'p1', team: Team.Blue } as IPlayer;
+        onGameWinnerSubject.next(winner);
+        expect(warningSpy).toHaveBeenCalledWith("p1 a rapporté le drapeau à son point de départ. L'équipe Bleu remporte la partie");
+    }));
+
+    it('should display the correct message and navigate after game ends with 3 wins', fakeAsync(() => {
+        const warningSpy = spyOn<any>(component, 'warning');
+        const winner = { name: 'p2' } as IPlayer;
+        onGameWinnerSubject.next(winner);
+        expect(warningSpy).toHaveBeenCalledWith('p2 a remporté la partie avec 3 victoires!');
+    }));
 
     it('toggleInfo should toggle showInfo value', () => {
         const initial = component.showInfo;
