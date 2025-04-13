@@ -68,7 +68,6 @@ $action-color: rgba(255, 0, 0, 0.3);
     pointer-events: none;
 }
 
-/* Highlighted path when hovering */
 .path-cell:hover ~ .path-highlight::after {
     background-color: $glow-teal;
 }
@@ -157,8 +156,10 @@ $action-color: rgba(255, 0, 0, 0.3);
 }
 
 .tooltip-gameView.small-row {
+    transform: translateX(-50%) translateY(5px);
     top: 100%;
     bottom: auto;
+    z-index: 1000;
 }
 
 .image-container:hover .tooltip,
