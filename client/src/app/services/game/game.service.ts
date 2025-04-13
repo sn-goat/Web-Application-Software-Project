@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmationDialogComponent } from '@app/components/common/confirmation-dialog/confirmation-dialog.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
+import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
@@ -9,8 +10,8 @@ import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, IGame, getAvatarName } from '@common/game';
 import { Entry } from '@common/journal';
-import { Stats } from '@common/stats';
 import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, IPlayer } from '@common/player';
+import { Stats } from '@common/stats';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -31,6 +32,7 @@ export class GameService {
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private playerService = inject(PlayerService);
+    private chatService = inject(ChatService);
 
     constructor() {
         this.socketReceiver.onPlayersUpdated().subscribe((players) => {
@@ -242,6 +244,7 @@ export class GameService {
         this.initialPlayers.next([]);
         this.journalEntries.next([]);
         this.stats.next(null);
+        this.chatService.clearChatHistory();
     }
 
     async confirmAndAbandonGame(): Promise<boolean> {
