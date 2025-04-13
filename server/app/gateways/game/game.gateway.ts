@@ -41,6 +41,13 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit(GameEvents.DebugStateChanged, payload.newState);
     }
 
+    @OnEvent(InternalGameEvents.Winner)
+    handleCtfWinner(payload: { accessCode: string; player: Player }) {
+        this.logger.log(`Winner team : ${payload.player.team}`);
+        this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.player);
+        this.gameManager.closeRoom(payload.accessCode);
+    }
+
     @OnEvent(InternalTurnEvents.Move)
     handleBroadcastMove(payload: { accessCode: string; previousPosition: Vec2; player: Player }) {
         this.logger.log('Moving player' + payload.player.name + 'to: ' + payload.previousPosition);
@@ -104,7 +111,7 @@ export class GameGateway {
         );
 
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
-        if (payload.winner.wins >= MAX_FIGHT_WINS) {
+        if (!game.isCTF && payload.winner.wins >= MAX_FIGHT_WINS) {
             this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.winner);
             this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.winner.name], GameMessage.EndGame, this.server);
             this.gameManager.closeRoom(payload.accessCode);

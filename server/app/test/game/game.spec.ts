@@ -7,7 +7,7 @@ import { Fight } from '@app/class/fight';
 import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { Timer } from '@app/class/timer';
-import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { InternalEvents, InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTurnEvents } from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -81,6 +81,7 @@ const createDummyPlayer = (id: string): Player => {
         updatePosition: jest.fn(),
         attack: jest.fn(),
         attemptFlee: jest.fn(),
+        isCtfWinner: jest.fn(),
         name: 'DummyPlayer',
         inventory: [],
     } as unknown as Player;
@@ -256,6 +257,24 @@ describe('Game', () => {
             game.processPath(pathInfo, 'nonexistent');
             expect(game.movementInProgress).toBe(false);
         });
+
+        it('should check for a ctf winner at the end of path', () => {
+            const winnerSpy = jest.spyOn(player1, 'isCtfWinner').mockReturnValueOnce(true);
+            const emitSpy = jest.spyOn(emitter, 'emit');
+            const pathInfo: PathInfo = {
+                path: [
+                    { x: 1, y: 1 },
+                    { x: 0, y: 1 },
+                ],
+                cost: 2,
+            };
+            jest.useFakeTimers();
+            game.processPath(pathInfo, player1.id);
+            expect(game.movementInProgress).toBe(true);
+            jest.runAllTimers();
+            expect(winnerSpy).toHaveBeenCalled();
+            expect(emitSpy).toHaveBeenCalledWith(InternalGameEvents.Winner, player1);
+        });
     });
 
     describe('decrementMovement and decrementAction', () => {
@@ -307,6 +326,16 @@ describe('Game', () => {
                 player: player1,
                 path: { k: { path: [{ x: 0, y: 0 }], cost: 1 } },
             });
+        });
+
+        it('movePlayerDebug should check for ctf winner', () => {
+            game.addPlayer(player1);
+            player1.position = { x: 0, y: 0 };
+            const emitSpy = jest.spyOn(emitter, 'emit');
+            const winnerSpy = jest.spyOn(player1, 'isCtfWinner').mockReturnValueOnce(true);
+            game.movePlayerDebug({ x: 1, y: 1 }, player1.id);
+            expect(winnerSpy).toHaveBeenCalled();
+            expect(emitSpy).toHaveBeenCalledWith(InternalGameEvents.Winner, player1);
         });
     });
 
