@@ -306,5 +306,26 @@ describe('Player', () => {
                 expect(attacker.hasItem(Item.Sword)).toBe(false);
             });
         });
+
+        describe('isCtfWinner', () => {
+            it('should return false if the player does not have the flag in its inventory', () => {
+                attacker.inventory = [];
+                expect(attacker.isCtfWinner()).toBeFalsy();
+            });
+
+            it('should return true if the player does have the flag in its inventory but is not positioned on his spawn point', () => {
+                attacker.addItemToInventory(Item.Flag);
+                attacker.spawnPosition = { x: 2, y: 2 };
+                attacker.position = { x: 4, y: 6 };
+                expect(attacker.isCtfWinner()).toBeFalsy();
+            });
+
+            it('should return true if the player does have the flag and is positioned on his spawn point', () => {
+                attacker.addItemToInventory(Item.Flag);
+                attacker.spawnPosition = { x: 2, y: 2 };
+                attacker.position = { x: 2, y: 2 };
+                expect(attacker.isCtfWinner()).toBeTruthy();
+            });
+        });
     });
 });

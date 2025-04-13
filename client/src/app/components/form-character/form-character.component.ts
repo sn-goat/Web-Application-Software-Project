@@ -61,7 +61,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.playerInput = {
             name: '',
-            avatar: this.currentPortraitImage,
+            avatar: this.currentPortraitStaticImage,
             life: DEFAULT_LIFE_VALUE,
             speed: DEFAULT_SPEED_VALUE,
             attackPower: DEFAULT_ATTACK_VALUE,
