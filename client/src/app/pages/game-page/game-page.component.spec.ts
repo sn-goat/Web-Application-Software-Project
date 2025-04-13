@@ -130,14 +130,14 @@ describe('GamePageComponent', () => {
     });
 
     it('should display the correct message and navigate after game ends with team winner', fakeAsync(() => {
-        const warningSpy = spyOn<any>(component, 'warning');
+        const warningSpy = spyOn<any>(component, 'warningEndGame');
         const winner = { name: 'p1', team: Team.Blue } as IPlayer;
         onGameWinnerSubject.next(winner);
         expect(warningSpy).toHaveBeenCalledWith("p1 a rapporté le drapeau à son point de départ. L'équipe Bleu remporte la partie");
     }));
 
     it('should display the correct message and navigate after game ends with 3 wins', fakeAsync(() => {
-        const warningSpy = spyOn<any>(component, 'warning');
+        const warningSpy = spyOn<any>(component, 'warningEndGame');
         const winner = { name: 'p2' } as IPlayer;
         onGameWinnerSubject.next(winner);
         expect(warningSpy).toHaveBeenCalledWith('p2 a remporté la partie avec 3 victoires!');
