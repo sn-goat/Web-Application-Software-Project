@@ -132,7 +132,7 @@ describe('GamePageComponent', () => {
     });
 
     it('should display the correct message and navigate after game ends with team winner', fakeAsync(() => {
-        const warningSpy = spyOn<any>(component, 'warningEndGamege');
+        const warningSpy = spyOn<any>(component, 'warningEndGame');
         const winner = { name: 'p1', team: Team.Blue } as IPlayer;
         onGameWinnerSubject.next(winner);
         expect(warningSpy).toHaveBeenCalledWith("p1 a rapporté le drapeau à son point de départ. L'équipe Bleu remporte la partie");
