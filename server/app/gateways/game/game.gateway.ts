@@ -50,9 +50,11 @@ export class GameGateway {
 
     @OnEvent(InternalGameEvents.Winner)
     handleCtfWinner(payload: { accessCode: string; player: Player }) {
+        const game = this.gameManager.getGame(payload.accessCode);
         this.logger.log(`Winner team : ${payload.player.team}`);
-        this.server.to(payload.accessCode).emit(GameEvents.GameEnded, payload.player);
-        this.gameManager.closeRoom(payload.accessCode);
+        this.server.to(payload.accessCode).emit(GameEvents.Winner, payload.player);
+        // this.gameManager.closeRoom(payload.accessCode);
+        game.dispatchGameStats();
     }
 
     @OnEvent(InternalTurnEvents.Move)
