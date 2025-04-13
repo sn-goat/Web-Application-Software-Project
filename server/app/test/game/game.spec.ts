@@ -7,7 +7,7 @@ import { Fight } from '@app/class/fight';
 import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { Timer } from '@app/class/timer';
-import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTurnEvents, InternalStatsEvents } from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -22,6 +22,8 @@ import { Item, Tile, Visibility } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GameStatsUtils } from '@app/services/game/game-utils-stats';
+import { mockStandardStats } from '@common/stats';
 
 // --- Create a dummy board that conforms to the Board interface ---
 const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.Default, cost: number = 1): Cell => ({
@@ -63,6 +65,7 @@ jest.spyOn(GameUtils, 'findPossiblePaths').mockImplementation(
 );
 jest.spyOn(GameUtils, 'findValidSpawn').mockImplementation((map: Cell[][], pos: Vec2) => pos);
 jest.spyOn(GameUtils, 'isPlayerCanMakeAction').mockImplementation((map: Cell[][], player: Player) => true);
+jest.spyOn(GameStatsUtils, 'calculateStats').mockImplementation(() => mockStandardStats);
 
 // --- Create dummy players ---
 const createDummyPlayer = (id: string): Player => {
@@ -120,6 +123,15 @@ describe('Game', () => {
             expect(game.timer).toBeInstanceOf(Timer);
             expect(game.fight).toBeInstanceOf(Fight);
             expect(game.maxPlayers).toBe(getLobbyLimit(dummyBoard.size));
+            expect(game.tilesNumber).toBe(dummyBoard.size * dummyBoard.size);
+            expect(game.doorsNumber).toBe(1);
+            expect(game.tilesVisited).toEqual(new Set<Vec2>());
+            expect(game.doorsHandled).toEqual(new Set<Vec2>());
+            expect(game.flagsCaptured).toEqual(new Set<string>());
+            expect(game.disconnectedPlayers).toEqual([]);
+            expect(game.timeStartOfGame).toBe(null);
+            expect(game.timeEndOfGame).toBe(null);
+            expect(game.stats).toBe(null);
         });
 
         it('getMapSize should return board length', () => {
@@ -210,6 +222,22 @@ describe('Game', () => {
             const configured = game.configureGame();
             expect(configured).toBe(game);
             expect(assignTeamsSpy).toHaveBeenCalledWith(game.players);
+        });
+
+        it('should call startGameTimer', () => {
+            const startGameTimerSpy = jest.spyOn(game as any, 'startGameTimer').mockImplementation(() => {});
+            game.configureGame();
+            expect(startGameTimerSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('statistics', () => {
+        it('should dispatchGameStats', () => {
+            const emitSpy = jest.spyOn(emitter, 'emit');
+            const endGameTimerSpy = jest.spyOn(game as any, 'endGameTimer');
+            game.dispatchGameStats();
+            expect(emitSpy).toHaveBeenCalledWith(InternalStatsEvents.DispatchStats, mockStandardStats);
+            expect(endGameTimerSpy).toHaveBeenCalled();
         });
     });
 

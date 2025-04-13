@@ -68,6 +68,7 @@ export class Game implements IGame, GameStats {
         this.disconnectedPlayers = [];
         this.timeStartOfGame = null;
         this.timeEndOfGame = null;
+        this.stats = null;
         this.players = [];
         this.currentTurn = 0;
         this.hasStarted = false;
@@ -128,8 +129,8 @@ export class Game implements IGame, GameStats {
 
     dispatchGameStats(): void {
         this.endGameTimer();
-        const stats = GameStatsUtils.calculateStats(this.players, this);
-        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, stats);
+        this.stats = GameStatsUtils.calculateStats(this.players, this);
+        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, this.stats);
     }
 
     getMapSize(): number {

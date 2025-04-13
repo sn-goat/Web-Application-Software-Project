@@ -9,12 +9,37 @@ import { GameManagerService } from '@app/services/game/games-manager.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
+import { Vec2, Cell } from '@common/board';
+import { Item, Tile, Visibility } from '@common/enums';
+import { Avatar } from '@common/game';
+
+const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.Default, cost: number = 1): Cell => ({
+    position: pos,
+    tile,
+    item,
+    cost,
+    player,
+});
+
+const dummyBoard: Board = {
+    name: 'TestBoard',
+    description: 'Dummy board',
+    size: 2,
+    isCTF: false,
+    visibility: Visibility.Public, // adjust according to your Visibility type
+    board: [
+        [createDummyCell({ x: 0, y: 0 }, Tile.Floor), createDummyCell({ x: 1, y: 0 }, Tile.ClosedDoor)],
+        [createDummyCell({ x: 0, y: 1 }, Tile.Ice), createDummyCell({ x: 1, y: 1 }, Tile.Water)],
+    ],
+    updatedAt: new Date(), // Added to satisfy required property
+    createdAt: new Date(),
+};
 
 describe('GameManagerService', () => {
     let service: GameManagerService;
     let boardService: jest.Mocked<BoardService>;
 
-    const mockBoard: Board = { name: 'mockBoard' } as Board;
+    const mockBoard: Board = dummyBoard;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({

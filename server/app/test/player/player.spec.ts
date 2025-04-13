@@ -55,6 +55,12 @@ describe('Player', () => {
             expect(attacker.defenseDice).toBe('D4');
             expect(attacker.wins).toBe(DEFAULT_WINS);
             expect(attacker.team).toBeNull();
+            expect(attacker.tilesVisited).toEqual(new Set<Vec2>());
+            expect(attacker.itemsPicked).toEqual(new Set<Item>());
+            expect(attacker.takenDamage).toBe(0);
+            expect(attacker.givenDamage).toBe(0);
+            expect(attacker.losses).toBe(0);
+            expect(attacker.fleeSuccess).toBe(0);
         });
     });
 
@@ -140,6 +146,11 @@ describe('Player', () => {
             expect(defender.currentLife).toBe(92);
             expect(result).toBe(false);
             randomMock.mockRestore();
+        });
+
+        it('should get the current damage', () => {
+            attacker.attack(true, defender);
+            expect(attacker.getDamage()).toBeGreaterThanOrEqual(0);
         });
     });
 

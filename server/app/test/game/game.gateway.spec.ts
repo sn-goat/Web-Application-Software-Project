@@ -11,10 +11,11 @@ import { JournalService } from '@app/services/journal/journal.service';
 import { Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
-import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, TurnEvents, StatsEvents } from '@common/game.gateway.events';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { BroadcastOperator, Server, Socket } from 'socket.io';
+import { Stats, mockStandardStats } from '@common/stats';
 
 describe('GameGateway', () => {
     let gateway: GameGateway;
@@ -135,6 +136,15 @@ describe('GameGateway', () => {
             expect(emitMock).toHaveBeenCalledWith(TurnEvents.PlayerTurn, { player, path });
         });
 
+        it('handleStats should emit Stats event to room', () => {
+            const stats: Stats = mockStandardStats;
+            const accessCode = 'game789';
+            gateway.handleStats({ accessCode, stats });
+
+            expect(server.to).toHaveBeenCalledWith(accessCode);
+            expect(emitMock).toHaveBeenCalledWith(StatsEvents.StatsUpdate, stats);
+        });
+
         it('changeFighter should emit ChangeFighter event to both players', () => {
             const fight1 = {
                 player1: { id: 'p1', getDamage: () => 5 },
@@ -163,6 +173,7 @@ describe('GameGateway', () => {
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
                 dropItems: jest.fn(),
+                dispatchGameStats: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -182,8 +193,8 @@ describe('GameGateway', () => {
 
             // Winner has enough wins
             expect(server.to).toHaveBeenCalledWith(accessCode);
-            expect(emitMock).toHaveBeenCalledWith(GameEvents.GameEnded, winner);
-            expect(gameManager.closeRoom).toHaveBeenCalledWith(accessCode);
+            expect(emitMock).toHaveBeenCalledWith(GameEvents.Winner, winner);
+            expect(game.dispatchGameStats).toBeCalled();
         });
 
         it('manageEndFight should end turn when loser is current player', () => {
@@ -200,6 +211,7 @@ describe('GameGateway', () => {
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
                 dropItems: jest.fn(),
+                dispatchGameStats: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -213,7 +225,7 @@ describe('GameGateway', () => {
             expect(emitMock).toHaveBeenCalledWith(FightEvents.End, players);
 
             // Should not end game
-            expect(gameManager.closeRoom).not.toHaveBeenCalled();
+            expect(game.dispatchGameStats).not.toHaveBeenCalled();
 
             // Should end turn since loser was current player
             expect(game.endTurn).toHaveBeenCalled();
@@ -235,6 +247,7 @@ describe('GameGateway', () => {
                 timer: { resumeTimer: jest.fn() },
                 decrementAction: jest.fn(),
                 dropItems: jest.fn(),
+                dispatchGameStats: jest.fn(),
             } as unknown as Game;
 
             gameManager.getGame.mockReturnValue(game as any);
@@ -243,7 +256,7 @@ describe('GameGateway', () => {
             gateway.manageEndFight({ accessCode, winner, loser });
 
             // Assertions
-            expect(gameManager.closeRoom).not.toHaveBeenCalled();
+            expect(game.dispatchGameStats).not.toHaveBeenCalled();
             expect(game.endTurn).not.toHaveBeenCalled();
 
             // Should resume timer and decrement winner's action

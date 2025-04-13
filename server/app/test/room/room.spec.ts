@@ -5,12 +5,20 @@ import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
 import { Timer } from '@app/class/timer';
-import { InternalFightEvents, InternalGameEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import {
+    InternalFightEvents,
+    InternalGameEvents,
+    InternalRoomEvents,
+    InternalTimerEvents,
+    InternalTurnEvents,
+    InternalStatsEvents,
+} from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
 import { Avatar, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
+import { Stats, mockStandardStats } from '@common/stats';
 
 const createDummyCell = (pos: Vec2, tile: Tile, player: Avatar = Avatar.Default, item: Item = Item.Default, cost: number = 1): Cell => ({
     position: pos,
@@ -138,6 +146,16 @@ describe('Room', () => {
             expect(globalEmitter.emit).toHaveBeenCalledWith(InternalTimerEvents.TurnUpdate, {
                 accessCode: room.accessCode,
                 remainingTime: 42,
+            });
+        });
+
+        it('should forward InternalStatsEvents.DispatchStats events', () => {
+            const internalEmitter = (room as any).internalEmitter as EventEmitter2;
+            const stats: Stats = mockStandardStats;
+            internalEmitter.emit(InternalStatsEvents.DispatchStats, stats);
+            expect(globalEmitter.emit).toHaveBeenCalledWith(InternalStatsEvents.DispatchStats, {
+                accessCode: room.accessCode,
+                stats,
             });
         });
 
