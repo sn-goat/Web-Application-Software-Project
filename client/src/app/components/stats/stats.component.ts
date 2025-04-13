@@ -6,12 +6,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { GameService } from '@app/services/game/game.service';
-import { Stats, StatPlayer } from '@common/stats';
+import { StatPlayer, Stats } from '@common/stats';
 import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-stats',
-    standalone: true,
     imports: [CommonModule, MatTableModule, MatSortModule, MatCardModule, MatDividerModule, MatChipsModule],
     templateUrl: './stats.component.html',
     styleUrls: ['./stats.component.scss'],
