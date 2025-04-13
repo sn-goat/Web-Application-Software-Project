@@ -101,6 +101,7 @@ export class GameService {
             newMap[pos.y][pos.x].item = data.item;
             this.map.next(newMap);
         });
+
         this.socketReceiver.onJournalEntry().subscribe((entry) => {
             this.journalEntries.next([...this.journalEntries.getValue(), entry]);
         });
