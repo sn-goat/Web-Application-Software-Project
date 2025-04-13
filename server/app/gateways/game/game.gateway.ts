@@ -315,16 +315,17 @@ export class GameGateway {
         if (player) {
             player.removeItemFromInventory(payload.itemToThrow);
             player.addItemToInventory(payload.itemToAdd);
+            game.inventoryFull = false;
             game.map[payload.position.y][payload.position.x].item = payload.itemToThrow;
             this.server.to(payload.accessCode).emit(TurnEvents.MapUpdate, {
                 player,
                 item: payload.itemToThrow,
                 position: payload.position,
             });
-            this.server.to(payload.accessCode).emit(TurnEvents.DroppedItem, {
-                player,
-                droppedItems: [{ item: payload.itemToThrow, position: payload.position }],
-            });
+
+            if (game.pendingEndTurn) {
+                game.endTurn();
+            }
         }
     }
 }

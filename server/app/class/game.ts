@@ -41,6 +41,7 @@ export class Game implements IGame, GameStats {
     fight: Fight;
     timer: Timer;
     movementInProgress: boolean;
+    inventoryFull: boolean;
     pendingEndTurn: boolean;
     maxPlayers: number;
 
@@ -78,6 +79,7 @@ export class Game implements IGame, GameStats {
         this.timer = new Timer(internalEmitter);
         this.fight = new Fight(internalEmitter);
         this.movementInProgress = false;
+        this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = getLobbyLimit(board.size);
 
@@ -113,6 +115,7 @@ export class Game implements IGame, GameStats {
         this.players = [];
         this.hasStarted = false;
         this.movementInProgress = false;
+        this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = 0;
     }
@@ -365,15 +368,15 @@ export class Game implements IGame, GameStats {
                     player,
                     position,
                 });
-                this.continueMovement = false;
             } else {
+                this.inventoryFull = true;
                 this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
                     player,
                     item: cell.item,
                     position,
                 });
-                this.continueMovement = false;
             }
+            this.continueMovement = false;
         }
     }
 
@@ -407,7 +410,7 @@ export class Game implements IGame, GameStats {
     }
 
     private endTurnRequested(): void {
-        if (this.movementInProgress) {
+        if (this.movementInProgress || this.inventoryFull) {
             this.pendingEndTurn = true;
         } else {
             this.endTurn();
