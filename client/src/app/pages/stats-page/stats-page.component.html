@@ -1,11 +1,18 @@
-<div class="stats-page-grid">
-    <div class="back-button">
-        <app-header-bar></app-header-bar>
+<body>
+  <div class="background-gif" style="background-image: url('assets/backgrounds/game.gif')"></div>
+
+
+<div class="stats-page">
+  <app-header-bar class="back-button"></app-header-bar>
+  <h1 class="medieval-title">Statistiques de la partie</h1>
+  <div class="main-layout">
+    <div class="stats-column">
+      <app-stats></app-stats>
     </div>
-    <div class="stats-container">
-        <app-stats></app-stats>
+    <div class="chat-column">
+      <app-chat></app-chat>
     </div>
-    <div class="chat-container">
-        <app-chat></app-chat>
-    </div>
+  </div>
 </div>
+
+</body>
