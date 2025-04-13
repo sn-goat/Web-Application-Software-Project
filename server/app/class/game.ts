@@ -1,6 +1,13 @@
 import { Fight } from '@app/class/fight';
 import { Player } from '@app/class/player';
-import { InternalEvents, InternalFightEvents, InternalRoomEvents, InternalTimerEvents, InternalTurnEvents } from '@app/constants/internal-events';
+import {
+    InternalEvents,
+    InternalFightEvents,
+    InternalGameEvents,
+    InternalRoomEvents,
+    InternalTimerEvents,
+    InternalTurnEvents,
+} from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
@@ -178,11 +185,18 @@ export class Game implements IGame {
         this._setPlayerInCell(position, player);
         this._handleItemCollection(position, player);
         this._updatePlayerPositionAndNotify(previousPosition, position, player);
+        if (player.isCtfWinner()) {
+            this.internalEmitter.emit(InternalGameEvents.Winner, player);
+        }
     }
 
     movePlayerDebug(direction: Vec2, playerId: string): void {
         const player = this.getPlayer(playerId);
         this.movePlayer(direction, player);
+        if (player.isCtfWinner()) {
+            this.internalEmitter.emit(InternalGameEvents.Winner, player);
+            return;
+        }
         const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
         this.internalEmitter.emit(InternalTurnEvents.Update, { player, path: Object.fromEntries(path) });
     }

@@ -12,6 +12,7 @@ export enum InternalRoomEvents {
 
 export enum InternalGameEvents {
     DebugStateChanged = 'debugStateChanged',
+    Winner = 'Winner',
 }
 
 export enum InternalTurnEvents {
