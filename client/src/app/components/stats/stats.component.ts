@@ -6,7 +6,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { GameService } from '@app/services/game/game.service';
-import { Stats, StatPlayer /* , mockCTFStats */ } from '@common/stats';
+import { Stats, StatPlayer } from '@common/stats';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -35,14 +35,6 @@ export class StatsComponent implements OnDestroy, OnInit {
     private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        /* this.stats = mockCTFStats;
-        const _allPlayerStats = [
-            ...this.stats.playersStats.map((player) => ({ ...player, isDisconnected: false })),
-            ...this.stats.disconnectedPlayersStats.map((player) => ({ ...player, isDisconnected: true })),
-        ];
-        this.dataSource = new MatTableDataSource(_allPlayerStats);
-        */
-
         this.subscriptions.push(
             this.gameService.stats.subscribe((stats: Stats | null) => {
                 if (!stats) {
