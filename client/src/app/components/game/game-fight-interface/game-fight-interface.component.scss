@@ -1,20 +1,51 @@
 $primary-bg: #1a1625;
-$primary-text: #7ee0d0;
+$primary-text: #f2e5b8;
 $accent-color: #ff6b93;
+$glow-teal: rgba(126, 224, 208, 0.3);
+
 
 :host {
     display: block;
     width: 100%;
 }
 
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'MedievalSharp', cursive;
+    text-shadow: 0 0 5px $glow-teal;
+}
+
+%blurred-gold-border {
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    animation: scrollReveal 1.4s ease-out;
+}
+
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 .fight-container {
     background-color: rgba(0, 0, 0, 0.85);
+    @extend %blurred-gold-border;
     border-radius: 10px;
     padding: 20px;
-    color: white;
     width: 100%;
-    box-shadow: 0 0 20px rgba($primary-text, 0.6);
-    border: 1px solid rgba($primary-text, 0.4);
 }
 
 .fight-header {
@@ -26,17 +57,14 @@ $accent-color: #ff6b93;
     h2 {
         font-size: 1.8rem;
         margin: 0;
-        color: $primary-text;
-        text-shadow: 0 0 10px rgba($primary-text, 0.6);
     }
 
     .timer {
         font-size: 1.4rem;
         padding: 5px 10px;
-        background-color: rgba(0, 0, 0, 0.3);
+        @extend %blurred-gold-border;
         border-radius: 4px;
-        color: $accent-color;
-        border: 1px solid rgba($accent-color, 0.3);
+
     }
 }
 
@@ -116,7 +144,7 @@ $accent-color: #ff6b93;
                     left: 50%;
                     transform: translate(-50%, -50%);
                     font-size: 0.7rem;
-                    color: white;
+                    color: $primary-text;
                     text-shadow: 0 0 2px black;
                 }
             }
@@ -155,7 +183,7 @@ $accent-color: #ff6b93;
         .dice-value {
             font-size: 1.8rem;
             font-weight: bold;
-            color: white;
+            color:$primary-text;
         }
     }
 }
@@ -169,11 +197,13 @@ $accent-color: #ff6b93;
 button {
     flex: 1;
     min-height: 45px;
-    text-transform: uppercase;
     letter-spacing: 1px;
+    @extend %blurred-gold-border;
 }
 button.disabled {
     filter: grayscale(100%);
     opacity: 0.5;
     pointer-events: none;
 }
+
+

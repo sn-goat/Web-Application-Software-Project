@@ -70,6 +70,8 @@ describe('GamePageComponent', () => {
         disconnect: jasmine.createSpy('disconnect').and.returnValue('disconnected'),
         onInventoryFull: jasmine.createSpy('onInventoryFull').and.returnValue(of(null)),
         onGameWinner: jasmine.createSpy('onGameWinner').and.returnValue(onGameWinnerSubject),
+        onItemCollected: jasmine.createSpy('onItemCollected').and.returnValue(of(null)),
+        onItemDropped: jasmine.createSpy('onItemDropped').and.returnValue(of(null)),
     };
 
     const routerMock = {

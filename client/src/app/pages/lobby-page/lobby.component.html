@@ -17,7 +17,7 @@
                         <h1>Code d'accès à la partie: {{ accessCode }}</h1>
                         @if (isAdmin) {
                         <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
-                            {{ isRoomLocked ? 'Verouiller la salle' : 'Déverouiller la salle' }}
+                            {{ isRoomLocked ? 'Déverouiller la salle' : 'Verouiller la salle' }}
                         </button>
                         }
 

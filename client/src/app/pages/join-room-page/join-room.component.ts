@@ -17,6 +17,7 @@ export class JoinRoomComponent {
     @Input() accessCode: string = '';
     joinResult: string = '';
     showCharacterForm: boolean = false;
+    characterFormOpened: boolean = false;
     isValidCode: boolean = false;
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
@@ -42,6 +43,7 @@ export class JoinRoomComponent {
     }
 
     closeCharacterForm(): void {
+        this.characterFormOpened = true;
         this.showCharacterForm = false;
     }
 }
