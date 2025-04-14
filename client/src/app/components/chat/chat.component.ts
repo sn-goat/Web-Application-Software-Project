@@ -1,8 +1,8 @@
+import { AfterViewChecked, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { IPlayer } from '@common/player';
-import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
 
 @Component({
     selector: 'app-chat',
@@ -10,7 +10,7 @@ import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/cor
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
-export class ChatComponent implements AfterViewChecked {
+export class ChatComponent implements AfterViewChecked, OnDestroy {
     @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
     @ViewChild('chatHistory') chatHistory!: ElementRef;
 
@@ -25,6 +25,14 @@ export class ChatComponent implements AfterViewChecked {
         this.playerService.myPlayer.subscribe((player) => {
             this.myPlayer = player;
         });
+    }
+
+    ngOnDestroy(): void {
+        this.chatService.clearChatHistory();
+        this.previousMessageCount = 0;
+        this.newMessage = '';
+        this.myPlayer = null;
+        this.playerService.myPlayer.unsubscribe();
     }
 
     ngAfterViewChecked(): void {

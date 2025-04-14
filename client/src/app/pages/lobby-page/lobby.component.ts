@@ -68,7 +68,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
                 await this.warning(message);
                 this.subscriptions.forEach((subscription) => subscription.unsubscribe());
                 this.subscriptions = [];
-                this.router.navigate(['/acceuil']);
+                this.router.navigate(['/accueil']);
             }),
 
             this.socketReceiver.onGameStartedError().subscribe((message: string) => {
