@@ -239,7 +239,7 @@ describe('GameGateway', () => {
             it("ne devrait pas émettre d'événement aux joueurs virtuels", () => {
                 // Arrange
                 const player1 = { id: 'player1' } as Player;
-                const player2 = new VirtualPlayer([], VirtualPlayerStyles.Agressive);
+                const player2 = new VirtualPlayer([], VirtualPlayerStyles.Aggressive);
                 const fight = {
                     player1,
                     player2,
@@ -365,7 +365,7 @@ describe('GameGateway', () => {
 
             it("ne devrait pas envoyer d'événements aux joueurs virtuels", () => {
                 // Arrange
-                const winner = new VirtualPlayer([], VirtualPlayerStyles.Agressive);
+                const winner = new VirtualPlayer([], VirtualPlayerStyles.Aggressive);
                 const loser = { id: 'loser' } as Player;
 
                 const mockGame = {

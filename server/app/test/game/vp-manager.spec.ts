@@ -42,7 +42,7 @@ describe('VPManager', () => {
             position: { x: 1, y: 1 },
             movementPts: 5,
             actions: 1,
-            virtualStyle: VirtualPlayerStyles.Agressive,
+            virtualStyle: VirtualPlayerStyles.Aggressive,
             avatar: Avatar.Default,
             team: null,
             life: 10,
@@ -57,8 +57,6 @@ describe('VPManager', () => {
         jest.spyOn(GameUtils, 'isValidPosition').mockImplementation((size, pos) => pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size);
 
         jest.spyOn(GameUtils, 'isOccupiedByPlayer').mockImplementation((cell) => cell.player !== Avatar.Default);
-
-        jest.spyOn(GameUtils, 'hasSameTeamPlayer').mockReturnValue(false);
 
         jest.spyOn(GameUtils, 'dijkstra').mockImplementation((_, start, end) => {
             return {
@@ -148,7 +146,7 @@ describe('VPManager', () => {
 
     describe('processFightAction', () => {
         it('devrait retourner Attack pour un joueur agressif', () => {
-            mockVirtualPlayer.virtualStyle = VirtualPlayerStyles.Agressive;
+            mockVirtualPlayer.virtualStyle = VirtualPlayerStyles.Aggressive;
             const action = VPManager.processFightAction(mockVirtualPlayer);
             expect(action).toBe(VirtualPlayerAction.Attack);
         });
