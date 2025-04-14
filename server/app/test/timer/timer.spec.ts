@@ -55,37 +55,24 @@ describe('Timer', () => {
             expect(timer.remainingTime).toBe(5);
         });
 
-        // it('should call pauseTimer if the current type is Movement', () => {
-        //     // Spy on pauseTimer.
-        //     const pauseSpy = jest.spyOn(timer, 'pauseTimer').mockReturnValue(42);
-        //     // Setup: simulate that the timer is already running with type Movement.
-        //     timer.type = TimerType.Movement;
-        //     // Also give it an intervalId so that pauseTimer gets executed.
-        //     timer.intervalId = setInterval(() => {}, 1000);
-        //     timer.startTimer(10, TimerType.Movement);
-        //     expect(pauseSpy).toHaveBeenCalled();
-        //     // pausedTime from pauseTimer is used.
-        //     expect(timer.pausedTime).toBe(42);
-        // });
+        it('should preserve the remaining time when changing from Movement to Combat', () => {
+            // Setup: simulate that the timer is already running with type Movement
+            timer.type = TimerType.Movement;
+            timer.remainingTime = 42;
+            timer.intervalId = setInterval(() => {}, 1000);
+
+            // Act: change to Combat type
+            timer.startTimer(10, TimerType.Combat);
+
+            // Assert: check that the remaining time was preserved as pausedTime
+            expect(timer.pausedTime).toBe(42);
+            expect(timer.type).toBe(TimerType.Combat);
+            expect(timer.remainingTime).toBe(10);
+            expect(clearIntervalSpy).toHaveBeenCalled();
+        });
     });
 
-    // describe('pauseTimer', () => {
-    //     it('should clear the interval and return the paused time if interval exists', () => {
-    //         // Set remaining time and simulate an active timer.
-    //         timer.remainingTime = 7;
-    //         timer.intervalId = setInterval(() => {}, 1000);
-    //         const paused = timer.pauseTimer();
-    //         expect(clearIntervalSpy).toHaveBeenCalled();
-    //         expect(paused).toBe(7);
-    //         expect(timer.pausedTime).toBe(7);
-    //     });
-
-    //     it('should return undefined if no interval exists', () => {
-    //         timer.intervalId = undefined;
-    //         const paused = timer.pauseTimer();
-    //         expect(paused).toBeUndefined();
-    //     });
-    // });
+    // Supprimer le bloc de test direct pour 'pauseTimer' puisque c'est maintenant une méthode privée
 
     describe('resumeTimer', () => {
         it('should restart the timer with pausedTime if pausedTime exists', () => {
@@ -118,6 +105,38 @@ describe('Timer', () => {
             timer.intervalId = undefined;
             timer.stopTimer();
             expect(timer.remainingTime).toBe(0);
+        });
+    });
+
+    // Test du comportement de la méthode pauseTimer à travers startTimer
+    describe('Behavior of private pauseTimer through public API', () => {
+        it('should save remaining time when changing timer types', () => {
+            // Arrange
+            timer.type = TimerType.Movement;
+            timer.remainingTime = 7;
+            timer.intervalId = setInterval(() => {}, 1000);
+
+            // Act - this will call the private pauseTimer method
+            timer.startTimer(3, TimerType.Combat);
+
+            // Assert
+            expect(clearIntervalSpy).toHaveBeenCalled();
+            expect(timer.pausedTime).toBe(7);
+        });
+
+        it('should not set pausedTime if no interval exists', () => {
+            // Arrange
+            timer.type = TimerType.Movement;
+            timer.remainingTime = 7;
+            timer.intervalId = undefined;
+            timer.pausedTime = undefined;
+
+            // Act - pauseTimer would be called but should not modify pausedTime
+            timer.startTimer(3, TimerType.Combat);
+
+            // Assert
+            expect(clearIntervalSpy).not.toHaveBeenCalled();
+            expect(timer.pausedTime).toBeUndefined();
         });
     });
 });

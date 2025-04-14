@@ -311,16 +311,17 @@ export class GameUtils {
         return cell && cell.player !== undefined && cell.player !== Avatar.Default;
     }
 
-    static hasSameTeamPlayer(player: Player, players: Player[], cell: Cell): boolean {
-        if (!this.isOccupiedByPlayer(cell)) {
-            return false;
-        }
+    static hasOpponentOnCell(player: Player, players: Player[], cell: Cell): boolean {
         const playerInCell = players.find((p) => p.avatar === cell.player);
-        return playerInCell && playerInCell.team === player.team;
+        return playerInCell && playerInCell.team !== player.team;
     }
 
     static isValidPosition(size: number, position: Vec2): boolean {
         return position.y >= 0 && position.y < size && position.x >= 0 && position.x < size;
+    }
+
+    static getPlayerWithFlag(players: Player[]): Player | null {
+        return players.find((player) => player.hasItem(Item.Flag)) || null;
     }
 
     private static vec2Key(vec: Vec2): string {

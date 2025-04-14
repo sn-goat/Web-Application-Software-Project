@@ -1,26 +1,26 @@
 import { Game } from '@app/class/game';
+import { FightResult } from '@app/constants/fight-interface';
 import {
     InternalFightEvents,
     InternalGameEvents,
+    InternalJournalEvents,
     InternalRoomEvents,
+    InternalStatsEvents,
     InternalTimerEvents,
     InternalTurnEvents,
-    InternalStatsEvents,
-    InternalJournalEvents,
 } from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
 import { DoorState, IRoom, PathInfo } from '@common/game';
 import { ChatMessage } from '@common/chat';
 import { Item } from '@common/enums';
+import { Entry } from '@common/journal';
+import { VirtualPlayerStyles } from '@common/player';
+import { Stats } from '@common/stats';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
 import { VirtualPlayer } from './virtual-player';
-import { VirtualPlayerStyles } from '@common/player';
-import { FightResult } from '@app/constants/fight-interface';
 import { Player } from './player';
-import { Stats } from '@common/stats';
-import { Entry } from '@common/journal';
 
 export class Room implements IRoom {
     accessCode: string;
@@ -44,13 +44,8 @@ export class Room implements IRoom {
         this.globalEmitter = globalEmitter;
         this.game = new Game(this.internalEmitter, board);
 
-        this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (payload: { name: string; playerId: string; message: string }) => {
-            this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, {
-                accessCode: this.accessCode,
-                name: payload.name,
-                playerId: payload.playerId,
-                message: payload.message,
-            });
+        this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (playerId: string, message: string) => {
+            this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, this.accessCode, playerId, message);
         });
 
         this.internalEmitter.on(InternalTimerEvents.TurnUpdate, (remainingTime) => {

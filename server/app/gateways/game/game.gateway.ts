@@ -1,28 +1,28 @@
 import { Fight } from '@app/class/fight';
-import { Cell, Vec2 } from '@common/board';
-import { DoorState, MAX_FIGHT_WINS, PathInfo } from '@common/game';
 import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
+import { Room } from '@app/class/room';
+import { VirtualPlayer } from '@app/class/virtual-player';
+import { FightResult, FightResultType } from '@app/constants/fight-interface';
 import {
     InternalFightEvents,
     InternalGameEvents,
+    InternalJournalEvents,
+    InternalStatsEvents,
     InternalTimerEvents,
     InternalTurnEvents,
-    InternalStatsEvents,
-    InternalJournalEvents,
 } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
+import { Cell, Vec2 } from '@common/board';
 import { Item } from '@common/enums';
-import { FightEvents, GameEvents, TurnEvents, StatsEvents, JournalEvent } from '@common/game.gateway.events';
-import { GameMessage, Entry } from '@common/journal';
+import { DoorState, MAX_FIGHT_WINS, PathInfo } from '@common/game';
+import { FightEvents, GameEvents, JournalEvent, StatsEvents, TurnEvents } from '@common/game.gateway.events';
+import { Entry, GameMessage } from '@common/journal';
+import { Stats } from '@common/stats';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Room } from '@app/class/room';
-import { VirtualPlayer } from '@app/class/virtual-player';
-import { FightResult, FightResultType } from '@app/constants/fight-interface';
-import { Stats } from '@common/stats';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
