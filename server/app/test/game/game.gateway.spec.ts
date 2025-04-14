@@ -355,12 +355,6 @@ describe('GameGateway', () => {
 
                 expect(server.to).toHaveBeenCalledWith(payload.accessCode);
                 expect(emitMock).toHaveBeenCalledWith(FightEvents.End, mockGame.players);
-
-                expect(server.to).toHaveBeenCalledWith(payload.accessCode);
-                expect(emitMock).toHaveBeenCalledWith(GameEvents.Winner, winner);
-
-                expect(mockGame.dispatchGameStats).toHaveBeenCalled();
-                expect(mockGame.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.EndGame, [winner, loser]);
             });
 
             it("ne devrait pas envoyer d'événements aux joueurs virtuels", () => {

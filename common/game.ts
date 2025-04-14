@@ -48,6 +48,12 @@ export interface IFight {
     currentPlayer: IPlayer;
 }
 
+export enum GamePhase {
+    Lobby = 'LOBBY',
+    InGame = 'IN_GAME',
+    AfterGame = 'AFTER_GAME',
+}
+
 export const ASSET_PATH_ANIMATED = './assets/character-animations/portrait';
 export const ASSET_EXT_ANIMATED = '.gif';
 export const ASSET_PATH_STATIC = './assets/portraits/portrait';
