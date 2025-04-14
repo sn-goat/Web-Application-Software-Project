@@ -23,8 +23,10 @@
 
                         <button (click)="disconnect()">Déconnexion</button>
 
-                        @if (isAdmin) {
-                        <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">Démarrer la partie</button>
+                        @if (isAdmin && players.length >= 2 && isRoomLocked) {
+                        <button (click)="startGame()">Démarrer la partie</button>
+                        }@else if (isAdmin) {
+                        <p>La partie ne peut pas commencer tant que la salle n'est pas verrouillée et qu'il n'y a pas deux joueurs minimum.</p>
                         }
                     </div>
 
