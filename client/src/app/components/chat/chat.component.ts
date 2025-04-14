@@ -1,7 +1,8 @@
-import { AfterViewChecked, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerService } from '@app/services/player/player.service';
+import { PopupService } from '@app/services/popup/popup.service';
 import { IPlayer } from '@common/player';
 import { Subscription } from 'rxjs';
 
@@ -14,11 +15,13 @@ import { Subscription } from 'rxjs';
 export class ChatComponent implements AfterViewChecked, OnDestroy {
     @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
     @ViewChild('chatHistory') chatHistory!: ElementRef;
+    @ViewChild('messageInput') messageInput!: ElementRef;
 
     newMessage: string = '';
     myPlayer: IPlayer | null = null;
     private previousMessageCount: number = 0;
     private subscriptions: Subscription[] = [];
+    private readonly popupService = inject(PopupService);
 
     constructor(
         private readonly playerService: PlayerService,
@@ -27,14 +30,13 @@ export class ChatComponent implements AfterViewChecked, OnDestroy {
         this.subscriptions.push(
             this.playerService.myPlayer.subscribe((player) => {
                 this.myPlayer = player;
-            })
+            }),
         );
     }
 
     ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.forEach((s) => s.unsubscribe());
     }
-
 
     ngAfterViewChecked(): void {
         const currentMessages = this.chatService.chatHistory();
@@ -56,5 +58,13 @@ export class ChatComponent implements AfterViewChecked, OnDestroy {
             this.chatService.sendMessage(trimmedMessage, this.myPlayer);
             this.newMessage = '';
         }
+    }
+
+    onInputFocus(): void {
+        this.popupService.setChatInputFocused(true);
+    }
+
+    onInputBlur(): void {
+        this.popupService.setChatInputFocused(false);
     }
 }
