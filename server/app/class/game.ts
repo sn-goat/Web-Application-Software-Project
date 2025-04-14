@@ -65,6 +65,7 @@ export class Game implements IGame, GameStats {
     tilesVisited: Map<string, Vec2>;
     doorsHandled: Map<string, Vec2>;
     flagsCaptured: Set<string>;
+    flagsCapturedCount?: number;
     disconnectedPlayers: IPlayer[];
     tilesNumber: number;
     doorsNumber: number;
@@ -86,6 +87,7 @@ export class Game implements IGame, GameStats {
         this.tilesVisited = new Map<string, Vec2>();
         this.doorsHandled = new Map<string, Vec2>();
         this.flagsCaptured = new Set<string>();
+        this.flagsCapturedCount = 0;
         this.disconnectedPlayers = [];
         this.timeStartOfGame = null;
         this.timeEndOfGame = null;
@@ -151,19 +153,6 @@ export class Game implements IGame, GameStats {
             this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, playerId, message);
         }
         this.disconnectedPlayers.push(player);
-    }
-
-    dispatchGameStats(): void {
-        this.endGameTimer();
-        this.stats = GameStatsUtils.calculateStats(this.players, this);
-        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, this.stats);
-    }
-
-    dispatchJournalEntry(messageType: GameMessage, playersInvolved: Player[], item?: Item): void {
-        const message = JournalManager.processEntry(messageType, playersInvolved, item);
-        if (message) {
-            this.internalEmitter.emit(InternalJournalEvents.Add, message);
-        }
     }
 
     getPlayerById(playerId: string): Player {
@@ -585,6 +574,19 @@ export class Game implements IGame, GameStats {
                 this.playerAttack();
             }
         }, ONE_SECOND_IN_MS);
+    }
+
+    private dispatchJournalEntry(messageType: GameMessage, playersInvolved: Player[], item?: Item): void {
+        const message = JournalManager.processEntry(messageType, playersInvolved, item);
+        if (message) {
+            this.internalEmitter.emit(InternalJournalEvents.Add, message);
+        }
+    }
+
+    private dispatchGameStats(): void {
+        this.endGameTimer();
+        this.stats = GameStatsUtils.calculateStats(this.players, this);
+        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, this.stats);
     }
 
     private manageEndGame(player: Player): void {

@@ -112,15 +112,16 @@ describe('JournalManager', () => {
         });
 
         it('should create entry for EndGame message', () => {
-            const players = ['Player1', 'Player2', 'Player3'];
+            const players = [{ name: 'Player1' }, { name: 'Player2' }, { name: 'Player3' }];
+            const playersNames = players.map((player) => player.name);
 
             const entry = JournalManager.processEntry(GameMessage.EndGame, players as any);
 
             expect(entry).toBeDefined();
             expect(entry.isFight).toBe(false);
-            expect(entry.message).toContain(`${GameMessage.EndGame} ${players[0]}`);
+            expect(entry.message).toContain(`${GameMessage.EndGame} ${players[0].name}`);
             expect(entry.message).toContain('Les joueurs actifs sont :');
-            expect(entry.message).toContain(players.join(',\n'));
+            expect(entry.message).toContain(playersNames.join(',\n'));
         });
 
         it('should create entry for AttackInit message (as a fight message)', () => {

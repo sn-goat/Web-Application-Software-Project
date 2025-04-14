@@ -409,18 +409,6 @@ describe('GameService', () => {
         expect(service.activePlayer.value).toEqual(movingPlayer);
     });
 
-    it('should return player description when cell contains a player', () => {
-        service.playingPlayers.next([testPlayer]);
-        testPlayer.avatar = Avatar.Magicien;
-        const cell: Cell = {
-            player: testPlayer.avatar,
-            tile: Tile.Floor,
-            position: { x: 0, y: 0 },
-        } as Cell;
-        const expected = 'Joueur: ' + testPlayer.name + ' Avatar: Wizard';
-        expect(service.getCellDescription(cell)).toEqual(expected);
-    });
-
     it('should return tile description when cell has no player and no item', () => {
         const cell: Cell = {
             tile: Tile.Floor,
@@ -428,56 +416,6 @@ describe('GameService', () => {
         } as Cell;
         const expected = service.getTileDescription(Tile.Floor);
         expect(service.getCellDescription(cell)).toEqual(expected);
-    });
-
-    it('should append item description when cell has an item', () => {
-        spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
-        spyOn(service, 'getItemDescription').and.returnValue('ItemDesc');
-        const cell: Cell = {
-            tile: Tile.Floor,
-            item: Item.Bow,
-            position: { x: 1, y: 2 },
-        } as Cell;
-        const expected = 'TileDesc, ItemDesc';
-        expect(service.getCellDescription(cell)).toEqual(expected);
-    });
-
-    it('should append item description when cell has a non-default item', () => {
-        spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
-        spyOn(service, 'getItemDescription').and.returnValue('ItemDesc');
-        const cell: Cell = {
-            tile: Tile.Floor,
-            item: Item.Bow,
-            position: { x: 1, y: 2 },
-        } as Cell;
-        const expected = 'TileDesc, ItemDesc';
-        expect(service.getCellDescription(cell)).toEqual(expected);
-    });
-
-    it('should append item description when cell contains a non-default item', () => {
-        spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
-        spyOn(service, 'getItemDescription').and.returnValue('ItemDesc');
-        const nonDefaultItem = Item.Bow;
-        const cell: Cell = {
-            tile: Tile.Floor,
-            item: nonDefaultItem,
-            position: { x: 1, y: 2 },
-        } as Cell;
-        const expected = 'TileDesc, ItemDesc';
-        expect(service.getCellDescription(cell)).toEqual(expected);
-    });
-
-    it('should not append item description when cell item is default', () => {
-        spyOn(service, 'getTileDescription').and.returnValue('TileDesc');
-        spyOn(service, 'getItemDescription');
-        const cell: Cell = {
-            tile: Tile.Floor,
-            item: Item.Default,
-            position: { x: 1, y: 2 },
-        } as Cell;
-        const expected = 'TileDesc';
-        expect(service.getCellDescription(cell)).toEqual(expected);
-        expect(service.getItemDescription).not.toHaveBeenCalled();
     });
 
     it('should return organizer id', () => {

@@ -59,9 +59,6 @@ export class GameStatsUtils {
         const secondsFormat = `${seconds < this.timeThreshold ? '0' + seconds : seconds}`;
 
         gameStats.gameDuration = `${minutesFormat}:${secondsFormat}`;
-
-        gameStats.timeStartOfGame = undefined;
-        gameStats.timeEndOfGame = undefined;
     }
 
     private static calculatePlayersStats(playersStats: PlayerStats[], tilesNumber: number): PlayerStats[] {
@@ -79,7 +76,7 @@ export class GameStatsUtils {
             player.tilesVisited.forEach((pos) => {
                 gameStats.tilesVisited.set(`${pos.x},${pos.y}`, pos);
             });
-            player.tilesVisited = undefined;
+            player.tilesVisited.clear();
         });
     }
 
@@ -92,7 +89,7 @@ export class GameStatsUtils {
                     }
                 }
             });
-            player.itemsPicked = undefined;
+            player.itemsPicked.clear();
         });
     }
 
@@ -105,13 +102,13 @@ export class GameStatsUtils {
         gameStats.tilesVisitedPercentage = `${Math.round((gameStats.tilesVisited.size / gameStats.tilesNumber) * this.hundredPercent)}%`;
         gameStats.doorsHandledPercentage =
             gameStats.doorsNumber > 0 ? `${Math.round((gameStats.doorsHandled.size / gameStats.doorsNumber) * this.hundredPercent)}%` : '0%';
-        gameStats.flagsCapturedCount = gameStats.flagsCaptured.size > 0 ? gameStats.flagsCaptured.size : undefined;
+        gameStats.flagsCapturedCount = gameStats.flagsCaptured.size > 0 ? gameStats.flagsCaptured.size : 0;
 
         this.calculateGameDuration(gameStats);
 
-        gameStats.tilesVisited = undefined;
-        gameStats.doorsHandled = undefined;
-        gameStats.flagsCaptured = undefined;
+        gameStats.tilesVisited.clear();
+        gameStats.doorsHandled.clear();
+        gameStats.flagsCaptured.clear();
 
         return gameStats;
     }

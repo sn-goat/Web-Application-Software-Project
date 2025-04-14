@@ -42,7 +42,7 @@ describe('GameStatsUtils', () => {
 
             expect(stats.gameStats.doorsHandledPercentage).toBe('0%');
             expect(stats.gameStats.gameDuration).toBe('15:42');
-            expect(stats.gameStats.flagsCapturedCount).toBe(undefined);
+            expect(stats.gameStats.flagsCapturedCount).toBe(0);
 
             expect(() => JSON.stringify(stats)).not.toThrow();
         });
@@ -72,8 +72,8 @@ describe('GameStatsUtils', () => {
                 (GameStatsUtils as any).calculateGameDuration(testGameStats);
 
                 expect(testGameStats.gameDuration).toBe('15:42');
-                expect(testGameStats.timeStartOfGame).toBeUndefined();
-                expect(testGameStats.timeEndOfGame).toBeUndefined();
+                expect(testGameStats.timeStartOfGame).toBeDefined();
+                expect(testGameStats.timeEndOfGame).toBeDefined();
             });
 
             it('should pad minutes and seconds with zeros when less than 10', () => {
@@ -187,7 +187,7 @@ describe('GameStatsUtils', () => {
                 expect(testGameStats.tilesVisited.size).toBe(2);
                 expect(testGameStats.tilesVisited.has('1,1')).toBe(true);
                 expect(testGameStats.tilesVisited.has('2,2')).toBe(true);
-                expect(testPlayerStats[0].tilesVisited).toBeUndefined();
+                expect(testPlayerStats[0].tilesVisited).toBeDefined();
             });
 
             it('should handle multiple players correctly', () => {
@@ -261,7 +261,7 @@ describe('GameStatsUtils', () => {
 
                 expect(testGameStats.flagsCaptured.size).toBe(1);
                 expect(testGameStats.flagsCaptured.has('FlagCapturer')).toBe(true);
-                expect(testPlayerStats[0].itemsPicked).toBeUndefined();
+                expect(testPlayerStats[0].itemsPicked).toBeDefined();
             });
 
             it('should handle players without flags correctly', () => {
@@ -291,7 +291,7 @@ describe('GameStatsUtils', () => {
                 (GameStatsUtils as any).addFlagsCapturedToGameStats(testPlayerStats, testGameStats);
 
                 expect(testGameStats.flagsCaptured.size).toBe(0);
-                expect(testPlayerStats[0].itemsPicked).toBeUndefined();
+                expect(testPlayerStats[0].itemsPicked).toBeDefined();
             });
         });
 
@@ -338,9 +338,9 @@ describe('GameStatsUtils', () => {
                 expect(result.gameDuration).toBe('15:30');
                 expect(result.flagsCapturedCount).toBe(1);
 
-                expect(result.tilesVisited).toBeUndefined();
-                expect(result.doorsHandled).toBeUndefined();
-                expect(result.flagsCaptured).toBeUndefined();
+                expect(result.tilesVisited).toBeDefined();
+                expect(result.doorsHandled).toBeDefined();
+                expect(result.flagsCaptured).toBeDefined();
             });
 
             it('should handle disconnected players correctly', () => {
@@ -397,7 +397,7 @@ describe('GameStatsUtils', () => {
 
                 const result = (GameStatsUtils as any).calculateGameStats(testGameStats, []);
 
-                expect(result.flagsCapturedCount).toBeUndefined();
+                expect(result.flagsCapturedCount).toBeDefined();
             });
 
             it('should handle empty collections correctly', () => {
