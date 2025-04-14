@@ -7,6 +7,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Item } from '@common/enums';
 import { Subscription } from 'rxjs';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 
 @Component({
     selector: 'app-game-map-player-tools',
@@ -20,6 +21,7 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     playerHasAction: boolean = false;
     isActionEnabled: boolean = false;
     debugMode: boolean = false;
+    showTooltip: string | null = null;
     performAction: () => void;
     endTurn: () => void;
     readonly src = DEFAULT_PATH_ITEMS;
@@ -82,6 +84,9 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
 
         this.performAction = this.gameService.toggleActionMode.bind(this.gameService);
         this.endTurn = this.gameService.endTurn.bind(this.gameService);
+    }
+    getDescription(type: Item): string {
+        return ASSETS_DESCRIPTION.get(type) ?? '';
     }
 
     ngOnDestroy() {

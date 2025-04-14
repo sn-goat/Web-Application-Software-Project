@@ -149,10 +149,10 @@ $action-color: rgba(255, 0, 0, 0.3);
     min-height: 25px;
     max-width: 500px;
     min-width: 150px;
-    white-space: normal;
     word-wrap: break-word;
     text-align: center;
     pointer-events: none;
+    white-space: pre-line;
 }
 
 .tooltip-gameView.small-row {

@@ -132,11 +132,13 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     toggleInfo() {
         this.showInfo = !this.showInfo;
+        this.popupVisible = false;
     }
 
     toggleChat() {
         this.popupVisible = !this.popupVisible;
         this.popupService.setPopupVisible(this.popupVisible);
+        this.showInfo = false;
     }
 
     ngOnDestroy(): void {

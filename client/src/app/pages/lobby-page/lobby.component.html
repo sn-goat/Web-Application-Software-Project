@@ -15,16 +15,22 @@
                 <div class="left-column">
                     <div class="access-code-container">
                         <h1>Code d'accès à la partie: {{ accessCode }}</h1>
-                        <button (click)="disconnect()">Déconnexion</button>
                         @if (isAdmin) {
-                            <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
-                                {{ isRoomLocked ? 'Déverouiller la salle' : 'Verouiller la salle' }}
-                            </button>
-                            <button [disabled]="players.length >= maxPlayers" (click)="openVirtualPlayerForm()">
-                                Ajouter un Joueur Virtuel
-                            </button>
-                            <button [disabled]="!(players.length >= 2 && isRoomLocked)" (click)="startGame()">Démarrer la partie</button>
+                        <button (click)="toggleRoomLock()" [disabled]="isRoomFull()">
+                            {{ isRoomLocked ? '🔓 Déverouiller la salle' : '🔒 Verouiller la salle' }}
+                        </button>
+                        @if(isRoomFull()){
+                        <p>La salle est pleine. Vous ne pouvez pas la déverouiller.</p>
                         }
+                        <button [disabled]="isRoomFull()" (click)="openVirtualPlayerForm()">🧙‍♂️ Ajouter un Joueur Virtuel</button>
+                        @if (players.length >= 2 && isRoomLocked) {
+                        <button (click)="startGame()">⚔️ Démarrer la partie</button>
+                        }@else if (!(players.length >= 2)) {
+                        <p>Il vous faut un minimum de 2 joueurs pour démarrer la partie.</p>
+                        }@else {
+                        <p>Veuillez verouiller la salle pour démarrer la partie.</p>
+                        } }
+                        <button (click)="disconnect()">🚪 Déconnexion</button>
                     </div>
 
                     <div class="players-list">
@@ -38,7 +44,7 @@
                                 </span>
 
                                 @if (isAdmin && player.id !== getPlayerId()) {
-                                    <button (click)="expelPlayer(player.id)">Bannir</button>
+                                <button (click)="expelPlayer(player.id)">Bannir</button>
                                 }
                             </li>
                             }
