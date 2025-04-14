@@ -127,6 +127,7 @@ export class Game implements IGame, GameStats {
         this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = 0;
+        this.stats = null;
     }
 
     removePlayer(playerId: string, message: string): void {
@@ -368,7 +369,9 @@ export class Game implements IGame, GameStats {
 
     flee(): void {
         if (this.fight.flee()) {
-            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer, this.fight.getOpponent(this.fight.currentPlayer.id)]);
+            const opponent = this.fight.getOpponent(this.fight.currentPlayer.id);
+            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer, opponent]);
+            opponent.totalFights += 1;
             this.endFight();
             const fightResult: FightResult = { type: FightResultType.Tie };
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);

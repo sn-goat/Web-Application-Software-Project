@@ -25,6 +25,12 @@ export class JournalManager {
                 messageFormat = this.processDamageMessage(playersInvolved);
                 isFight = true;
                 break;
+            case GameMessage.FleeAttempt:
+            case GameMessage.FleeSuccess:
+            case GameMessage.FleeFailure:
+                messageFormat = `${messageType} ${playersInvolved[0].name}`;
+                isFight = true;
+                break;
             case GameMessage.EndGame:
                 messagePlayer = playersInvolved.join(',\n');
                 messageFormat = `${messageType} ${playersInvolved[0]}\n ${this.endGameMessage} ${messagePlayer}`;
@@ -32,11 +38,7 @@ export class JournalManager {
             default: {
                 messagePlayer = playersInvolved.length > 1 ? playersName.join(' et ') : playersName[0];
                 messageFormat = `${messageType} ${messagePlayer}`;
-                const isFightMessage =
-                    messageType === GameMessage.FleeAttempt ||
-                    messageType === GameMessage.FleeSuccess ||
-                    messageType === GameMessage.FleeFailure ||
-                    messageType === GameMessage.AttackInit;
+                const isFightMessage = messageType === GameMessage.AttackInit;
 
                 if (isFightMessage) {
                     isFight = true;

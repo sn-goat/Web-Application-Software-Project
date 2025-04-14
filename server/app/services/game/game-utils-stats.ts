@@ -66,7 +66,7 @@ export class GameStatsUtils {
 
     private static calculatePlayersStats(playersStats: PlayerStats[], tilesNumber: number): PlayerStats[] {
         return playersStats.map((player) => {
-            player.totalFights = player.wins + player.losses + player.fleeSuccess;
+            player.totalFights = player.wins + player.losses + player.fleeSuccess + player.totalFights;
             player.itemsPickedCount = player.itemsPicked.size > 0 ? player.itemsPicked.size : 0;
             player.tilesVisitedPercentage = `${Math.round((player.tilesVisited.size / tilesNumber) * this.hundredPercent)}%`;
 

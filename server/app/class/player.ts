@@ -41,6 +41,7 @@ export class Player implements IPlayer {
     givenDamage: number;
     itemsPicked: Map<string, Item>;
     tilesVisited: Map<string, Vec2>;
+    totalFights: number;
     losses: number;
     fleeSuccess: number;
 
@@ -57,6 +58,7 @@ export class Player implements IPlayer {
         this.itemsPicked = new Map<string, Item>();
         this.takenDamage = 0;
         this.givenDamage = 0;
+        this.totalFights = 0;
         this.losses = 0;
         this.fleeSuccess = 0;
         this.id = id;
