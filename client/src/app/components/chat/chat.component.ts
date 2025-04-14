@@ -19,14 +19,13 @@ export class ChatComponent implements AfterViewChecked, OnDestroy {
 
     newMessage: string = '';
     myPlayer: IPlayer | null = null;
+    readonly chatService = inject(ChatService);
     private previousMessageCount: number = 0;
     private subscriptions: Subscription[] = [];
     private readonly popupService = inject(PopupService);
+    private readonly playerService = inject(PlayerService);
 
-    constructor(
-        private readonly playerService: PlayerService,
-        readonly chatService: ChatService,
-    ) {
+    constructor() {
         this.subscriptions.push(
             this.playerService.myPlayer.subscribe((player) => {
                 this.myPlayer = player;

@@ -13,12 +13,12 @@ import { Subscription } from 'rxjs';
     imports: [CommonModule, BoardCellComponent],
 })
 export class BoardGameComponent implements OnInit, OnDestroy {
+    elRef = inject(ElementRef);
+
     boardGame: Board;
     private boardSubscription: Subscription;
     private mapService = inject(MapService);
     private editEventHandlerService = inject(EditEventHandlerService);
-
-    constructor(public elRef: ElementRef) {}
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent) {

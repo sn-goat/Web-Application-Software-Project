@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { ChatMessage } from '@common/chat';
@@ -9,11 +9,10 @@ import { IPlayer } from '@common/player';
 })
 export class ChatService {
     chatHistory = signal<ChatMessage[]>([]);
+    private readonly socketEmitterService = inject(SocketEmitterService);
+    private readonly socketReceiverService = inject(SocketReceiverService);
 
-    constructor(
-        private readonly socketEmitterService: SocketEmitterService,
-        private readonly socketReceiverService: SocketReceiverService,
-    ) {
+    constructor() {
         this.socketReceiverService.receiveMessageFromServer().subscribe((message) => {
             this.chatHistory.update((history) => [...history, message]);
         });

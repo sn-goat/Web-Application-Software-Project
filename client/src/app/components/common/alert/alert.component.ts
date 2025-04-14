@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { Alert } from '@app/constants/enums';
 
 @Component({
@@ -11,9 +11,16 @@ import { Alert } from '@app/constants/enums';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AlertComponent {
+    data = inject<{
+        type: Alert;
+        message: string;
+    }>(MAT_DIALOG_DATA);
+
     formattedMessage: string;
     readonly alert = Alert;
-    constructor(@Inject(MAT_DIALOG_DATA) public data: { type: Alert; message: string }) {
+    constructor() {
+        const data = this.data;
+
         this.formattedMessage = data.message.replace(/\n/g, '<br>');
     }
 }

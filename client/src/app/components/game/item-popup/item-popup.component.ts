@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
@@ -12,18 +12,19 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./item-popup.component.scss'],
 })
 export class ItemPopupComponent implements OnInit, OnDestroy {
+    data = inject<{
+        inventory: Item[];
+        collectedPosition: Vec2;
+    }>(MAT_DIALOG_DATA);
+
     items: Item[] = [];
     newItem: Item;
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
     collectedPosition: Vec2;
     private subscriptions: Subscription[] = [];
-
-    constructor(
-        private dialogRef: MatDialogRef<ItemPopupComponent>,
-        private gameService: GameService,
-        @Inject(MAT_DIALOG_DATA) public data: { inventory: Item[]; collectedPosition: Vec2 },
-    ) {}
+    private dialogRef = inject<MatDialogRef<ItemPopupComponent>>(MatDialogRef);
+    private gameService = inject(GameService);
 
     ngOnInit(): void {
         this.items = this.data.inventory;

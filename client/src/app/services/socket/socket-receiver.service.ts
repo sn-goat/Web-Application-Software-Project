@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Cell, Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { ChatEvents } from '@common/chat.gateway.events';
@@ -17,12 +17,10 @@ import { SocketEmitterService } from './socket-emitter.service';
     providedIn: 'root',
 })
 export class SocketReceiverService {
-    private socket = this.sharedSocketService.socket;
+    private sharedSocketService = inject(SharedSocketService);
+    private socketEmitter = inject(SocketEmitterService);
 
-    constructor(
-        private sharedSocketService: SharedSocketService,
-        private socketEmitter: SocketEmitterService,
-    ) {}
+    private socket = this.sharedSocketService.socket;
 
     onRoomCreated(): Observable<IRoom> {
         return new Observable((observer) => {
