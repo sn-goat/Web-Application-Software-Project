@@ -23,6 +23,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     isActionSelected = false;
     isPlayerTurn = false;
     popupVisible = false;
+    chatInputFocused = false;
 
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     getTooltipContent: (cell: Cell) => string;
@@ -40,7 +41,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
     @HostListener('window:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
-        if (event.key.toLowerCase() === KEYPRESS_D && !this.popupVisible) {
+        if (event.key.toLowerCase() === KEYPRESS_D && !this.chatInputFocused) {
             event.preventDefault();
             this.gameService.toggleDebugMode();
         }
@@ -82,6 +83,10 @@ export class GameMapComponent implements OnInit, OnDestroy {
 
             this.popupService.popupVisible$.subscribe((isVisible) => {
                 this.popupVisible = isVisible;
+            }),
+
+            this.popupService.chatInputFocused$.subscribe((isFocused) => {
+                this.chatInputFocused = isFocused;
             }),
         );
         this.getTooltipContent = this.gameService.getCellDescription.bind(this.gameService);

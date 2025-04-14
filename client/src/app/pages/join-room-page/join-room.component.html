@@ -8,7 +8,7 @@
     <div class="form-wrapper">
         <div class="container">
             <label for="code">Code d'accès :</label>
-            <input id="code" [(ngModel)]="accessCode" placeholder="Entrez le code d'accès" (input)="validateCode()" />
+            <input id="code" [(ngModel)]="accessCode" placeholder="Entrez le code d'accès" (input)="validateCode()" (keyup.enter)="validateCode()" />
             @if (!isValidCode && accessCode.length > 0) {
             <p class="error">Le code doit contenir exactement 4 chiffres.</p>
             }
