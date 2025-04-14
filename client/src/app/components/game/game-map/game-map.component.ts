@@ -23,7 +23,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     isActionSelected = false;
     isPlayerTurn = false;
     popupVisible = false;
-    chatInputFocused = false; // Add this property
+    chatInputFocused = false;
 
     path: Map<string, PathInfo> | null = new Map<string, PathInfo>();
     getTooltipContent: (cell: Cell) => string;
@@ -85,7 +85,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
                 this.popupVisible = isVisible;
             }),
 
-            // Add subscription to chatInputFocused
             this.popupService.chatInputFocused$.subscribe((isFocused) => {
                 this.chatInputFocused = isFocused;
             }),
