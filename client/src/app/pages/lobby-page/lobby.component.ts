@@ -125,6 +125,10 @@ export class LobbyComponent implements OnInit, OnDestroy {
         });
     }
 
+    isRoomFull(): boolean {
+        return this.players.length >= this.maxPlayers;
+    }
+
     async warning(message: string): Promise<void> {
         await this.openDialog(message, Alert.WARNING);
     }
