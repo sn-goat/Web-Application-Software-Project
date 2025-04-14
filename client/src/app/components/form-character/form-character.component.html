@@ -19,29 +19,30 @@
             <label for="player-name">Qui êtes vous ?</label>
             <input type="text" id="player-name" [(ngModel)]="playerInput.name" placeholder="Choisissez un nom" class="name-input" maxlength="20" />
         </div>
+        <span>Veuillez choisir un attribut par colonne</span>
         <div class="stat-container">
             <div class="stat-column">
                 <p class="stat-description">Attribuer un +2</p>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ playerInput.life }}</button>
-                    <span class="tooltiptext">le nombre de points de vie</span>
+                    <span class="tooltiptext">Augmenter vos points de vie de deux points</span>
                 </div>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
                         Rapidité: {{ playerInput.speed }}
                     </button>
-                    <span class="tooltiptext">déterminer l'ordre des tours et points de mouvement par tour</span>
+                    <span class="tooltiptext">Augmenter votre rapidité de deux points</span>
                 </div>
             </div>
             <div class="stat-column">
-                <p class="stat-description">Attribuer un D6</p>
+                <p class="stat-description">Attribuer un dé à 6 faces</p>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
                         Attaque: {{ playerInput.attackPower }} + @if(playerInput.attackDice) {
                         <img [src]="diceToImageLink(playerInput.attackDice)" alt="Attack Dice" class="dice-image" />
                         }
                     </button>
-                    <span class="tooltiptext">dégats d'une attaque</span>
+                    <span class="tooltiptext">Augmenter les dégats de vos attaques</span>
                 </div>
                 <div class="tooltip">
                     <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
@@ -49,7 +50,7 @@
                         <img [src]="diceToImageLink(playerInput.defenseDice)" alt="Defense Dice" class="dice-image" />
                         }
                     </button>
-                    <span class="tooltiptext">capacité à bloquer une attaque </span>
+                    <span class="tooltiptext">Augmenter votre capacité à bloquer une attaque </span>
                 </div>
             </div>
         </div>
