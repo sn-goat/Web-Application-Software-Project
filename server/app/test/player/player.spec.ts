@@ -47,8 +47,8 @@ describe('Player', () => {
             expect(attacker.defenseDice).toBe('D4');
             expect(attacker.wins).toBe(DEFAULT_WINS);
             expect(attacker.team).toBeNull();
-            expect(attacker.tilesVisited).toEqual(new Set<Vec2>());
-            expect(attacker.itemsPicked).toEqual(new Set<Item>());
+            expect(attacker.tilesVisited).toEqual(new Map<string, Vec2>());
+            expect(attacker.itemsPicked).toEqual(new Map<string, Item>());
             expect(attacker.takenDamage).toBe(0);
             expect(attacker.givenDamage).toBe(0);
             expect(attacker.losses).toBe(0);

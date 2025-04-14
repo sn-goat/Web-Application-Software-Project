@@ -40,6 +40,7 @@ export class MockSocketService {
     private mapUpdate = new Subject<unknown>();
     private inventoryFull = new Subject<unknown>();
     private gameWinner = new Subject<unknown>();
+    private onMapUpdatedSubject = new Subject<unknown>();
 
     private journalSubject = new Subject<Entry>();
     private chatSubject = new Subject<ChatMessage>();
@@ -56,6 +57,10 @@ export class MockSocketService {
 
     onPlayerJoined() {
         return this.playerJoinedSubject.asObservable();
+    }
+
+    onMapUpdated() {
+        return this.onMapUpdatedSubject.asObservable();
     }
 
     onPlayerMoved() {
@@ -232,7 +237,7 @@ export class MockSocketService {
         this.startTurnSubject.next(null);
     }
 
-    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }) {
+    triggerDoorStateChanged(data: { position: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }) {
         this.doorSubject.next(data);
     }
 

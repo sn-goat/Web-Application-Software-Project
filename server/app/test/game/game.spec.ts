@@ -141,8 +141,8 @@ describe('Game', () => {
             expect(game.maxPlayers).toBe(getLobbyLimit(dummyBoard.size));
             expect(game.tilesNumber).toBe(dummyBoard.size * dummyBoard.size);
             expect(game.doorsNumber).toBe(1);
-            expect(game.tilesVisited).toEqual(new Set<Vec2>());
-            expect(game.doorsHandled).toEqual(new Set<Vec2>());
+            expect(game.tilesVisited).toEqual(new Map<string, Vec2>());
+            expect(game.doorsHandled).toEqual(new Map<string, Vec2>());
             expect(game.flagsCaptured).toEqual(new Set<string>());
             expect(game.disconnectedPlayers).toEqual([]);
             expect(game.timeStartOfGame).toBe(null);
