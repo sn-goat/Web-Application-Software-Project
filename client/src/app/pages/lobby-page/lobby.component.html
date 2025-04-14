@@ -15,11 +15,12 @@
                 <div class="left-column">
                     <div class="access-code-container">
                         <h1>Code d'accès à la partie: {{ accessCode }}</h1>
-                        <button (click)="disconnect()">Déconnexion</button>
                         @if (isAdmin) {
                         <button (click)="toggleRoomLock()" [disabled]="players.length >= maxPlayers">
                             {{ isRoomLocked ? 'Déverouiller la salle' : 'Verouiller la salle' }}
                         </button>
+                        <button [disabled]="players.length >= maxPlayers" (click)="openVirtualPlayerForm()">Ajouter un Joueur Virtuel</button>
+
                         }
 
                         <button (click)="disconnect()">Déconnexion</button>
@@ -42,7 +43,7 @@
                                 </span>
 
                                 @if (isAdmin && player.id !== getPlayerId()) {
-                                    <button (click)="expelPlayer(player.id)">Bannir</button>
+                                <button (click)="expelPlayer(player.id)">Bannir</button>
                                 }
                             </li>
                             }

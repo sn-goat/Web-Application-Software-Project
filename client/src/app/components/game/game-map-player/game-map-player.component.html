@@ -14,14 +14,16 @@
             </h4>
             }
             <img draggable="false" [src]="player.avatar" [alt]="player.name" />
-            <h3 [class.player-not-in-game]="!playerIsInGame(player)">{{ player.name }}</h3>
+            <h3 [class.player-not-in-game]="!isPlayerInGame(player)">{{ player.name }}</h3>
         </div>
         <div class="player-info">
             @if(flagOwner !== null && player.id === flagOwner.id) {
             <img class="flag-icon" draggable="false" src="assets/items/Flag.png" />}
             @if (player.id === getOrganizerId()) {
             <h3 class="admin">Admin</h3>
-            } @else {
+            } @else if (isVirtualPlayer(player)) {
+            <h3 class="admin">JV {{player.virtualStyle}}</h3>
+            }@else{
             <h3 class="admin">Joueur</h3>
             } @if (activePlayer && player.name === activePlayer.name) {
             <h3 class="active">Actif</h3>

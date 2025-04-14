@@ -15,6 +15,7 @@ export interface PlayerInfo {
     id: string;
     name: string;
     avatar: string;
+    virtualStyle?: string;
 }
 
 export type Dice = 'D4' | 'D6';
@@ -58,7 +59,7 @@ export interface PlayerStats {
     tilesVisitedPercentage?: string;
     wins: number;
     losses?: number;
-    fleeSuccess?: number; 
+    fleeSuccess?: number;
     totalFights?: number;
 }
 

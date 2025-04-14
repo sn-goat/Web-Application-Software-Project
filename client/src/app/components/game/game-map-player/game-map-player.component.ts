@@ -59,8 +59,12 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
         this.players = this.playersInGame;
     }
 
-    playerIsInGame(player: IPlayer): boolean {
+    isPlayerInGame(player: IPlayer): boolean {
         return player && this.playersInGame.some((playerInGame) => playerInGame.id === player.id);
+    }
+
+    isVirtualPlayer(player: IPlayer): boolean {
+        return player.virtualStyle !== undefined;
     }
 
     ngOnDestroy() {
