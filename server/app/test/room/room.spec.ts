@@ -14,7 +14,7 @@ import { Board } from '@app/model/database/board';
 import { Cell, Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { Item, Tile, Visibility } from '@common/enums';
-import { Avatar, PathInfo } from '@common/game';
+import { Avatar, GamePhase, PathInfo } from '@common/game';
 import { mockStandardStats, Stats } from '@common/stats';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -43,7 +43,7 @@ const dummyBoard: Board = {
 interface FakeGame extends Partial<Game> {
     players: Player[];
     timer: Timer;
-    hasStarted: boolean;
+    gamePhase: GamePhase;
     isDebugMode: boolean;
     addPlayer: jest.Mock<any, any>;
     isGameFull: jest.Mock<any, any>;
@@ -55,13 +55,15 @@ interface FakeGame extends Partial<Game> {
     isPlayerTurn: jest.Mock<any, any>;
     endTurn: jest.Mock<any, any>;
     dropItems: jest.Mock<any, any>;
+    getPhysicalPlayers: jest.Mock<any, any>;
+    canGameContinue: jest.Mock<any, any>;
 }
 
 const createFakeGame = (): FakeGame => {
     return {
         players: [],
         timer: { stopTimer: jest.fn() as any } as Timer,
-        hasStarted: false,
+        gamePhase: GamePhase.Lobby,
         isDebugMode: false,
         addPlayer: jest.fn((player: Player) => {
             fakeGame.players.push(player);
@@ -74,7 +76,9 @@ const createFakeGame = (): FakeGame => {
         removePlayerFromFight: jest.fn(),
         isPlayerTurn: jest.fn(() => false),
         endTurn: jest.fn(),
-        dropItems: jest.fn(), // ajoutez cette méthode pour corriger l'erreur
+        dropItems: jest.fn(),
+        getPhysicalPlayers: jest.fn(() => []),
+        canGameContinue: jest.fn(() => true),
     } as FakeGame;
 };
 
@@ -248,7 +252,7 @@ describe('Room', () => {
         describe('removePlayer (lobby branch)', () => {
             beforeEach(() => {
                 // Set hasStarted false to take lobby branch
-                fakeGame.hasStarted = false;
+                fakeGame.gamePhase = GamePhase.Lobby;
                 // Reset global emitter spy
                 jest.clearAllMocks();
             });
@@ -285,7 +289,7 @@ describe('Room', () => {
         describe('removePlayer (game branch)', () => {
             beforeEach(() => {
                 // Configurer le jeu comme démarré pour tester removePlayerFromGame
-                fakeGame.hasStarted = true;
+                fakeGame.gamePhase = GamePhase.InGame;
                 // Ajouter canGameContinue à notre fakeGame
                 (fakeGame as any).canGameContinue = jest.fn(() => true);
                 // Propriété currentTurn et méthode startTurn nécessaires
@@ -310,7 +314,9 @@ describe('Room', () => {
             it('should close room when not enough players remain', () => {
                 fakeGame.players = [player1];
                 // Simuler que le jeu ne peut plus continuer
-                (fakeGame as any).canGameContinue = jest.fn(() => false);
+                fakeGame.canGameContinue.mockReturnValue(false);
+                // Simuler un joueur physique restant
+                fakeGame.getPhysicalPlayers.mockReturnValue([player1]);
 
                 room.removePlayer(player1.id);
 

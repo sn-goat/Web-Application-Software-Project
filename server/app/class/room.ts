@@ -11,7 +11,7 @@ import {
 } from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
-import { DoorState, IRoom, PathInfo } from '@common/game';
+import { DoorState, GamePhase, IRoom, PathInfo } from '@common/game';
 import { ChatMessage } from '@common/chat';
 import { Item } from '@common/enums';
 import { Entry } from '@common/journal';
@@ -174,10 +174,19 @@ export class Room implements IRoom {
     }
 
     removePlayer(playerId: string): void {
-        if (this.game.hasStarted) {
-            this.removePlayerFromGame(playerId);
-        } else {
-            this.removePlayerFromLobby(playerId);
+        switch (this.game.gamePhase) {
+            case GamePhase.Lobby:
+                this.removePlayerFromLobby(playerId);
+                break;
+            case GamePhase.InGame:
+                this.removePlayerFromGame(playerId);
+                break;
+            case GamePhase.AfterGame:
+                this.game.removePlayer(playerId, this.confirmDisconnectMessage);
+                if (!this.game.hasPhysicalPlayers()) {
+                    this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
+                }
+                break;
         }
     }
 
@@ -229,8 +238,10 @@ export class Room implements IRoom {
         this.game.dropItems(playerId);
 
         if (!this.game.canGameContinue()) {
-            const lastPlayer = this.getPlayers()[0];
-            this.game.removePlayer(lastPlayer.id, this.notEnoughPlayersMessage);
+            const lastPlayer = this.game.getPhysicalPlayers().pop();
+            if (lastPlayer) {
+                this.game.removePlayer(lastPlayer.id, this.notEnoughPlayersMessage);
+            }
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
             return;
         }
