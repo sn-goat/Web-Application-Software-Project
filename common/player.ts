@@ -52,9 +52,9 @@ export interface PlayerStats {
     name: string;
     takenDamage?: number;
     givenDamage?: number;
-    itemsPicked?: Set<Item>;
+    itemsPicked?: Map<string,Item>;
     itemsPickedCount?: number;
-    tilesVisited?: Set<Vec2>;
+    tilesVisited?: Map<string,Vec2>;
     tilesVisitedPercentage?: string;
     wins: number;
     losses?: number;

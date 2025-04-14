@@ -21,8 +21,8 @@ export interface IGame {
 export interface GameStats {
     gameDuration?: string;
     tilesVisitedPercentage?: string;
-    tilesVisited?: Set<Vec2>;
-    doorsHandled?: Set<Vec2>;
+    tilesVisited?: Map<string, Vec2>;
+    doorsHandled?: Map<string, Vec2>;
     doorsHandledPercentage?: string;
     flagsCaptured?: Set<string>;
     flagsCapturedCount?: number;

@@ -76,8 +76,8 @@ export class GameStatsUtils {
 
     private static addVisitedTileToGameStats(playersStats: PlayerStats[], gameStats: GameStats): void {
         playersStats.forEach((player) => {
-            player.tilesVisited.forEach((tile) => {
-                gameStats.tilesVisited.add(tile);
+            player.tilesVisited.forEach((pos) => {
+                gameStats.tilesVisited.set(`${pos.x},${pos.y}`, pos);
             });
             player.tilesVisited = undefined;
         });
@@ -85,9 +85,11 @@ export class GameStatsUtils {
 
     private static addFlagsCapturedToGameStats(playersStats: PlayerStats[], gameStats: GameStats): void {
         playersStats.forEach((player) => {
-            player.itemsPicked.forEach((item) => {
-                if (item === Item.Flag) {
-                    gameStats.flagsCaptured.add(player.name);
+            player.itemsPicked.forEach((value) => {
+                if (value === Item.Flag) {
+                    if (!gameStats.flagsCaptured.has(player.name)) {
+                        gameStats.flagsCaptured.add(player.name);
+                    }
                 }
             });
             player.itemsPicked = undefined;

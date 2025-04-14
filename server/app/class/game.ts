@@ -52,8 +52,8 @@ export class Game implements IGame, GameStats {
     maxPlayers: number;
 
     gameDuration: string;
-    tilesVisited: Set<Vec2>;
-    doorsHandled: Set<Vec2>;
+    tilesVisited: Map<string, Vec2>;
+    doorsHandled: Map<string, Vec2>;
     flagsCaptured: Set<string>;
     disconnectedPlayers: IPlayer[];
     tilesNumber: number;
@@ -73,8 +73,8 @@ export class Game implements IGame, GameStats {
         this.map = board.board;
         this.tilesNumber = board.size * board.size;
         this.doorsNumber = this.getDoorsNumber(board.board);
-        this.tilesVisited = new Set<Vec2>();
-        this.doorsHandled = new Set<Vec2>();
+        this.tilesVisited = new Map<string, Vec2>();
+        this.doorsHandled = new Map<string, Vec2>();
         this.flagsCaptured = new Set<string>();
         this.disconnectedPlayers = [];
         this.timeStartOfGame = null;
@@ -333,6 +333,7 @@ export class Game implements IGame, GameStats {
         const player = this.getPlayerById(playerId);
         door.tile = door.tile === Tile.ClosedDoor ? Tile.OpenedDoor : Tile.ClosedDoor;
         const doorState: DoorState = { position: doorPosition, state: door.tile };
+        this.doorsHandled.set(`${doorPosition.x},${doorPosition.y}`, doorPosition);
         if (door.tile === Tile.OpenedDoor) {
             this.dispatchJournalEntry(GameMessage.OpenDoor, [player]);
         } else if (door.tile === Tile.ClosedDoor) {

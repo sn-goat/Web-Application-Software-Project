@@ -29,7 +29,9 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
         this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
         const clientSock: Socket = this.server.sockets.sockets.get(payload.playerId);
-        clientSock.leave(payload.accessCode);
+        if (clientSock) {
+            clientSock.leave(payload.accessCode);
+        }
     }
 
     @OnEvent(InternalRoomEvents.PlayersUpdated)
@@ -98,7 +100,9 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage(RoomEvents.DisconnectPlayer)
     handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
         const room = this.gameManager.getRoom(payload.accessCode);
-        room.removePlayer(payload.playerId);
+        if (room) {
+            room.removePlayer(payload.playerId);
+        }
     }
 
     afterInit(server: Server) {
@@ -114,7 +118,9 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.logger.log(`Client déconnecté : ${client.id}`);
         client.rooms.forEach((room) => {
             const gameRoom = this.gameManager.getRoom(room);
-            gameRoom.removePlayer(client.id);
+            if (gameRoom) {
+                gameRoom.removePlayer(client.id);
+            }
         });
     }
 }

@@ -12,6 +12,8 @@ import {
     Team,
 } from '@common/player';
 
+import { ITEM_TO_NAME } from '@common/journal';
+
 export class Player implements IPlayer {
     id: string;
     name: string;
@@ -37,8 +39,8 @@ export class Player implements IPlayer {
 
     takenDamage: number;
     givenDamage: number;
-    itemsPicked: Set<Item>;
-    tilesVisited: Set<Vec2>;
+    itemsPicked: Map<string, Item>;
+    tilesVisited: Map<string, Vec2>;
     losses: number;
     fleeSuccess: number;
 
@@ -51,8 +53,8 @@ export class Player implements IPlayer {
     private currentDamage: number;
 
     constructor(id: string, player: PlayerInput) {
-        this.tilesVisited = new Set<Vec2>();
-        this.itemsPicked = new Set<Item>();
+        this.tilesVisited = new Map<string, Vec2>();
+        this.itemsPicked = new Map<string, Item>();
         this.takenDamage = 0;
         this.givenDamage = 0;
         this.losses = 0;
@@ -112,13 +114,13 @@ export class Player implements IPlayer {
     updatePosition(position: Vec2, fieldType: Tile): void {
         this.isOnIce = fieldType === Tile.Ice && !this.hasItem(Item.LeatherBoot);
         this.position = position;
-        this.tilesVisited.add(position);
+        this.tilesVisited.set(`${position.x},${position.y}`, position);
     }
 
     addItemToInventory(item: Item): boolean {
         if (this.inventory.length < this.maxInventorySize) {
             this.inventory.push(item);
-            this.itemsPicked.add(item);
+            this.itemsPicked.set(ITEM_TO_NAME[item], item);
 
             if (item === Item.Sword) {
                 this.attackPower += 1;
