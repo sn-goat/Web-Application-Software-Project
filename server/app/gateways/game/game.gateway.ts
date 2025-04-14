@@ -1,4 +1,6 @@
 import { Fight } from '@app/class/fight';
+import { Cell, Vec2 } from '@common/board';
+import { DoorState, PathInfo } from '@common/game';
 import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
@@ -13,16 +15,14 @@ import {
     InternalTurnEvents,
 } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { Cell, Vec2 } from '@common/board';
 import { Item } from '@common/enums';
-import { DoorState, MAX_FIGHT_WINS, PathInfo } from '@common/game';
-import { FightEvents, GameEvents, JournalEvent, StatsEvents, TurnEvents } from '@common/game.gateway.events';
-import { Entry, GameMessage } from '@common/journal';
-import { Stats } from '@common/stats';
+import { FightEvents, GameEvents, TurnEvents, StatsEvents, JournalEvent } from '@common/game.gateway.events';
+import { Entry } from '@common/journal';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Stats } from 'fs';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -141,13 +141,6 @@ export class GameGateway {
         }
 
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
-        if (!game.isCTF && payload.fightResult.winner.wins >= MAX_FIGHT_WINS) {
-            this.server.to(payload.accessCode).emit(GameEvents.Winner, payload.fightResult.winner);
-            game.dispatchGameStats();
-
-            const playerWithoutWinner = game.players.filter((player) => player.id !== payload.fightResult.winner.id);
-            game.dispatchJournalEntry(GameMessage.EndGame, [payload.fightResult.winner, ...playerWithoutWinner]);
-        }
     }
 
     @OnEvent(InternalTurnEvents.Start)

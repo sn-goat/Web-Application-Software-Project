@@ -1,6 +1,16 @@
 /* eslint-disable max-lines */ // TODO: fix this
 import { Fight } from '@app/class/fight';
-import { Avatar, DoorState, IGame, PathInfo, VirtualPlayerAction, VirtualPlayerInstructions, GameStats } from '@common/game';
+import {
+    Avatar,
+    DoorState,
+    IGame,
+    PathInfo,
+    VirtualPlayerAction,
+    VirtualPlayerInstructions,
+    GameStats,
+    GamePhase,
+    MAX_FIGHT_WINS,
+} from '@common/game';
 import { GameUtils } from '@app/services/game/game-utils';
 import { Timer } from './timer';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -44,12 +54,12 @@ export class Game implements IGame, GameStats {
     map: Cell[][];
     players: Player[];
     currentTurn: number;
-    hasStarted: boolean;
     isDebugMode: boolean;
     isCTF: boolean;
     fight: Fight;
     timer: Timer;
     maxPlayers: number;
+    gamePhase: GamePhase;
 
     gameDuration: string;
     tilesVisited: Set<Vec2>;
@@ -82,7 +92,6 @@ export class Game implements IGame, GameStats {
         this.stats = null;
         this.players = [];
         this.currentTurn = 0;
-        this.hasStarted = false;
         this.isDebugMode = false;
         this.isCTF = board.isCTF;
         this.timer = new Timer(internalEmitter);
@@ -91,6 +100,7 @@ export class Game implements IGame, GameStats {
         this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = getLobbyLimit(board.size);
+        this.gamePhase = GamePhase.Lobby;
 
         this.internalEmitter.on(InternalEvents.EndTimer, () => {
             if (this.fight.hasFight()) {
@@ -120,13 +130,13 @@ export class Game implements IGame, GameStats {
         if (this.fight) {
             this.fight = null;
         }
-
         this.players = [];
-        this.hasStarted = false;
         this.movementInProgress = false;
         this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = 0;
+        this.gamePhase = GamePhase.Lobby;
+        this.endTurn();
     }
 
     removePlayer(playerId: string, message: string): void {
@@ -168,7 +178,8 @@ export class Game implements IGame, GameStats {
     }
 
     canGameContinue(): boolean {
-        return this.players.length > 1 && this.hasPhysicalPlayers();
+        const hasDifferentTeams = this.isCTF ? this.hasDifferentTeams() : true;
+        return this.players.length > 1 && this.hasPhysicalPlayers() && hasDifferentTeams;
     }
 
     configureGame(): Game {
@@ -178,7 +189,7 @@ export class Game implements IGame, GameStats {
             }
             GameUtils.assignTeams(this.players);
         }
-        this.hasStarted = true;
+        this.gamePhase = GamePhase.InGame;
         GameUtils.normalizeChestItems(this.map);
         this.players = GameUtils.sortPlayersBySpeed(this.players);
         const allSpawns = GameUtils.getAllSpawnPoints(this.map);
@@ -233,9 +244,7 @@ export class Game implements IGame, GameStats {
         this._setPlayerInCell(position, player);
         this._handleItemCollection(position, player);
         this._updatePlayerPositionAndNotify(previousPosition, position, player);
-        if (player.isCtfWinner()) {
-            this.internalEmitter.emit(InternalGameEvents.Winner, player);
-        }
+        this.manageEndGame(player);
     }
 
     movePlayerDebug(direction: Vec2, playerId: string): void {
@@ -280,8 +289,11 @@ export class Game implements IGame, GameStats {
 
     endTurn(): void {
         this.pendingEndTurn = false;
-        this.currentTurn = (this.currentTurn + 1) % this.players.length;
-        this.startTurn();
+        this.timer.stopTimer();
+        if (this.gamePhase === GamePhase.InGame) {
+            this.currentTurn = (this.currentTurn + 1) % this.players.length;
+            this.startTurn();
+        }
     }
 
     dropItems(playerId: string): void {
@@ -385,6 +397,7 @@ export class Game implements IGame, GameStats {
             this.dispatchJournalEntry(GameMessage.LoserFight, [fightResult.loser]);
             this.endFight();
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
+            this.manageEndGame(fightResult.winner);
         }
     }
 
@@ -446,8 +459,16 @@ export class Game implements IGame, GameStats {
         }
     }
 
-    private hasPhysicalPlayers(): boolean {
-        return this.players.some((player) => !(player instanceof VirtualPlayer));
+    hasPhysicalPlayers(): boolean {
+        return this.getPhysicalPlayers().length > 0;
+    }
+
+    getPhysicalPlayers(): Player[] {
+        return this.players.filter((player) => !(player instanceof VirtualPlayer));
+    }
+
+    private hasDifferentTeams(): boolean {
+        return this.players.some((player) => player.team !== this.players[0].team);
     }
 
     private _clearCell(position: Vec2): void {
@@ -556,5 +577,17 @@ export class Game implements IGame, GameStats {
                 this.playerAttack();
             }
         }, ONE_SECOND_IN_MS);
+    }
+
+    private manageEndGame(player: Player): void {
+        const isPlayerWinner = this.isCTF ? player.isCtfWinner() : player.wins >= MAX_FIGHT_WINS;
+        if (isPlayerWinner) {
+            this.gamePhase = GamePhase.AfterGame;
+            this.endTurn();
+            this.internalEmitter.emit(InternalGameEvents.Winner, player);
+            const playerWithoutWinner = this.players.filter((p) => p.id !== player.id);
+            this.dispatchJournalEntry(GameMessage.EndGame, [player, ...playerWithoutWinner]);
+            this.dispatchGameStats();
+        }
     }
 }
