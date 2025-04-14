@@ -65,7 +65,7 @@ const createDummyPlayer = (id: string): Player => {
     // Minimal stub with the properties and methods needed by Game
     return {
         id,
-        avatar: Avatar.Cleric,
+        avatar: Avatar.Clerc,
         wins: 0,
         speed: 5,
         movementPts: 3,
@@ -739,7 +739,7 @@ describe('Game', () => {
     //         it('devrait trouver une nouvelle position si le spawn est occupé par un autre joueur', () => {
     //             // Arrange
     //             player.spawnPosition = { x: 1, y: 1 };
-    //             game.map[1][1].player = Avatar.Knight; // Un autre joueur est sur la position d'origine
+    //             game.map[1][1].player = Avatar.Chevalier; // Un autre joueur est sur la position d'origine
     //             const findValidSpawnSpy = jest.spyOn(GameUtils, 'findValidSpawn').mockReturnValue({ x: 0, y: 0 });
 
     //             // Act

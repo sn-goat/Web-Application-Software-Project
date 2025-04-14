@@ -56,7 +56,7 @@
 
 //         service = TestBed.inject(GameService);
 
-//         testPlayer = { id: 'p-test', avatar: Avatar.Cleric, position: { x: 1, y: 1 } } as IPlayer;
+//         testPlayer = { id: 'p-test', avatar: Avatar.Clerc, position: { x: 1, y: 1 } } as IPlayer;
 //         adjacentCell = { position: { x: 2, y: 1 }, player: Avatar.Default, tile: Tile.ClosedDoor, cost: 1 } as Cell;
 //         nonAdjacentCell = { position: { x: 3, y: 3 } };
 //         teleportableCell = { player: undefined, tile: 'Floor', position: { x: 0, y: 0 } };
@@ -79,7 +79,7 @@
 //     });
 
 //     it('should set game correctly', () => {
-//         const testPlayers = [{ id: 'p1', avatar: Avatar.Knight } as IPlayer];
+//         const testPlayers = [{ id: 'p1', avatar: Avatar.Chevalier } as IPlayer];
 //         const testGame = { map: [[{} as Cell]], players: testPlayers, currentTurn: 0, isCTF: false, isDebugMode: false } as IGame;
 
 //         service.setGame(testGame);
@@ -166,14 +166,14 @@
 
 //     it('should call onMove and update map/activePlayer', () => {
 //         const prevPos = { x: 0, y: 0 };
-//         const player = { id: 'p-test', avatar: 'Wizard', position: { x: 1, y: 1 } } as IPlayer;
+//         const player = { id: 'p-test', avatar: 'Magicien', position: { x: 1, y: 1 } } as IPlayer;
 //         playerServiceMock.isActive.and.returnValue(true);
 //         playerServiceMock.getPlayer.and.returnValue(player);
 
 //         const initialMap: Cell[][] = [
 //             [
 //                 {
-//                     player: Avatar.Wizard,
+//                     player: Avatar.Magicien,
 //                     position: { x: 0, y: 0 },
 //                     tile: 'Floor',
 //                     item: Item.Default,
@@ -189,7 +189,7 @@
 
 //         expect(service.activePlayer.value).toEqual(player);
 //         expect(service.map.value[0][0].player).toBe(Avatar.Default);
-//         expect(service.map.value[1][1].player).toBe('Wizard');
+//         expect(service.map.value[1][1].player).toBe('Magicien');
 //     });
 
 //     it('should end turn and force no action mode', () => {
@@ -234,7 +234,7 @@
 //         const defender = {
 //             id: 'p-def',
 //             name: 'Defender',
-//             avatar: Avatar.Knight,
+//             avatar: Avatar.Chevalier,
 //             attackPower: 4,
 //             defensePower: 4,
 //             speed: 6,
@@ -251,7 +251,7 @@
 //         spyOn(socketServiceMock, 'initFight');
 
 //         // Act
-//         service.initFight(Avatar.Knight);
+//         service.initFight(Avatar.Chevalier);
 
 //         // Assert
 //         expect(socketServiceMock.initFight).toHaveBeenCalledWith(testPlayer.id, defender.id);
@@ -262,7 +262,7 @@
 //         service.playingPlayers.next([testPlayer]);
 //         spyOn(socketServiceMock, 'initFight');
 
-//         service.initFight(Avatar.Knight);
+//         service.initFight(Avatar.Chevalier);
 
 //         expect(socketServiceMock.initFight).not.toHaveBeenCalled();
 //     });
@@ -400,7 +400,7 @@
 //     it('should call onMove and update map/activePlayer when broadcast move event is received', () => {
 //         const initialMap: Cell[][] = [
 //             [
-//                 { player: Avatar.Wizard, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
+//                 { player: Avatar.Magicien, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
 //                 { player: Avatar.Default, tile: Tile.Floor, position: { x: 1, y: 0 } } as Cell,
 //             ],
 //             [
@@ -412,27 +412,27 @@
 //         const prevPos = { x: 0, y: 0 };
 //         const movingPlayer = {
 //             id: 'p-test',
-//             avatar: Avatar.Cleric,
+//             avatar: Avatar.Clerc,
 //             position: { x: 1, y: 1 },
 //         } as IPlayer;
 //         playerServiceMock.getPlayer.and.returnValue(movingPlayer);
 
-//         initialMap[prevPos.y][prevPos.x].player = Avatar.Wizard;
+//         initialMap[prevPos.y][prevPos.x].player = Avatar.Magicien;
 
-//         expect(service.map.value[prevPos.y][prevPos.x].player).toBe(Avatar.Wizard);
+//         expect(service.map.value[prevPos.y][prevPos.x].player).toBe(Avatar.Magicien);
 //         expect(service.map.value[movingPlayer.position.y][movingPlayer.position.x].player).toBe('');
 //         expect(service.activePlayer.value).toEqual(movingPlayer);
 //     });
 
 //     it('should return player description when cell contains a player', () => {
 //         service.playingPlayers.next([testPlayer]);
-//         testPlayer.avatar = Avatar.Wizard;
+//         testPlayer.avatar = Avatar.Magicien;
 //         const cell: Cell = {
 //             player: testPlayer.avatar,
 //             tile: Tile.Floor,
 //             position: { x: 0, y: 0 },
 //         } as Cell;
-//         const expected = 'Joueur: ' + testPlayer.name + ' Avatar: Wizard';
+//         const expected = 'Joueur: ' + testPlayer.name + ' Avatar: Magicien';
 //         expect(service.getCellDescription(cell)).toEqual(expected);
 //     });
 
@@ -539,7 +539,7 @@
 //         service.playingPlayers.next([testPlayer]);
 //         const initialMap: Cell[][] = [
 //             [
-//                 { player: Avatar.Cleric, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
+//                 { player: Avatar.Clerc, tile: Tile.Floor, position: { x: 0, y: 0 } } as Cell,
 //                 { player: Avatar.Default, tile: Tile.Wall, position: { x: 1, y: 0 } } as Cell,
 //             ],
 //             [

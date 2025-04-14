@@ -53,7 +53,7 @@ describe('GameUtils Comprehensive Tests', () => {
     //         // Arrange
     //         const board = createBoard(3, 3);
     //         // Placer un ennemi en diagonale
-    //         board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Knight);
+    //         board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Chevalier);
 
     //         // Un joueur avec un arc au centre
     //         const mockPlayer = {
@@ -72,7 +72,7 @@ describe('GameUtils Comprehensive Tests', () => {
     //         // Arrange
     //         const board = createBoard(3, 3);
     //         // Placer un ennemi en diagonale mais aucun ennemi orthogonal
-    //         board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Knight);
+    //         board[2][2] = dummyCell(2, 2, Tile.Floor, Avatar.Chevalier);
 
     //         // Un joueur sans arc au centre
     //         const mockPlayer = {
@@ -140,7 +140,7 @@ describe('GameUtils Comprehensive Tests', () => {
     //     it('should assign spawn points to players and update the map', () => {
     //         const players: Player[] = [
     //             { speed: 5, avatar: Avatar.Berserker, spawnPosition: null, position: null } as Player,
-    //             { speed: 7, avatar: Avatar.Cleric, spawnPosition: null, position: null } as Player,
+    //             { speed: 7, avatar: Avatar.Clerc, spawnPosition: null, position: null } as Player,
     //         ];
     //         const spawnPoints: Vec2[] = [
     //             { x: 0, y: 0 },
@@ -157,8 +157,8 @@ describe('GameUtils Comprehensive Tests', () => {
     //         expect(players[1].position).toBeDefined();
     //         const cellA = board[spawnPoints[0].y][spawnPoints[0].x].player;
     //         const cellB = board[spawnPoints[1].y][spawnPoints[1].x].player;
-    //         expect([Avatar.Berserker, Avatar.Cleric]).toContain(cellA);
-    //         expect([Avatar.Berserker, Avatar.Cleric]).toContain(cellB);
+    //         expect([Avatar.Berserker, Avatar.Clerc]).toContain(cellA);
+    //         expect([Avatar.Berserker, Avatar.Clerc]).toContain(cellB);
     //     });
     // });
 
@@ -233,7 +233,7 @@ describe('GameUtils Comprehensive Tests', () => {
     //     });
 
     //     it('isOccupiedByPlayer should return true if cell has a player different from Avatar.Default', () => {
-    //         const cell = dummyCell(0, 0, Tile.Floor, Avatar.Cleric, 1);
+    //         const cell = dummyCell(0, 0, Tile.Floor, Avatar.Clerc, 1);
     //         const result = GameUtils['isOccupiedByPlayer'](cell);
     //         expect(result).toBe(true);
     //     });
@@ -245,7 +245,7 @@ describe('GameUtils Comprehensive Tests', () => {
     //     });
 
     //     it('isValidCellForAction should return true if cell has a non-default player or is a door', () => {
-    //         const cell1 = dummyCell(0, 0, Tile.Floor, Avatar.Cleric, 1);
+    //         const cell1 = dummyCell(0, 0, Tile.Floor, Avatar.Clerc, 1);
     //         expect(GameUtils['isValidCellForAction'](cell1)).toBe(true);
     //         const cell2 = dummyCell(0, 0, Tile.ClosedDoor, undefined, 1);
     //         expect(GameUtils['isValidCellForAction'](cell2)).toBe(true);
@@ -257,7 +257,7 @@ describe('GameUtils Comprehensive Tests', () => {
 
     //     it('getTileCost should return Infinity if cell is missing or occupied', () => {
     //         expect(GameUtils['getTileCost'](null)).toBe(Infinity);
-    //         const cell = dummyCell(0, 0, Tile.Floor, Avatar.Cleric, 2);
+    //         const cell = dummyCell(0, 0, Tile.Floor, Avatar.Clerc, 2);
     //         expect(GameUtils['getTileCost'](cell)).toBe(Infinity);
     //     });
 
@@ -302,10 +302,10 @@ describe('GameUtils Comprehensive Tests', () => {
     //     it('should not return paths that require moving through obstacles', () => {
     //         const board = createBoard(3, 3);
     //         // Mark all adjacent cells around {x:1, y:1} as obstacles by simulating them as occupied by a non-default avatar.
-    //         board[0][1] = dummyCell(1, 0, Tile.Floor, Avatar.Cleric);
-    //         board[1][0] = dummyCell(0, 1, Tile.Floor, Avatar.Cleric);
-    //         board[1][2] = dummyCell(2, 1, Tile.Floor, Avatar.Cleric);
-    //         board[2][1] = dummyCell(1, 2, Tile.Floor, Avatar.Cleric);
+    //         board[0][1] = dummyCell(1, 0, Tile.Floor, Avatar.Clerc);
+    //         board[1][0] = dummyCell(0, 1, Tile.Floor, Avatar.Clerc);
+    //         board[1][2] = dummyCell(2, 1, Tile.Floor, Avatar.Clerc);
+    //         board[2][1] = dummyCell(1, 2, Tile.Floor, Avatar.Clerc);
     //         const movementPoints = 3;
     //         const paths = GameUtils.findPossiblePaths(board, { x: 1, y: 1 }, movementPoints);
     //         // With surrounding obstacles, no move should be possible.
@@ -376,7 +376,7 @@ describe('GameUtils Comprehensive Tests', () => {
     //         for (let y = 0; y < 3; y++) {
     //             for (let x = 0; x < 3; x++) {
     //                 if (x === 1 && y === 1) continue; // Ignorer la position du joueur
-    //                 board[y][x] = dummyCell(x, y, Tile.Floor, Avatar.Knight, 1, Item.Sword);
+    //                 board[y][x] = dummyCell(x, y, Tile.Floor, Avatar.Chevalier, 1, Item.Sword);
     //             }
     //         }
 
@@ -475,7 +475,7 @@ describe('GameUtils Comprehensive Tests', () => {
     // describe('Private methods: isValidCellForAttack', () => {
     //     it('devrait retourner true si la cellule contient un avatar non-Default', () => {
     //         // Arrange
-    //         const cell1 = dummyCell(0, 0, Tile.Floor, Avatar.Knight);
+    //         const cell1 = dummyCell(0, 0, Tile.Floor, Avatar.Chevalier);
     //         const cell2 = dummyCell(0, 0, Tile.Floor, Avatar.Default);
     //         const cell3 = dummyCell(0, 0, Tile.Floor, undefined);
 
