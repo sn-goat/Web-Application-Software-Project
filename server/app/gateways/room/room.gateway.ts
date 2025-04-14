@@ -1,16 +1,14 @@
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
+import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { InternalRoomEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { JournalService } from '@app/services/journal/journal.service';
-import { GameMessage } from '@common/journal';
-import { PlayerInput } from '@common/player';
+import { GameEvents } from '@common/game.gateway.events';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameEvents } from '@common/game.gateway.events';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -18,10 +16,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger(RoomGateway.name);
 
-    constructor(
-        private readonly gameManager: GameManagerService,
-        private journalService: JournalService,
-    ) {}
+    constructor(private readonly gameManager: GameManagerService) {}
     @OnEvent(InternalRoomEvents.CloseRoom)
     handleClosingRoom(accessCode: string): void {
         this.server.to(accessCode).emit(GameEvents.GameEnded);
@@ -29,13 +24,12 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @OnEvent(InternalRoomEvents.PlayerRemoved)
-    handlePlayerRemoved(payload: { accessCode: string; name: string; playerId: string; message: string }): void {
-        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.name], GameMessage.Quit, this.server);
-        this.server.to(payload.playerId).emit(RoomEvents.PlayerRemoved, payload.message);
+    handlePlayerRemoved(accessCode: string, playerId: string, message: string): void {
+        this.server.to(playerId).emit(RoomEvents.PlayerRemoved, message);
 
-        this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
-        const clientSock: Socket = this.server.sockets.sockets.get(payload.playerId);
-        clientSock.leave(payload.accessCode);
+        this.logger.log(`Joueur ${playerId} a été expulsé de la salle ${accessCode}`);
+        const clientSock: Socket = this.server.sockets.sockets.get(playerId);
+        clientSock.leave(accessCode);
     }
 
     @OnEvent(InternalRoomEvents.PlayersUpdated)
@@ -71,6 +65,13 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const room: Room = this.gameManager.getRoom(payload.accessCode);
         room.addPlayer(player);
         client.emit(RoomEvents.SetCharacter, player);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+    }
+
+    @SubscribeMessage(RoomEvents.CreateVirtualPlayer)
+    handleCreateVirtualPlayer(client: Socket, payload: { accessCode: string; playerStyle: VirtualPlayerStyles }) {
+        const room: Room = this.gameManager.getRoom(payload.accessCode);
+        room.addVirtualPlayer(payload.playerStyle);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
     }
 

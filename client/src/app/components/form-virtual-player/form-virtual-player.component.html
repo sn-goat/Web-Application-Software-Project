@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Création d'un joueur virtuel</h2>
+<mat-dialog-content>
+    <section>
+        <p>Quel Style voulez vous donner à ce joueur virtuel ?</p>
+        <mat-button-toggle-group [(ngModel)]="virtualPlayerStyle" aria-label="Font Style">
+          <mat-button-toggle [value]=virtualPlayerStyles.Aggressive>{{virtualPlayerStyles.Aggressive}}</mat-button-toggle>
+          <mat-button-toggle [value]=virtualPlayerStyles.Defensive>{{virtualPlayerStyles.Defensive}}</mat-button-toggle>
+        </mat-button-toggle-group>
+    </section>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-raised-button mat-dialog-close cdkFocusInitial>Annuler</button>
+    <button mat-raised-button mat-dialog-close (click)="createVirtualPlayer()">Créer</button>
+</mat-dialog-actions>

@@ -81,7 +81,6 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             }),
 
             this.socketReceiver.onRoomCreated().subscribe((room) => {
-                this.accessCode = room.accessCode;
                 this.socketEmitter.shareCharacter(this.playerInput);
                 this.playerService.setAdmin(true);
                 this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });

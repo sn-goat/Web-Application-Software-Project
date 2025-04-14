@@ -21,6 +21,10 @@ export class FightLogicService {
     private playerService = inject(PlayerService);
 
     constructor() {
+        this.initializeListeners();
+    }
+
+    initializeListeners(): void {
         this.socketReceiver.onFightInit().subscribe((fight: IFight) => {
             this.fight.next(fight);
             this.fightStarted.next(true);
@@ -53,5 +57,6 @@ export class FightLogicService {
         this.fight.next({} as IFight);
         this.fightStarted.next(false);
         this.gameService.isActionSelected.next(false);
+        this.initializeListeners();
     }
 }

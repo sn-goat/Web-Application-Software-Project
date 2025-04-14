@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Vec2 } from '@common/board';
@@ -9,17 +9,21 @@ import { BehaviorSubject, Subscription } from 'rxjs';
 @Injectable({
     providedIn: 'root',
 })
-export class PlayerService implements OnDestroy {
+export class PlayerService {
     myPlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isActivePlayer: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     path: BehaviorSubject<Map<string, PathInfo>> = new BehaviorSubject<Map<string, PathInfo>>(new Map());
-    subscriptions: Subscription[] = [];
     private isAdmin: boolean = false;
 
+    private readonly subscriptions: Subscription[] = [];
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
 
     constructor() {
+        this.initializeListeners();
+    }
+
+    initializeListeners(): void {
         this.subscriptions.push(
             this.socketReceiver.onSetCharacter().subscribe((player: IPlayer) => {
                 this.setPlayer(player);
@@ -95,11 +99,6 @@ export class PlayerService implements OnDestroy {
         this.isActivePlayer.next(false);
         this.path.next(new Map());
         this.isAdmin = false;
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach((subscription) => {
-            subscription.unsubscribe();
-        });
+        this.initializeListeners();
     }
 }

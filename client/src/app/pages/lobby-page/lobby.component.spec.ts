@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-empty-function */
 
+import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { MockRouter } from '@app/helpers/router-mock';
@@ -16,6 +19,9 @@ import { getLobbyLimit } from '@common/lobby-limits';
 import { IPlayer } from '@common/player';
 import { BehaviorSubject, of } from 'rxjs';
 import { LobbyComponent } from './lobby.component';
+
+@Component({ selector: 'app-chat', template: '', standalone: true })
+class ChatStubComponent {}
 
 describe('LobbyComponent', () => {
     let component: LobbyComponent;
@@ -54,7 +60,7 @@ describe('LobbyComponent', () => {
         lobbyLimit = getLobbyLimit(15);
 
         TestBed.configureTestingModule({
-            imports: [LobbyComponent],
+            imports: [CommonModule, LobbyComponent, ChatStubComponent],
             providers: [
                 { provide: SocketEmitterService, useValue: socketServiceMock },
                 { provide: SocketReceiverService, useValue: socketServiceMock },
@@ -64,7 +70,13 @@ describe('LobbyComponent', () => {
                 { provide: MatDialog, useValue: dialogMock },
                 { provide: Router, useValue: router },
             ],
-        }).compileComponents();
+        })
+            .overrideComponent(LobbyComponent, {
+                set: {
+                    imports: [CommonModule, FormsModule, ChatStubComponent],
+                },
+            })
+            .compileComponents();
 
         fixture = TestBed.createComponent(LobbyComponent);
         component = fixture.componentInstance;
@@ -87,7 +99,7 @@ describe('LobbyComponent', () => {
         socketServiceMock.triggerPlayerRemoved();
         component.disconnect();
         tick();
-        expect(router.navigate).toHaveBeenCalledWith(['/acceuil']);
+        expect(router.navigate).toHaveBeenCalledWith(['/accueil']);
     }));
 
     it('should trigger a disconnect if current player disconnects', fakeAsync(() => {

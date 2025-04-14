@@ -5,7 +5,8 @@ export enum GameEvents {
 
     Debug = 'toggleDebug',
     DebugStateChanged = 'debugStateChanged',
-
+    MapUpdated = 'mapUpdated',
+    
     GameEnded = 'gameEnded',
     Winner = 'gameWinner',
 
@@ -54,5 +55,4 @@ export enum StatsEvents {
 
 export enum JournalEvent {
     Add = 'addJournalEntry',
-    Clear = 'clearJournal',
 }

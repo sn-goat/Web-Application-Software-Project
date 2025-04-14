@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
+import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
 import { StatsComponent } from '@app/components/stats/stats.component';
 import { Alert } from '@app/constants/enums';
@@ -11,7 +12,6 @@ import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { IPlayer } from '@common/player';
 import { Subject, of } from 'rxjs';
 import { StatsPageComponent } from './stats-page.component';
@@ -104,7 +104,7 @@ describe('StatsPageComponent', () => {
             expect(component['warning']).toHaveBeenCalledWith('Player was removed');
 
             fixture.whenStable().then(() => {
-                expect(routerMock.navigate).toHaveBeenCalledWith(['/acceuil']);
+                expect(routerMock.navigate).toHaveBeenCalledWith(['/accueil']);
             });
         });
     });

@@ -6,7 +6,7 @@ import { ChatEvents } from '@common/chat.gateway.events';
 import { Item } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { PlayerInput } from '@common/player';
+import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 
 @Injectable({
@@ -37,6 +37,10 @@ export class SocketEmitterService {
 
     shareCharacter(player: PlayerInput) {
         this.socket.emit(RoomEvents.ShareCharacter, { accessCode: this.accessCode, player });
+    }
+
+    createVirtualPlayer(playerStyle: VirtualPlayerStyles) {
+        this.socket.emit(RoomEvents.CreateVirtualPlayer, { accessCode: this.accessCode, playerStyle });
     }
 
     lockRoom() {

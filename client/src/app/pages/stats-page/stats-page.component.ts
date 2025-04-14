@@ -1,16 +1,16 @@
-import { Component, AfterViewInit, inject, ViewChild, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { StatsComponent } from '@app/components/stats/stats.component';
-import { ChatComponent } from '@app/components/chat/chat.component';
-import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
+import { AfterViewInit, Component, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { ChatComponent } from '@app/components/chat/chat.component';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
+import { StatsComponent } from '@app/components/stats/stats.component';
 import { Alert } from '@app/constants/enums';
 import { GameService } from '@app/services/game/game.service';
+import { PlayerService } from '@app/services/player/player.service';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { PlayerService } from '@app/services/player/player.service';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-stats-page',
@@ -71,7 +71,7 @@ export class StatsPageComponent implements AfterViewInit, OnInit, OnDestroy {
 
     private warning(message: string): void {
         this.openDialog(message, Alert.WARNING).then(() => {
-            this.router.navigate(['/acceuil']);
+            this.router.navigate(['/accueil']);
         });
     }
 }

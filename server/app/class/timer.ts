@@ -19,7 +19,7 @@ export class Timer {
             clearInterval(this.intervalId);
         }
 
-        if (this.type === TimerType.Movement) {
+        if (this.type === TimerType.Movement && newType === TimerType.Combat) {
             pausedTime = this.pauseTimer();
         }
 
@@ -41,14 +41,6 @@ export class Timer {
         this.intervalId = intervalId;
     }
 
-    pauseTimer(): number {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.pausedTime = this.remainingTime;
-            return this.pausedTime;
-        }
-    }
-
     resumeTimer() {
         if (this.pausedTime) {
             this.startTimer(this.pausedTime, TimerType.Movement);
@@ -60,5 +52,13 @@ export class Timer {
             clearInterval(this.intervalId);
         }
         this.remainingTime = 0;
+    }
+
+    private pauseTimer(): number {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+            this.pausedTime = this.remainingTime;
+            return this.pausedTime;
+        }
     }
 }

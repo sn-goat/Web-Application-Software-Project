@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Injectable, signal } from '@angular/core';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
@@ -17,16 +16,12 @@ export class ChatService {
     ) {
         this.socketReceiverService.receiveMessageFromServer().subscribe((message) => {
             this.chatHistory.update((history) => [...history, message]);
-            console.log('Chat message received:', message);
-            console.log('Chat history post receive:', this.chatHistory());
         });
     }
 
     sendMessage(message: string, senderPlayer: IPlayer): void {
         const chatMessage = this.packageMessage(message, senderPlayer);
         this.chatHistory.update((history) => [...history, chatMessage]);
-        console.log('Chat message sent:', chatMessage);
-        console.log('Chat history post send:', this.chatHistory());
         this.socketEmitterService.sendMessageToServer(chatMessage);
     }
 
@@ -37,5 +32,9 @@ export class ChatService {
             message,
             timestamp: new Date().toLocaleTimeString(undefined, { hour12: false }),
         };
+    }
+
+    clearChatHistory(): void {
+        this.chatHistory.set([]);
     }
 }

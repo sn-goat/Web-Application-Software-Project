@@ -5,7 +5,6 @@ import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { Board, boardSchema } from '@app/model/database/board';
 import { BoardService } from '@app/services/board/board.service';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { JournalService } from '@app/services/journal/journal.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -25,6 +24,6 @@ import { MongooseModule } from '@nestjs/mongoose';
         EventEmitterModule.forRoot(),
     ],
     controllers: [BoardController],
-    providers: [ChatGateway, BoardService, Logger, RoomGateway, GameGateway, GameManagerService, JournalService],
+    providers: [ChatGateway, BoardService, Logger, RoomGateway, GameGateway, GameManagerService],
 })
 export class AppModule {}

@@ -1,5 +1,9 @@
 /* eslint-disable max-lines */ // TODO: fix this
 import { Fight } from '@app/class/fight';
+import { Avatar, DoorState, IGame, PathInfo, VirtualPlayerAction, VirtualPlayerInstructions, GameStats } from '@common/game';
+import { GameUtils } from '@app/services/game/game-utils';
+import { Timer } from './timer';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Player } from '@app/class/player';
 import {
     InternalEvents,
@@ -9,26 +13,31 @@ import {
     InternalTurnEvents,
     InternalStatsEvents,
     InternalGameEvents,
+    InternalJournalEvents,
 } from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
     FIGHT_TURN_DURATION_NO_FLEE_IN_S,
+    MAX_VP_TURN_DELAY,
+    MIN_VP_TURN_DELAY,
     MOVEMENT_TIMEOUT_IN_MS,
+    ONE_SECOND_IN_MS,
     THREE_SECONDS_IN_MS,
     TimerType,
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
-import { Board } from '@app/model/database/board';
-import { GameUtils } from '@app/services/game/game-utils';
-import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
-import { Avatar, IGame, PathInfo, GameStats } from '@common/game';
+import { Board } from '@app/model/database/board';
+import { VirtualPlayer } from './virtual-player';
+import { VPManager } from './utils/vp-manager';
+import { FightResult, FightResultType } from '@app/constants/fight-interface';
+import { Cell, Vec2 } from '@common/board';
 import { getLobbyLimit } from '@common/lobby-limits';
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { Timer } from './timer';
 import { IPlayer } from '@common/player';
 import { Stats } from '@common/stats';
 import { GameStatsUtils } from '@app/services/game/game-utils-stats';
+import { JournalManager } from '@app/class/journal-manager';
+import { GameMessage } from '@common/journal';
 
 export class Game implements IGame, GameStats {
     internalEmitter: EventEmitter2;
@@ -40,9 +49,6 @@ export class Game implements IGame, GameStats {
     isCTF: boolean;
     fight: Fight;
     timer: Timer;
-    movementInProgress: boolean;
-    inventoryFull: boolean;
-    pendingEndTurn: boolean;
     maxPlayers: number;
 
     gameDuration: string;
@@ -56,7 +62,10 @@ export class Game implements IGame, GameStats {
     timeEndOfGame: Date;
 
     stats: Stats;
+    inventoryFull: boolean;
+    pendingEndTurn: boolean;
 
+    movementInProgress: boolean;
     private continueMovement: boolean;
 
     constructor(internalEmitter: EventEmitter2, board: Board) {
@@ -127,8 +136,10 @@ export class Game implements IGame, GameStats {
             return;
         }
         const player = this.players.splice(index, 1)[0];
+        if (!(player instanceof VirtualPlayer)) {
+            this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, playerId, message);
+        }
         this.disconnectedPlayers.push(player);
-        this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { name: player.name, playerId, message });
     }
 
     dispatchGameStats(): void {
@@ -137,24 +148,27 @@ export class Game implements IGame, GameStats {
         this.internalEmitter.emit(InternalStatsEvents.DispatchStats, this.stats);
     }
 
-    getMapSize(): number {
-        return this.map.length;
+    dispatchJournalEntry(messageType: GameMessage, playersInvolved: Player[], item?: Item): void {
+        const message = JournalManager.processEntry(messageType, playersInvolved, item);
+        if (message) {
+            this.internalEmitter.emit(InternalJournalEvents.Add, message);
+        }
     }
 
-    getTimer(): Timer {
-        return this.timer;
-    }
-
-    getPlayer(playerId: string): Player {
+    getPlayerById(playerId: string): Player {
         return this.players.find((p) => p.id === playerId);
     }
 
-    getPlayerByAvatar(avatar: Avatar): Player {
-        return this.players.find((p) => p.avatar === avatar);
+    getPlayerByPosition(playerPosition: Vec2): Player {
+        return this.players.find((p) => p.position.x === playerPosition.x && p.position.y === playerPosition.y);
     }
 
     isGameFull(): boolean {
         return this.players.length >= this.maxPlayers;
+    }
+
+    canGameContinue(): boolean {
+        return this.players.length > 1 && this.hasPhysicalPlayers();
     }
 
     configureGame(): Game {
@@ -174,15 +188,8 @@ export class Game implements IGame, GameStats {
         return this;
     }
 
-    configureTurn(): { player: Player; path: Record<string, PathInfo> } {
-        const player = this.players[this.currentTurn];
-        player.initTurn();
-        const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
-        return { player, path: Object.fromEntries(path) };
-    }
-
     processPath(pathInfo: PathInfo, playerId: string): void {
-        const player = this.getPlayer(playerId);
+        const player = this.getPlayerById(playerId);
         if (player && !this.pendingEndTurn) {
             this.movementInProgress = true;
             let index = 0;
@@ -208,12 +215,16 @@ export class Game implements IGame, GameStats {
 
     decrementMovement(player: Player, mvtCost: number): void {
         player.movementPts -= mvtCost;
-        this.checkForEndTurn(player);
+        if (!(player instanceof VirtualPlayer)) {
+            this.checkForEndTurn(player);
+        }
     }
 
     decrementAction(player: Player): void {
         player.actions--;
-        this.checkForEndTurn(player);
+        if (!(player instanceof VirtualPlayer)) {
+            this.checkForEndTurn(player);
+        }
     }
 
     movePlayer(position: Vec2, player: Player): void {
@@ -228,7 +239,7 @@ export class Game implements IGame, GameStats {
     }
 
     movePlayerDebug(direction: Vec2, playerId: string): void {
-        const player = this.getPlayer(playerId);
+        const player = this.getPlayerById(playerId);
         this.movePlayer(direction, player);
         if (player.isCtfWinner()) {
             this.internalEmitter.emit(InternalGameEvents.Winner, player);
@@ -239,12 +250,31 @@ export class Game implements IGame, GameStats {
     }
 
     startTurn(): void {
-        const turn = this.configureTurn();
-        this.pendingEndTurn = false;
+        const player = this.players[this.currentTurn];
+        player.initTurn();
+        let turn: { player: Player; path: Record<string, PathInfo> };
+        if (player instanceof VirtualPlayer) {
+            turn = {
+                player,
+                path: Object.fromEntries(new Map<string, PathInfo>()),
+            };
+            this.pendingEndTurn = false;
+        } else {
+            const path = GameUtils.findPossiblePaths(this.map, player.position, player.movementPts);
+            turn = {
+                player,
+                path: Object.fromEntries(path),
+            };
+        }
         this.internalEmitter.emit(InternalTurnEvents.ChangeTurn, turn);
+        this.dispatchJournalEntry(GameMessage.StartTurn, [turn.player]);
         setTimeout(() => {
             this.timer.startTimer(TURN_DURATION_IN_S);
-            this.internalEmitter.emit(InternalTurnEvents.Start, turn.player.id);
+            if (player instanceof VirtualPlayer) {
+                this.computeVirtualPlayerTurn(player);
+            } else {
+                this.internalEmitter.emit(InternalTurnEvents.Start, player.id);
+            }
         }, THREE_SECONDS_IN_MS);
     }
 
@@ -255,7 +285,7 @@ export class Game implements IGame, GameStats {
     }
 
     dropItems(playerId: string): void {
-        const player = this.getPlayer(playerId);
+        const player = this.getPlayerById(playerId);
         if (!player || !player.inventory.length) return;
         const playerPos = player.position;
         const droppedItems = [];
@@ -286,48 +316,73 @@ export class Game implements IGame, GameStats {
 
     toggleDebug(): boolean {
         this.isDebugMode = !this.isDebugMode;
+        if (this.isDebugMode) {
+            this.dispatchJournalEntry(GameMessage.ActivateDebugMode, [this.players[this.currentTurn]]);
+        } else {
+            this.dispatchJournalEntry(GameMessage.DeactivateDebugMode, [this.players[this.currentTurn]]);
+        }
         return this.isDebugMode;
     }
 
-    changeDoorState(doorPosition: Vec2, playerId: string): { doorPosition: Vec2; newDoorState: Tile.OpenedDoor | Tile.ClosedDoor } {
+    changeDoorState(doorPosition: Vec2, playerId: string): void {
         const door = this.map[doorPosition.y][doorPosition.x];
-        this.doorsHandled.add(doorPosition);
-        const player = this.getPlayer(playerId);
+        const player = this.getPlayerById(playerId);
         door.tile = door.tile === Tile.ClosedDoor ? Tile.OpenedDoor : Tile.ClosedDoor;
+        const doorState: DoorState = { position: doorPosition, state: door.tile };
+        if (door.tile === Tile.OpenedDoor) {
+            this.dispatchJournalEntry(GameMessage.OpenDoor, [player]);
+        } else if (door.tile === Tile.ClosedDoor) {
+            this.dispatchJournalEntry(GameMessage.CloseDoor, [player]);
+        }
         this.decrementAction(player);
-        return { doorPosition, newDoorState: door.tile };
+        this.internalEmitter.emit(InternalTurnEvents.DoorStateChanged, doorState);
     }
 
-    initFight(playerInitiatorId: string, playerDefenderId: string): Fight {
-        const playerInitiator = this.getPlayer(playerInitiatorId);
-        const playerDefender = this.getPlayer(playerDefenderId);
-
+    initFight(playerInitiatorId: string, playerDefenderId: string): void {
+        const playerInitiator = this.getPlayerById(playerInitiatorId);
+        const playerDefender = this.getPlayerById(playerDefenderId);
         playerInitiator.initFight();
         playerDefender.initFight();
 
         this.fight.initFight(playerInitiator, playerDefender);
         this.timer.startTimer(FIGHT_TURN_DURATION_IN_S, TimerType.Combat);
-        return this.fight;
+        if (this.fight.currentPlayer instanceof VirtualPlayer) {
+            this.computeVirtualPlayerFight(this.fight.currentPlayer);
+        }
+        this.dispatchJournalEntry(GameMessage.StartFight, [playerInitiator, playerDefender]);
     }
 
     changeFighter() {
         this.fight.changeFighter();
         const fightTurnDuration = this.fight.currentPlayer.fleeAttempts === 0 ? FIGHT_TURN_DURATION_NO_FLEE_IN_S : FIGHT_TURN_DURATION_IN_S;
         this.timer.startTimer(fightTurnDuration, TimerType.Combat);
-        return this.fight;
+        if (this.fight.currentPlayer instanceof VirtualPlayer) {
+            this.computeVirtualPlayerFight(this.fight.currentPlayer);
+        }
     }
 
-    flee(): boolean {
-        return this.fight.flee();
+    flee(): void {
+        if (this.fight.flee()) {
+            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer, this.fight.getOpponent(this.fight.currentPlayer.id)]);
+            this.endFight();
+            const fightResult: FightResult = { type: FightResultType.Tie };
+            this.internalEmitter.emit(InternalFightEvents.End, fightResult);
+        } else {
+            this.dispatchJournalEntry(GameMessage.FleeFailure, [this.fight.currentPlayer, this.fight.getOpponent(this.fight.currentPlayer.id)]);
+            this.changeFighter();
+        }
     }
 
     playerAttack(): void {
         const fightResult = this.fight.playerAttack(this.isDebugMode);
         if (fightResult === null) {
-            this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this.changeFighter());
+            this.changeFighter();
         } else {
             this.dropItems(fightResult.loser.id);
             this.movePlayerToSpawn(fightResult.loser);
+            this.dispatchJournalEntry(GameMessage.EndFight, [fightResult.winner, fightResult.loser]);
+            this.dispatchJournalEntry(GameMessage.WinnerFight, [fightResult.winner]);
+            this.dispatchJournalEntry(GameMessage.LoserFight, [fightResult.loser]);
             this.endFight();
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
         }
@@ -337,17 +392,62 @@ export class Game implements IGame, GameStats {
         return this.fight.hasFight() && this.fight.isPlayerInFight(playerId);
     }
     removePlayerOnMap(playerId: string): void {
-        const player = this.getPlayer(playerId);
+        const player = this.getPlayerById(playerId);
         this.map[player.position.y][player.position.x].player = Avatar.Default;
         this.map[player.spawnPosition.y][player.spawnPosition.x].item = Item.Default;
+        this.internalEmitter.emit(InternalGameEvents.MapUpdated, this.map);
+        this.dispatchJournalEntry(GameMessage.Quit, [player]);
     }
     removePlayerFromFight(playerId: string): void {
         const fightResult = this.fight.handleFightRemoval(playerId);
         this.internalEmitter.emit(InternalFightEvents.End, fightResult);
     }
 
-    endFight(): void {
+    computeVirtualPlayerTurn(player: VirtualPlayer): void {
+        let timeBeforeTurn = Math.max(MIN_VP_TURN_DELAY, Math.floor(Math.random() * MAX_VP_TURN_DELAY));
+        const vpTurnInterval = setInterval(() => {
+            if (!this.isPlayerTurn(player.id)) {
+                clearInterval(vpTurnInterval);
+                return;
+            }
+            let targetPath: Vec2[] = [];
+            const playerWithFlag = GameUtils.getPlayerWithFlag(this.players);
+            const shouldChaseFlag = playerWithFlag ? player.team !== playerWithFlag.team : false;
+            if (this.isCTF && shouldChaseFlag) {
+                targetPath = VPManager.lookForFlag(player, this.map, playerWithFlag);
+            } else {
+                targetPath = VPManager.lookForTarget(player, this.map, this.players);
+            }
+            const instruction: VirtualPlayerInstructions = VPManager.computePath(player, this.map, targetPath);
+            if (instruction.action === VirtualPlayerAction.EndTurn) {
+                clearInterval(vpTurnInterval);
+                this.endTurn();
+            } else {
+                timeBeforeTurn = Math.max(MIN_VP_TURN_DELAY, Math.floor(Math.random() * MAX_VP_TURN_DELAY));
+                this.processVirtualPlayerInstructions(player, instruction);
+                if (instruction.action === VirtualPlayerAction.InitFight) {
+                    clearInterval(vpTurnInterval);
+                }
+            }
+        }, timeBeforeTurn);
+    }
+
+    endFight(loser?: Player): void {
         this.fight = new Fight(this.internalEmitter);
+        if (loser && this.isPlayerTurn(loser.id)) {
+            this.endTurn();
+            return;
+        }
+        this.timer.resumeTimer();
+        const playingPlayer = this.players[this.currentTurn];
+        this.decrementAction(playingPlayer);
+        if (playingPlayer instanceof VirtualPlayer) {
+            this.computeVirtualPlayerTurn(playingPlayer);
+        }
+    }
+
+    private hasPhysicalPlayers(): boolean {
+        return this.players.some((player) => !(player instanceof VirtualPlayer));
     }
 
     private _clearCell(position: Vec2): void {
@@ -363,6 +463,7 @@ export class Game implements IGame, GameStats {
         this.continueMovement = true;
         if (cell.item !== Item.Default && cell.item !== Item.Spawn) {
             if (player.addItemToInventory(cell.item)) {
+                this.dispatchJournalEntry(GameMessage.PickItem, [player], cell.item);
                 cell.item = Item.Default;
                 this.internalEmitter.emit(InternalTurnEvents.ItemCollected, {
                     player,
@@ -427,14 +528,33 @@ export class Game implements IGame, GameStats {
     }
 
     private isPlayerContinueTurn(player: Player, pathLength: number): boolean {
-        return this.pendingEndTurn || this.isPlayerCanMove(pathLength) || this.isPlayerCanMakeAction(player);
+        return !this.pendingEndTurn && (pathLength > 0 || GameUtils.isPlayerCanMakeAction(this.map, player));
     }
 
-    private isPlayerCanMove(pathLength: number): boolean {
-        return pathLength > 0;
+    private processVirtualPlayerInstructions(vPlayer: VirtualPlayer, instruction: VirtualPlayerInstructions): void {
+        switch (instruction.action) {
+            case VirtualPlayerAction.Move:
+                this.processPath(instruction.pathInfo, vPlayer.id);
+                break;
+            case VirtualPlayerAction.InitFight:
+                this.initFight(vPlayer.id, this.getPlayerByPosition(instruction.target).id);
+                break;
+            case VirtualPlayerAction.OpenDoor:
+                this.changeDoorState(instruction.target, vPlayer.id);
+                break;
+            default:
+                break;
+        }
     }
 
-    private isPlayerCanMakeAction(player: Player): boolean {
-        return player.actions > 0 && GameUtils.isPlayerCanMakeAction(this.map, player);
+    private computeVirtualPlayerFight(vPlayer: VirtualPlayer): void {
+        setTimeout(() => {
+            const fightAction = VPManager.processFightAction(vPlayer);
+            if (fightAction === VirtualPlayerAction.Flee) {
+                this.flee();
+            } else {
+                this.playerAttack();
+            }
+        }, ONE_SECOND_IN_MS);
     }
 }

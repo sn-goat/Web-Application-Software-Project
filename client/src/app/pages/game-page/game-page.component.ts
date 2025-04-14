@@ -145,7 +145,7 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     private warning(message: string): void {
         this.openDialog(message, Alert.WARNING).then(() => {
-            this.router.navigate(['/acceuil']);
+            this.router.navigate(['/accueil']);
         });
     }
 
