@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable max-params */
+/* eslint-disable max-lines */
 import { Fight } from '@app/class/fight';
 import { Player } from '@app/class/player';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -27,7 +32,7 @@ describe('Fight', () => {
             attack: jest.fn(),
             attemptFlee: jest.fn(),
             hasItem: jest.fn().mockReturnValue(false), // Add the missing hasItem method
-            getDamage: jest.fn().mockReturnValue(10) // Ajout de la méthode getDamage manquante
+            getDamage: jest.fn().mockReturnValue(10), // Ajout de la méthode getDamage manquante
         } as unknown as Player;
 
         player2 = {
@@ -44,9 +49,9 @@ describe('Fight', () => {
         } as unknown as Player;
 
         fight = new Fight(fakeEmitter);
-        });
+    });
 
-        describe('initFight', () => {
+    describe('initFight', () => {
         it('should initialize fight and set currentPlayer to player1 when player1.speed >= player2.speed', () => {
             fight.initFight(player1, player2);
             expect(fight.hasFight()).toBe(true);
@@ -54,9 +59,9 @@ describe('Fight', () => {
             expect(fight.player2).toBe(player2);
             expect(fight.currentPlayer).toBe(player1);
         });
-        });
+    });
 
-        describe('getFighter', () => {
+    describe('getFighter', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
         });
@@ -70,9 +75,9 @@ describe('Fight', () => {
             const fighter = fight.getFighter('p2');
             expect(fighter).toBe(player2);
         });
-        });
+    });
 
-        describe('getOpponent', () => {
+    describe('getOpponent', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
         });
@@ -86,9 +91,9 @@ describe('Fight', () => {
             const opponent = fight.getOpponent('p2');
             expect(opponent).toBe(player1);
         });
-        });
+    });
 
-        describe('changeFighter', () => {
+    describe('changeFighter', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
         });
@@ -104,9 +109,9 @@ describe('Fight', () => {
             fight.changeFighter();
             expect(fight.currentPlayer).toBe(player1);
         });
-        });
+    });
 
-        describe('flee', () => {
+    describe('flee', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
             fight.currentPlayer = player1;
@@ -122,9 +127,9 @@ describe('Fight', () => {
             fight.flee();
             expect(spy).toHaveBeenCalled();
         });
-        });
+    });
 
-        describe('playerAttack', () => {
+    describe('playerAttack', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
             fight.currentPlayer = player1;
@@ -145,9 +150,9 @@ describe('Fight', () => {
             (player1.attack as jest.Mock).mockReturnValue(true);
             const result = fight.playerAttack(false);
             expect(result).toEqual({
-            type: 'decisive',
-            winner: player1,
-            loser: player2
+                type: 'decisive',
+                winner: player1,
+                loser: player2,
             });
         });
 
@@ -155,16 +160,16 @@ describe('Fight', () => {
             (player1.attack as jest.Mock).mockReturnValue(true);
             (player2.hasItem as jest.Mock).mockReturnValue(true);
             player2.pearlUsed = false;
-            
+
             const result = fight.playerAttack(false);
-            
+
             expect(result).toBeNull();
             expect(player2.pearlUsed).toBe(true);
             expect(player2.currentLife).toBe(50); // Half of 100
         });
-        });
+    });
 
-        describe('isPlayerInFight', () => {
+    describe('isPlayerInFight', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
         });
@@ -177,9 +182,9 @@ describe('Fight', () => {
         it('should return false when player is not part of the fight', () => {
             expect(fight.isPlayerInFight('p3')).toBe(false);
         });
-        });
+    });
 
-        describe('handleFightRemoval', () => {
+    describe('handleFightRemoval', () => {
         beforeEach(() => {
             fight.initFight(player1, player2);
         });
@@ -190,12 +195,12 @@ describe('Fight', () => {
             expect(result.loser).toBe(player1);
             expect(player2.wins).toBe(1);
         });
-        });
-
-        it('should set currentPlayer to player2 when player1.speed < player2.speed', () => {
-            player1.speed = 4;
-            player2.speed = 6;
-            fight.initFight(player1, player2);
-            expect(fight.currentPlayer).toBe(player2);
-        });
     });
+
+    it('should set currentPlayer to player2 when player1.speed < player2.speed', () => {
+        player1.speed = 4;
+        player2.speed = 6;
+        fight.initFight(player1, player2);
+        expect(fight.currentPlayer).toBe(player2);
+    });
+});

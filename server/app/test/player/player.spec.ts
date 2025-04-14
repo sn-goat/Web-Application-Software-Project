@@ -147,7 +147,6 @@ describe('Player', () => {
     });
 
     describe('updatePosition', () => {
-
         it('should update position without reducing powers when field is not Ice', () => {
             const initialAttackPower = attacker.attackPower;
             const initialDefensePower = attacker.defensePower;

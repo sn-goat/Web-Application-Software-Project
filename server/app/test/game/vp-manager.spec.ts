@@ -51,18 +51,12 @@ describe('VPManager', () => {
         } as VirtualPlayer;
 
         // Créer des joueurs mock
-        mockPlayers = [
-            { avatar: Avatar.Default, position: { x: 2, y: 2 } } as Player,
-        ];
+        mockPlayers = [{ avatar: Avatar.Default, position: { x: 2, y: 2 } } as Player];
 
         // Mock des méthodes GameUtils
-        jest.spyOn(GameUtils, 'isValidPosition').mockImplementation((size, pos) => 
-            pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size
-        );
-        
-        jest.spyOn(GameUtils, 'isOccupiedByPlayer').mockImplementation((cell) => 
-            cell.player !== Avatar.Default
-        );
+        jest.spyOn(GameUtils, 'isValidPosition').mockImplementation((size, pos) => pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size);
+
+        jest.spyOn(GameUtils, 'isOccupiedByPlayer').mockImplementation((cell) => cell.player !== Avatar.Default);
 
         jest.spyOn(GameUtils, 'hasSameTeamPlayer').mockReturnValue(false);
 
@@ -84,25 +78,25 @@ describe('VPManager', () => {
         it('devrait trouver un chemin vers un joueur pour un joueur agressif', () => {
             // Configurer une carte avec un joueur cible
             mockMap[0][0].player = Avatar.Default;
-            
+
             const result = VPManager.lookForTarget(mockVirtualPlayer, mockMap, mockPlayers);
-            
+
             expect(result).toBeDefined();
         });
 
         it('devrait prioriser le drapeau par rapport aux autres éléments', () => {
             mockMap[0][0].item = Item.Flag;
             mockMap[2][2].item = Item.Sword;
-            
+
             const dijkstraSpy = jest.spyOn(GameUtils, 'dijkstra').mockImplementation((_, start, end) => {
                 return {
                     path: [start, end],
                     cost: Math.abs(end.x - start.x) + Math.abs(end.y - start.y),
                 };
             });
-            
+
             const result = VPManager.lookForTarget(mockVirtualPlayer, mockMap, mockPlayers);
-            
+
             expect(dijkstraSpy).toHaveBeenCalled();
             expect(result.length).toBeGreaterThan(0);
         });
@@ -114,9 +108,9 @@ describe('VPManager', () => {
                 { x: 1, y: 0 },
                 { x: 2, y: 0 },
             ];
-            
+
             const result = VPManager.computePath(mockVirtualPlayer, mockMap, targetPath);
-            
+
             expect(result.action).toBe(VirtualPlayerAction.Move);
             expect(result.pathInfo).toBeDefined();
             expect(result.pathInfo.path).toEqual(targetPath);
@@ -128,26 +122,26 @@ describe('VPManager', () => {
                 { x: 1, y: 0 }, // Coût 1
                 { x: 2, y: 0 }, // Coût 1 (dépasse les points de mouvement)
             ];
-            
+
             const result = VPManager.computePath(mockVirtualPlayer, mockMap, targetPath);
-            
+
             expect(result.action).toBe(VirtualPlayerAction.Move);
             expect(result.pathInfo.path).toEqual([{ x: 1, y: 0 }]);
         });
 
-        it('devrait retourner une action d\'ouverture de porte quand une porte est sur le chemin', () => {
+        it("devrait retourner une action d'ouverture de porte quand une porte est sur le chemin", () => {
             mockMap[1][0].tile = Tile.ClosedDoor;
             const targetPath = [{ x: 0, y: 1 }];
-            
+
             const result = VPManager.computePath(mockVirtualPlayer, mockMap, targetPath);
-            
+
             expect(result.action).toBe(VirtualPlayerAction.OpenDoor);
             expect(result.target).toEqual({ x: 0, y: 1 });
         });
 
-        it('devrait retourner une action de fin de tour quand aucun chemin valide n\'existe', () => {
+        it("devrait retourner une action de fin de tour quand aucun chemin valide n'existe", () => {
             const result = VPManager.computePath(mockVirtualPlayer, mockMap, []);
-            
+
             expect(result.action).toBe(VirtualPlayerAction.EndTurn);
         });
     });
@@ -163,19 +157,19 @@ describe('VPManager', () => {
             mockVirtualPlayer.virtualStyle = VirtualPlayerStyles.Defensive;
             mockVirtualPlayer.currentLife = mockVirtualPlayer.life - 1;
             mockVirtualPlayer.fleeAttempts = 1;
-            
+
             const action = VPManager.processFightAction(mockVirtualPlayer);
-            
+
             expect(action).toBe(VirtualPlayerAction.Flee);
         });
 
-        it('devrait retourner Attack si aucune tentative de fuite n\'est disponible', () => {
+        it("devrait retourner Attack si aucune tentative de fuite n'est disponible", () => {
             mockVirtualPlayer.virtualStyle = VirtualPlayerStyles.Defensive;
             mockVirtualPlayer.currentLife = mockVirtualPlayer.life - 1;
             mockVirtualPlayer.fleeAttempts = 0;
-            
+
             const action = VPManager.processFightAction(mockVirtualPlayer);
-            
+
             expect(action).toBe(VirtualPlayerAction.Attack);
         });
     });

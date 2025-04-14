@@ -481,21 +481,21 @@ describe('GameUtils Comprehensive Tests', () => {
     });
 
     describe('dijkstra', () => {
-        it('devrait retourner un chemin direct lorsque le point de départ et d\'arrivée sont adjacents', () => {
+        it("devrait retourner un chemin direct lorsque le point de départ et d'arrivée sont adjacents", () => {
             // Arrange
             const board = createBoard(3, 3);
             const start: Vec2 = { x: 1, y: 1 };
             const end: Vec2 = { x: 2, y: 1 };
-            
+
             // Act
             const result = GameUtils.dijkstra(board, start, end, false);
-            
+
             // Assert
             expect(result).not.toBeNull();
             expect(result.path).toEqual([{ x: 2, y: 1 }]);
             expect(result.cost).toBe(1);
         });
-        
+
         it('devrait retourner un chemin contournant les obstacles', () => {
             // Arrange
             const board = createBoard(3, 3);
@@ -503,19 +503,19 @@ describe('GameUtils Comprehensive Tests', () => {
             board[1][1] = dummyCell(1, 1, Tile.Wall);
             const start: Vec2 = { x: 0, y: 0 };
             const end: Vec2 = { x: 2, y: 2 };
-            
+
             // Act
             const result = GameUtils.dijkstra(board, start, end, false);
-            
+
             // Assert
             expect(result).not.toBeNull();
             // Vérifier que le chemin ne passe pas par (1,1)
-            expect(result.path.some(p => p.x === 1 && p.y === 1)).toBe(false);
+            expect(result.path.some((p) => p.x === 1 && p.y === 1)).toBe(false);
             // Vérifier que le chemin atteint la destination
             expect(result.path[result.path.length - 1]).toEqual(end);
         });
-        
-        it('devrait retourner null lorsqu\'aucun chemin n\'existe', () => {
+
+        it("devrait retourner null lorsqu'aucun chemin n'existe", () => {
             // Arrange
             const board = createBoard(3, 3);
             // Entourer le point de départ de murs
@@ -524,14 +524,14 @@ describe('GameUtils Comprehensive Tests', () => {
             board[1][1] = dummyCell(1, 1, Tile.Wall);
             const start: Vec2 = { x: 0, y: 0 };
             const end: Vec2 = { x: 2, y: 2 };
-            
+
             // Act
             const result = GameUtils.dijkstra(board, start, end, false);
-            
+
             // Assert
             expect(result).toBeNull();
         });
-        
+
         it('devrait ignorer les joueurs et portes fermées quand ignorePlayerDoors est true', () => {
             // Arrange
             const board = createBoard(5, 5);
@@ -539,19 +539,19 @@ describe('GameUtils Comprehensive Tests', () => {
             board[2][1] = dummyCell(1, 2, Tile.Floor, Avatar.Knight);
             // Placer une porte fermée
             board[2][3] = dummyCell(3, 2, Tile.ClosedDoor);
-            
+
             const start: Vec2 = { x: 0, y: 2 };
             const end: Vec2 = { x: 4, y: 2 };
-            
+
             // Act
             const result = GameUtils.dijkstra(board, start, end, true);
-            
+
             // Assert
             expect(result).not.toBeNull();
             // Le chemin doit passer directement, y compris par les cellules occupées
             expect(result.path.length).toBeLessThanOrEqual(4); // Chemin direct serait de longueur 4
         });
-        
+
         it('devrait contourner les joueurs et portes fermées quand ignorePlayerDoors est false', () => {
             // Arrange
             const board = createBoard(5, 5);
@@ -561,51 +561,51 @@ describe('GameUtils Comprehensive Tests', () => {
             board[1][2] = dummyCell(2, 1, Tile.Floor, Avatar.Knight); // Joueur bloquant
             board[1][3] = dummyCell(3, 1, Tile.Wall);
             board[1][4] = dummyCell(4, 1, Tile.Wall);
-            
+
             board[3][0] = dummyCell(0, 3, Tile.Wall);
             board[3][1] = dummyCell(1, 3, Tile.Wall);
             board[3][2] = dummyCell(2, 3, Tile.Wall);
             board[3][3] = dummyCell(3, 3, Tile.Wall);
             board[3][4] = dummyCell(4, 3, Tile.Wall);
-            
+
             const start: Vec2 = { x: 0, y: 2 };
             const end: Vec2 = { x: 4, y: 2 };
-            
+
             // Act
             const result = GameUtils.dijkstra(board, start, end, false);
-            
+
             // Assert
             expect(result).not.toBeNull();
             // Le chemin doit contourner le joueur (aller vers le bas puis revenir)
             const expectedContourLength = 4; // Plus long car contournement nécessaire
             expect(result.path.length).toBeGreaterThanOrEqual(expectedContourLength);
-            
+
             // Vérifier qu'on n'a pas traversé la position du joueur
-            expect(result.path.some(p => p.x === 2 && p.y === 1)).toBe(false);
+            expect(result.path.some((p) => p.x === 2 && p.y === 1)).toBe(false);
         });
-        
+
         it('devrait trouver le chemin le plus court parmi plusieurs possibilités', () => {
             // Arrange
             const board = createBoard(5, 5);
             // Créer une carte avec deux chemins possibles, un plus court que l'autre
             // Chemin 1 : direct, longueur 4
             // Chemin 2 : contournement, longueur > 4
-            
+
             // Mur bloquant le chemin direct sauf une ouverture
             board[1][1] = dummyCell(1, 1, Tile.Wall);
             board[1][2] = dummyCell(2, 1, Tile.Wall);
             board[1][3] = dummyCell(3, 1, Tile.Floor); // Ouverture
-            
+
             const start: Vec2 = { x: 0, y: 0 };
             const end: Vec2 = { x: 4, y: 4 };
-            
+
             // Act
             const result = GameUtils.dijkstra(board, start, end, false);
-            
+
             // Assert
             expect(result).not.toBeNull();
             // Vérifier que le chemin passe par l'ouverture dans le mur (le plus court)
-            const pathContainsOpening = result.path.some(p => p.x === 3 && p.y === 1);
+            const pathContainsOpening = result.path.some((p) => p.x === 3 && p.y === 1);
             expect(pathContainsOpening).toBe(false);
         });
     });

@@ -60,10 +60,10 @@ describe('Timer', () => {
             timer.type = TimerType.Movement;
             timer.remainingTime = 42;
             timer.intervalId = setInterval(() => {}, 1000);
-            
+
             // Act: change to Combat type
             timer.startTimer(10, TimerType.Combat);
-            
+
             // Assert: check that the remaining time was preserved as pausedTime
             expect(timer.pausedTime).toBe(42);
             expect(timer.type).toBe(TimerType.Combat);
@@ -107,7 +107,7 @@ describe('Timer', () => {
             expect(timer.remainingTime).toBe(0);
         });
     });
-    
+
     // Test du comportement de la méthode pauseTimer à travers startTimer
     describe('Behavior of private pauseTimer through public API', () => {
         it('should save remaining time when changing timer types', () => {
@@ -115,25 +115,25 @@ describe('Timer', () => {
             timer.type = TimerType.Movement;
             timer.remainingTime = 7;
             timer.intervalId = setInterval(() => {}, 1000);
-            
+
             // Act - this will call the private pauseTimer method
             timer.startTimer(3, TimerType.Combat);
-            
+
             // Assert
             expect(clearIntervalSpy).toHaveBeenCalled();
             expect(timer.pausedTime).toBe(7);
         });
-        
+
         it('should not set pausedTime if no interval exists', () => {
             // Arrange
             timer.type = TimerType.Movement;
             timer.remainingTime = 7;
             timer.intervalId = undefined;
             timer.pausedTime = undefined;
-            
+
             // Act - pauseTimer would be called but should not modify pausedTime
             timer.startTimer(3, TimerType.Combat);
-            
+
             // Assert
             expect(clearIntervalSpy).not.toHaveBeenCalled();
             expect(timer.pausedTime).toBeUndefined();
