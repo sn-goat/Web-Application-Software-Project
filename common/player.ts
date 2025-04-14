@@ -35,7 +35,7 @@ export enum Team {
 }
 
 export enum VirtualPlayerStyles {
-    Agressive = 'Agressif',
+    Aggressive = 'Agressif',
     Defensive = 'Defensif',
 }
 

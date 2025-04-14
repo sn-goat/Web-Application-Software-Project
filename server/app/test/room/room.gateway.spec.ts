@@ -80,19 +80,13 @@ describe('RoomGateway', () => {
 
         it('handlePlayerRemoved should emit event and remove player from room', () => {
             const errorSpy = jest.spyOn(Logger.prototype, 'log');
-            const payload = {
-                accessCode: 'room123',
-                name: 'player',
-                playerId: 'player123',
-                message: 'Player was removed',
-            };
 
-            gateway.handlePlayerRemoved(payload);
+            gateway.handlePlayerRemoved('room123', 'player123', 'Player was removed');
 
-            expect(server.to).toHaveBeenCalledWith(payload.playerId);
-            expect(emitMock).toHaveBeenCalledWith(RoomEvents.PlayerRemoved, payload.message);
+            expect(server.to).toHaveBeenCalledWith('player123');
+            expect(emitMock).toHaveBeenCalledWith(RoomEvents.PlayerRemoved, 'Player was removed');
             expect(errorSpy).toHaveBeenCalled();
-            expect(client.leave).toHaveBeenCalledWith(payload.accessCode);
+            expect(client.leave).toHaveBeenCalledWith('room123');
         });
 
         it('handleUpdatePlayers should emit updated players to room', () => {

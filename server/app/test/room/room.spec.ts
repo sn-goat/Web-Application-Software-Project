@@ -129,13 +129,8 @@ describe('Room', () => {
             // Get the internal emitter from room
             const internalEmitter = (room as any).internalEmitter as EventEmitter2;
             // Fire a PlayerRemoved event on internal emitter{ name: string; playerId: string; message: string }
-            internalEmitter.emit(InternalRoomEvents.PlayerRemoved, { name: 'joe', playerId: 'p1', message: 'Test message' });
-            expect(globalEmitter.emit).toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, {
-                accessCode: room.accessCode,
-                name: 'joe',
-                playerId: 'p1',
-                message: 'Test message',
-            });
+            internalEmitter.emit(InternalRoomEvents.PlayerRemoved, 'p1', 'Test message');
+            expect(globalEmitter.emit).toHaveBeenCalledWith(InternalRoomEvents.PlayerRemoved, room.accessCode, 'p1', 'Test message');
         });
 
         it('should forward InternalTimerEvents.TurnUpdate events', () => {
