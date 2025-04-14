@@ -8,9 +8,15 @@
             <div class="inventory-container">
                 <div class="items">
                     @for (item of items; track item) {
-                    <div class="item-slot">
+                    <div class="item-slot" (mouseenter)="showTooltip = item" (mouseleave)="showTooltip = null">
                         <img draggable="false" [src]="src + item + fileType" [alt]="item" class="item-image" />
+                        @if(showTooltip === item){
+                        <div class="custom-tooltip">
+                            {{ getDescription(item) }}
+                        </div>
+                        }
                     </div>
+
                     } @if (items.length === 1) {
                     <div class="item-slot empty"></div>
                     } @else if (!items.length) {

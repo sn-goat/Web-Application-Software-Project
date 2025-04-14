@@ -142,6 +142,11 @@ body {
     align-items: center;
     justify-content: center;
     padding: 0 5px;
+    z-index: 101;
+}
+
+.toggle-button.chat{
+    z-index: 1000;
 }
 
 /* Hover Effect */
@@ -190,7 +195,7 @@ body {
     background: rgba(0, 0, 0, 0.9);
 
     padding: 10px;
-    z-index: 1000;
+    z-index: 100;
 }
 
 .popup-header {
@@ -277,6 +282,10 @@ app-game-map-player {
         width: 100%;
         max-width: 800px;
     }
+}
+
+app-header-bar{
+    z-index: 101;
 }
 
 .debug-indicator {
