@@ -32,7 +32,7 @@ export class ChatComponent implements AfterViewChecked, OnDestroy {
         this.previousMessageCount = 0;
         this.newMessage = '';
         this.myPlayer = null;
-        this.playerService.myPlayer.unsubscribe();
+        // this.playerService.myPlayer.unsubscribe();
     }
 
     ngAfterViewChecked(): void {

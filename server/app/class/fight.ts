@@ -1,7 +1,11 @@
 import { Player } from '@app/class/player';
+import { FightResult, FightResultType } from '@app/constants/fight-interface';
+import { InternalFightEvents, InternalJournalEvents } from '@app/constants/internal-events';
 import { Item } from '@common/enums';
 import { IFight } from '@common/game';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GameMessage } from '@common/journal';
+import { JournalManager } from '@app/class/journal-manager';
 
 export class Fight implements IFight {
     player1: Player;
@@ -22,6 +26,7 @@ export class Fight implements IFight {
         this.player1 = player1;
         this.player2 = player2;
         this.currentPlayer = player1.speed >= player2.speed ? player1 : player2;
+        this.internalEmitter.emit(InternalFightEvents.Init, this);
     }
 
     getFighter(playerId: string): Player {
@@ -34,16 +39,22 @@ export class Fight implements IFight {
 
     changeFighter(): void {
         this.currentPlayer = this.currentPlayer.id === this.player1.id ? this.player2 : this.player1;
+        this.internalEmitter.emit(InternalFightEvents.ChangeFighter, this);
     }
 
     flee() {
+        this.dispatchJournalEntry(GameMessage.FleeAttempt, [this.currentPlayer, this.getOpponent(this.currentPlayer.id)]);
         return this.currentPlayer.attemptFlee();
     }
 
-    playerAttack(isDebugMode: boolean): { winner: Player; loser: Player } | null {
+    playerAttack(isDebugMode: boolean): FightResult | null {
         const attacker = this.currentPlayer;
         const defender = this.getOpponent(this.currentPlayer.id);
         const isDefenderDead = attacker.attack(isDebugMode, defender);
+        this.dispatchJournalEntry(GameMessage.AttackInit, [attacker, defender]);
+        this.dispatchJournalEntry(GameMessage.AttackDiceResult, [attacker, defender]);
+        this.dispatchJournalEntry(GameMessage.DefenseDiceResult, [defender, attacker]);
+        this.dispatchJournalEntry(GameMessage.DamageResult, [attacker, defender]);
         if (isDefenderDead) {
             if (defender.hasItem(Item.Pearl) && !defender.pearlUsed) {
                 defender.pearlUsed = true;
@@ -52,10 +63,17 @@ export class Fight implements IFight {
             } else {
                 defender.losses += 1;
                 attacker.wins += 1;
-                return { winner: attacker, loser: defender };
+                return { type: FightResultType.Decisive, winner: attacker, loser: defender };
             }
         }
         return null;
+    }
+
+    dispatchJournalEntry(messageType: GameMessage, playersInvolved: Player[], item?: Item): void {
+        const message = JournalManager.processEntry(messageType, playersInvolved, item);
+        if (message) {
+            this.internalEmitter.emit(InternalJournalEvents.Add, message);
+        }
     }
 
     hasFight(): boolean {
@@ -66,10 +84,10 @@ export class Fight implements IFight {
         return this.player1.id === playerId || this.player2.id === playerId;
     }
 
-    handleFightRemoval(playerId: string): { winner: Player; loser: Player } {
+    handleFightRemoval(playerId: string): FightResult {
         const winner = this.getOpponent(playerId);
         winner.wins += 1;
         const loser = this.getFighter(playerId);
-        return { winner, loser };
+        return { type: FightResultType.Decisive, winner, loser };
     }
 }

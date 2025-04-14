@@ -13,6 +13,10 @@ export class RoomService {
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
 
     constructor() {
+        this.initializeListeners();
+    }
+
+    initializeListeners() {
         this.socketReceiver.onRoomCreated().subscribe((room) => {
             this.connected.next(room.game.players);
             this.isRoomLocked.next(room.isLocked);
@@ -41,5 +45,6 @@ export class RoomService {
         this.connected.next([]);
         this.isRoomLocked.next(false);
         this.maxPlayer.next(0);
+        this.initializeListeners();
     }
 }

@@ -7,9 +7,12 @@ import { DEFAULT_MOVEMENT_DIRECTIONS, DIAGONAL_MOVEMENT_DIRECTIONS, Team } from 
 
 export class GameUtils {
     static isPlayerCanMakeAction(map: Cell[][], player: Player): boolean {
-        const position: Vec2 = player.position;
-        for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
-            const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+        if (player.actions <= 0) {
+            return false;
+        }
+        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
+        for (const dir of directions) {
+            const newPos: Vec2 = { x: player.position.x + dir.x, y: player.position.y + dir.y };
             if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
                 const targetCell = map[newPos.y][newPos.x];
                 if (this.isValidCellForAction(targetCell)) {
@@ -19,7 +22,7 @@ export class GameUtils {
         }
         if (player.inventory.includes(Item.Bow)) {
             for (const dir of DIAGONAL_MOVEMENT_DIRECTIONS) {
-                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+                const newPos: Vec2 = { x: player.position.x + dir.x, y: player.position.y + dir.y };
                 if (newPos.y >= 0 && newPos.y < map.length && newPos.x >= 0 && newPos.x < map[0].length) {
                     const targetCell = map[newPos.y][newPos.x];
                     if (this.isValidCellForAttack(targetCell)) {
@@ -52,7 +55,7 @@ export class GameUtils {
                     continue;
                 }
 
-                const tileCost = this.getTileCost(game[newPos.y][newPos.x]);
+                const tileCost = this.getTileCost(game[newPos.y][newPos.x], false);
                 if (tileCost === Infinity) {
                     continue;
                 }
@@ -251,27 +254,77 @@ export class GameUtils {
         return null;
     }
 
-    private static vec2Key(vec: Vec2): string {
-        return `${vec.x},${vec.y}`;
-    }
-
-    private static isValidPosition(size: number, position: Vec2): boolean {
-        return position.y >= 0 && position.y < size && position.x >= 0 && position.x < size;
-    }
-
-    private static isOccupiedByPlayer(cell: Cell): boolean {
-        return cell && cell.player !== undefined && cell.player !== Avatar.Default;
-    }
-
-    private static getTileCost(cell: Cell): number {
+    static getTileCost(cell: Cell, ignorePlayerDoors: boolean): number {
         if (!cell) {
             return Infinity;
         }
         if (this.isOccupiedByPlayer(cell)) {
-            return Infinity;
+            return ignorePlayerDoors ? 0 : Infinity;
+        }
+        if (cell.tile === Tile.ClosedDoor) {
+            return ignorePlayerDoors ? 1 : TILE_COST.get(cell.tile);
         }
         const cost = TILE_COST.get(cell.tile);
         return cost !== undefined ? cost : cell.cost;
+    }
+
+    static isValidCellForAction(cell: Cell): boolean {
+        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.ClosedDoor || cell.tile === Tile.OpenedDoor;
+    }
+
+    static dijkstra(map: Cell[][], start: Vec2, end: Vec2, ignorePlayerDoors: boolean): PathInfo {
+        const queue = [{ position: start, path: [], cost: 0 }];
+        const visited = new Set<string>();
+        visited.add(this.vec2Key(start));
+
+        while (queue.length > 0) {
+            const { position, path, cost } = queue.shift();
+            if (position.x === end.x && position.y === end.y) {
+                const fPath = [...path, position];
+                fPath.shift();
+                return { path: fPath, cost };
+            }
+
+            for (const dir of DEFAULT_MOVEMENT_DIRECTIONS) {
+                const newPos: Vec2 = { x: position.x + dir.x, y: position.y + dir.y };
+
+                if (!this.isValidPosition(map.length, newPos)) {
+                    continue;
+                }
+                const tileCost = this.getTileCost(map[newPos.y][newPos.x], ignorePlayerDoors);
+                if (tileCost === Infinity) {
+                    continue;
+                }
+
+                const newCost = cost + tileCost;
+                const newKey = this.vec2Key(newPos);
+                if (!visited.has(newKey)) {
+                    visited.add(newKey);
+                    queue.push({ position: newPos, path: [...path, position], cost: newCost });
+                }
+            }
+        }
+        return null;
+    }
+
+    static isOccupiedByPlayer(cell: Cell): boolean {
+        return cell && cell.player !== undefined && cell.player !== Avatar.Default;
+    }
+
+    static hasSameTeamPlayer(player: Player, players: Player[], cell: Cell): boolean {
+        if (!this.isOccupiedByPlayer(cell)) {
+            return false;
+        }
+        const playerInCell = players.find((p) => p.avatar === cell.player);
+        return playerInCell && playerInCell.team === player.team;
+    }
+
+    static isValidPosition(size: number, position: Vec2): boolean {
+        return position.y >= 0 && position.y < size && position.x >= 0 && position.x < size;
+    }
+
+    private static vec2Key(vec: Vec2): string {
+        return `${vec.x},${vec.y}`;
     }
 
     private static isValidSpawn(cell: Cell): boolean {
@@ -281,10 +334,6 @@ export class GameUtils {
             cell.tile !== Tile.OpenedDoor &&
             (cell.player === Avatar.Default || cell.player === undefined)
         );
-    }
-
-    private static isValidCellForAction(cell: Cell): boolean {
-        return (cell.player !== undefined && cell.player !== Avatar.Default) || cell.tile === Tile.ClosedDoor || cell.tile === Tile.OpenedDoor;
     }
 
     private static isValidCellForAttack(cell: Cell): boolean {

@@ -34,6 +34,11 @@ export enum Team {
     Blue = 'Bleu',
 }
 
+export enum VirtualPlayerStyles {
+    Agressive = 'Agressif',
+    Defensive = 'Defensif',
+}
+
 export interface GameStats {
     actions: number;
     wins: number;
@@ -89,6 +94,21 @@ export const DIAGONAL_POSITIONS: Vec2[] = [
     { x: -1, y: -1 }, // Up-Left
     { x: -1, y: 1 }, // Down-Left
     { x: 1, y: -1 }, // Up-Right
+];
+
+export const VIRTUAL_PLAYER_NAMES: string[] = [
+    "Aldoril",
+    "Eldrin",
+    "Thalion",
+    "Faranor",
+    "Galadren",
+    "Lorian",
+    "Cerethan",
+    "Veloria",
+    "Aerion",
+    "Evangor",
+    "Mythril",
+    "Silvyr",
 ];
 export const DIAGONAL_MOVEMENT_DIRECTIONS: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS.concat(DIAGONAL_POSITIONS);
 

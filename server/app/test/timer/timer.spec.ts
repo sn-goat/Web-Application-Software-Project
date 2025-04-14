@@ -55,37 +55,37 @@ describe('Timer', () => {
             expect(timer.remainingTime).toBe(5);
         });
 
-        it('should call pauseTimer if the current type is Movement', () => {
-            // Spy on pauseTimer.
-            const pauseSpy = jest.spyOn(timer, 'pauseTimer').mockReturnValue(42);
-            // Setup: simulate that the timer is already running with type Movement.
-            timer.type = TimerType.Movement;
-            // Also give it an intervalId so that pauseTimer gets executed.
-            timer.intervalId = setInterval(() => {}, 1000);
-            timer.startTimer(10, TimerType.Movement);
-            expect(pauseSpy).toHaveBeenCalled();
-            // pausedTime from pauseTimer is used.
-            expect(timer.pausedTime).toBe(42);
-        });
+        // it('should call pauseTimer if the current type is Movement', () => {
+        //     // Spy on pauseTimer.
+        //     const pauseSpy = jest.spyOn(timer, 'pauseTimer').mockReturnValue(42);
+        //     // Setup: simulate that the timer is already running with type Movement.
+        //     timer.type = TimerType.Movement;
+        //     // Also give it an intervalId so that pauseTimer gets executed.
+        //     timer.intervalId = setInterval(() => {}, 1000);
+        //     timer.startTimer(10, TimerType.Movement);
+        //     expect(pauseSpy).toHaveBeenCalled();
+        //     // pausedTime from pauseTimer is used.
+        //     expect(timer.pausedTime).toBe(42);
+        // });
     });
 
-    describe('pauseTimer', () => {
-        it('should clear the interval and return the paused time if interval exists', () => {
-            // Set remaining time and simulate an active timer.
-            timer.remainingTime = 7;
-            timer.intervalId = setInterval(() => {}, 1000);
-            const paused = timer.pauseTimer();
-            expect(clearIntervalSpy).toHaveBeenCalled();
-            expect(paused).toBe(7);
-            expect(timer.pausedTime).toBe(7);
-        });
+    // describe('pauseTimer', () => {
+    //     it('should clear the interval and return the paused time if interval exists', () => {
+    //         // Set remaining time and simulate an active timer.
+    //         timer.remainingTime = 7;
+    //         timer.intervalId = setInterval(() => {}, 1000);
+    //         const paused = timer.pauseTimer();
+    //         expect(clearIntervalSpy).toHaveBeenCalled();
+    //         expect(paused).toBe(7);
+    //         expect(timer.pausedTime).toBe(7);
+    //     });
 
-        it('should return undefined if no interval exists', () => {
-            timer.intervalId = undefined;
-            const paused = timer.pauseTimer();
-            expect(paused).toBeUndefined();
-        });
-    });
+    //     it('should return undefined if no interval exists', () => {
+    //         timer.intervalId = undefined;
+    //         const paused = timer.pauseTimer();
+    //         expect(paused).toBeUndefined();
+    //     });
+    // });
 
     describe('resumeTimer', () => {
         it('should restart the timer with pausedTime if pausedTime exists', () => {

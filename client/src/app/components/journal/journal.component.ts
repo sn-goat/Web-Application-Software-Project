@@ -14,6 +14,7 @@ export class JournalComponent implements OnDestroy, OnInit {
     journalEntries: Entry[] = [];
     isFilterActive: boolean = false;
     myPlayerId: string = '';
+    currentDate: string;
     private readonly gameService: GameService = inject(GameService);
     private readonly playerService: PlayerService = inject(PlayerService);
     private subscriptions: Subscription[] = [];

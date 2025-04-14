@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { Entry, FightMessage, GameMessage } from '@common/journal';
+import { Entry, GameMessage } from '@common/journal';
 import { BehaviorSubject } from 'rxjs';
 import { JournalComponent } from './journal.component';
 
@@ -22,15 +22,13 @@ describe('JournalComponent', () => {
     const testPlayerId = 'player123';
     const mockEntries: Entry[] = [
         {
-            messageType: GameMessage.Quit,
-            message: GameMessage.Quit + 'Jean',
-            accessCode: 'ABC123',
+            isFight: false,
+            message: GameMessage.AttackInit + 'Jean',
             playersInvolved: ['otherPlayer456'],
         },
         {
-            messageType: GameMessage.StartTurn,
+            isFight: false,
             message: GameMessage.StartTurn + 'vous',
-            accessCode: 'ABC123',
             playersInvolved: [testPlayerId],
         },
     ];
@@ -78,17 +76,15 @@ describe('JournalComponent', () => {
             component.isFilterActive = false;
 
             const entryNotInvolved: Entry = {
-                messageType: GameMessage.OpenDoor,
+                isFight: false,
                 message: GameMessage.OpenDoor + 'Marie',
-                accessCode: 'ABC123',
                 playersInvolved: ['someOtherId'],
             };
             expect(component.shouldDisplayEntry(entryNotInvolved)).toBeTrue();
 
             const entryInvolved: Entry = {
-                messageType: FightMessage.Attack,
-                message: FightMessage.Attack + 'vous',
-                accessCode: 'ABC123',
+                isFight: false,
+                message: GameMessage.AttackInit + 'vous',
                 playersInvolved: [testPlayerId],
             };
             expect(component.shouldDisplayEntry(entryInvolved)).toBeTrue();
@@ -98,9 +94,8 @@ describe('JournalComponent', () => {
             component.isFilterActive = true;
 
             const entryNotInvolved: Entry = {
-                messageType: GameMessage.CloseDoor,
+                isFight: false,
                 message: GameMessage.CloseDoor + 'Pierre',
-                accessCode: 'ABC123',
                 playersInvolved: ['someOtherId'],
             };
             expect(component.shouldDisplayEntry(entryNotInvolved)).toBeFalse();
@@ -120,9 +115,8 @@ describe('JournalComponent', () => {
     it('should update entries when new entries are emitted', () => {
         const newEntries: Entry[] = [
             {
-                messageType: GameMessage.EndGame,
+                isFight: false,
                 message: GameMessage.EndGame + 'Marie',
-                accessCode: 'ABC123',
                 playersInvolved: ['otherPlayer789'],
             },
         ];

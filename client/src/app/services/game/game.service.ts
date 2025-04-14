@@ -35,6 +35,10 @@ export class GameService {
     private chatService = inject(ChatService);
 
     constructor() {
+        this.initializeListeners();
+    }
+
+    initializeListeners(): void {
         this.socketReceiver.onPlayersUpdated().subscribe((players) => {
             this.playingPlayers.next(players);
             this.updateInitialPlayers(players);
@@ -63,9 +67,13 @@ export class GameService {
 
         this.socketReceiver.onDoorStateChanged().subscribe((door) => {
             const newMap = this.map.value;
-            newMap[door.doorPosition.y][door.doorPosition.x].tile = door.newDoorState;
+            newMap[door.position.y][door.position.x].tile = door.state;
             this.map.next(newMap);
             this.isActionSelected.next(false);
+        });
+
+        this.socketReceiver.onMapUpdated().subscribe((map) => {
+            this.map.next(map);
         });
 
         this.socketReceiver.onEndFight().subscribe((players: IPlayer[] | null) => {
@@ -105,7 +113,10 @@ export class GameService {
         });
 
         this.socketReceiver.onJournalEntry().subscribe((entry) => {
-            this.journalEntries.next([...this.journalEntries.getValue(), entry]);
+            const date = new Date().toTimeString().split(' ')[0];
+            const currentDate = '[' + date + ']: ';
+            entry.message = currentDate + entry.message;
+            this.journalEntries.next([...this.journalEntries.value, entry]);
         });
 
         this.socketReceiver.onStatsUpdate().subscribe((stats) => {
@@ -245,6 +256,7 @@ export class GameService {
         this.journalEntries.next([]);
         this.stats.next(null);
         this.chatService.clearChatHistory();
+        this.initializeListeners();
     }
 
     async confirmAndAbandonGame(): Promise<boolean> {

@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { Vec2 } from '@common/board';
+import { Cell, Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { ChatEvents } from '@common/chat.gateway.events';
-import { Item, Tile } from '@common/enums';
-import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
-import { FightEvents, GameEvents, TurnEvents, JournalEvent, StatsEvents } from '@common/game.gateway.events';
+import { Item } from '@common/enums';
+import { DoorState, IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
+import { FightEvents, GameEvents, JournalEvent, StatsEvents, TurnEvents } from '@common/game.gateway.events';
 import { Entry } from '@common/journal';
 import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
+import { Stats } from '@common/stats';
 import { Observable } from 'rxjs';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
-import { Stats } from '@common/stats';
 
 @Injectable({
     providedIn: 'root',
@@ -113,6 +113,14 @@ export class SocketReceiverService {
         });
     }
 
+    onMapUpdated(): Observable<Cell[][]> {
+        return new Observable((observer) => {
+            this.socket.on(GameEvents.MapUpdated, (map: Cell[][]) => {
+                observer.next(map);
+            });
+        });
+    }
+
     onGameWinner(): Observable<IPlayer> {
         return new Observable((observer) => {
             this.socket.once(GameEvents.Winner, (winner: IPlayer) => {
@@ -169,7 +177,7 @@ export class SocketReceiverService {
         });
     }
 
-    onDoorStateChanged(): Observable<{ doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }> {
+    onDoorStateChanged(): Observable<DoorState> {
         return new Observable((observer) => {
             this.socket.on(TurnEvents.DoorStateChanged, (data) => {
                 observer.next(data);

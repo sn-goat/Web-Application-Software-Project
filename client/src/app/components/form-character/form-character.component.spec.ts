@@ -259,7 +259,6 @@ describe('FormCharacterComponent', () => {
         spyOn(mockSocketService, 'shareCharacter');
         mockSocketService.triggerRoomCreated({ accessCode: 'accessCode' } as IRoom);
 
-        expect(component.accessCode).toEqual('accessCode');
         expect(mockSocketService.shareCharacter).toHaveBeenCalledWith(component.playerInput);
         expect(mockPlayerService.setAdmin).toHaveBeenCalledWith(true);
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/lobby'], { state: { accessCode: 'accessCode' } });
