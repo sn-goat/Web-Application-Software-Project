@@ -24,6 +24,7 @@
                 maxlength="200"
                 (focus)="onInputFocus()"
                 (blur)="onInputBlur()"
+                (keyup.enter)="sendMessage()"
             />
             <button (click)="sendMessage()">Envoyer</button>
         </div>

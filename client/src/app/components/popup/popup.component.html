@@ -2,7 +2,7 @@
 <div class="popup">
     <div class="popup-header">
         <ul class="popup-tabs">
-            <li [class.active]="selectedTab === 'chat'" (click)="selectTab('chat')">Zone de messages</li>
+            <li [class.active]="selectedTab === 'chat'" (click)="selectTab('chat')">Messages</li>
             <li [class.active]="selectedTab === 'journal'" (click)="selectTab('journal')">Journal</li>
         </ul>
         <button (click)="togglePopup()" class="close-popup">X</button>
