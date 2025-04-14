@@ -24,7 +24,7 @@ export class GameService {
     activePlayer: BehaviorSubject<IPlayer | null> = new BehaviorSubject<IPlayer | null>(null);
     isDebugMode: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isActionSelected: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-    journalEntries: BehaviorSubject<Entry[]> = new BehaviorSubject<Entry[]>([]);
+    journalEntries: BehaviorSubject<Set<Entry>> = new BehaviorSubject<Set<Entry>>(new Set());
     stats: BehaviorSubject<Stats | null> = new BehaviorSubject<Stats | null>(null);
 
     private organizerId: string = '';
@@ -113,10 +113,7 @@ export class GameService {
         });
 
         this.socketReceiver.onJournalEntry().subscribe((entry) => {
-            const date = new Date().toTimeString().split(' ')[0];
-            const currentDate = '[' + date + ']: ';
-            entry.message = currentDate + entry.message;
-            this.journalEntries.next([...this.journalEntries.value, entry]);
+            this.journalEntries.next(new Set<Entry>([...this.journalEntries.value, this.setCurrentTime(entry)]));
         });
 
         this.socketReceiver.onStatsUpdate().subscribe((stats) => {
@@ -253,7 +250,7 @@ export class GameService {
         this.isDebugMode.next(false);
         this.isActionSelected.next(false);
         this.initialPlayers.next([]);
-        this.journalEntries.next([]);
+        this.journalEntries.next(new Set<Entry>());
         this.stats.next(null);
         this.chatService.clearChatHistory();
         this.initializeListeners();
@@ -380,5 +377,16 @@ export class GameService {
             return !defender.team || myPlayer.team !== defender.team;
         }
         return false;
+    }
+
+    private setCurrentTime(entry: Entry): Entry {
+        const date = new Date().toTimeString().split(' ')[0];
+        const currentDate = '[' + date + ']: ';
+        if (entry.message.includes(']: ')) {
+            return entry;
+        } else {
+            entry.message = currentDate + entry.message;
+            return entry;
+        }
     }
 }

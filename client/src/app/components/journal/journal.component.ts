@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
     styleUrl: './journal.component.scss',
 })
 export class JournalComponent implements OnDestroy, OnInit {
-    journalEntries: Entry[] = [];
+    journalEntries: Set<Entry> = new Set<Entry>();
     isFilterActive: boolean = false;
     myPlayerId: string = '';
     currentDate: string;
@@ -21,7 +21,7 @@ export class JournalComponent implements OnDestroy, OnInit {
 
     ngOnInit() {
         this.subscriptions.push(
-            this.gameService.journalEntries.subscribe((entries: Entry[]) => {
+            this.gameService.journalEntries.subscribe((entries: Set<Entry>) => {
                 this.journalEntries = entries;
             }),
             this.playerService.myPlayer.subscribe((player) => {

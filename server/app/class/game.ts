@@ -311,7 +311,11 @@ export class Game implements IGame, GameStats {
     }
 
     isPlayerTurn(playerId: string): boolean {
-        return this.players[this.currentTurn].id === playerId;
+        if (this.players[this.currentTurn].id) {
+            return this.players[this.currentTurn].id === playerId;
+        } else {
+            return true;
+        }
     }
 
     toggleDebug(): boolean {

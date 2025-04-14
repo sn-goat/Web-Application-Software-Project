@@ -101,7 +101,8 @@ export class GameStatsUtils {
         this.addFlagsCapturedToGameStats(gameStats.disconnectedPlayers, gameStats);
 
         gameStats.tilesVisitedPercentage = `${Math.round((gameStats.tilesVisited.size / gameStats.tilesNumber) * this.hundredPercent)}%`;
-        gameStats.doorsHandledPercentage = `${Math.round((gameStats.doorsHandled.size / gameStats.doorsNumber) * this.hundredPercent)}%`;
+        gameStats.doorsHandledPercentage =
+            gameStats.doorsNumber > 0 ? `${Math.round((gameStats.doorsHandled.size / gameStats.doorsNumber) * this.hundredPercent)}%` : '0%';
         gameStats.flagsCapturedCount = gameStats.flagsCaptured.size > 0 ? gameStats.flagsCaptured.size : undefined;
 
         this.calculateGameDuration(gameStats);

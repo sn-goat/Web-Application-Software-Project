@@ -112,6 +112,7 @@ export class Player implements IPlayer {
     updatePosition(position: Vec2, fieldType: Tile): void {
         this.isOnIce = fieldType === Tile.Ice && !this.hasItem(Item.LeatherBoot);
         this.position = position;
+        this.tilesVisited.add(position);
     }
 
     addItemToInventory(item: Item): boolean {
