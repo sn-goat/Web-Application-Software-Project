@@ -14,7 +14,7 @@ import { Item } from '@common/enums';
     encapsulation: ViewEncapsulation.None,
 })
 export class BoardCellComponent {
-    private static readonly smallRowThreshhold = 4;
+    private static readonly smallRowThreshhold = 9;
 
     @Input() cell!: Cell;
     @Input() isInGameView = false;
