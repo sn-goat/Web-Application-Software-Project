@@ -14,7 +14,7 @@ import { SocketEmitterService } from '@app/services/socket/socket-emitter.servic
 })
 export class FormVirtualPlayerComponent {
     readonly virtualPlayerStyles = VirtualPlayerStyles;
-    virtualPlayerStyle: VirtualPlayerStyles = VirtualPlayerStyles.Agressive;
+    virtualPlayerStyle: VirtualPlayerStyles = VirtualPlayerStyles.Aggressive;
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
 
     createVirtualPlayer() {

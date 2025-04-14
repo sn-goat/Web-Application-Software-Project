@@ -410,7 +410,14 @@ export class Game implements IGame, GameStats {
                 clearInterval(vpTurnInterval);
                 return;
             }
-            const targetPath: Vec2[] = VPManager.lookForTarget(player, this.map, this.players);
+            let targetPath: Vec2[] = [];
+            const playerWithFlag = GameUtils.getPlayerWithFlag(this.players);
+            const shouldChaseFlag = playerWithFlag ? player.team !== playerWithFlag.team : false;
+            if (this.isCTF && shouldChaseFlag) {
+                targetPath = VPManager.lookForFlag(player, this.map, playerWithFlag);
+            } else {
+                targetPath = VPManager.lookForTarget(player, this.map, this.players);
+            }
             const instruction: VirtualPlayerInstructions = VPManager.computePath(player, this.map, targetPath);
             if (instruction.action === VirtualPlayerAction.EndTurn) {
                 clearInterval(vpTurnInterval);

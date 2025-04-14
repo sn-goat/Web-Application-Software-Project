@@ -18,7 +18,7 @@ export class VPManager {
         const queue: Vec2[] = [];
         const visited = new Set<string>();
         visited.add(`${player.position.x},${player.position.y}`);
-        this.addNeigboursToQueue(queue, visited, map, player.position);
+        this.addNeighborsToQueue(queue, visited, map, player.position);
 
         let bestScore = -Infinity;
         let bestPath: Vec2[] = [];
@@ -31,10 +31,19 @@ export class VPManager {
                 bestScore = evaluation.score;
                 bestPath = evaluation.path;
             }
-            this.addNeigboursToQueue(queue, visited, map, current);
+            this.addNeighborsToQueue(queue, visited, map, current);
         }
 
         return bestPath;
+    }
+
+    static lookForFlag(player: VirtualPlayer, map: Cell[][], playerWithFlag: Player): Vec2[] {
+        if (player.virtualStyle === VirtualPlayerStyles.Defensive) {
+            const validSpawnPosition: Vec2 = GameUtils.findValidSpawn(map, playerWithFlag.spawnPosition);
+            return GameUtils.dijkstra(map, player.position, validSpawnPosition, true).path;
+        } else {
+            return GameUtils.dijkstra(map, player.position, playerWithFlag.position, true).path;
+        }
     }
 
     static computePath(vPlayer: VirtualPlayer, map: Cell[][], targetPath: Vec2[]): VirtualPlayerInstructions {
@@ -83,7 +92,7 @@ export class VPManager {
             return { score: this.flagPriority, path: pathInfo.path };
         }
         score += pathInfo.cost <= vPlayer.movementPts ? this.bonusScoreCell : 0;
-        if (vPlayer.virtualStyle === VirtualPlayerStyles.Agressive) {
+        if (vPlayer.virtualStyle === VirtualPlayerStyles.Aggressive) {
             score += ATTACK_ITEMS.has(cell.item) ? this.aggressivePriorityItem : this.aggressivePriorityPlayer;
         } else {
             score += DEFENSE_ITEMS.has(cell.item) ? this.defensivePriorityItem : this.defensivePriorityPlayer;
@@ -92,12 +101,12 @@ export class VPManager {
     }
 
     private static isInterestingCell(vPlayer: VirtualPlayer, players: Player[], cell: Cell): boolean {
-        const hasPlayer = vPlayer.team ? GameUtils.hasSameTeamPlayer(vPlayer, players, cell) : GameUtils.isOccupiedByPlayer(cell);
-        const hasItem = vPlayer.virtualStyle === VirtualPlayerStyles.Agressive ? ATTACK_ITEMS.has(cell.item) : DEFENSE_ITEMS.has(cell.item);
+        const hasPlayer = vPlayer.team ? GameUtils.hasOpponentOnCell(vPlayer, players, cell) : GameUtils.isOccupiedByPlayer(cell);
+        const hasItem = vPlayer.virtualStyle === VirtualPlayerStyles.Aggressive ? ATTACK_ITEMS.has(cell.item) : DEFENSE_ITEMS.has(cell.item);
         return (hasPlayer && cell.player !== vPlayer.avatar) || hasItem;
     }
 
-    private static addNeigboursToQueue(queue: Vec2[], visited: Set<string>, map: Cell[][], position: Vec2) {
+    private static addNeighborsToQueue(queue: Vec2[], visited: Set<string>, map: Cell[][], position: Vec2) {
         for (const direction of DEFAULT_MOVEMENT_DIRECTIONS) {
             const newPos: Vec2 = { x: position.x + direction.x, y: position.y + direction.y };
             if (GameUtils.isValidPosition(map.length, newPos) && !visited.has(`${newPos.x},${newPos.y}`)) {
