@@ -31,6 +31,7 @@ export class Player implements IPlayer {
     currentLife: number;
     diceResult: number;
     team?: Team;
+    isOnIce: boolean;
     inventory: Item[];
     pearlUsed: boolean;
 
@@ -101,7 +102,7 @@ export class Player implements IPlayer {
     }
 
     attack(isDebugMode: boolean, playerDefender: Player): boolean {
-        this.currentDamage = Math.max(this.initiateAttack(isDebugMode) - playerDefender.initiateDefence(isDebugMode), 0);
+        this.currentDamage = Math.max(this.initiateAttack(isDebugMode) - playerDefender.initiateDefense(isDebugMode), 0);
         playerDefender.currentLife = Math.max(playerDefender.currentLife - this.currentDamage, 0);
         playerDefender.takenDamage += this.currentDamage;
         this.givenDamage += this.currentDamage;
@@ -109,11 +110,7 @@ export class Player implements IPlayer {
     }
 
     updatePosition(position: Vec2, fieldType: Tile): void {
-        this.tilesVisited.add(position);
-        if (fieldType === Tile.Ice && !this.hasItem(Item.LeatherBoot)) {
-            this.attackPower = fieldType === Tile.Ice ? this.attackPower - ATTACK_ICE_DECREMENT : this.attackPower;
-            this.defensePower = fieldType === Tile.Ice ? this.defensePower - DEFENSE_ICE_DECREMENT : this.defensePower;
-        }
+        this.isOnIce = fieldType === Tile.Ice && !this.hasItem(Item.LeatherBoot);
         this.position = position;
     }
 
@@ -164,12 +161,12 @@ export class Player implements IPlayer {
 
     private initiateAttack(isDebugMode: boolean): number {
         this.diceResult = isDebugMode ? this.diceToNumber(this.attackDice) : Math.floor(Math.random() * this.diceToNumber(this.attackDice)) + 1;
-        return this.diceResult + this.attackPower;
+        return this.isOnIce ? this.diceResult + this.attackPower - ATTACK_ICE_DECREMENT : this.diceResult + this.attackPower;
     }
 
-    private initiateDefence(isDebugMode: boolean): number {
+    private initiateDefense(isDebugMode: boolean): number {
         this.diceResult = isDebugMode ? this.minDiceValue : Math.floor(Math.random() * this.diceToNumber(this.defenseDice)) + 1;
-        return this.diceResult + this.defensePower;
+        return this.isOnIce ? this.diceResult + this.defensePower - DEFENSE_ICE_DECREMENT : this.diceResult + this.defensePower;
     }
 
     private diceToNumber(dice: Dice): number {

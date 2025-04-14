@@ -4,7 +4,6 @@ import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
 import { RoomGateway } from '@app/gateways/room/room.gateway';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { JournalService } from '@app/services/journal/journal.service';
 import { PlayerInput } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Logger } from '@nestjs/common';
@@ -17,7 +16,6 @@ describe('RoomGateway', () => {
     let gameManager: jest.Mocked<GameManagerService>;
     let emitMock: jest.Mock;
     let client: jest.Mocked<Socket>;
-    let journalService: jest.Mocked<JournalService>;
 
     beforeEach(async () => {
         emitMock = jest.fn();
@@ -59,17 +57,8 @@ describe('RoomGateway', () => {
             closeRoom: jest.fn(),
         } as unknown as jest.Mocked<GameManagerService>;
 
-        journalService = {
-            dispatchEntry: jest.fn(),
-        } as unknown as jest.Mocked<JournalService>;
-
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                RoomGateway,
-                { provide: GameManagerService, useValue: gameManager },
-                { provide: Logger, useValue: new Logger() },
-                { provide: JournalService, useValue: journalService },
-            ],
+            providers: [RoomGateway, { provide: GameManagerService, useValue: gameManager }, { provide: Logger, useValue: new Logger() }],
         }).compile();
 
         gateway = module.get<RoomGateway>(RoomGateway);

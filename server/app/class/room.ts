@@ -6,16 +6,21 @@ import {
     InternalTimerEvents,
     InternalTurnEvents,
     InternalStatsEvents,
+    InternalJournalEvents,
 } from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
+import { DoorState, IRoom, PathInfo } from '@common/game';
 import { ChatMessage } from '@common/chat';
 import { Item } from '@common/enums';
-import { IRoom, PathInfo } from '@common/game';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
+import { VirtualPlayer } from './virtual-player';
+import { VirtualPlayerStyles } from '@common/player';
+import { FightResult } from '@app/constants/fight-interface';
 import { Player } from './player';
 import { Stats } from '@common/stats';
+import { Entry } from '@common/journal';
 
 export class Room implements IRoom {
     accessCode: string;
@@ -56,8 +61,16 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalStatsEvents.DispatchStats, { accessCode: this.accessCode, stats });
         });
 
+        this.internalEmitter.on(InternalJournalEvents.Add, (entry: Entry) => {
+            this.globalEmitter.emit(InternalJournalEvents.Add, { accessCode: this.accessCode, entry });
+        });
+
         this.internalEmitter.on(InternalTimerEvents.FightUpdate, (remainingTime) => {
             this.globalEmitter.emit(InternalTimerEvents.FightUpdate, { accessCode: this.accessCode, remainingTime });
+        });
+
+        this.internalEmitter.on(InternalGameEvents.MapUpdated, (map) => {
+            this.globalEmitter.emit(InternalGameEvents.MapUpdated, { accessCode: this.accessCode, map });
         });
 
         this.internalEmitter.on(InternalTurnEvents.Move, (movement: { previousPosition: Vec2; player: Player }) => {
@@ -80,12 +93,23 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalTurnEvents.Start, playerId);
         });
 
-        this.internalEmitter.on(InternalFightEvents.ChangeFighter, (fight: Fight) => {
-            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, { accessCode: this.accessCode, fight });
+        this.internalEmitter.on(InternalFightEvents.Init, (fight: Fight) => {
+            this.globalEmitter.emit(InternalFightEvents.Init, fight);
         });
 
-        this.internalEmitter.on(InternalFightEvents.End, (fightResult: { winner: Player; loser: Player }) => {
-            this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, winner: fightResult.winner, loser: fightResult.loser });
+        this.internalEmitter.on(InternalTurnEvents.DoorStateChanged, (doorState: DoorState) => {
+            this.globalEmitter.emit(InternalTurnEvents.DoorStateChanged, {
+                accessCode: this.accessCode,
+                doorState,
+            });
+        });
+
+        this.internalEmitter.on(InternalFightEvents.ChangeFighter, (fight: Fight) => {
+            this.globalEmitter.emit(InternalFightEvents.ChangeFighter, fight);
+        });
+
+        this.internalEmitter.on(InternalFightEvents.End, (fightResult: FightResult) => {
+            this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, fightResult });
         });
 
         this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; position: Vec2 }) => {
@@ -136,6 +160,14 @@ export class Room implements IRoom {
     addPlayer(player: Player): void {
         this.generateUniquePlayerName(player);
         this.game.addPlayer(player);
+        if (this.game.isGameFull()) {
+            this.isLocked = true;
+        }
+    }
+
+    addVirtualPlayer(playerStyle: VirtualPlayerStyles): void {
+        const virtualPlayer = new VirtualPlayer(this.game.players, playerStyle);
+        this.game.addPlayer(virtualPlayer);
         if (this.game.isGameFull()) {
             this.isLocked = true;
         }
@@ -196,11 +228,12 @@ export class Room implements IRoom {
     }
 
     private removePlayerFromGame(playerId: string): void {
+        const wasPlayerTurn = this.game.isPlayerTurn(playerId);
         this.game.removePlayerOnMap(playerId);
         this.game.removePlayer(playerId, this.confirmDisconnectMessage);
         this.game.dropItems(playerId);
 
-        if (this.game.players.length < 2) {
+        if (!this.game.canGameContinue()) {
             const lastPlayer = this.getPlayers()[0];
             this.game.removePlayer(lastPlayer.id, this.notEnoughPlayersMessage);
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
@@ -216,8 +249,9 @@ export class Room implements IRoom {
             this.game.removePlayerFromFight(playerId);
         }
 
-        if (this.game.isPlayerTurn(playerId)) {
-            this.game.endTurn();
+        if (wasPlayerTurn) {
+            this.game.currentTurn = this.game.currentTurn % this.game.players.length;
+            this.game.startTurn();
         }
     }
 

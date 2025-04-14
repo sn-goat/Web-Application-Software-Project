@@ -1,4 +1,5 @@
 import { Cell, Vec2 } from './board';
+import { Item, Tile } from './enums';
 import { IPlayer } from './player';
 
 export interface IRoom {
@@ -78,6 +79,11 @@ export function getAvatarName(avatar: Avatar): string {
     return avatarNameMap[avatar] || 'Unknown';
 }
 
+export interface DoorState {
+    position: Vec2;
+    state: Tile.OpenedDoor | Tile.ClosedDoor;
+}
+
 export interface TurnInfo {
     player: IPlayer;
     path: Map<string, PathInfo>;
@@ -87,3 +93,35 @@ export interface PathInfo {
     path: Vec2[];
     cost: number;
 }
+
+
+
+export interface VirtualPlayerInstructions {
+    action: VirtualPlayerAction;
+    pathInfo?: PathInfo;
+    target?: Vec2;
+}
+
+export enum VirtualPlayerAction {
+    Move = 'MOVE',
+    InitFight = 'INIT_FIGHT',
+    Attack = 'ATTACK',
+    Flee = 'FLEE',
+    OpenDoor = 'OPENED_DOOR',
+    EndTurn = 'END_TURN',
+}
+
+export interface CellEvaluation {
+    score: number;
+    path: Vec2[];
+}
+
+export const ATTACK_ITEMS = new Set([
+    Item.Sword,
+    Item.Bow,
+])
+
+export const DEFENSE_ITEMS = new Set([
+    Item.Shield,
+    Item.Pearl,
+])

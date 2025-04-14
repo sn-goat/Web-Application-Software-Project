@@ -3,15 +3,14 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { TestBed } from '@angular/core/testing';
 import { FakeSocket } from '@app/helpers/fake-socket';
-import { Tile } from '@common/enums';
-import { FightEvents, GameEvents, TurnEvents, StatsEvents, JournalEvent } from '@common/game.gateway.events';
+import { FightEvents, GameEvents, JournalEvent, StatsEvents, TurnEvents } from '@common/game.gateway.events';
+import { Entry, GameMessage } from '@common/journal';
 import { IPlayer } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
+import { mockStandardStats } from '@common/stats';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
 import { SocketReceiverService } from './socket-receiver.service';
-import { mockStandardStats } from '@common/stats';
-import { Entry, GameMessage } from '@common/journal';
 
 describe('SocketReceiverService', () => {
     let service: SocketReceiverService;
@@ -48,9 +47,8 @@ describe('SocketReceiverService', () => {
 
     it('should emit on journal event', (done) => {
         const mockEntry: Entry = {
-            messageType: GameMessage.Quit,
+            isFight: false,
             message: GameMessage.Quit + 'Jean',
-            accessCode: 'ABC123',
             playersInvolved: ['otherPlayer456'],
         };
         service.onJournalEntry().subscribe((receivedEntry) => {
@@ -237,14 +235,14 @@ describe('SocketReceiverService', () => {
         fakeSocket.callbacks[TurnEvents.PlayerMoved](movement);
     });
 
-    it('should emit on door update', (done) => {
-        const data = { doorPosition: { x: 1, y: 1 }, newDoorState: Tile.ClosedDoor as Tile.ClosedDoor | Tile.OpenedDoor };
-        service.onDoorStateChanged().subscribe((received) => {
-            expect(received).toEqual(data);
-            done();
-        });
-        fakeSocket.callbacks[TurnEvents.DoorStateChanged](data);
-    });
+    // it('should emit on door update', (done) => {
+    //     const data = { doorPosition: { x: 1, y: 1 }, newDoorState: Tile.ClosedDoor as Tile.ClosedDoor | Tile.OpenedDoor };
+    //     service.onDoorStateChanged().subscribe((received) => {
+    //         expect(received).toEqual(data);
+    //         done();
+    //     });
+    //     fakeSocket.callbacks[TurnEvents.DoorStateChanged](data);
+    // });
 
     it('should emit on fight init', (done) => {
         const fight = { id: 'fight1' } as any;

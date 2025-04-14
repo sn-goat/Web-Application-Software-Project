@@ -9,6 +9,7 @@ export enum RoomEvents {
     JoinError = 'joinError',
 
     ShareCharacter = 'shareCharacter',
+    CreateVirtualPlayer = 'createVirtualPlayer',
     SetCharacter = 'setCharacter',
 
     LockRoom = 'lockRoom',

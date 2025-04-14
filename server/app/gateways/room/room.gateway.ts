@@ -1,10 +1,8 @@
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
+import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { InternalRoomEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { JournalService } from '@app/services/journal/journal.service';
-import { GameMessage } from '@common/journal';
-import { PlayerInput } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -18,10 +16,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer() server: Server;
     private logger: Logger = new Logger(RoomGateway.name);
 
-    constructor(
-        private readonly gameManager: GameManagerService,
-        private journalService: JournalService,
-    ) {}
+    constructor(private readonly gameManager: GameManagerService) {}
     @OnEvent(InternalRoomEvents.CloseRoom)
     handleClosingRoom(accessCode: string): void {
         this.server.to(accessCode).emit(GameEvents.GameEnded);
@@ -30,7 +25,6 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @OnEvent(InternalRoomEvents.PlayerRemoved)
     handlePlayerRemoved(payload: { accessCode: string; name: string; playerId: string; message: string }): void {
-        this.journalService.dispatchEntry(this.gameManager.getRoom(payload.accessCode), [payload.name], GameMessage.Quit, this.server);
         this.server.to(payload.playerId).emit(RoomEvents.PlayerRemoved, payload.message);
 
         this.logger.log(`Joueur ${payload.playerId} a été expulsé de la salle ${payload.accessCode}`);
@@ -71,6 +65,13 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const room: Room = this.gameManager.getRoom(payload.accessCode);
         room.addPlayer(player);
         client.emit(RoomEvents.SetCharacter, player);
+        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+    }
+
+    @SubscribeMessage(RoomEvents.CreateVirtualPlayer)
+    handleCreateVirtualPlayer(client: Socket, payload: { accessCode: string; playerStyle: VirtualPlayerStyles }) {
+        const room: Room = this.gameManager.getRoom(payload.accessCode);
+        room.addVirtualPlayer(payload.playerStyle);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
     }
 
