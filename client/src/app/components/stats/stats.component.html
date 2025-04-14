@@ -1,3 +1,4 @@
+<div class="container justified">
 @if(stats) {
     <div class="stats-container">
         <mat-card class="player-stats-card">
@@ -7,8 +8,8 @@
             <mat-card-content>
                 <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)" class="player-stats-table">
                     <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Nom</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Nom</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected">
                             {{ player.name }}
                             @if(player.isDisconnected) {
                                 <mat-chip color="warn" selected>Déconnecté</mat-chip>
@@ -17,57 +18,57 @@
                     </ng-container>
 
                     <ng-container matColumnDef="wins">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Victoires</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Victoires</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.wins }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="losses">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Défaites</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Défaites</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.losses }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="totalFights">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Nombre de combats</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Nombre de combats</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.totalFights }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="givenDamage">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Dégâts infligés</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Dégâts infligés</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.givenDamage }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="takenDamage">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Dégâts subis</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Dégâts subis</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.takenDamage }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="itemsPickedCount">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Items collectés</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Items collectés</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.itemsPickedCount }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="tilesVisitedPercentage">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Pourcentage de la carte explorée</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Pourcentage de la carte explorée</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.tilesVisitedPercentage }}
                         </td>
                     </ng-container>
 
                     <ng-container matColumnDef="fleeSuccess">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="text-align: center">Fuites réussies</th>
-                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" style="text-align: center">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Fuites réussies</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
                             {{ player.fleeSuccess }}
                         </td>
                     </ng-container>
@@ -119,3 +120,4 @@
         <p>Aucune statistique disponible.</p>
     </div>
 }
+</div>

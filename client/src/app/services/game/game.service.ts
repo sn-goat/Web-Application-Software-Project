@@ -297,13 +297,13 @@ export class GameService {
             const currentPlayers = this.playingPlayers.value;
             const playerInfo = currentPlayers.find((player) => player.avatar === cell.player) || { name: 'Unknown' };
 
-            return 'Joueur: ' + playerInfo.name + ' Avatar: ' + getAvatarName(cell.player);
+            return 'Joueur: ' + playerInfo.name + '\n Avatar: ' + getAvatarName(cell.player);
         }
         const tileDesc = this.getTileDescription(cell.tile);
         let desc = tileDesc;
         if (cell.item && cell.item !== (Item.Default as unknown as Item)) {
             const itemDesc = this.getItemDescription(cell.item);
-            desc += ', ' + itemDesc;
+            desc += '\n\n' + itemDesc;
         }
         return desc;
     }

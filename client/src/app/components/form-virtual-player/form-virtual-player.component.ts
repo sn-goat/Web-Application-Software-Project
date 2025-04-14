@@ -14,10 +14,12 @@ import { SocketEmitterService } from '@app/services/socket/socket-emitter.servic
 })
 export class FormVirtualPlayerComponent {
     readonly virtualPlayerStyles = VirtualPlayerStyles;
-    virtualPlayerStyle: VirtualPlayerStyles = VirtualPlayerStyles.Aggressive;
+    virtualPlayerStyle: VirtualPlayerStyles | null = null;
     private readonly socketEmitter: SocketEmitterService = inject(SocketEmitterService);
 
     createVirtualPlayer() {
-        this.socketEmitter.createVirtualPlayer(this.virtualPlayerStyle);
+        if (this.virtualPlayerStyle) {
+            this.socketEmitter.createVirtualPlayer(this.virtualPlayerStyle);
+        }
     }
 }

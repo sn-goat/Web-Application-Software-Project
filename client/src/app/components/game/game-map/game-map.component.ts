@@ -93,6 +93,7 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     onLeftClicked(cell: Cell) {
+        this.rightSelectedCell = null;
         if (!this.isPlayerTurn) return;
         if (this.isActionSelected) {
             if (this.gameService.isWithinActionRange(cell)) {

@@ -84,7 +84,7 @@ describe('FormCharacterComponent', () => {
         // Setup required properties before detectChanges
         component.playerInput = {
             name: 'test-id',
-            avatar: Avatar.Dwarf, // Use a valid Avatar enum value
+            avatar: Avatar.Nain, // Use a valid Avatar enum value
             attackPower: 0,
             defensePower: 0,
             speed: 0,

@@ -89,7 +89,7 @@ export class MapMakerComponent implements OnInit {
         if (result) {
             this.saveBoard()
                 .then(() => {
-                    this.openDialog('Partie sauvegardée! Vous allez être redirigé.\n', Alert.SUCCESS);
+                    this.openDialog('Partie sauvegardée! Vous avez été redirigé.\n', Alert.SUCCESS);
                     this.router.navigate(['/admin']);
                 })
                 .catch((error) => {

@@ -9,7 +9,11 @@
     </head>
     <body>
         <div class="background-gif" style="background-image: url('assets/backgrounds/edit.gif')"></div>
-        <h1 class="medieval-title">Édition de carte</h1>
+<div class="header-bar">
+    <button class="return-button top-left" (click)="confirmReturn()">Retour</button>
+    <h1 class="medieval-title">Édition de carte</h1>
+</div>
+
         <div class="container justified">
             <div class="main-content">
                 <div class="editor-container">
@@ -31,7 +35,6 @@
 
                             <button type="button" id="saveButton" (click)="checkIfReadyToSave()">Enregistrer</button>
                             <button type="reset" class="reset-button" (click)="reset()">Réinitialiser</button>
-                            <button type="button" class="return-button" (click)="confirmReturn()">Retour</button>
                         </div>
                     </div>
                     <div class="map-container" id="map-screenshot">

@@ -48,6 +48,12 @@ export interface IFight {
     currentPlayer: IPlayer;
 }
 
+export enum GamePhase {
+    Lobby = 'LOBBY',
+    InGame = 'IN_GAME',
+    AfterGame = 'AFTER_GAME',
+}
+
 export const ASSET_PATH_ANIMATED = './assets/character-animations/portrait';
 export const ASSET_EXT_ANIMATED = '.gif';
 export const ASSET_PATH_STATIC = './assets/portraits/portrait';
@@ -55,25 +61,28 @@ export const ASSET_EXT_STATIC = '.png';
 export const ACCESS_CODE_REGEX = /^\d{4}$/;
 
 export enum Avatar {
-    Dwarf = ASSET_PATH_STATIC + '1' + ASSET_EXT_STATIC,
-    Elf = ASSET_PATH_STATIC + '2' + ASSET_EXT_STATIC,
-    Rogue = ASSET_PATH_STATIC + '3' + ASSET_EXT_STATIC,
-    Knight = ASSET_PATH_STATIC + '4' + ASSET_EXT_STATIC,
-    Lancer = ASSET_PATH_STATIC + '5' + ASSET_EXT_STATIC,
-    Warlock = ASSET_PATH_STATIC + '6' + ASSET_EXT_STATIC,
-    Wizard = ASSET_PATH_STATIC + '7' + ASSET_EXT_STATIC,
+    Nain = ASSET_PATH_STATIC + '1' + ASSET_EXT_STATIC,
+    Elfe = ASSET_PATH_STATIC + '2' + ASSET_EXT_STATIC,
+    Roublard = ASSET_PATH_STATIC + '3' + ASSET_EXT_STATIC,
+    Chevalier = ASSET_PATH_STATIC + '4' + ASSET_EXT_STATIC,
+    Lancier = ASSET_PATH_STATIC + '5' + ASSET_EXT_STATIC,
+    Démoniste = ASSET_PATH_STATIC + '6' + ASSET_EXT_STATIC,
+    Magicien = ASSET_PATH_STATIC + '7' + ASSET_EXT_STATIC,
     Paladin = ASSET_PATH_STATIC + '8' + ASSET_EXT_STATIC,
     Berserker = ASSET_PATH_STATIC + '9' + ASSET_EXT_STATIC,
-    Cleric = ASSET_PATH_STATIC + '10' + ASSET_EXT_STATIC,
-    Farmer = ASSET_PATH_STATIC + '11' + ASSET_EXT_STATIC,
-    Hermit = ASSET_PATH_STATIC + '12' + ASSET_EXT_STATIC,
+    Clerc = ASSET_PATH_STATIC + '10' + ASSET_EXT_STATIC,
+    Fermier = ASSET_PATH_STATIC + '11' + ASSET_EXT_STATIC,
+    Ermite = ASSET_PATH_STATIC + '12' + ASSET_EXT_STATIC,
     Default = '',
 }
 
-const avatarNameMap = Object.entries(Avatar).reduce((acc, [key, value]) => {
-    acc[value] = key;
-    return acc;
-}, {} as Record<string, string>);
+const avatarNameMap = Object.entries(Avatar).reduce(
+    (acc, [key, value]) => {
+        acc[value] = key;
+        return acc;
+    },
+    {} as Record<string, string>,
+);
 
 export function getAvatarName(avatar: Avatar): string {
     return avatarNameMap[avatar] || 'Unknown';
@@ -93,8 +102,6 @@ export interface PathInfo {
     path: Vec2[];
     cost: number;
 }
-
-
 
 export interface VirtualPlayerInstructions {
     action: VirtualPlayerAction;
@@ -116,12 +123,6 @@ export interface CellEvaluation {
     path: Vec2[];
 }
 
-export const ATTACK_ITEMS = new Set([
-    Item.Sword,
-    Item.Bow,
-])
+export const ATTACK_ITEMS = new Set([Item.Sword, Item.Bow]);
 
-export const DEFENSE_ITEMS = new Set([
-    Item.Shield,
-    Item.Pearl,
-])
+export const DEFENSE_ITEMS = new Set([Item.Shield, Item.Pearl]);

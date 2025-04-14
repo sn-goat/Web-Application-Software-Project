@@ -100,7 +100,7 @@ describe('GameMapPlayerComponent', () => {
 
     it('playerIsInGame should return true if a player is in the game', () => {
         currentPlayersSubject.next(mockPlayers);
-        const check = component.playerIsInGame(mockActivePlayer);
+        const check = component.isPlayerInGame(mockActivePlayer);
         expect(check).toBeTrue();
     });
 });

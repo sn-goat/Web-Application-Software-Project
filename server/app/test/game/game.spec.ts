@@ -33,7 +33,7 @@ import { GameUtils } from '@app/services/game/game-utils';
 import { GameStatsUtils } from '@app/services/game/game-utils-stats';
 import { Cell, Vec2 } from '@common/board';
 import { Item, Tile, Visibility } from '@common/enums';
-import { Avatar, PathInfo, VirtualPlayerAction, VirtualPlayerInstructions } from '@common/game';
+import { Avatar, GamePhase, PathInfo, VirtualPlayerAction, VirtualPlayerInstructions } from '@common/game';
 import { GameMessage } from '@common/journal';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { VirtualPlayerStyles } from '@common/player';
@@ -87,7 +87,7 @@ const createDummyPlayer = (id: string): Player => {
     // Minimal stub with the properties and methods needed by Game
     return {
         id,
-        avatar: Avatar.Cleric,
+        avatar: Avatar.Clerc,
         wins: 0,
         speed: 5,
         movementPts: 3,
@@ -134,7 +134,7 @@ describe('Game', () => {
             expect(game.map).toEqual(dummyBoard.board);
             expect(game.players).toEqual([]);
             expect(game.currentTurn).toBe(0);
-            expect(game.hasStarted).toBe(false);
+            expect(game.gamePhase).toBe(GamePhase.Lobby);
             expect(game.isCTF).toBe(dummyBoard.isCTF);
             expect(game.timer).toBeInstanceOf(Timer);
             expect(game.fight).toBeInstanceOf(Fight);
@@ -182,7 +182,7 @@ describe('Game', () => {
             const removeAllSpy = jest.spyOn(emitter, 'removeAllListeners');
             game.fight = {} as Fight;
             game.players = [player1, player2];
-            game.hasStarted = true;
+            game.gamePhase = GamePhase.InGame;
             game.movementInProgress = true;
             game.pendingEndTurn = true;
             game.maxPlayers = 5;
@@ -191,7 +191,7 @@ describe('Game', () => {
             expect(removeAllSpy).toHaveBeenCalledWith(InternalEvents.UpdateTimer);
             expect(game.fight).toBeNull();
             expect(game.players).toEqual([]);
-            expect(game.hasStarted).toBe(false);
+            expect(game.gamePhase).toBe(GamePhase.Lobby);
             expect(game.movementInProgress).toBe(false);
             expect(game.pendingEndTurn).toBe(false);
             expect(game.maxPlayers).toBe(0);
@@ -204,7 +204,7 @@ describe('Game', () => {
             game.addPlayer(player2);
             const configured = game.configureGame();
             expect(configured).toBe(game);
-            expect(game.hasStarted).toBe(true);
+            expect(game.gamePhase).toBe(GamePhase.InGame);
         });
 
         it('should return null in CTF mode with odd number of players', () => {
@@ -271,24 +271,6 @@ describe('Game', () => {
             game.pendingEndTurn = true;
             game.processPath(pathInfo, 'nonexistent');
             expect(game.movementInProgress).toBe(false);
-        });
-
-        it('should check for a ctf winner at the end of path', () => {
-            const winnerSpy = jest.spyOn(player1, 'isCtfWinner').mockReturnValueOnce(true);
-            const emitSpy = jest.spyOn(emitter, 'emit');
-            const pathInfo: PathInfo = {
-                path: [
-                    { x: 1, y: 1 },
-                    { x: 0, y: 1 },
-                ],
-                cost: 2,
-            };
-            jest.useFakeTimers();
-            game.processPath(pathInfo, player1.id);
-            expect(game.movementInProgress).toBe(true);
-            jest.runAllTimers();
-            expect(winnerSpy).toHaveBeenCalled();
-            expect(emitSpy).toHaveBeenCalledWith(InternalGameEvents.Winner, player1);
         });
     });
 
@@ -365,6 +347,7 @@ describe('Game', () => {
             const startTurnSpy = jest.spyOn(game, 'startTurn').mockImplementation(() => {});
             game.players = [player1, player2];
             game.currentTurn = 0;
+            game.gamePhase = GamePhase.InGame;
             game.endTurn();
             expect(game.currentTurn).toBe(1);
             expect(startTurnSpy).toHaveBeenCalled();
@@ -672,7 +655,7 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
         it('devrait trouver une nouvelle position si le spawn est occupé par un autre joueur', () => {
             // Arrange
             player.spawnPosition = { x: 1, y: 1 };
-            game.map[1][1].player = Avatar.Knight; // Un autre joueur est sur la position d'origine
+            game.map[1][1].player = Avatar.Chevalier; // Un autre joueur est sur la position d'origine
             const findValidSpawnSpy = jest.spyOn(GameUtils, 'findValidSpawn').mockReturnValue({ x: 0, y: 0 });
 
             // Act

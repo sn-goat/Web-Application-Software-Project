@@ -1,14 +1,26 @@
-<h2 mat-dialog-title>Création d'un joueur virtuel</h2>
-<mat-dialog-content>
-    <section>
-        <p>Quel Style voulez vous donner à ce joueur virtuel ?</p>
-        <mat-button-toggle-group [(ngModel)]="virtualPlayerStyle" aria-label="Font Style">
-          <mat-button-toggle [value]=virtualPlayerStyles.Aggressive>{{virtualPlayerStyles.Aggressive}}</mat-button-toggle>
-          <mat-button-toggle [value]=virtualPlayerStyles.Defensive>{{virtualPlayerStyles.Defensive}}</mat-button-toggle>
-        </mat-button-toggle-group>
-    </section>
-</mat-dialog-content>
-<mat-dialog-actions>
-    <button mat-raised-button mat-dialog-close cdkFocusInitial>Annuler</button>
-    <button mat-raised-button mat-dialog-close (click)="createVirtualPlayer()">Créer</button>
-</mat-dialog-actions>
+<div class="popup-container">
+  <h2>Création d'un joueur virtuel</h2>
+  <p>Choisissez un style à ce joueur virtuel</p>
+
+  <div class="items">
+    <div class="item" [class.selected]="virtualPlayerStyle === virtualPlayerStyles.Aggressive"
+         (click)="virtualPlayerStyle = virtualPlayerStyles.Aggressive">
+      <img src="assets/items/Sword.png" alt="Agressif">
+      <span>Agressif</span>
+    </div>
+
+    <div class="item" [class.selected]="virtualPlayerStyle === virtualPlayerStyles.Defensive"
+         (click)="virtualPlayerStyle = virtualPlayerStyles.Defensive">
+      <img src="assets/items/Shield.png" alt="Défensif">
+      <span>Défensif</span>
+    </div>
+  </div>
+
+  <div class="popup-actions">
+    <button mat-dialog-close>Annuler</button>
+    <button (click)="createVirtualPlayer()" [disabled]="!virtualPlayerStyle" mat-dialog-close>
+  Créer
+</button>
+
+  </div>
+</div>

@@ -40,7 +40,6 @@ p {
     width: 100%;
     display: flex;
     flex-direction: row;
-    overflow: hidden;
     box-shadow:
         0 0 10px rgba(0, 0, 0, 0.5),
         0 0 8px $glow-teal;
@@ -148,6 +147,7 @@ p {
         box-shadow: 0 0 3px rgba($primary-text, 0.2);
         width: 5vh;
         height: 5vh;
+        position: relative;
     }
 
     .item-slot.empty {
@@ -358,6 +358,37 @@ p {
     }
 }
 
+.custom-tooltip {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+
+  background-color: rgba(0, 0, 0, 0.8);
+  color: $primary-text;
+  padding: 8px 12px;
+  border-radius: 6px;
+
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
+  word-break: break-word;
+
+  max-width: 300px;
+  min-width: 100px;
+  z-index: 10;
+  pointer-events: none;
+
+  font-family: 'MedievalSharp', cursive;
+  text-shadow: 0 0 4px $glow-teal;
+  box-shadow: 0 0 8px rgba($primary-text, 0.4);
+}
+
+
+
 .tools-section {
     display: flex;
     align-items: center;
@@ -380,23 +411,6 @@ p {
     align-items: center;
     justify-content: center;
     border: 1px solid rgba($primary-text, 0.5);
-}
-
-.items {
-    display: flex;
-    gap: 5px;
-    height: 100%;
-    align-items: center;
-
-    .item {
-        width: 24px;
-        height: 24px;
-        border-radius: $border-radius;
-        border: 1px solid $primary-text;
-        box-shadow: 0 0 5px $glow-teal;
-        object-fit: contain;
-        background-color: rgba(0, 0, 0, 0.2);
-    }
 }
 
 @keyframes blink {
