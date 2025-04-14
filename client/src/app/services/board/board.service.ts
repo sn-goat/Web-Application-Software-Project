@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
     providedIn: 'root',
 })
 export class BoardService {
-    private readonly apiUrl = environment.serverUrl + '/api/board'; // Update if hosted elsewhere
+    private readonly apiUrl = environment.serverUrl + '/api/board';
 
     constructor(private readonly http: HttpClient) {}
 

@@ -125,7 +125,6 @@ export class MapService {
 
         const maxMapObject: number = BOARD_SIZE_MAPPING[this.firstBoardValue.size as Size];
 
-        // Reset all state variables
         this.nbrSpawnsToPlace.next(maxMapObject);
         this.nbrItemsToPlace.next(maxMapObject);
         this.setHasFlagOnBoard(false);

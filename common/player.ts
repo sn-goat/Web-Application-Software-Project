@@ -58,7 +58,7 @@ export interface PlayerStats {
     tilesVisitedPercentage?: string;
     wins: number;
     losses?: number;
-    fleeSuccess?: number; 
+    fleeSuccess?: number;
     totalFights?: number;
 }
 
@@ -84,31 +84,30 @@ export const DEFAULT_FLEE_ATTEMPTS = 2;
 export const DEFAULT_POSITION: Vec2 = { x: 0, y: 0 };
 export const DEFAULT_POSITION_BEFORE_GAME: Vec2 = { x: -1, y: -1 };
 export const DEFAULT_MOVEMENT_DIRECTIONS: Vec2[] = [
-    { x: 0, y: 1 }, // Down
-    { x: 1, y: 0 }, // Right
-    { x: 0, y: -1 }, // Up
-    { x: -1, y: 0 }, // Left
+    { x: 0, y: 1 },
+    { x: 1, y: 0 },
+    { x: 0, y: -1 },
+    { x: -1, y: 0 },
 ];
 export const DIAGONAL_POSITIONS: Vec2[] = [
-    { x: 1, y: 1 }, // Down-Right
-    { x: -1, y: -1 }, // Up-Left
-    { x: -1, y: 1 }, // Down-Left
-    { x: 1, y: -1 }, // Up-Right
+    { x: 1, y: 1 },
+    { x: -1, y: -1 },
+    { x: -1, y: 1 },
+    { x: 1, y: -1 },
 ];
 
 export const VIRTUAL_PLAYER_NAMES: string[] = [
-    "Aldoril",
-    "Eldrin",
-    "Thalion",
-    "Faranor",
-    "Galadren",
-    "Lorian",
-    "Cerethan",
-    "Veloria",
-    "Aerion",
-    "Evangor",
-    "Mythril",
-    "Silvyr",
+    'Aldoril',
+    'Eldrin',
+    'Thalion',
+    'Faranor',
+    'Galadren',
+    'Lorian',
+    'Cerethan',
+    'Veloria',
+    'Aerion',
+    'Evangor',
+    'Mythril',
+    'Silvyr',
 ];
 export const DIAGONAL_MOVEMENT_DIRECTIONS: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS.concat(DIAGONAL_POSITIONS);
-
