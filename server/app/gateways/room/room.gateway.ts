@@ -1,9 +1,9 @@
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
+import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { InternalRoomEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { GameEvents } from '@common/game.gateway.events';
-import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';

@@ -11,16 +11,16 @@ import {
 } from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
+import { DoorState, IRoom, PathInfo } from '@common/game';
 import { ChatMessage } from '@common/chat';
 import { Item } from '@common/enums';
-import { DoorState, IRoom, PathInfo } from '@common/game';
 import { Entry } from '@common/journal';
 import { VirtualPlayerStyles } from '@common/player';
 import { Stats } from '@common/stats';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
-import { Player } from './player';
 import { VirtualPlayer } from './virtual-player';
+import { Player } from './player';
 
 export class Room implements IRoom {
     accessCode: string;
