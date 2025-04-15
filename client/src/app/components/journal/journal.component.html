@@ -1,6 +1,6 @@
 <div class="journal-content">
-    <button 
-        class="filter-button" 
+    <button
+        class="filter-button"
         (click)="toggleFilter()"
         title="Filtrer les messages pour afficher uniquement ceux qui vous concernent">
         {{ isFilterActive ? 'Voir tous les messages' : 'Voir mes messages' }}
@@ -10,10 +10,12 @@
         @for(journalEntry of journalEntries; track journalEntry) {
             @if (shouldDisplayEntry(journalEntry)) {
                 <p>{{ journalEntry.message }}</p>
-            } 
+            }
         } @empty {
             <p>Aucun message dans le journal</p>
         }
+
+        <div #scrollAnchor></div>
     </div>
 </div>
 
