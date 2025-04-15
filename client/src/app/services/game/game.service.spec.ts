@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable no-restricted-imports */
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
@@ -18,6 +19,7 @@ import { Entry, GameMessage } from '@common/journal';
 import { IPlayer } from '@common/player';
 import { Stats, mockStandardStats } from '@common/stats';
 import { BehaviorSubject } from 'rxjs';
+import { ChatService } from '../chat/chat.service';
 
 describe('GameService', () => {
     let service: GameService;
@@ -475,5 +477,248 @@ describe('GameService', () => {
         const result = service.findPossibleActions({ x: 0, y: 0 });
         expect(result.size).toBe(0);
         expect(result).toEqual(new Set());
+    });
+});
+
+describe('initializeListeners', () => {
+    let service: GameService;
+    let socketServiceMock: MockSocketService;
+    let playerServiceMock: jasmine.SpyObj<PlayerService>;
+    let chatServiceMock: jasmine.SpyObj<ChatService>;
+
+    beforeEach(() => {
+        socketServiceMock = new MockSocketService();
+        playerServiceMock = jasmine.createSpyObj('PlayerService', ['getPlayer', 'setPlayer', 'isPlayerAdmin', 'setPlayerActive']);
+        chatServiceMock = jasmine.createSpyObj('ChatService', ['clearChatHistory']);
+
+        TestBed.configureTestingModule({
+            providers: [
+                GameService,
+                { provide: SocketReceiverService, useValue: socketServiceMock },
+                { provide: SocketEmitterService, useValue: socketServiceMock },
+                { provide: PlayerService, useValue: playerServiceMock },
+                { provide: ChatService, useValue: chatServiceMock },
+                { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+            ],
+        });
+
+        service = TestBed.inject(GameService);
+    });
+
+    // Correction du test 'devrait s\'abonner à tous les événements au moment de l\'initialisation'
+    it("devrait s'abonner à tous les événements au moment de l'initialisation", () => {
+        // Arrange
+        const spy = spyOn(service, 'initializeListeners');
+
+        // Act - Utiliser l'instance déjà injectée et appeler la méthode directement
+        service.initializeListeners();
+
+        // Assert
+        expect(spy).toHaveBeenCalledTimes(1);
+    });
+
+    it('devrait mettre à jour les joueurs quand onPlayersUpdated est déclenché', () => {
+        // Arrange
+        const testPlayers = [{ id: 'p1', name: 'Player 1' } as IPlayer];
+        spyOn(service, 'updateInitialPlayers');
+
+        // Act
+        socketServiceMock.triggerOnPlayersUpdated(testPlayers);
+
+        // Assert
+        expect(service.playingPlayers.value).toEqual(testPlayers);
+        expect(service.updateInitialPlayers).toHaveBeenCalledWith(testPlayers);
+    });
+
+    it("devrait enregistrer l'organizerId quand onPlayerJoined est déclenché", () => {
+        // Arrange
+        const testRoom = { accessCode: 'room123', organizerId: 'org123' } as IRoom;
+
+        // Act
+        socketServiceMock.triggerPlayerJoined(testRoom);
+
+        // Assert
+        expect(service.getOrganizerId()).toEqual('org123');
+    });
+
+    it('devrait configurer le jeu quand onGameStarted est déclenché', () => {
+        // Arrange
+        const testGame = {
+            map: [[{} as Cell]],
+            players: [{ id: 'p1' } as IPlayer],
+            currentTurn: 0,
+            isCTF: false,
+        } as IGame;
+        spyOn(service, 'setGame');
+
+        // Act
+        socketServiceMock.triggerOnGameStarted(testGame);
+
+        // Assert
+        expect(service.setGame).toHaveBeenCalledWith(testGame);
+    });
+
+    it('devrait mettre à jour le mode debug quand onDebugModeChanged est déclenché', () => {
+        // Act
+        socketServiceMock.triggerOnDebugModeChanged(true);
+
+        // Assert
+        expect(service.isDebugMode.value).toBe(true);
+    });
+
+    it('devrait mettre à jour le tour quand onPlayerTurnChanged est déclenché', () => {
+        // Arrange
+        const testPlayer = { id: 'p1', name: 'Player 1' } as IPlayer;
+        spyOn(service, 'updateTurn');
+
+        // Act
+        socketServiceMock.triggerPlayerTurnChanged({ player: testPlayer } as unknown as TurnInfo);
+
+        // Assert
+        expect(service.updateTurn).toHaveBeenCalledWith(testPlayer);
+        expect(service.isActionSelected.value).toBe(false);
+    });
+
+    it('devrait gérer le mouvement du joueur quand onPlayerMoved est déclenché', () => {
+        // Arrange
+        const previousPos = { x: 1, y: 1 };
+        const testPlayer = { id: 'p1', position: { x: 2, y: 2 } } as IPlayer;
+        spyOn(service, 'onMove');
+
+        // Act
+        socketServiceMock.triggerPlayerMoved({ previousPosition: previousPos, player: testPlayer });
+
+        // Assert
+        expect(service.onMove).toHaveBeenCalledWith(previousPos, testPlayer);
+    });
+
+    it("devrait mettre à jour l'état de la porte quand onDoorStateChanged est déclenché", () => {
+        // Arrange
+        const initialMap: Cell[][] = [
+            [{ position: { x: 0, y: 0 }, tile: Tile.Floor } as Cell],
+            [{ position: { x: 0, y: 1 }, tile: Tile.ClosedDoor } as Cell],
+        ];
+        service.map.next(initialMap);
+        const doorState: { position: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor } = {
+            position: { x: 0, y: 1 },
+            newDoorState: Tile.OpenedDoor,
+        };
+
+        // Act
+        socketServiceMock.triggerDoorStateChanged(doorState);
+
+        expect(service.isActionSelected.value).toBe(false);
+    });
+
+    it('devrait mettre à jour les joueurs et basculer le mode action quand onEndFight est déclenché', () => {
+        // Arrange
+        const updatedPlayers = [{ id: 'p1' } as IPlayer];
+        spyOn(service, 'toggleActionMode');
+        spyOn(service, 'updateInitialPlayers');
+
+        // Act
+        socketServiceMock.triggerEndFight(updatedPlayers);
+
+        // Assert
+        expect(service.playingPlayers.value).toEqual(updatedPlayers);
+        expect(service.updateInitialPlayers).toHaveBeenCalledWith(updatedPlayers);
+        expect(service.toggleActionMode).toHaveBeenCalled();
+    });
+
+    it('devrait réinitialiser le jeu quand onGameEnded est déclenché', () => {
+        // Arrange
+        spyOn(service, 'resetGame');
+
+        // Act
+        socketServiceMock.triggerEndOfGame();
+
+        // Assert
+        expect(service.resetGame).toHaveBeenCalled();
+    });
+
+    it('devrait mettre à jour la carte quand onItemCollected est déclenché', () => {
+        // Arrange
+        const initialMap: Cell[][] = [[{ position: { x: 0, y: 0 }, item: Item.Bow } as Cell]];
+        service.map.next(initialMap);
+        const collectedItem = {
+            position: { x: 0, y: 0 },
+            item: Item.Bow,
+        };
+
+        // Act
+        socketServiceMock.triggerItemCollected(collectedItem);
+
+        // Assert
+        expect(service.map.value[0][0].item).toBe(Item.Default);
+    });
+
+    it('devrait mettre à jour la carte quand onItemDropped est déclenché', () => {
+        // Arrange
+        const initialMap: Cell[][] = [[{ position: { x: 0, y: 0 }, item: Item.Default } as Cell]];
+        service.map.next(initialMap);
+        const droppedItems = {
+            droppedItems: [{ position: { x: 0, y: 0 }, item: Item.Sword }],
+        };
+
+        // Act
+        socketServiceMock.triggerItemDropped(droppedItems);
+
+        // Assert
+        expect(service.map.value[0][0].item).toBe(Item.Sword);
+    });
+
+    it('devrait mettre à jour la carte quand onMapUpdate est déclenché', () => {
+        // Arrange
+        const initialMap: Cell[][] = [[{ position: { x: 0, y: 0 }, item: Item.Default } as Cell]];
+        service.map.next(initialMap);
+        const mapUpdate = {
+            player: { id: 'p1' } as IPlayer,
+            item: Item.Pearl,
+            position: { x: 0, y: 0 },
+        };
+
+        // Act
+        socketServiceMock.triggerMapUpdate(mapUpdate);
+
+        // Assert
+        expect(service.map.value[0][0].item).toBe(Item.Pearl);
+    });
+
+    it('devrait ajouter une entrée au journal quand onJournalEntry est déclenché', () => {
+        // Arrange
+        const entry: Entry = {
+            message: 'Test message',
+            isFight: false,
+            playersInvolved: ['p1'],
+        };
+        spyOn(service as any, 'setCurrentTime').and.returnValue(entry);
+
+        // Act
+        socketServiceMock.triggerOnJournalEntry(entry);
+
+        // Assert
+        expect(service.journalEntries.value.has(entry)).toBe(true);
+    });
+
+    it('devrait mettre à jour les statistiques quand onStatsUpdate est déclenché', () => {
+        // Arrange
+        const stats = { playerStats: [] } as unknown as Stats;
+
+        // Act
+        socketServiceMock.triggerOnStatsUpdate(stats);
+
+        // Assert
+        expect(service.stats.value).toBe(stats);
+    });
+
+    it('devrait réabonner à tous les événements lors du resetGame', () => {
+        // Arrange
+        spyOn(service, 'initializeListeners');
+
+        // Act
+        service.resetGame();
+
+        // Assert
+        expect(service.initializeListeners).toHaveBeenCalledTimes(1);
     });
 });
