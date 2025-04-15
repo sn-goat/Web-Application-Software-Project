@@ -1,9 +1,9 @@
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
-import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { InternalRoomEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { GameEvents } from '@common/game.gateway.events';
+import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -66,9 +66,14 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerInput }) {
         const player: Player = new Player(client.id, payload.player);
         const room: Room = this.gameManager.getRoom(payload.accessCode);
-        room.addPlayer(player);
-        client.emit(RoomEvents.SetCharacter, player);
-        this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+        const avatars = room.addPlayer(player);
+        if (!avatars) {
+            client.emit(RoomEvents.SetCharacter, player);
+            this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
+        } else {
+            this.logger.log('Avatar already taken');
+            client.emit(RoomEvents.AvatarError, avatars);
+        }
     }
 
     @SubscribeMessage(RoomEvents.CreateVirtualPlayer)

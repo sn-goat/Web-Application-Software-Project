@@ -392,7 +392,7 @@ export class Game implements IGame, GameStats {
             this.dispatchJournalEntry(GameMessage.EndFight, [fightResult.winner, fightResult.loser]);
             this.dispatchJournalEntry(GameMessage.WinnerFight, [fightResult.winner]);
             this.dispatchJournalEntry(GameMessage.LoserFight, [fightResult.loser]);
-            this.endFight();
+            this.endFight(fightResult.loser);
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
             this.manageEndGame(fightResult.winner);
         }

@@ -15,55 +15,62 @@
         <p style="color: red">Avatar déjà sélectionné par un autre joueur</p>
         }
         <div class="form-content">
-        <div class="name-container">
-            <label for="player-name">Qui êtes vous ?</label>
-            <input type="text" id="player-name" [(ngModel)]="playerInput.name" placeholder="Choisissez un nom" class="name-input" maxlength="20" />
-        </div>
-        <span>Veuillez choisir un attribut par colonne</span>
-        <div class="stat-container">
-            <div class="stat-column">
-                <p class="stat-description">Attribuer un +2</p>
-                <div class="tooltip">
-                    <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ playerInput.life }}</button>
-                    <span class="tooltiptext">Augmenter vos points de vie de deux points</span>
+            <div class="name-container">
+                <label for="player-name">Qui êtes vous ?</label>
+                <input
+                    type="text"
+                    id="player-name"
+                    [(ngModel)]="playerInput.name"
+                    placeholder="Choisissez un nom"
+                    class="name-input"
+                    maxlength="20"
+                />
+            </div>
+            <span>Veuillez choisir un attribut par colonne</span>
+            <div class="stat-container">
+                <div class="stat-column">
+                    <p class="stat-description">Attribuer un +2</p>
+                    <div class="tooltip">
+                        <button class="stat-button" [class.selected]="lifeSelected" (click)="selectStat('life')">Vie: {{ playerInput.life }}</button>
+                        <span class="tooltiptext">Augmenter vos points de vie de deux points</span>
+                    </div>
+                    <div class="tooltip">
+                        <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
+                            Rapidité: {{ playerInput.speed }}
+                        </button>
+                        <span class="tooltiptext">Augmenter votre rapidité de deux points</span>
+                    </div>
                 </div>
-                <div class="tooltip">
-                    <button class="stat-button" [class.selected]="speedSelected" (click)="selectStat('speed')">
-                        Rapidité: {{ playerInput.speed }}
-                    </button>
-                    <span class="tooltiptext">Augmenter votre rapidité de deux points</span>
+                <div class="stat-column">
+                    <p class="stat-description">Attribuer un dé à 6 faces</p>
+                    <div class="tooltip">
+                        <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
+                            Attaque: {{ playerInput.attackPower }} + @if(playerInput.attackDice) {
+                            <img [src]="diceToImageLink(playerInput.attackDice)" alt="Attack Dice" class="dice-image" />
+                            }
+                        </button>
+                        <span class="tooltiptext">Augmenter les dégats de vos attaques</span>
+                    </div>
+                    <div class="tooltip">
+                        <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
+                            Défense: {{ playerInput.defensePower }} + @if(playerInput.defenseDice) {
+                            <img [src]="diceToImageLink(playerInput.defenseDice)" alt="Defense Dice" class="dice-image" />
+                            }
+                        </button>
+                        <span class="tooltiptext">Augmenter votre capacité à bloquer une attaque </span>
+                    </div>
                 </div>
             </div>
-            <div class="stat-column">
-                <p class="stat-description">Attribuer un dé à 6 faces</p>
-                <div class="tooltip">
-                    <button class="stat-button" [class.selected]="attackSelected" (click)="selectCombatStat('attack')">
-                        Attaque: {{ playerInput.attackPower }} + @if(playerInput.attackDice) {
-                        <img [src]="diceToImageLink(playerInput.attackDice)" alt="Attack Dice" class="dice-image" />
-                        }
-                    </button>
-                    <span class="tooltiptext">Augmenter les dégats de vos attaques</span>
-                </div>
-                <div class="tooltip">
-                    <button class="stat-button" [class.selected]="defenseSelected" (click)="selectCombatStat('defense')">
-                        Défense: {{ playerInput.defensePower }} + @if(playerInput.defenseDice) {
-                        <img [src]="diceToImageLink(playerInput.defenseDice)" alt="Defense Dice" class="dice-image" />
-                        }
-                    </button>
-                    <span class="tooltiptext">Augmenter votre capacité à bloquer une attaque </span>
-                </div>
-            </div>
-        </div>
-        <button class="close-popup-button" (click)="onClose()">Fermer</button>
-        @if (!isRoomLocked) { @if (canJoin()) { @if(isCreationPage) {
-        <button class="join-button" (click)="createGame()">Commencer partie</button>
-        } @else {
-        <button class="join-button" (click)="shareCharacter()" routerLink="/lobby" [disabled]="isCurrentAvatarTaken">Joindre</button>
-        } } } @else {
-        <p style="color: red">L'admin a verrouillé la partie. Cette partie n'accepte plus de joueuers.</p>
-        <p style="color: red">Veuillez vous diriger vers le menu principal ou soumettre un nouveau code d'accès.</p>
-        <button class="close-popup-button" routerLink="/accueil" (click)="onClose()">Retour au menu principal</button>
-        }
+            <button class="close-popup-button" (click)="onClose()">Fermer</button>
+            @if (!isRoomLocked) { @if (canJoin()) { @if(isCreationPage) {
+            <button class="join-button" (click)="createGame()">Commencer partie</button>
+            } @else {
+            <button class="join-button" (click)="shareCharacter()" [disabled]="isCurrentAvatarTaken">Joindre</button>
+            } } } @else {
+            <p style="color: red">L'admin a verrouillé la partie. Cette partie n'accepte plus de joueuers.</p>
+            <p style="color: red">Veuillez vous diriger vers le menu principal ou soumettre un nouveau code d'accès.</p>
+            <button class="close-popup-button" routerLink="/accueil" (click)="onClose()">Retour au menu principal</button>
+            }
         </div>
     </div>
 </div>

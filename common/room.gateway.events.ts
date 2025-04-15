@@ -22,4 +22,6 @@ export enum RoomEvents {
     DisconnectPlayer = 'disconnectPlayer',
     PlayerRemoved = 'playerRemoved',
     PlayersUpdated = 'updatePlayers',
+
+    AvatarError = 'avatarError',
 }

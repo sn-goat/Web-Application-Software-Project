@@ -200,6 +200,19 @@ describe('FormCharacterComponent', () => {
         expect(component.currentPortraitImage).toBeTruthy();
     });
 
+    it('should update takenAvatars when emit onAvatarError is called', () => {
+        const avatars = [component.currentPortraitStaticImage];
+        mockSocketService.triggerAvatarError(avatars);
+        expect(component.isCurrentAvatarTaken).toBeTrue();
+
+        expect(component.isCurrentAvatarTaken).toBeTrue();
+    });
+
+    it('should redirect to lobby when emit onPlayerJoin is called', () => {
+        mockSocketService.triggerPlayerJoined({ accessCode: 'accessCode' } as IRoom);
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/lobby'], { state: { accessCode: 'accessCode' } });
+    });
+
     it('should update stat values when selectStat is called', () => {
         // Test stat values change correctly when selecting life
         component.playerInput.life = 4;

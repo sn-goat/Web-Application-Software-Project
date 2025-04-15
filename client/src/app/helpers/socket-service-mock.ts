@@ -41,6 +41,7 @@ export class MockSocketService {
     private inventoryFull = new Subject<unknown>();
     private gameWinner = new Subject<unknown>();
     private onMapUpdatedSubject = new Subject<unknown>();
+    private avatarUpdateSubject = new Subject<string[]>();
 
     private journalSubject = new Subject<Entry>();
     private chatSubject = new Subject<ChatMessage>();
@@ -171,6 +172,10 @@ export class MockSocketService {
         return this.mapUpdate.asObservable();
     }
 
+    onAvatarError() {
+        return this.avatarUpdateSubject.asObservable();
+    }
+
     createRoom(_mapName: string): void {}
     lockRoom(_accessCode: string): void {}
     unlockRoom(_accessCode: string): void {}
@@ -295,6 +300,10 @@ export class MockSocketService {
 
     triggerInventoryFull(data: unknown) {
         this.inventoryFull.next(data);
+    }
+
+    triggerAvatarError(data: string[]) {
+        this.avatarUpdateSubject.next(data);
     }
 
     getAccessCode() {

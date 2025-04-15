@@ -283,4 +283,12 @@ export class SocketReceiverService {
             });
         });
     }
+
+    onAvatarError(): Observable<string[]> {
+        return new Observable((observer) => {
+            this.socket.on(RoomEvents.AvatarError, (data: string[]) => {
+                observer.next(data);
+            });
+        });
+    }
 }
