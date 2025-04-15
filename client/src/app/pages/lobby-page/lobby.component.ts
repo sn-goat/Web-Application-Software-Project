@@ -88,6 +88,10 @@ export class LobbyComponent extends SubLifecycleHandlerComponent implements OnIn
         return this.players.length >= this.maxPlayers;
     }
 
+    isVirtualPlayer(player: IPlayer): boolean {
+        return player.virtualStyle !== undefined;
+    }
+
     async warning(message: string): Promise<void> {
         await this.openDialog(message, Alert.WARNING);
     }
