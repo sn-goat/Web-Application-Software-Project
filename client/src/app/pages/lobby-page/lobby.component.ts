@@ -8,7 +8,6 @@ import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { FormVirtualPlayerComponent } from '@app/components/form-virtual-player/form-virtual-player.component';
 import { Alert } from '@app/constants/enums';
-import { diceToImageLink } from '@app/constants/player-constants';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { RoomService } from '@app/services/room/room.service';
@@ -30,7 +29,6 @@ export class LobbyComponent extends SubLifecycleHandlerComponent implements OnIn
     isRoomLocked: boolean = false;
     isAdmin: boolean = false;
     maxPlayers: number = 0;
-    readonly diceToImageLink = diceToImageLink;
 
     private readonly dialog = inject(MatDialog);
     private readonly socketEmitter = inject(SocketEmitterService);

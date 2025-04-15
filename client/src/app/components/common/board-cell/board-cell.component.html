@@ -18,7 +18,7 @@
                 [src]="srcItem + cell.item + fileType">
 
             @if(!isInGameView && showTooltip) {
-                <div class="tooltip">
+                <div class="tooltip" [ngClass]="{ 'small-row': isSmallRow }">
                     {{ cell.item ? getItemDescription(cell.item) : '' }}
                 </div>
             }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, inject, Input, OnInit, OnDestroy, EventEmitter, Output } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
@@ -17,13 +17,13 @@ import { Subject, combineLatest, takeUntil } from 'rxjs';
     imports: [MatBadgeModule, CommonModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
+    @Output() descriptionHovered = new EventEmitter<string>();
     @Input() type: Item;
 
     readonly src = DEFAULT_PATH_ITEMS;
     readonly fileType = DEFAULT_FILE_TYPE;
     isDraggable = true;
     remainingItem: number = 0;
-    showTooltip = false;
 
     private readonly mapService = inject(MapService);
     private readonly toolSelectionService = inject(ToolSelectionService);
@@ -64,6 +64,10 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.destroy$.next();
         this.destroy$.complete();
+    }
+
+    onMouseEnter() {
+        this.descriptionHovered.emit(this.getDescription(this.type));
     }
 
     onDragStart() {

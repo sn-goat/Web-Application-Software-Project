@@ -4,8 +4,7 @@ export const ASSETS_DESCRIPTION = new Map<Tile | Item, string>([
     [
         Tile.Ice,
         `Glace:
-C'est une tuile de terrain qui peut être parcourue par le joueur.
-Le coût pour la traverser s'élève à 0 pts. Vous perdez 2 points à l'attaque et à la défense lorsque vous êtes sur cette tuile.`,
+Tuile traversable sans coût (0 pts). En étant dessus, vous perdez 2 points en attaque et en défense.`,
     ],
     [
         Tile.Wall,

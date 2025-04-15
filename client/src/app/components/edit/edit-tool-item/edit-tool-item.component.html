@@ -1,6 +1,6 @@
 <div class="object"
-    (mouseenter)="showTooltip = true"
-    (mouseleave)="showTooltip = false"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="descriptionHovered.emit('')"
     matBadge="{{remainingItem}}"
     matBadgePosition="below"
     matBadgeSize="medium"
@@ -17,8 +17,4 @@
         (dragleave)="onDragEnter($event)"
         [title]="''"
     >
-
-    @if(showTooltip){<div class="tooltip">
-        {{ getDescription(type) }}
-    </div>}
 </div>
