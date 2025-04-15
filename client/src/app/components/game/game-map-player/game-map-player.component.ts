@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, inject, OnInit } from '@angular/core';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { GameService } from '@app/services/game/game.service';
-import { IPlayer } from '@common/player';
-import { Item } from '@common/enums';
-import { Subscription } from 'rxjs';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
+import { Item } from '@common/enums';
+import { IPlayer } from '@common/player';
 
 @Component({
     selector: 'app-game-map-player',
@@ -12,7 +12,7 @@ import { SocketReceiverService } from '@app/services/socket/socket-receiver.serv
     templateUrl: './game-map-player.component.html',
     styleUrl: './game-map-player.component.scss',
 })
-export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit {
+export class GameMapPlayerComponent extends SubLifecycleHandlerComponent implements OnInit, AfterViewInit {
     players: IPlayer[] = [];
     activePlayer: IPlayer | null;
     flagOwner: IPlayer | null = null;
@@ -20,38 +20,10 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
     private playersInGame: IPlayer[];
     private readonly gameService: GameService = inject(GameService);
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
-    private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        this.subscriptions.push(
-            this.gameService.playingPlayers.subscribe((gamePlayers: IPlayer[]) => {
-                this.playersInGame = gamePlayers;
-            }),
-
-            this.gameService.initialPlayers.subscribe((gamePlayers: IPlayer[]) => {
-                this.players = gamePlayers;
-            }),
-
-            this.gameService.activePlayer.subscribe((player: IPlayer | null) => {
-                this.activePlayer = player;
-            }),
-
-            this.socketReceiver.onItemCollected().subscribe((data) => {
-                for (const items of data.player.inventory) {
-                    if (items === Item.Flag) {
-                        this.flagOwner = data.player;
-                    }
-                }
-            }),
-
-            this.socketReceiver.onItemDropped().subscribe((data) => {
-                for (const items of data.droppedItems) {
-                    if (items.item === Item.Flag) {
-                        this.flagOwner = null;
-                    }
-                }
-            }),
-        );
+        this.subscribeToGameService();
+        this.subscribeToSocketReceiver();
         this.getOrganizerId = this.gameService.getOrganizerId.bind(this.gameService);
     }
 
@@ -67,8 +39,35 @@ export class GameMapPlayerComponent implements OnInit, OnDestroy, AfterViewInit 
         return player.virtualStyle !== undefined;
     }
 
-    ngOnDestroy() {
-        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-        this.subscriptions = [];
+    private subscribeToGameService() {
+        this.autoSubscribe(this.gameService.playingPlayers, (gamePlayers: IPlayer[]) => {
+            this.playersInGame = gamePlayers;
+        });
+
+        this.autoSubscribe(this.gameService.initialPlayers, (gamePlayers: IPlayer[]) => {
+            this.players = gamePlayers;
+        });
+
+        this.autoSubscribe(this.gameService.activePlayer, (player: IPlayer | null) => {
+            this.activePlayer = player;
+        });
+    }
+
+    private subscribeToSocketReceiver() {
+        this.autoSubscribe(this.socketReceiver.onItemCollected(), (data) => {
+            for (const items of data.player.inventory) {
+                if (items === Item.Flag) {
+                    this.flagOwner = data.player;
+                }
+            }
+        });
+
+        this.autoSubscribe(this.socketReceiver.onItemDropped(), (data) => {
+            for (const items of data.droppedItems) {
+                if (items.item === Item.Flag) {
+                    this.flagOwner = null;
+                }
+            }
+        });
     }
 }

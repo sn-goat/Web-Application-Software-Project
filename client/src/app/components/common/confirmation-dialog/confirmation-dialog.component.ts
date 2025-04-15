@@ -1,7 +1,7 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { ConfirmationDialogData } from '@app/components/common/confirmation-dialog/confirmation-dialog-data';
 
 @Component({
@@ -11,10 +11,8 @@ import { ConfirmationDialogData } from '@app/components/common/confirmation-dial
     styleUrl: './confirmation-dialog.component.scss',
 })
 export class ConfirmationDialogComponent {
-    constructor(
-        public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: ConfirmationDialogData,
-    ) {}
+    dialogRef = inject<MatDialogRef<ConfirmationDialogComponent>>(MatDialogRef);
+    data = inject<ConfirmationDialogData>(MAT_DIALOG_DATA);
 
     onCancel(): void {
         this.dialogRef.close(false);

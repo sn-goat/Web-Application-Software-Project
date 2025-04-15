@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SharedSocketService } from '@app/services/socket/shared-socket.service';
 import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
@@ -13,10 +13,10 @@ import { RoomEvents } from '@common/room.gateway.events';
     providedIn: 'root',
 })
 export class SocketEmitterService {
+    private sharedSocketService = inject(SharedSocketService);
+
     private accessCode: string;
     private socket = this.sharedSocketService.socket;
-
-    constructor(private sharedSocketService: SharedSocketService) {}
 
     getAccessCode() {
         return this.accessCode;

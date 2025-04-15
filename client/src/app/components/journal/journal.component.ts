@@ -1,8 +1,8 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { Entry } from '@common/journal';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
-import { Subscription } from 'rxjs';
+import { Entry } from '@common/journal';
 
 @Component({
     selector: 'app-journal',
@@ -10,30 +10,23 @@ import { Subscription } from 'rxjs';
     templateUrl: './journal.component.html',
     styleUrl: './journal.component.scss',
 })
-export class JournalComponent implements OnDestroy, OnInit {
+export class JournalComponent extends SubLifecycleHandlerComponent implements OnInit, OnDestroy {
     journalEntries: Set<Entry> = new Set<Entry>();
     isFilterActive: boolean = false;
     myPlayerId: string = '';
     currentDate: string;
     private readonly gameService: GameService = inject(GameService);
     private readonly playerService: PlayerService = inject(PlayerService);
-    private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        this.subscriptions.push(
-            this.gameService.journalEntries.subscribe((entries: Set<Entry>) => {
-                this.journalEntries = entries;
-            }),
-            this.playerService.myPlayer.subscribe((player) => {
-                if (player) {
-                    this.myPlayerId = player.id;
-                }
-            }),
-        );
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+        this.autoSubscribe(this.gameService.journalEntries, (entries: Set<Entry>) => {
+            this.journalEntries = entries;
+        });
+        this.autoSubscribe(this.playerService.myPlayer, (player) => {
+            if (player) {
+                this.myPlayerId = player.id;
+            }
+        });
     }
 
     toggleFilter() {

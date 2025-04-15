@@ -1,5 +1,5 @@
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Board } from '@common/board';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -8,9 +8,9 @@ import { environment } from 'src/environments/environment';
     providedIn: 'root',
 })
 export class BoardService {
-    private readonly apiUrl = environment.serverUrl + '/api/board';
+    private readonly http = inject(HttpClient);
 
-    constructor(private readonly http: HttpClient) {}
+    private readonly apiUrl = environment.serverUrl + '/api/board';
 
     getAllBoards(): Observable<Board[]> {
         return this.http.get<Board[]>(`${this.apiUrl}/`);
