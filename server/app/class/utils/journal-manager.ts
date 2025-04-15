@@ -1,6 +1,6 @@
 import { Item } from '@common/enums';
 import { Entry, GameMessage, ITEM_TO_NAME } from '@common/journal';
-import { Player } from './player';
+import { Player } from '@app/class/player';
 
 export class JournalManager {
     private static readonly endGameMessage: string = 'Les joueurs actifs sont :\n';
