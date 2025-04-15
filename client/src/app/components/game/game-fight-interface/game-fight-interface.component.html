@@ -62,8 +62,8 @@
 
     <div class="action-buttons">
         @if( (myPlayer?.fleeAttempts ?? 0) > 0 ){
-        <button mat-raised-button color="primary" (click)="flee()" [class.disabled]="!isMyTurn()">Fuir</button>
+        <button (click)="flee()" [class.disabled]="!isMyTurn()">Fuir</button>
         }
-        <button mat-raised-button color="warn" (click)="attack()" [class.disabled]="!isMyTurn()">Attaquer</button>
+        <button (click)="attack()" [class.disabled]="!isMyTurn()">Attaquer</button>
     </div>
 </div>

@@ -212,7 +212,7 @@ h4 {
 
     span {
         font-size: 0.75rem;
-        color: $accent-color;
+        color: $primary-text;
         text-align: center;
         margin-bottom: 6px;
     }
@@ -234,11 +234,21 @@ h4 {
 }
 
 button {
-    flex: 1;
-    min-height: 45px;
-    letter-spacing: 1px;
-    @extend %blurred-gold-border;
+  flex: 1;
+  min-height: 45px;
+  letter-spacing: 1px;
+  background: transparent;
+  @extend %blurred-gold-border;
+
+  &:hover {
+    border-color: #d4af37;
+    box-shadow: 0 0 10px #d4af37, inset 0 0 5px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+  }
 }
+
 button.disabled {
     filter: grayscale(100%);
     opacity: 0.5;
