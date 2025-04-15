@@ -3,9 +3,20 @@ import { SharedSocketService } from '@app/services/socket/shared-socket.service'
 import { Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { ChatEvents } from '@common/chat.gateway.events';
-import { Item } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
+import {
+    ChangeDoorStatePayload,
+    CreateVirtualPlayerPayload,
+    DebugMovePayload,
+    DisconnectPlayerPayload,
+    FightInitPayload,
+    InventoryChoicePayload,
+    PlayerMovementPayload,
+    ReadyPayload,
+    RemovePlayerPayload,
+    ShareCharacterPayload,
+} from '@common/payload';
 import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
 
@@ -18,91 +29,101 @@ export class SocketEmitterService {
     private accessCode: string;
     private socket = this.sharedSocketService.socket;
 
-    getAccessCode() {
+    getAccessCode(): string {
         return this.accessCode;
     }
 
-    setAccessCode(accessCode: string) {
+    setAccessCode(accessCode: string): void {
         this.accessCode = accessCode;
     }
 
-    createRoom(mapName: string) {
+    createRoom(mapName: string): void {
         this.socket.emit(RoomEvents.CreateRoom, mapName);
     }
 
-    joinRoom(accessCode: string) {
+    joinRoom(accessCode: string): void {
         this.setAccessCode(accessCode);
         this.socket.emit(RoomEvents.JoinRoom, accessCode);
     }
 
-    shareCharacter(player: PlayerInput) {
-        this.socket.emit(RoomEvents.ShareCharacter, { accessCode: this.accessCode, player });
+    shareCharacter(player: PlayerInput): void {
+        const payload: ShareCharacterPayload = { accessCode: this.accessCode, player };
+        this.socket.emit(RoomEvents.ShareCharacter, payload);
     }
 
-    createVirtualPlayer(playerStyle: VirtualPlayerStyles) {
-        this.socket.emit(RoomEvents.CreateVirtualPlayer, { accessCode: this.accessCode, playerStyle });
+    createVirtualPlayer(playerStyle: VirtualPlayerStyles): void {
+        const payload: CreateVirtualPlayerPayload = { accessCode: this.accessCode, playerStyle };
+        this.socket.emit(RoomEvents.CreateVirtualPlayer, payload);
     }
 
-    lockRoom() {
+    lockRoom(): void {
         this.socket.emit(RoomEvents.LockRoom, this.accessCode);
     }
 
-    unlockRoom() {
+    unlockRoom(): void {
         this.socket.emit(RoomEvents.UnlockRoom, this.accessCode);
     }
 
-    expelPlayer(playerId: string) {
-        this.socket.emit(RoomEvents.ExpelPlayer, { accessCode: this.accessCode, playerId });
+    expelPlayer(playerId: string): void {
+        const payload: RemovePlayerPayload = { accessCode: this.accessCode, playerId };
+        this.socket.emit(RoomEvents.ExpelPlayer, payload);
     }
 
-    disconnect(playerId: string) {
-        this.socket.emit(RoomEvents.DisconnectPlayer, { accessCode: this.accessCode, playerId });
+    disconnect(playerId: string): void {
+        const payload: DisconnectPlayerPayload = { accessCode: this.accessCode, playerId };
+        this.socket.emit(RoomEvents.DisconnectPlayer, payload);
     }
 
-    startGame() {
+    startGame(): void {
         this.socket.emit(GameEvents.Start, this.accessCode);
     }
 
-    ready(playerId: string) {
-        this.socket.emit(GameEvents.Ready, { accessCode: this.accessCode, playerId });
+    ready(playerId: string): void {
+        const payload: ReadyPayload = { accessCode: this.accessCode, playerId };
+        this.socket.emit(GameEvents.Ready, payload);
     }
 
-    toggleDebug() {
+    toggleDebug(): void {
         this.socket.emit(GameEvents.Debug, this.accessCode);
     }
 
-    movePlayer(path: PathInfo, playerId: string) {
-        this.socket.emit(TurnEvents.Move, { accessCode: this.accessCode, path, playerId });
+    movePlayer(path: PathInfo, playerId: string): void {
+        const payload: PlayerMovementPayload = { accessCode: this.accessCode, path, playerId };
+        this.socket.emit(TurnEvents.Move, payload);
     }
 
-    debugMove(direction: Vec2, playerId: string) {
-        this.socket.emit(TurnEvents.DebugMove, { accessCode: this.accessCode, direction, playerId });
+    debugMove(direction: Vec2, playerId: string): void {
+        const payload: DebugMovePayload = { accessCode: this.accessCode, direction, playerId };
+        this.socket.emit(TurnEvents.DebugMove, payload);
     }
 
-    endTurn() {
+    endTurn(): void {
         this.socket.emit(TurnEvents.End, this.accessCode);
     }
 
-    changeDoorState(doorPosition: Vec2, playerId: string) {
-        this.socket.emit(TurnEvents.ChangeDoorState, { accessCode: this.accessCode, doorPosition, playerId });
+    changeDoorState(doorPosition: Vec2, playerId: string): void {
+        const payload: ChangeDoorStatePayload = { accessCode: this.accessCode, doorPosition, playerId };
+        this.socket.emit(TurnEvents.ChangeDoorState, payload);
     }
 
-    initFight(playerInitiatorId: string, playerDefenderId: string) {
-        this.socket.emit(FightEvents.Init, { accessCode: this.accessCode, playerInitiatorId, playerDefenderId });
+    initFight(playerInitiatorId: string, playerDefenderId: string): void {
+        const payload: FightInitPayload = { accessCode: this.accessCode, playerInitiatorId, playerDefenderId };
+        this.socket.emit(FightEvents.Init, payload);
     }
 
-    flee() {
+    flee(): void {
         this.socket.emit(FightEvents.Flee, this.accessCode);
     }
 
-    attack() {
+    attack(): void {
         this.socket.emit(FightEvents.Attack, this.accessCode);
     }
 
-    inventoryChoice(payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string }): void {
+    inventoryChoice(payload: InventoryChoicePayload): void {
         this.socket.emit(TurnEvents.InventoryChoice, payload);
     }
-    sendMessageToServer(message: ChatMessage) {
+
+    sendMessageToServer(message: ChatMessage): void {
         this.socket.emit(ChatEvents.RoomMessage, message);
     }
 }

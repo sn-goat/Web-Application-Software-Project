@@ -3,7 +3,13 @@ import { Room } from '@app/class/room';
 import { InternalRoomEvents } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
 import { GameEvents } from '@common/game.gateway.events';
-import { PlayerInput, VirtualPlayerStyles } from '@common/player';
+import {
+    CreateVirtualPlayerPayload,
+    DisconnectPlayerPayload,
+    RemovePlayerPayload,
+    ShareCharacterPayload,
+    UpdatePlayersPayload,
+} from '@common/payload';
 import { RoomEvents } from '@common/room.gateway.events';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -17,6 +23,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private logger: Logger = new Logger(RoomGateway.name);
 
     constructor(private readonly gameManager: GameManagerService) {}
+
     @OnEvent(InternalRoomEvents.CloseRoom)
     handleClosingRoom(accessCode: string): void {
         this.server.to(accessCode).emit(GameEvents.GameEnded);
@@ -26,17 +33,15 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @OnEvent(InternalRoomEvents.PlayerRemoved)
     handlePlayerRemoved(accessCode: string, playerId: string, message: string): void {
         this.server.to(playerId).emit(RoomEvents.PlayerRemoved, message);
-
         this.logger.log(`Joueur ${playerId} a été expulsé de la salle ${accessCode}`);
         const clientSock: Socket = this.server.sockets.sockets.get(playerId);
-        clientSock.leave(accessCode);
         if (clientSock) {
             clientSock.leave(accessCode);
         }
     }
 
     @OnEvent(InternalRoomEvents.PlayersUpdated)
-    handleUpdatePlayers(payload: { accessCode: string; players: Player[] }): void {
+    handleUpdatePlayers(payload: UpdatePlayersPayload): void {
         this.server.to(payload.accessCode).emit(RoomEvents.PlayersUpdated, payload.players);
     }
 
@@ -63,8 +68,8 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(RoomEvents.ShareCharacter)
-    handleShareCharacter(client: Socket, payload: { accessCode: string; player: PlayerInput }) {
-        const player: Player = new Player(client.id, payload.player);
+    handleShareCharacter(client: Socket, payload: ShareCharacterPayload) {
+        const player = new Player(client.id, payload.player);
         const room: Room = this.gameManager.getRoom(payload.accessCode);
         const avatars = room.addPlayer(player);
         if (!avatars) {
@@ -77,7 +82,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(RoomEvents.CreateVirtualPlayer)
-    handleCreateVirtualPlayer(client: Socket, payload: { accessCode: string; playerStyle: VirtualPlayerStyles }) {
+    handleCreateVirtualPlayer(client: Socket, payload: CreateVirtualPlayerPayload) {
         const room: Room = this.gameManager.getRoom(payload.accessCode);
         room.addVirtualPlayer(payload.playerStyle);
         this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
@@ -98,13 +103,13 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage(RoomEvents.ExpelPlayer)
-    handleRemovePlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
+    handleRemovePlayer(client: Socket, payload: RemovePlayerPayload) {
         const room = this.gameManager.getRoom(payload.accessCode);
         room.expelPlayer(payload.playerId);
     }
 
     @SubscribeMessage(RoomEvents.DisconnectPlayer)
-    handleDisconnectPlayer(client: Socket, payload: { accessCode: string; playerId: string }) {
+    handleDisconnectPlayer(client: Socket, payload: DisconnectPlayerPayload) {
         const room = this.gameManager.getRoom(payload.accessCode);
         if (room) {
             room.removePlayer(payload.playerId);
@@ -112,7 +117,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     afterInit(server: Server) {
-        this.logger.log('RoomGateway initialisé' + server);
+        this.logger.log('RoomGateway initialisé ' + server);
     }
 
     handleConnection(client: Socket) {

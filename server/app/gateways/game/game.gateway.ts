@@ -1,11 +1,8 @@
 import { Fight } from '@app/class/fight';
-import { Cell, Vec2 } from '@common/board';
-import { DoorState, PathInfo } from '@common/game';
 import { Game } from '@app/class/game';
-import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
 import { VirtualPlayer } from '@app/class/virtual-player';
-import { FightResult, FightResultType } from '@app/constants/fight-interface';
+import { FightResultType } from '@app/constants/fight-interface';
 import {
     InternalFightEvents,
     InternalGameEvents,
@@ -15,14 +12,34 @@ import {
     InternalTurnEvents,
 } from '@app/constants/internal-events';
 import { GameManagerService } from '@app/services/game/games-manager.service';
-import { Item } from '@common/enums';
-import { FightEvents, GameEvents, TurnEvents, StatsEvents, JournalEvent } from '@common/game.gateway.events';
-import { Entry } from '@common/journal';
+import { FightEvents, GameEvents, JournalEvent, StatsEvents, TurnEvents } from '@common/game.gateway.events';
+import {
+    ChangeDoorStatePayload,
+    ChangeTurnPayload,
+    DebugMovePayload,
+    DebugStateChangedPayload,
+    DispatchStatsPayload,
+    DoorStateChangedPayload,
+    DroppedItemPayload,
+    FightEndPayload,
+    FightInitPayload,
+    FightTimerUpdatePayload,
+    InventoryChoicePayload,
+    InventoryFullPayload,
+    ItemCollectedPayload,
+    JournalEntryPayload,
+    MapUpdatePayload,
+    PlayerMovementPayload,
+    PlayerMovePayload,
+    ReadyPayload,
+    TurnTimerUpdatePayload,
+    UpdateTurnPayload,
+    WinnerPayload,
+} from '@common/payload';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Stats } from 'fs';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
@@ -33,55 +50,61 @@ export class GameGateway {
     constructor(private readonly gameManager: GameManagerService) {}
 
     @OnEvent(InternalTimerEvents.FightUpdate)
-    handleFightTimerUpdate(payload: { accessCode: string; remainingTime: number }) {
+    handleFightTimerUpdate(payload: FightTimerUpdatePayload) {
         const fight: Fight = this.gameManager.getFight(payload.accessCode);
         this.server.to([fight.player1.id, fight.player2.id]).emit(FightEvents.UpdateTimer, payload.remainingTime);
     }
 
     @OnEvent(InternalTimerEvents.TurnUpdate)
-    handleTurnTimerUpdate(payload: { accessCode: string; remainingTime: number }) {
+    handleTurnTimerUpdate(payload: TurnTimerUpdatePayload) {
         this.server.to(payload.accessCode).emit(TurnEvents.UpdateTimer, payload.remainingTime);
     }
 
     @OnEvent(InternalGameEvents.DebugStateChanged)
-    handleDebugStateChange(payload: { accessCode: string; newState: boolean }) {
+    handleDebugStateChange(payload: DebugStateChangedPayload) {
         this.server.to(payload.accessCode).emit(GameEvents.DebugStateChanged, payload.newState);
     }
 
     @OnEvent(InternalGameEvents.MapUpdated)
-    handleMapUpdate(payload: { accessCode: string; map: Cell[][] }) {
+    handleMapUpdate(payload: MapUpdatePayload) {
         this.logger.log('Updating map');
         this.server.to(payload.accessCode).emit(GameEvents.MapUpdated, payload.map);
     }
 
     @OnEvent(InternalGameEvents.Winner)
-    handleCtfWinner(payload: { accessCode: string; player: Player }) {
+    handleCtfWinner(payload: WinnerPayload) {
         this.logger.log(`Winner team : ${payload.player.team}`);
         this.server.to(payload.accessCode).emit(GameEvents.Winner, payload.player);
     }
 
     @OnEvent(InternalTurnEvents.Move)
-    handleBroadcastMove(payload: { accessCode: string; previousPosition: Vec2; player: Player }) {
-        this.logger.log('Moving player' + payload.player.name + 'to: ' + payload.previousPosition);
-        this.server.to(payload.accessCode).emit(TurnEvents.PlayerMoved, { previousPosition: payload.previousPosition, player: payload.player });
+    handleBroadcastMove(payload: PlayerMovePayload) {
+        this.logger.log('Moving player ' + payload.player.name + ' to: ' + payload.previousPosition);
+        this.server.to(payload.accessCode).emit(TurnEvents.PlayerMoved, {
+            previousPosition: payload.previousPosition,
+            player: payload.player,
+        });
     }
 
     @OnEvent(InternalTurnEvents.DoorStateChanged)
-    sendDoorState(payload: { accessCode: string; doorState: DoorState }) {
+    sendDoorState(payload: DoorStateChangedPayload) {
         this.logger.log('Changing door state at position: ' + payload.doorState.position + ' to: ' + payload.doorState.state);
         this.server.to(payload.accessCode).emit(TurnEvents.DoorStateChanged, payload.doorState);
     }
 
     @OnEvent(InternalTurnEvents.Update)
-    handleUpdateTurn(turn: { player: Player; path: Record<string, PathInfo> }) {
+    handleUpdateTurn(turn: UpdateTurnPayload) {
         this.logger.log('Updating turn for player: ' + turn.player.name + turn.player.id);
         this.server.to(turn.player.id).emit(TurnEvents.UpdateTurn, turn);
     }
 
     @OnEvent(InternalTurnEvents.ChangeTurn)
-    handleEndTurn(payload: { accessCode: string; player: Player; path: Record<string, PathInfo> }) {
+    handleEndTurn(payload: ChangeTurnPayload) {
         this.logger.log('Changing turn to player: ' + payload.player.name);
-        this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, { player: payload.player, path: payload.path });
+        this.server.to(payload.accessCode).emit(TurnEvents.PlayerTurn, {
+            player: payload.player,
+            path: payload.path,
+        });
     }
 
     @OnEvent(InternalFightEvents.Init)
@@ -96,13 +119,13 @@ export class GameGateway {
     }
 
     @OnEvent(InternalStatsEvents.DispatchStats)
-    handleStats(payload: { accessCode: string; stats: Stats }) {
+    handleStats(payload: DispatchStatsPayload) {
         this.logger.log('Dispatching stats for game: ' + payload.accessCode);
         this.server.to(payload.accessCode).emit(StatsEvents.StatsUpdate, payload.stats);
     }
 
     @OnEvent(InternalJournalEvents.Add)
-    handleJournalEntry(payload: { accessCode: string; entry: Entry }) {
+    handleJournalEntry(payload: JournalEntryPayload) {
         this.logger.log('Dispatching journal entry: ' + payload.entry.message);
         if (payload.entry.isFight) {
             this.server.to(payload.entry.playersInvolved[0]).emit(JournalEvent.Add, payload.entry);
@@ -124,7 +147,7 @@ export class GameGateway {
     }
 
     @OnEvent(InternalFightEvents.End)
-    manageEndFight(payload: { accessCode: string; fightResult: FightResult }) {
+    manageEndFight(payload: FightEndPayload) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         if (payload.fightResult.type === FightResultType.Tie) {
             this.server.to(payload.accessCode).emit(FightEvents.End, null);
@@ -137,7 +160,6 @@ export class GameGateway {
         if (!(payload.fightResult.loser instanceof VirtualPlayer)) {
             this.server.to(payload.fightResult.loser.id).emit(FightEvents.Loser, payload.fightResult.loser);
         }
-
         this.server.to(payload.accessCode).emit(FightEvents.End, game.players);
     }
 
@@ -148,7 +170,7 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.ItemCollected)
-    handleItemCollected(payload: { accessCode: string; player: Player; position: Vec2 }) {
+    handleItemCollected(payload: ItemCollectedPayload) {
         this.logger.log(`Player ${payload.player.name} collected item`);
         this.server.to(payload.accessCode).emit(TurnEvents.BroadcastItem, {
             player: payload.player,
@@ -157,7 +179,7 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.InventoryFull)
-    handleInventoryFull(payload: { accessCode: string; player: Player; item: Item; position: Vec2 }) {
+    handleInventoryFull(payload: InventoryFullPayload) {
         this.logger.log(`Player ${payload.player.name} inventory is full`);
         this.server.to(payload.accessCode).emit(TurnEvents.InventoryFull, {
             player: payload.player,
@@ -167,7 +189,7 @@ export class GameGateway {
     }
 
     @OnEvent(InternalTurnEvents.DroppedItem)
-    handleDroppedItem(payload: { accessCode: string; player: Player; droppedItems: { item: Item; position: Vec2 }[] }) {
+    handleDroppedItem(payload: DroppedItemPayload) {
         this.logger.log(`Player ${payload.player.name} dropped ${payload.droppedItems.length} items`);
         this.server.to(payload.accessCode).emit(TurnEvents.DroppedItem, {
             player: payload.player,
@@ -192,7 +214,7 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.Ready)
-    handleReady(client: Socket, payload: { accessCode: string; playerId: string }) {
+    handleReady(client: Socket, payload: ReadyPayload) {
         const room: Room = this.gameManager.getRoom(payload.accessCode);
         if (room.isPlayerAdmin(payload.playerId)) {
             room.game.startTurn();
@@ -211,20 +233,20 @@ export class GameGateway {
     }
 
     @SubscribeMessage(TurnEvents.Move)
-    handlePlayerMovement(client: Socket, payload: { accessCode: string; path: PathInfo; playerId: string }) {
+    handlePlayerMovement(client: Socket, payload: PlayerMovementPayload) {
         this.logger.log('Player movement');
         const game: Game = this.gameManager.getGame(payload.accessCode);
         game.processPath(payload.path, payload.playerId);
     }
 
     @SubscribeMessage(TurnEvents.DebugMove)
-    debugPlayerMovement(client: Socket, payload: { accessCode: string; direction: Vec2; playerId: string }) {
+    debugPlayerMovement(client: Socket, payload: DebugMovePayload) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         game.movePlayerDebug(payload.direction, payload.playerId);
     }
 
     @SubscribeMessage(TurnEvents.ChangeDoorState)
-    handleChangeDoorState(client: Socket, payload: { accessCode: string; doorPosition: Vec2; playerId: string }) {
+    handleChangeDoorState(client: Socket, payload: ChangeDoorStatePayload) {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         game.changeDoorState(payload.doorPosition, payload.playerId);
     }
@@ -236,7 +258,7 @@ export class GameGateway {
     }
 
     @SubscribeMessage(FightEvents.Init)
-    handleFightInit(client: Socket, payload: { accessCode: string; playerInitiatorId: string; playerDefenderId: string }) {
+    handleFightInit(client: Socket, payload: FightInitPayload) {
         this.logger.log('Initiating fight');
         const game: Game = this.gameManager.getGame(payload.accessCode);
         game.initFight(payload.playerInitiatorId, payload.playerDefenderId);
@@ -257,10 +279,7 @@ export class GameGateway {
     }
 
     @SubscribeMessage(TurnEvents.InventoryChoice)
-    handleInventoryChoice(
-        client: Socket,
-        payload: { playerId: string; itemToThrow: Item; itemToAdd: Item; position: Vec2; accessCode: string },
-    ): void {
+    handleInventoryChoice(client: Socket, payload: InventoryChoicePayload): void {
         const game: Game = this.gameManager.getGame(payload.accessCode);
         if (!game) return;
 
