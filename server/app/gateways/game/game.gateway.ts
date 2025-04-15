@@ -202,9 +202,10 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.Debug)
     handleDebug(client: Socket, accessCode: string) {
         const game: Game = this.gameManager.getGame(accessCode);
+        const room: Room = this.gameManager.getRoom(accessCode);
         if (game) {
             this.logger.log('Toggling debug mode');
-            const newDebugState = game.toggleDebug();
+            const newDebugState = game.toggleDebug(room.organizerId);
             this.server.to(accessCode).emit(GameEvents.DebugStateChanged, newDebugState);
         }
     }

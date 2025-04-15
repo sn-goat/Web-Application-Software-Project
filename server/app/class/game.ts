@@ -320,12 +320,12 @@ export class Game implements IGame, GameStats {
         }
     }
 
-    toggleDebug(): boolean {
+    toggleDebug(adminId: string): boolean {
         this.isDebugMode = !this.isDebugMode;
         if (this.isDebugMode) {
-            this.dispatchJournalEntry(GameMessage.ActivateDebugMode, [this.players[this.currentTurn]]);
+            this.dispatchJournalEntry(GameMessage.ActivateDebugMode, [this.getPlayerById(adminId)]);
         } else {
-            this.dispatchJournalEntry(GameMessage.DeactivateDebugMode, [this.players[this.currentTurn]]);
+            this.dispatchJournalEntry(GameMessage.DeactivateDebugMode, [this.getPlayerById(adminId)]);
         }
         return this.isDebugMode;
     }

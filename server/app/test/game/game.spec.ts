@@ -1284,7 +1284,7 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.isDebugMode = false;
 
             // Act
-            const result = game.toggleDebug();
+            const result = game.toggleDebug(player.id);
 
             // Assert
             expect(result).toBe(true);
@@ -1296,7 +1296,7 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.isDebugMode = true;
 
             // Act
-            const result = game.toggleDebug();
+            const result = game.toggleDebug(player.id);
 
             // Assert
             expect(result).toBe(false);
