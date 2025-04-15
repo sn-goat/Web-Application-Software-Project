@@ -7,8 +7,11 @@ import { FakeSocket } from '@app/helpers/fake-socket';
 import { Vec2 } from '@common/board';
 import { PathInfo } from '@common/game';
 import { FightEvents, GameEvents, TurnEvents } from '@common/game.gateway.events';
-import { PlayerInput } from '@common/player';
+import { PlayerInput, VirtualPlayerStyles } from '@common/player';
 import { RoomEvents } from '@common/room.gateway.events';
+import { Item } from '@common/enums';
+import { ChatMessage } from '@common/chat';
+import { ChatEvents } from '@common/chat.gateway.events';
 
 describe('SocketEmitterService', () => {
     let service: SocketEmitterService;
@@ -51,6 +54,29 @@ describe('SocketEmitterService', () => {
         service.setAccessCode(accessCode);
         service.shareCharacter(player);
         expect(fakeSocket.emit).toHaveBeenCalledWith(RoomEvents.ShareCharacter, { accessCode, player });
+    });
+
+    it('should emit a virtual player with accessCode and playerStyle', () => {
+        const accessCode = 'VIRTUAL123';
+        const playerStyle = VirtualPlayerStyles.Aggressive;
+        service.setAccessCode(accessCode);
+        service.createVirtualPlayer(playerStyle);
+        expect(fakeSocket.emit).toHaveBeenCalledWith(RoomEvents.CreateVirtualPlayer, { accessCode, playerStyle });
+    });
+
+    it('should emit inventory with accessCode and item', () => {
+        const accessCode = 'code';
+
+        const payload = { playerId: 'Id', itemToThrow: Item.Default, itemToAdd: Item.Default, position: { x: 0, y: 0 }, accessCode };
+        service.setAccessCode(accessCode);
+        service.inventoryChoice(payload);
+        expect(fakeSocket.emit).toHaveBeenCalledWith(TurnEvents.InventoryChoice, payload);
+    });
+
+    it('should emit send message to server', () => {
+        const message = { message: 'Hello' } as ChatMessage;
+        service.sendMessageToServer(message);
+        expect(fakeSocket.emit).toHaveBeenCalledWith(ChatEvents.RoomMessage, message);
     });
 
     it('should emit lockRoom with accessCode', () => {

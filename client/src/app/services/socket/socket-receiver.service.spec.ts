@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
@@ -11,6 +12,25 @@ import { mockStandardStats } from '@common/stats';
 import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
 import { SocketReceiverService } from './socket-receiver.service';
+import { Cell, Vec2 } from '@common/board';
+import { DoorState } from '@common/game';
+import { Item, Tile } from '@common/enums';
+import { ChatEvents } from '@common/chat.gateway.events';
+import { ChatMessage } from '@common/chat';
+
+const generateMockBoard = (size: number): Cell[][] => {
+    return Array.from({ length: size }, (_, x) =>
+        Array.from(
+            { length: size },
+            (__, y) =>
+                ({
+                    position: { x, y } as Vec2,
+                    tile: Tile.Wall,
+                    item: y % 2 === 0 ? Item.Chest : Item.Default,
+                }) as Cell,
+        ),
+    );
+};
 
 describe('SocketReceiverService', () => {
     let service: SocketReceiverService;
@@ -179,6 +199,63 @@ describe('SocketReceiverService', () => {
             done();
         });
         fakeSocket.onceCallbacks[GameEvents.GameEnded](undefined);
+    });
+
+    it('should update map' + 'with map as Cell[][]', (done) => {
+        const map = generateMockBoard(5);
+        service.onMapUpdated().subscribe((received) => {
+            expect(received).toEqual(map);
+            done();
+        });
+        fakeSocket.callbacks[GameEvents.MapUpdated](map);
+    });
+
+    it('should change door state', (done) => {
+        const doorState = {
+            position: { x: 1, y: 1 } as Vec2,
+            state: Tile.OpenedDoor,
+        } as DoorState;
+        service.onDoorStateChanged().subscribe((received) => {
+            expect(received).toEqual(doorState);
+            done();
+        });
+        fakeSocket.callbacks[TurnEvents.DoorStateChanged](doorState);
+    });
+
+    it('should collect item', (done) => {
+        const item = { player: { id: 'item1' } as IPlayer, position: { x: 0, y: 0 } as Vec2 } as any;
+        service.onItemCollected().subscribe((received) => {
+            expect(received).toEqual(item);
+            done();
+        });
+        fakeSocket.callbacks[TurnEvents.BroadcastItem](item);
+    });
+
+    it('should emit on inventory full', (done) => {
+        const item = { player: { id: 'item1' } as IPlayer, item: Item.Default, position: { x: 0, y: 0 } as Vec2 } as any;
+        service.onInventoryFull().subscribe((received) => {
+            expect(received).toEqual(item);
+            done();
+        });
+        fakeSocket.callbacks[TurnEvents.InventoryFull](item);
+    });
+
+    it('should emit on map update', (done) => {
+        const item = { player: { id: 'item1' } as IPlayer, item: Item.Default, position: { x: 0, y: 0 } as Vec2 } as any;
+        service.onMapUpdate().subscribe((received) => {
+            expect(received).toEqual(item);
+            done();
+        });
+        fakeSocket.callbacks[TurnEvents.MapUpdate](item);
+    });
+
+    it('should receive message', (done) => {
+        const message = { message: 'Hello' } as ChatMessage;
+        service.receiveMessageFromServer().subscribe((received) => {
+            expect(received).toEqual(message);
+            done();
+        });
+        fakeSocket.callbacks[ChatEvents.RoomMessage](message);
     });
 
     it('should emit on player turn changed with path as Map', (done) => {
