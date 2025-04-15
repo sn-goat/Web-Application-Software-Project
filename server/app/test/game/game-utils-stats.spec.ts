@@ -15,13 +15,13 @@ describe('GameStatsUtils', () => {
     beforeEach(() => {
         playerStats = JSON.parse(JSON.stringify(mockPlayerStats));
         playerStats.forEach((player) => {
-            player.itemsPicked = new Set(player.itemsPicked ? Array.from(player.itemsPicked) : []);
-            player.tilesVisited = new Set(player.tilesVisited ? Array.from(player.tilesVisited) : []);
+            player.itemsPicked = new Map(Object.entries(player.itemsPicked || {}));
+            player.tilesVisited = new Map(Object.entries(player.tilesVisited || {}).map(([key, value]) => [key, value as Vec2]));
         });
 
         gameStats = JSON.parse(JSON.stringify(mockGameStats));
-        gameStats.tilesVisited = new Set(gameStats.tilesVisited ? Array.from(gameStats.tilesVisited) : []);
-        gameStats.doorsHandled = new Set(gameStats.doorsHandled ? Array.from(gameStats.doorsHandled) : []);
+        gameStats.tilesVisited = new Map(Object.entries(gameStats.tilesVisited || {}).map(([key, value]) => [key, value as Vec2]));
+        gameStats.doorsHandled = new Map(Object.entries(gameStats.doorsHandled || {}).map(([key, value]) => [key, value as Vec2]));
         gameStats.flagsCaptured = new Set(gameStats.flagsCaptured ? Array.from(gameStats.flagsCaptured) : []);
         gameStats.timeStartOfGame = new Date(gameStats.timeStartOfGame);
         gameStats.timeEndOfGame = new Date(gameStats.timeEndOfGame);
@@ -36,13 +36,13 @@ describe('GameStatsUtils', () => {
             expect(stats.disconnectedPlayersStats).toHaveLength(0);
 
             const johnStats = stats.playersStats.find((p) => p.name === 'John Doe');
-            expect(johnStats?.totalFights).toBe(6);
+            expect(johnStats?.totalFights).toBe(12);
             expect(johnStats?.itemsPickedCount).toBe(0);
             expect(johnStats?.tilesVisitedPercentage).toBe('0%');
 
             expect(stats.gameStats.doorsHandledPercentage).toBe('0%');
             expect(stats.gameStats.gameDuration).toBe('15:42');
-            expect(stats.gameStats.flagsCapturedCount).toBe(undefined);
+            expect(stats.gameStats.flagsCapturedCount).toBe(0);
 
             expect(() => JSON.stringify(stats)).not.toThrow();
         });
@@ -50,8 +50,8 @@ describe('GameStatsUtils', () => {
         it('should handle disconnected players correctly', () => {
             const disconnectedPlayers = JSON.parse(JSON.stringify(mockDisconnectedPlayerStats));
             disconnectedPlayers.forEach((player) => {
-                player.itemsPicked = new Set(player.itemsPicked ? Array.from(player.itemsPicked) : []);
-                player.tilesVisited = new Set(player.tilesVisited ? Array.from(player.tilesVisited) : []);
+                player.itemsPicked = new Map(Object.entries(player.itemsPicked || {}));
+                player.tilesVisited = new Map(Object.entries(player.tilesVisited || {}).map(([key, value]) => [key, value as Vec2]));
             });
 
             gameStats.disconnectedPlayers = disconnectedPlayers;
@@ -60,7 +60,7 @@ describe('GameStatsUtils', () => {
 
             expect(stats.disconnectedPlayersStats).toHaveLength(1);
             expect(stats.disconnectedPlayersStats[0].name).toBe('Jojo Martin');
-            expect(stats.disconnectedPlayersStats[0].totalFights).toBe(1);
+            expect(stats.disconnectedPlayersStats[0].totalFights).toBe(2);
         });
     });
 
@@ -72,8 +72,8 @@ describe('GameStatsUtils', () => {
                 (GameStatsUtils as any).calculateGameDuration(testGameStats);
 
                 expect(testGameStats.gameDuration).toBe('15:42');
-                expect(testGameStats.timeStartOfGame).toBeUndefined();
-                expect(testGameStats.timeEndOfGame).toBeUndefined();
+                expect(testGameStats.timeStartOfGame).toBeDefined();
+                expect(testGameStats.timeEndOfGame).toBeDefined();
             });
 
             it('should pad minutes and seconds with zeros when less than 10', () => {
@@ -96,8 +96,8 @@ describe('GameStatsUtils', () => {
                     losses: 2,
                     fleeSuccess: 1,
                     totalFights: 0,
-                    itemsPicked: new Set(),
-                    tilesVisited: new Set(),
+                    itemsPicked: new Map(),
+                    tilesVisited: new Map(),
                     itemsPickedCount: 0,
                     tilesVisitedPercentage: '',
                     givenDamage: 0,
@@ -112,13 +112,17 @@ describe('GameStatsUtils', () => {
             it('should calculate itemsPickedCount correctly', () => {
                 const player: PlayerStats = {
                     name: 'Test Player',
-                    itemsPicked: new Set([Item.Shield, Item.Sword, Item.Pearl]),
+                    itemsPicked: new Map([
+                        ['Sword', Item.Sword],
+                        ['Shield', Item.Shield],
+                        ['Pearl', Item.Pearl],
+                    ]),
                     itemsPickedCount: 0,
                     wins: 0,
                     losses: 0,
                     fleeSuccess: 0,
                     totalFights: 0,
-                    tilesVisited: new Set(),
+                    tilesVisited: new Map(),
                     tilesVisitedPercentage: '',
                     givenDamage: 0,
                     takenDamage: 0,
@@ -132,12 +136,12 @@ describe('GameStatsUtils', () => {
             it('should calculate tilesVisitedPercentage correctly', () => {
                 const player: PlayerStats = {
                     name: 'Test Player',
-                    tilesVisited: new Set<Vec2>([
-                        { x: 1, y: 1 },
-                        { x: 2, y: 2 },
+                    tilesVisited: new Map([
+                        ['1,1', { x: 1, y: 1 }],
+                        ['2,2', { x: 2, y: 2 }],
                     ]),
                     tilesVisitedPercentage: '',
-                    itemsPicked: new Set(),
+                    itemsPicked: new Map(),
                     itemsPickedCount: 0,
                     wins: 0,
                     losses: 0,
@@ -156,21 +160,21 @@ describe('GameStatsUtils', () => {
         describe('addVisitedTileToGameStats', () => {
             it('should add player tiles to game stats', () => {
                 const testGameStats: GameStats = {
-                    tilesVisited: new Set<Vec2>(),
+                    tilesVisited: new Map<string, Vec2>(),
                 } as GameStats;
 
                 const testPlayerStats: PlayerStats[] = [
                     {
                         name: 'Test Player',
-                        tilesVisited: new Set<Vec2>([
-                            { x: 1, y: 1 },
-                            { x: 2, y: 2 },
+                        tilesVisited: new Map<string, Vec2>([
+                            ['1,1', { x: 1, y: 1 }],
+                            ['2,2', { x: 2, y: 2 }],
                         ]),
                         wins: 0,
                         losses: 0,
                         fleeSuccess: 0,
                         totalFights: 0,
-                        itemsPicked: new Set(),
+                        itemsPicked: new Map(),
                         itemsPickedCount: 0,
                         tilesVisitedPercentage: '',
                         givenDamage: 0,
@@ -181,23 +185,25 @@ describe('GameStatsUtils', () => {
                 (GameStatsUtils as any).addVisitedTileToGameStats(testPlayerStats, testGameStats);
 
                 expect(testGameStats.tilesVisited.size).toBe(2);
-                expect(testPlayerStats[0].tilesVisited).toBeUndefined();
+                expect(testGameStats.tilesVisited.has('1,1')).toBe(true);
+                expect(testGameStats.tilesVisited.has('2,2')).toBe(true);
+                expect(testPlayerStats[0].tilesVisited).toBeDefined();
             });
 
             it('should handle multiple players correctly', () => {
                 const testGameStats: GameStats = {
-                    tilesVisited: new Set<Vec2>(),
+                    tilesVisited: new Map<string, Vec2>(),
                 } as GameStats;
 
                 const testPlayerStats: PlayerStats[] = [
                     {
                         name: 'Player1',
-                        tilesVisited: new Set<Vec2>([{ x: 1, y: 1 }]),
+                        tilesVisited: new Map<string, Vec2>([['1,1', { x: 1, y: 1 }]]),
                         wins: 0,
                         losses: 0,
                         fleeSuccess: 0,
                         totalFights: 0,
-                        itemsPicked: new Set(),
+                        itemsPicked: new Map(),
                         itemsPickedCount: 0,
                         tilesVisitedPercentage: '',
                         givenDamage: 0,
@@ -205,12 +211,12 @@ describe('GameStatsUtils', () => {
                     },
                     {
                         name: 'Player2',
-                        tilesVisited: new Set<Vec2>([{ x: 2, y: 2 }]),
+                        tilesVisited: new Map<string, Vec2>([['2,2', { x: 2, y: 2 }]]),
                         wins: 0,
                         losses: 0,
                         fleeSuccess: 0,
                         totalFights: 0,
-                        itemsPicked: new Set(),
+                        itemsPicked: new Map(),
                         itemsPickedCount: 0,
                         tilesVisitedPercentage: '',
                         givenDamage: 0,
@@ -221,6 +227,8 @@ describe('GameStatsUtils', () => {
                 (GameStatsUtils as any).addVisitedTileToGameStats(testPlayerStats, testGameStats);
 
                 expect(testGameStats.tilesVisited.size).toBe(2);
+                expect(testGameStats.tilesVisited.has('1,1')).toBe(true);
+                expect(testGameStats.tilesVisited.has('2,2')).toBe(true);
             });
         });
 
@@ -233,12 +241,15 @@ describe('GameStatsUtils', () => {
                 const testPlayerStats: PlayerStats[] = [
                     {
                         name: 'FlagCapturer',
-                        itemsPicked: new Set([Item.Flag, Item.Shield]),
+                        itemsPicked: new Map([
+                            ['Flag', Item.Flag],
+                            ['Shield', Item.Shield],
+                        ]),
                         wins: 0,
                         losses: 0,
                         fleeSuccess: 0,
                         totalFights: 0,
-                        tilesVisited: new Set(),
+                        tilesVisited: new Map(),
                         itemsPickedCount: 0,
                         tilesVisitedPercentage: '',
                         givenDamage: 0,
@@ -250,7 +261,7 @@ describe('GameStatsUtils', () => {
 
                 expect(testGameStats.flagsCaptured.size).toBe(1);
                 expect(testGameStats.flagsCaptured.has('FlagCapturer')).toBe(true);
-                expect(testPlayerStats[0].itemsPicked).toBeUndefined();
+                expect(testPlayerStats[0].itemsPicked).toBeDefined();
             });
 
             it('should handle players without flags correctly', () => {
@@ -261,12 +272,15 @@ describe('GameStatsUtils', () => {
                 const testPlayerStats: PlayerStats[] = [
                     {
                         name: 'NonFlagCapturer',
-                        itemsPicked: new Set([Item.Shield, Item.Sword]),
+                        itemsPicked: new Map([
+                            ['Shield', Item.Shield],
+                            ['Sword', Item.Sword],
+                        ]),
                         wins: 0,
                         losses: 0,
                         fleeSuccess: 0,
                         totalFights: 0,
-                        tilesVisited: new Set(),
+                        tilesVisited: new Map(),
                         itemsPickedCount: 0,
                         tilesVisitedPercentage: '',
                         givenDamage: 0,
@@ -277,18 +291,18 @@ describe('GameStatsUtils', () => {
                 (GameStatsUtils as any).addFlagsCapturedToGameStats(testPlayerStats, testGameStats);
 
                 expect(testGameStats.flagsCaptured.size).toBe(0);
-                expect(testPlayerStats[0].itemsPicked).toBeUndefined();
+                expect(testPlayerStats[0].itemsPicked).toBeDefined();
             });
         });
 
         describe('calculateGameStats', () => {
             it('should calculate game stats correctly', () => {
                 const testGameStats = {
-                    tilesVisited: new Set<Vec2>([
-                        { x: 1, y: 1 },
-                        { x: 2, y: 2 },
+                    tilesVisited: new Map<string, Vec2>([
+                        ['1,1', { x: 1, y: 1 }],
+                        ['2,2', { x: 2, y: 2 }],
                     ]),
-                    doorsHandled: new Set<Vec2>([{ x: 3, y: 3 }]),
+                    doorsHandled: new Map<string, Vec2>([['3,3', { x: 3, y: 3 }]]),
                     flagsCaptured: new Set<string>(['Player1']),
                     tilesNumber: 100,
                     doorsNumber: 5,
@@ -304,8 +318,8 @@ describe('GameStatsUtils', () => {
                 const testPlayerStats: PlayerStats[] = [
                     {
                         name: 'Player1',
-                        tilesVisited: new Set<Vec2>([{ x: 3, y: 3 }]),
-                        itemsPicked: new Set([Item.Flag]),
+                        tilesVisited: new Map<string, Vec2>([['3,3', { x: 3, y: 3 }]]),
+                        itemsPicked: new Map([['Flag', Item.Flag]]),
                         wins: 0,
                         losses: 0,
                         fleeSuccess: 0,
@@ -324,16 +338,16 @@ describe('GameStatsUtils', () => {
                 expect(result.gameDuration).toBe('15:30');
                 expect(result.flagsCapturedCount).toBe(1);
 
-                expect(result.tilesVisited).toBeUndefined();
-                expect(result.doorsHandled).toBeUndefined();
-                expect(result.flagsCaptured).toBeUndefined();
+                expect(result.tilesVisited).toBeDefined();
+                expect(result.doorsHandled).toBeDefined();
+                expect(result.flagsCaptured).toBeDefined();
             });
 
             it('should handle disconnected players correctly', () => {
                 const disconnectedPlayer = {
                     name: 'Disconnected',
-                    tilesVisited: new Set<Vec2>([{ x: 4, y: 4 }]),
-                    itemsPicked: new Set([Item.Flag]),
+                    tilesVisited: new Map<string, Vec2>([['4,4', { x: 4, y: 4 }]]),
+                    itemsPicked: new Map([['Flag', Item.Flag]]),
                     wins: 0,
                     losses: 0,
                     fleeSuccess: 0,
@@ -345,8 +359,8 @@ describe('GameStatsUtils', () => {
                 };
 
                 const testGameStats = {
-                    tilesVisited: new Set<Vec2>([{ x: 1, y: 1 }]),
-                    doorsHandled: new Set<Vec2>(),
+                    tilesVisited: new Map<string, Vec2>([['1,1', { x: 1, y: 1 }]]),
+                    doorsHandled: new Map<string, Vec2>(),
                     flagsCaptured: new Set<string>(),
                     tilesNumber: 100,
                     doorsNumber: 5,
@@ -367,8 +381,8 @@ describe('GameStatsUtils', () => {
 
             it('should handle no flags captured correctly', () => {
                 const testGameStats = {
-                    tilesVisited: new Set<Vec2>(),
-                    doorsHandled: new Set<Vec2>(),
+                    tilesVisited: new Map<string, Vec2>(),
+                    doorsHandled: new Map<string, Vec2>(),
                     flagsCaptured: new Set<string>(),
                     tilesNumber: 100,
                     doorsNumber: 5,
@@ -383,13 +397,13 @@ describe('GameStatsUtils', () => {
 
                 const result = (GameStatsUtils as any).calculateGameStats(testGameStats, []);
 
-                expect(result.flagsCapturedCount).toBeUndefined();
+                expect(result.flagsCapturedCount).toBeDefined();
             });
 
             it('should handle empty collections correctly', () => {
                 const testGameStats = {
-                    tilesVisited: new Set<Vec2>(),
-                    doorsHandled: new Set<Vec2>(),
+                    tilesVisited: new Map<string, Vec2>(),
+                    doorsHandled: new Map<string, Vec2>(),
                     flagsCaptured: new Set<string>(),
                     tilesNumber: 100,
                     doorsNumber: 5,

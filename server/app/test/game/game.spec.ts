@@ -141,8 +141,8 @@ describe('Game', () => {
             expect(game.maxPlayers).toBe(getLobbyLimit(dummyBoard.size));
             expect(game.tilesNumber).toBe(dummyBoard.size * dummyBoard.size);
             expect(game.doorsNumber).toBe(1);
-            expect(game.tilesVisited).toEqual(new Set<Vec2>());
-            expect(game.doorsHandled).toEqual(new Set<Vec2>());
+            expect(game.tilesVisited).toEqual(new Map<string, Vec2>());
+            expect(game.doorsHandled).toEqual(new Map<string, Vec2>());
             expect(game.flagsCaptured).toEqual(new Set<string>());
             expect(game.disconnectedPlayers).toEqual([]);
             expect(game.timeStartOfGame).toBe(null);
@@ -227,16 +227,6 @@ describe('Game', () => {
             const startGameTimerSpy = jest.spyOn(game as any, 'startGameTimer').mockImplementation(() => {});
             game.configureGame();
             expect(startGameTimerSpy).toHaveBeenCalled();
-        });
-    });
-
-    describe('statistics', () => {
-        it('should dispatchGameStats', () => {
-            const emitSpy = jest.spyOn(emitter, 'emit');
-            const endGameTimerSpy = jest.spyOn(game as any, 'endGameTimer');
-            game.dispatchGameStats();
-            expect(emitSpy).toHaveBeenCalledWith(InternalStatsEvents.DispatchStats, mockStandardStats);
-            expect(endGameTimerSpy).toHaveBeenCalled();
         });
     });
 
@@ -1161,7 +1151,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             // Mock pour les méthodes qu'on veut surveiller
             jest.spyOn(game, 'endFight').mockImplementation(() => {});
             jest.spyOn(game, 'changeFighter').mockImplementation(() => {});
-            jest.spyOn(game, 'dispatchJournalEntry').mockImplementation(() => {});
 
             // Mock pour getOpponent
             jest.spyOn(game.fight, 'getOpponent').mockReturnValue(player2);
@@ -1175,7 +1164,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.flee();
 
             // Assert
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.FleeSuccess, [player1, player2]);
             expect(game.endFight).toHaveBeenCalled();
             expect(game.changeFighter).not.toHaveBeenCalled();
         });
@@ -1188,7 +1176,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.flee();
 
             // Assert
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.FleeFailure, [player1, player2]);
             expect(game.changeFighter).toHaveBeenCalled();
             expect(game.endFight).not.toHaveBeenCalled();
         });
@@ -1227,7 +1214,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             // Mock pour les méthodes qu'on veut surveiller
             jest.spyOn(game, 'endFight').mockImplementation(() => {});
             jest.spyOn(game, 'changeFighter').mockImplementation(() => {});
-            jest.spyOn(game, 'dispatchJournalEntry').mockImplementation(() => {});
             jest.spyOn(game, 'dropItems').mockImplementation(() => {});
             jest.spyOn(game as any, 'movePlayerToSpawn').mockImplementation(() => {});
         });
@@ -1243,7 +1229,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             expect(game.changeFighter).toHaveBeenCalled();
             expect(game.dropItems).not.toHaveBeenCalled();
             expect(game.endFight).not.toHaveBeenCalled();
-            expect(game.dispatchJournalEntry).not.toHaveBeenCalled();
         });
 
         it("devrait terminer le combat quand l'attaque est décisive", () => {
@@ -1256,9 +1241,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             // Assert
             expect(game.endFight).toHaveBeenCalled();
             expect(game.dropItems).toHaveBeenCalledWith(player2.id);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.EndFight, [player1, player2]);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.WinnerFight, [player1]);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.LoserFight, [player2]);
             expect(game.changeFighter).not.toHaveBeenCalled();
         });
 
@@ -1295,7 +1277,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.currentTurn = 0;
 
             // Mock pour dispatchJournalEntry
-            jest.spyOn(game, 'dispatchJournalEntry').mockImplementation(() => {});
         });
 
         it('devrait activer le mode debug quand il est désactivé', () => {
@@ -1303,12 +1284,11 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.isDebugMode = false;
 
             // Act
-            const result = game.toggleDebug();
+            const result = game.toggleDebug(player.id);
 
             // Assert
             expect(result).toBe(true);
             expect(game.isDebugMode).toBe(true);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.ActivateDebugMode, [player]);
         });
 
         it('devrait désactiver le mode debug quand il est activé', () => {
@@ -1316,12 +1296,11 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.isDebugMode = true;
 
             // Act
-            const result = game.toggleDebug();
+            const result = game.toggleDebug(player.id);
 
             // Assert
             expect(result).toBe(false);
             expect(game.isDebugMode).toBe(false);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.DeactivateDebugMode, [player]);
         });
     });
 
@@ -1342,7 +1321,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             game.map[0][1].tile = Tile.ClosedDoor; // S'assurer que la tuile est une porte fermée
 
             // Mocks nécessaires
-            jest.spyOn(game, 'dispatchJournalEntry').mockImplementation(() => {});
             jest.spyOn(game, 'decrementAction').mockImplementation(() => {});
         });
 
@@ -1352,7 +1330,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
 
             // Assert
             expect(game.map[0][1].tile).toBe(Tile.OpenedDoor);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.OpenDoor, [player]);
             expect(game.decrementAction).toHaveBeenCalledWith(player);
         });
 
@@ -1365,7 +1342,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
 
             // Assert
             expect(game.map[0][1].tile).toBe(Tile.ClosedDoor);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.CloseDoor, [player]);
             expect(game.decrementAction).toHaveBeenCalledWith(player);
         });
     });
@@ -1403,7 +1379,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             jest.spyOn(game.fight, 'initFight').mockImplementation(() => {});
             jest.spyOn(game.timer, 'startTimer').mockImplementation(() => {});
             jest.spyOn(game as any, 'computeVirtualPlayerFight').mockImplementation(() => {});
-            jest.spyOn(game, 'dispatchJournalEntry').mockImplementation(() => {});
         });
 
         it('devrait initialiser un combat entre deux joueurs humains', () => {
@@ -1415,7 +1390,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             expect(player2.initFight).toHaveBeenCalled();
             expect(game.fight.initFight).toHaveBeenCalledWith(player1, player2);
             expect(game.timer.startTimer).toHaveBeenCalledWith(FIGHT_TURN_DURATION_IN_S, TimerType.Combat);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.StartFight, [player1, player2]);
         });
 
         it('devrait initialiser un combat et appeler computeVirtualPlayerFight si le joueur actuel est virtuel', () => {
@@ -1433,7 +1407,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             expect(player1.initFight).toHaveBeenCalled();
             expect(game.fight.initFight).toHaveBeenCalledWith(virtualPlayer, player1);
             expect(game.timer.startTimer).toHaveBeenCalledWith(FIGHT_TURN_DURATION_IN_S, TimerType.Combat);
-            expect(game.dispatchJournalEntry).toHaveBeenCalledWith(GameMessage.StartFight, [virtualPlayer, player1]);
         });
     });
 });

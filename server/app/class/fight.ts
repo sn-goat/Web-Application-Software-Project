@@ -43,7 +43,7 @@ export class Fight implements IFight {
     }
 
     flee() {
-        this.dispatchJournalEntry(GameMessage.FleeAttempt, [this.currentPlayer, this.getOpponent(this.currentPlayer.id)]);
+        this.dispatchJournalEntry(GameMessage.FleeAttempt, [this.currentPlayer, this.getOpponent(this.currentPlayer.id ?? this.currentPlayer.name)]);
         return this.currentPlayer.attemptFlee();
     }
 

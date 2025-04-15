@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -10,8 +10,8 @@ import { Entry } from '@common/journal';
     templateUrl: './journal.component.html',
     styleUrl: './journal.component.scss',
 })
-export class JournalComponent extends SubLifecycleHandlerComponent implements OnInit {
-    journalEntries: Entry[] = [];
+export class JournalComponent extends SubLifecycleHandlerComponent implements OnInit, OnDestroy {
+    journalEntries: Set<Entry> = new Set<Entry>();
     isFilterActive: boolean = false;
     myPlayerId: string = '';
     currentDate: string;
@@ -19,7 +19,7 @@ export class JournalComponent extends SubLifecycleHandlerComponent implements On
     private readonly playerService: PlayerService = inject(PlayerService);
 
     ngOnInit() {
-        this.autoSubscribe(this.gameService.journalEntries, (entries: Entry[]) => {
+        this.autoSubscribe(this.gameService.journalEntries, (entries: Set<Entry>) => {
             this.journalEntries = entries;
         });
         this.autoSubscribe(this.playerService.myPlayer, (player) => {

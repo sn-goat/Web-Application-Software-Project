@@ -20,7 +20,7 @@ describe('JournalComponent', () => {
     let playerServiceMock: jasmine.SpyObj<PlayerService>;
 
     const testPlayerId = 'player123';
-    const mockEntries: Entry[] = [
+    const mockEntries: Set<Entry> = new Set<Entry>([
         {
             isFight: false,
             message: GameMessage.AttackInit + 'Jean',
@@ -31,9 +31,9 @@ describe('JournalComponent', () => {
             message: GameMessage.StartTurn + 'vous',
             playersInvolved: [testPlayerId],
         },
-    ];
+    ]);
 
-    const entriesSubject = new BehaviorSubject<Entry[]>(mockEntries);
+    const entriesSubject = new BehaviorSubject<Set<Entry>>(mockEntries);
     const playerSubject = new BehaviorSubject<{ id: string }>({ id: testPlayerId });
 
     beforeEach(async () => {
@@ -102,15 +102,14 @@ describe('JournalComponent', () => {
         });
     });
 
-    it('should update entries when new entries are emitted', () => {
-        const newEntries: Entry[] = [
+    it('should update entries when journalEntries changes', () => {
+        const newEntries: Set<Entry> = new Set<Entry>([
             {
                 isFight: false,
-                message: GameMessage.EndGame + 'Marie',
-                playersInvolved: ['otherPlayer789'],
+                message: GameMessage.AttackInit + 'Marie',
+                playersInvolved: ['someOtherId'],
             },
-        ];
-
+        ]);
         entriesSubject.next(newEntries);
         expect(component.journalEntries).toEqual(newEntries);
     });

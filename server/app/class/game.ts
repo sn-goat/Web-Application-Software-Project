@@ -62,9 +62,10 @@ export class Game implements IGame, GameStats {
     gamePhase: GamePhase;
 
     gameDuration: string;
-    tilesVisited: Set<Vec2>;
-    doorsHandled: Set<Vec2>;
+    tilesVisited: Map<string, Vec2>;
+    doorsHandled: Map<string, Vec2>;
     flagsCaptured: Set<string>;
+    flagsCapturedCount?: number;
     disconnectedPlayers: IPlayer[];
     tilesNumber: number;
     doorsNumber: number;
@@ -83,9 +84,10 @@ export class Game implements IGame, GameStats {
         this.map = board.board;
         this.tilesNumber = board.size * board.size;
         this.doorsNumber = this.getDoorsNumber(board.board);
-        this.tilesVisited = new Set<Vec2>();
-        this.doorsHandled = new Set<Vec2>();
+        this.tilesVisited = new Map<string, Vec2>();
+        this.doorsHandled = new Map<string, Vec2>();
         this.flagsCaptured = new Set<string>();
+        this.flagsCapturedCount = 0;
         this.disconnectedPlayers = [];
         this.timeStartOfGame = null;
         this.timeEndOfGame = null;
@@ -135,6 +137,7 @@ export class Game implements IGame, GameStats {
         this.inventoryFull = false;
         this.pendingEndTurn = false;
         this.maxPlayers = 0;
+        this.stats = null;
         this.gamePhase = GamePhase.Lobby;
         this.endTurn();
     }
@@ -150,19 +153,6 @@ export class Game implements IGame, GameStats {
             this.internalEmitter.emit(InternalRoomEvents.PlayerRemoved, playerId, message);
         }
         this.disconnectedPlayers.push(player);
-    }
-
-    dispatchGameStats(): void {
-        this.endGameTimer();
-        this.stats = GameStatsUtils.calculateStats(this.players, this);
-        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, this.stats);
-    }
-
-    dispatchJournalEntry(messageType: GameMessage, playersInvolved: Player[], item?: Item): void {
-        const message = JournalManager.processEntry(messageType, playersInvolved, item);
-        if (message) {
-            this.internalEmitter.emit(InternalJournalEvents.Add, message);
-        }
     }
 
     getPlayerById(playerId: string): Player {
@@ -323,15 +313,19 @@ export class Game implements IGame, GameStats {
     }
 
     isPlayerTurn(playerId: string): boolean {
-        return this.players[this.currentTurn].id === playerId;
+        if (this.players[this.currentTurn].id) {
+            return this.players[this.currentTurn].id === playerId;
+        } else {
+            return true;
+        }
     }
 
-    toggleDebug(): boolean {
+    toggleDebug(adminId: string): boolean {
         this.isDebugMode = !this.isDebugMode;
         if (this.isDebugMode) {
-            this.dispatchJournalEntry(GameMessage.ActivateDebugMode, [this.players[this.currentTurn]]);
+            this.dispatchJournalEntry(GameMessage.ActivateDebugMode, [this.getPlayerById(adminId)]);
         } else {
-            this.dispatchJournalEntry(GameMessage.DeactivateDebugMode, [this.players[this.currentTurn]]);
+            this.dispatchJournalEntry(GameMessage.DeactivateDebugMode, [this.getPlayerById(adminId)]);
         }
         return this.isDebugMode;
     }
@@ -341,6 +335,7 @@ export class Game implements IGame, GameStats {
         const player = this.getPlayerById(playerId);
         door.tile = door.tile === Tile.ClosedDoor ? Tile.OpenedDoor : Tile.ClosedDoor;
         const doorState: DoorState = { position: doorPosition, state: door.tile };
+        this.doorsHandled.set(`${doorPosition.x},${doorPosition.y}`, doorPosition);
         if (door.tile === Tile.OpenedDoor) {
             this.dispatchJournalEntry(GameMessage.OpenDoor, [player]);
         } else if (door.tile === Tile.ClosedDoor) {
@@ -375,7 +370,9 @@ export class Game implements IGame, GameStats {
 
     flee(): void {
         if (this.fight.flee()) {
-            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer, this.fight.getOpponent(this.fight.currentPlayer.id)]);
+            const opponent = this.fight.getOpponent(this.fight.currentPlayer.id);
+            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer, opponent]);
+            opponent.totalFights += 1;
             this.endFight();
             const fightResult: FightResult = { type: FightResultType.Tie };
             this.internalEmitter.emit(InternalFightEvents.End, fightResult);
@@ -577,6 +574,19 @@ export class Game implements IGame, GameStats {
                 this.playerAttack();
             }
         }, ONE_SECOND_IN_MS);
+    }
+
+    private dispatchJournalEntry(messageType: GameMessage, playersInvolved: Player[], item?: Item): void {
+        const message = JournalManager.processEntry(messageType, playersInvolved, item);
+        if (message) {
+            this.internalEmitter.emit(InternalJournalEvents.Add, message);
+        }
+    }
+
+    private dispatchGameStats(): void {
+        this.endGameTimer();
+        this.stats = GameStatsUtils.calculateStats(this.players, this);
+        this.internalEmitter.emit(InternalStatsEvents.DispatchStats, this.stats);
     }
 
     private manageEndGame(player: Player): void {

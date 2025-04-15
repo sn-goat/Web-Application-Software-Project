@@ -136,28 +136,6 @@ describe('GameGateway', () => {
             });
         });
 
-        // Test pour handleCtfWinner
-        describe('handleCtfWinner', () => {
-            it('devrait émettre un événement Winner et générer les statistiques', () => {
-                // Arrange
-                const winningPlayer = { id: 'player1', name: 'Victor', team: 'red' } as unknown as Player;
-                const payload = { accessCode: 'room123', player: winningPlayer };
-                const mockGame = {
-                    dispatchGameStats: jest.fn(),
-                } as unknown as Game;
-                gameManager.getGame.mockReturnValue(mockGame);
-
-                // Act
-                gateway.handleCtfWinner(payload);
-
-                // Assert
-                expect(gameManager.getGame).toHaveBeenCalledWith(payload.accessCode);
-                expect(server.to).toHaveBeenCalledWith(payload.accessCode);
-                expect(emitMock).toHaveBeenCalledWith(GameEvents.Winner, winningPlayer);
-                expect(mockGame.dispatchGameStats).toHaveBeenCalled();
-            });
-        });
-
         // Test pour handleBroadcastMove
         describe('handleBroadcastMove', () => {
             it('devrait émettre un événement PlayerMoved à toute la salle', () => {

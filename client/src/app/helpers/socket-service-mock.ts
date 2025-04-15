@@ -2,14 +2,14 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { Vec2 } from '@common/board';
+import { Cell, Vec2 } from '@common/board';
 import { ChatMessage } from '@common/chat';
 import { Item, Tile } from '@common/enums';
 import { IFight, IGame, IRoom, PathInfo, TurnInfo } from '@common/game';
 import { Entry } from '@common/journal';
 import { IPlayer, PlayerInput } from '@common/player';
-import { Subject } from 'rxjs';
 import { Stats } from '@common/stats';
+import { Subject } from 'rxjs';
 
 export class MockSocketService {
     gameRoom: IRoom = {
@@ -35,11 +35,12 @@ export class MockSocketService {
     private doorSubject = new Subject<unknown>();
     private endOfGame = new Subject<unknown>();
     private gameStartedError = new Subject<string>();
-    private itemCollected = new Subject<Item>();
-    private itemDropped = new Subject<Item>();
-    private mapUpdate = new Subject<unknown>();
+    private itemCollected = new Subject<{ position: Vec2; item: Item }>();
+    private itemDropped = new Subject<{ droppedItems: { position: Vec2; item: Item }[] }>();
+    private mapUpdate = new Subject<{ player: IPlayer; item: Item; position: Vec2 } | Cell[][]>();
     private inventoryFull = new Subject<unknown>();
     private gameWinner = new Subject<unknown>();
+    private onMapUpdatedSubject = new Subject<unknown>();
 
     private journalSubject = new Subject<Entry>();
     private chatSubject = new Subject<ChatMessage>();
@@ -56,6 +57,10 @@ export class MockSocketService {
 
     onPlayerJoined() {
         return this.playerJoinedSubject.asObservable();
+    }
+
+    onMapUpdated() {
+        return this.onMapUpdatedSubject.asObservable();
     }
 
     onPlayerMoved() {
@@ -232,7 +237,7 @@ export class MockSocketService {
         this.startTurnSubject.next(null);
     }
 
-    triggerDoorStateChanged(data: { doorPosition: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }) {
+    triggerDoorStateChanged(data: { position: Vec2; newDoorState: Tile.ClosedDoor | Tile.OpenedDoor }) {
         this.doorSubject.next(data);
     }
 
@@ -276,15 +281,15 @@ export class MockSocketService {
         this.endOfGame.next(null);
     }
 
-    triggerItemCollected(data: Item) {
+    triggerItemCollected(data: { position: Vec2; item: Item }) {
         this.itemCollected.next(data);
     }
 
-    triggerItemDropped(data: Item) {
+    triggerItemDropped(data: { droppedItems: { position: Vec2; item: Item }[] }): void {
         this.itemDropped.next(data);
     }
 
-    triggerMapUpdate(data: unknown) {
+    triggerMapUpdate(data: { player: IPlayer; item: Item; position: Vec2 } | Cell[][]): void {
         this.mapUpdate.next(data);
     }
 
