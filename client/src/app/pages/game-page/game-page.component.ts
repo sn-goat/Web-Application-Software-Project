@@ -161,9 +161,6 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
             this.fightLogicService.fightStarted.subscribe((show) => {
                 this.showFightInterface = show;
             }),
-            this.fightLogicService.fightStarted.subscribe((show) => {
-                this.showFightInterface = show;
-            }),
         );
     }
 
