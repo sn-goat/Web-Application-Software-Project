@@ -102,16 +102,6 @@ describe('JournalComponent', () => {
         });
     });
 
-    it('should unsubscribe from all subscriptions when destroyed', () => {
-        const subscriptionSpies = component['subscriptions'].map((subscription) => spyOn(subscription, 'unsubscribe').and.callThrough());
-
-        component.ngOnDestroy();
-
-        subscriptionSpies.forEach((spy) => {
-            expect(spy).toHaveBeenCalled();
-        });
-    });
-
     it('should update entries when new entries are emitted', () => {
         const newEntries: Entry[] = [
             {

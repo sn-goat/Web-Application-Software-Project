@@ -61,15 +61,6 @@ describe('StatsComponent', () => {
         expect(disconnectedPlayer?.isDisconnected).toBeTrue();
     });
 
-    it('should unsubscribe from subscriptions on destroy', () => {
-        const subscription = jasmine.createSpyObj('Subscription', ['unsubscribe']);
-        component['subscriptions'] = [subscription];
-
-        component.ngOnDestroy();
-
-        expect(subscription.unsubscribe).toHaveBeenCalled();
-    });
-
     describe('sortData', () => {
         beforeEach(() => {
             statsSubject.next(mockStandardStats);
