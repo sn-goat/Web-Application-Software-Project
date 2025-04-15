@@ -11,16 +11,16 @@ import {
 } from '@app/constants/internal-events';
 import { Board } from '@app/model/database/board';
 import { Vec2 } from '@common/board';
-import { DoorState, GamePhase, IRoom, PathInfo } from '@common/game';
 import { ChatMessage } from '@common/chat';
 import { Item } from '@common/enums';
+import { DoorState, GamePhase, IRoom, PathInfo } from '@common/game';
 import { Entry } from '@common/journal';
 import { VirtualPlayerStyles } from '@common/player';
 import { Stats } from '@common/stats';
 import { EventEmitter2 } from 'eventemitter2';
 import { Fight } from './fight';
-import { VirtualPlayer } from './virtual-player';
 import { Player } from './player';
+import { VirtualPlayer } from './virtual-player';
 
 export class Room implements IRoom {
     accessCode: string;
@@ -152,12 +152,16 @@ export class Room implements IRoom {
         return this.game.players;
     }
 
-    addPlayer(player: Player): void {
+    addPlayer(player: Player): string[] | null {
+        if (this.isAvatarTaken(player)) {
+            return this.getPlayers().map((p) => p.avatar);
+        }
         this.generateUniquePlayerName(player);
         this.game.addPlayer(player);
         if (this.game.isGameFull()) {
             this.isLocked = true;
         }
+        return null;
     }
 
     addVirtualPlayer(playerStyle: VirtualPlayerStyles): void {
@@ -272,5 +276,10 @@ export class Room implements IRoom {
             nameToAssign = `${baseName}-${suffix}`;
         }
         player.name = nameToAssign;
+    }
+
+    private isAvatarTaken(player: Player): boolean {
+        const takenAvatars = this.getPlayers().map((p) => p.avatar);
+        return takenAvatars.includes(player.avatar);
     }
 }

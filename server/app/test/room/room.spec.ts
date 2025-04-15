@@ -93,6 +93,7 @@ const createPlayer = (id: string, name: string): Player =>
         id,
         name,
         // Adding minimal properties needed by Room; additional properties are not used in Room
+        avatar: Avatar.Berserker,
         inventory: [],
     }) as Player;
 
@@ -223,6 +224,7 @@ describe('Room', () => {
             it('should add player, generate a unique name if duplicate, and lock room if game is full', () => {
                 // Simulate duplicate names
                 const duplicatePlayer1 = createPlayer('p3', 'Alice');
+                duplicatePlayer1.avatar = Avatar.Chevalier;
                 fakeGame.isGameFull.mockReturnValueOnce(false);
                 room.addPlayer(player1);
                 room.addPlayer(duplicatePlayer1);
@@ -231,6 +233,7 @@ describe('Room', () => {
                 // Also test full room condition:
                 fakeGame.isGameFull.mockReturnValueOnce(true);
                 const newPlayer = createPlayer('p4', 'Charlie');
+                newPlayer.avatar = Avatar.Clerc;
                 room.addPlayer(newPlayer);
                 expect(room.isLocked).toBe(true);
             });
@@ -369,6 +372,7 @@ describe('Room', () => {
             fakeGame.players = [playerA];
             // New player with same base name "Sam"
             const playerB = createPlayer('pB', 'Sam');
+            playerB.avatar = Avatar.Démoniste;
             room.addPlayer(playerB);
             expect(playerB.name).not.toBe('Sam');
             expect(playerB.name).toMatch(/Sam-\d+/);

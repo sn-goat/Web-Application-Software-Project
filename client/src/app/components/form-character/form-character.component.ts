@@ -85,6 +85,14 @@ export class FormCharacterComponent extends SubLifecycleHandlerComponent impleme
             this.playerService.setAdmin(true);
             this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
         });
+
+        this.autoSubscribe(this.socketReceiver.onAvatarError(), (data: string[]) => {
+            this.takenAvatars = data;
+        });
+
+        this.autoSubscribe(this.socketReceiver.onPlayerJoined(), (room) => {
+            this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
+        });
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
