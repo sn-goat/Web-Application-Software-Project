@@ -11,8 +11,7 @@
 }
 
 mat-card {
-  @extend %blurred-gold-border;
-  background: rgba(36, 24, 10, 0.5);
+  background: transparent;
   font-size: 1.5rem;
   text-align: center;
   letter-spacing: 2px;
@@ -23,6 +22,7 @@ mat-card {
   display: flex;
   flex-direction: column;
   overflow: visible;
+  border: transparent;
 }
 @keyframes scrollReveal {
     0% {
@@ -51,10 +51,12 @@ mat-card-header {
 
 mat-card-content.content {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   justify-content: center;
+
 }
+
 
 .content > * {
   width: 52px;
@@ -62,11 +64,7 @@ mat-card-content.content {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 6px;
-  background: rgba(255, 255, 200, 0.06);
-  box-shadow:
-    0 0 4px rgba(255, 215, 0, 0.15),
-    inset 0 0 2px rgba(255, 215, 0, 0.05);
+
   transition: transform 0.2s ease;
   z-index: 1;
 
@@ -78,3 +76,22 @@ mat-card-content.content {
   }
 }
 
+.description-card {
+    @extend %blurred-gold-border;
+  flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.description-card .description-box {
+  overflow-y: auto;
+  font-size: 0.7rem;
+  font-family: 'MedievalSharp', cursive;
+  color: #f2e5b8;
+  line-height: 0.9;
+  text-align: center;
+  word-wrap: break-word;
+  white-space: normal;
+}

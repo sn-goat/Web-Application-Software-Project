@@ -134,7 +134,10 @@ export class BoardService {
                     }
 
                     if (this.isDoorStructureValid(board, i, j)) {
-                        return { isValid: false, error: "Des portes n'ont pas de structure valide" };
+                        return {
+                            isValid: false,
+                            error: 'Les portes doivent être encadrées par deux murs parallèles, et les deux autres côtés doivent rester ouverts.',
+                        };
                     }
                 }
             }

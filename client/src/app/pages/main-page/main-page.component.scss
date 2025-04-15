@@ -227,19 +227,29 @@ img {
 
 
 
-/* Responsive */
-@media (max-width: 768px) {
+@media screen and (max-height: 850px) {
   img {
-    width: 100% !important;
-    height: auto !important;
-    max-width: 500px;
+    max-height: 25vh;
+    width: auto;
   }
 
-  .header-item {
-    font-size: 2rem;
+  .medieval-title {
+    font-size: 2.5rem;
+    padding: 10px 25px;
   }
 
-  .button-container {
-    max-width: 250px;
+  .parchment-box {
+    padding: 30px 20px;
+  }
+
+  .button {
+    font-size: 1rem;
+    padding: 10px 16px;
+  }
+
+  .footer-item {
+    font-size: 0.75rem;
+    padding: 10px 15px;
   }
 }
+

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, Output, EventEmitter } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
@@ -14,6 +14,7 @@ import { IPlayer } from '@common/player';
     styleUrl: './game-fight-interface.component.scss',
 })
 export class GameFightInterfaceComponent extends SubLifecycleHandlerComponent implements OnInit {
+    @Output() toggleChat = new EventEmitter<void>();
     readonly perCent = 100;
     timer: string = '00 s';
     currentNameTurn: string = '';
@@ -43,6 +44,10 @@ export class GameFightInterfaceComponent extends SubLifecycleHandlerComponent im
 
         this.flee = this.fightLogicService.flee.bind(this.fightLogicService);
         this.attack = this.fightLogicService.attack.bind(this.fightLogicService);
+    }
+
+    onToggleChatClick(): void {
+        this.toggleChat.emit();
     }
 
     isMyTurn(): boolean {

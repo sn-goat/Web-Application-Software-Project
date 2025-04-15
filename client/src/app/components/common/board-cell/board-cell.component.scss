@@ -117,21 +117,16 @@ $action-color: rgba(255, 0, 0, 0.3);
     -ms-user-select: none;
 }
 
-.tooltip {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(36, 24, 10, 0.9);
-    color: #f2e5b8;
-    padding: 6px 10px;
-    border-radius: 4px;
-    height: 120px;
-    width: 130px;
-    font-size: 14px;
-    z-index: 1000;
+
+.tooltip{
+  white-space: pre-line;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  line-height: 1.4;
 }
 
+.tooltip,
 .tooltip-gameView {
     position: absolute;
     bottom: 100%;
@@ -154,7 +149,7 @@ $action-color: rgba(255, 0, 0, 0.3);
     pointer-events: none;
     white-space: pre-line;
 }
-
+.tooltip.small-row,
 .tooltip-gameView.small-row {
     transform: translateX(-50%) translateY(5px);
     top: 100%;

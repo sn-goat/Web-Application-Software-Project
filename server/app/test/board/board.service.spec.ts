@@ -121,7 +121,9 @@ describe('BoardService', () => {
         placeTile(board, Tile.OpenedDoor, { x: 5, y: 5 });
         placeTile(board, Tile.Wall, { x: 6, y: 5 });
         placeTile(board, Tile.Wall, { x: 5, y: 6 });
-        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual("Jeu invalide: Des portes n'ont pas de structure valide");
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual(
+            'Jeu invalide: Les portes doivent être encadrées par deux murs parallèles, et les deux autres côtés doivent rester ouverts.',
+        );
 
         placeTile(board, Tile.Wall, { x: 5, y: 4 });
         placeTile(board, Tile.Ice, { x: 4, y: 5 });

@@ -10,6 +10,8 @@
     <body>
         <div class="background-gif" style="background-image: url('assets/backgrounds/lobby.gif')"></div>
         <h1 class="medieval-title">Salle d'attente</h1>
+        <button class="top-left-button return-button" (click)="disconnect()">Déconnexion</button>
+
         <div class="container justified">
             <div class="main-content">
                 <div class="left-column">
@@ -30,7 +32,6 @@
                         }@else {
                         <p>Veuillez verouiller la salle pour démarrer la partie.</p>
                         } }
-                        <button (click)="disconnect()">🚪 Déconnexion</button>
                     </div>
 
                     <div class="players-list">
@@ -40,7 +41,11 @@
                             <li>
                                 <img class="avatar-image" [src]="player.avatar" alt="Avatar" />
                                 <span [ngStyle]="{ color: players[0].id === player.id ? 'yellow' : 'inherit' }">
-                                    <strong>{{ player.name }}</strong>
+                                    @if(isVirtualPlayer(player)){
+                                        <strong>{{ player.name }} 🤖 JV</strong>
+                                    }@else{
+                                        <strong>{{ player.name }}</strong>>
+                                    }
                                 </span>
 
                                 @if (isAdmin && player.id !== getPlayerId()) {
