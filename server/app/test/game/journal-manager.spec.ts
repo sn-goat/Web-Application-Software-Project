@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { JournalManager } from '@app/class/journal-manager';
+import { JournalManager } from '@app/class/utils/journal-manager';
 import { Item } from '@common/enums';
 import { GameMessage, ITEM_TO_NAME } from '@common/journal';
 

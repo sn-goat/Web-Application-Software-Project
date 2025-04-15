@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */ // TODO: fix this
 import { Fight } from '@app/class/fight';
-import { JournalManager } from '@app/class/journal-manager';
+import { JournalManager } from '@app/class/utils/journal-manager';
 import { Player } from '@app/class/player';
 import { FightResult, FightResultType } from '@app/constants/fight-interface';
 import {
@@ -361,7 +361,7 @@ export class Game implements IGame, GameStats {
 
     changeFighter() {
         this.fight.changeFighter();
-        const fightTurnDuration = this.fight.currentPlayer.fleeAttempts === 0 ? FIGHT_TURN_DURATION_NO_FLEE_IN_S : FIGHT_TURN_DURATION_IN_S;
+        const fightTurnDuration = !this.fight.currentPlayer.fleeAttempts ? FIGHT_TURN_DURATION_NO_FLEE_IN_S : FIGHT_TURN_DURATION_IN_S;
         this.timer.startTimer(fightTurnDuration, TimerType.Combat);
         if (this.fight.currentPlayer instanceof VirtualPlayer) {
             this.computeVirtualPlayerFight(this.fight.currentPlayer);

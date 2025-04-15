@@ -5,7 +5,7 @@ import { Item } from '@common/enums';
 import { IFight } from '@common/game';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameMessage } from '@common/journal';
-import { JournalManager } from '@app/class/journal-manager';
+import { JournalManager } from '@app/class/utils/journal-manager';
 
 export class Fight implements IFight {
     player1: Player;
