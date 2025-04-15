@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { GameService } from '@app/services/game/game.service';
 import { StatPlayer, Stats } from '@common/stats';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-stats',
@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './stats.component.html',
     styleUrls: ['./stats.component.scss'],
 })
-export class StatsComponent implements OnDestroy, OnInit {
+export class StatsComponent extends SubLifecycleHandlerComponent implements OnInit {
     stats: Stats | null = null;
     dataSource: MatTableDataSource<StatPlayer> = new MatTableDataSource();
     displayedColumns: string[] = [
@@ -31,28 +31,21 @@ export class StatsComponent implements OnDestroy, OnInit {
     ];
 
     private readonly gameService: GameService = inject(GameService);
-    private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        this.subscriptions.push(
-            this.gameService.stats.subscribe((stats: Stats | null) => {
-                if (!stats) {
-                    return;
-                }
-                this.stats = stats;
+        this.autoSubscribe(this.gameService.stats, (stats: Stats | null) => {
+            if (!stats) {
+                return;
+            }
+            this.stats = stats;
 
-                const allPlayerStats = [
-                    ...stats.playersStats.map((player) => ({ ...player, isDisconnected: false })),
-                    ...stats.disconnectedPlayersStats.map((player) => ({ ...player, isDisconnected: true })),
-                ];
+            const allPlayerStats = [
+                ...stats.playersStats.map((player) => ({ ...player, isDisconnected: false })),
+                ...stats.disconnectedPlayersStats.map((player) => ({ ...player, isDisconnected: true })),
+            ];
 
-                this.dataSource = new MatTableDataSource(allPlayerStats);
-            }),
-        );
-    }
-
-    ngOnDestroy() {
-        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+            this.dataSource = new MatTableDataSource(allPlayerStats);
+        });
     }
 
     sortData(sort: Sort) {

@@ -71,51 +71,9 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
         if (myPlayerId) {
             this.socketEmitter.ready(myPlayerId);
         }
-        this.subscriptions.push(
-            this.fightLogicService.fightStarted.subscribe((show) => {
-                this.showFightInterface = show;
-            }),
-
-            this.gameService.isDebugMode.subscribe((isDebugMode) => {
-                this.debugMode = isDebugMode;
-            }),
-
-            this.fightLogicService.fightStarted.subscribe((show) => {
-                this.showFightInterface = show;
-            }),
-
-            this.gameService.isDebugMode.subscribe((isDebugMode) => {
-                this.debugMode = isDebugMode;
-            }),
-
-            this.socketReceiver.onPlayerRemoved().subscribe((message: string) => {
-                this.warning(message);
-            }),
-
-            this.socketReceiver.onGameWinner().subscribe((winner) => {
-                if (winner.team) {
-                    this.warningEndGame(`${winner.name} a rapporté le drapeau à son point de départ. L'équipe ${winner.team} remporte la partie`);
-                } else {
-                    this.warningEndGame(`${winner.name} a remporté la partie avec 3 victoires!`);
-                }
-                timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/stats']));
-            }),
-
-            this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer; item: Item; position: Vec2 }) => {
-                const localPlayer = this.playerService.getPlayer();
-                if (localPlayer && payload && payload.player && payload.player.id === localPlayer.id) {
-                    this.dialog.open(ItemPopupComponent, {
-                        data: {
-                            inventory: [...payload.player.inventory, payload.item],
-                            collectedPosition: payload.position,
-                        },
-                        disableClose: true,
-                        width: 'auto',
-                        height: 'auto',
-                    });
-                }
-            }),
-        );
+        this.subscribeToGameService();
+        this.subscribeToFightLogic();
+        this.subscribeToSocketReceiver();
     }
 
     ngAfterViewInit(): void {
@@ -164,5 +122,60 @@ export class GamePageComponent implements OnInit, AfterViewInit, OnDestroy {
             panelClass: 'alert-dialog',
         });
         return firstValueFrom(dialogRef.afterClosed());
+    }
+
+    private subscribeToSocketReceiver() {
+        this.subscriptions.push(
+            this.socketReceiver.onPlayerRemoved().subscribe((message: string) => {
+                this.warning(message);
+            }),
+
+            this.socketReceiver.onGameWinner().subscribe((winner) => {
+                if (winner.team) {
+                    this.warningEndGame(`${winner.name} a rapporté le drapeau à son point de départ. L'équipe ${winner.team} remporte la partie`);
+                } else {
+                    this.warningEndGame(`${winner.name} a remporté la partie avec 3 victoires!`);
+                }
+                timer(this.endGameTimeoutInS).subscribe(async () => this.router.navigate(['/stats']));
+            }),
+
+            this.socketReceiver.onInventoryFull().subscribe((payload: { player: IPlayer; item: Item; position: Vec2 }) => {
+                const localPlayer = this.playerService.getPlayer();
+                if (localPlayer && payload && payload.player && payload.player.id === localPlayer.id) {
+                    this.dialog.open(ItemPopupComponent, {
+                        data: {
+                            inventory: [...payload.player.inventory, payload.item],
+                            collectedPosition: payload.position,
+                        },
+                        disableClose: true,
+                        width: 'auto',
+                        height: 'auto',
+                    });
+                }
+            }),
+        );
+    }
+
+    private subscribeToFightLogic() {
+        this.subscriptions.push(
+            this.fightLogicService.fightStarted.subscribe((show) => {
+                this.showFightInterface = show;
+            }),
+            this.fightLogicService.fightStarted.subscribe((show) => {
+                this.showFightInterface = show;
+            }),
+        );
+    }
+
+    private subscribeToGameService() {
+        this.subscriptions.push(
+            this.gameService.isDebugMode.subscribe((isDebugMode) => {
+                this.debugMode = isDebugMode;
+            }),
+
+            this.gameService.isDebugMode.subscribe((isDebugMode) => {
+                this.debugMode = isDebugMode;
+            }),
+        );
     }
 }
