@@ -1,29 +1,17 @@
 /* eslint-disable max-lines */ // TODO: fix this
 import { Fight } from '@app/class/fight';
-import {
-    Avatar,
-    DoorState,
-    IGame,
-    PathInfo,
-    VirtualPlayerAction,
-    VirtualPlayerInstructions,
-    GameStats,
-    GamePhase,
-    MAX_FIGHT_WINS,
-} from '@common/game';
-import { GameUtils } from '@app/services/game/game-utils';
-import { Timer } from './timer';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { JournalManager } from '@app/class/journal-manager';
 import { Player } from '@app/class/player';
+import { FightResult, FightResultType } from '@app/constants/fight-interface';
 import {
     InternalEvents,
     InternalFightEvents,
-    InternalRoomEvents,
-    InternalTimerEvents,
-    InternalTurnEvents,
-    InternalStatsEvents,
     InternalGameEvents,
     InternalJournalEvents,
+    InternalRoomEvents,
+    InternalStatsEvents,
+    InternalTimerEvents,
+    InternalTurnEvents,
 } from '@app/constants/internal-events';
 import {
     FIGHT_TURN_DURATION_IN_S,
@@ -36,18 +24,30 @@ import {
     TimerType,
     TURN_DURATION_IN_S,
 } from '@app/gateways/game/game.gateway.constants';
-import { Item, Tile } from '@common/enums';
 import { Board } from '@app/model/database/board';
-import { VirtualPlayer } from './virtual-player';
-import { VPManager } from './utils/vp-manager';
-import { FightResult, FightResultType } from '@app/constants/fight-interface';
+import { GameUtils } from '@app/services/game/game-utils';
+import { GameStatsUtils } from '@app/services/game/game-utils-stats';
 import { Cell, Vec2 } from '@common/board';
+import { Item, Tile } from '@common/enums';
+import {
+    Avatar,
+    DoorState,
+    GamePhase,
+    GameStats,
+    IGame,
+    MAX_FIGHT_WINS,
+    PathInfo,
+    VirtualPlayerAction,
+    VirtualPlayerInstructions,
+} from '@common/game';
+import { GameMessage } from '@common/journal';
 import { getLobbyLimit } from '@common/lobby-limits';
 import { IPlayer } from '@common/player';
 import { Stats } from '@common/stats';
-import { GameStatsUtils } from '@app/services/game/game-utils-stats';
-import { JournalManager } from '@app/class/journal-manager';
-import { GameMessage } from '@common/journal';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Timer } from './timer';
+import { VPManager } from './utils/vp-manager';
+import { VirtualPlayer } from './virtual-player';
 
 export class Game implements IGame, GameStats {
     internalEmitter: EventEmitter2;
