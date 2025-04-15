@@ -15,6 +15,23 @@ import { ChatMessage } from '@common/chat';
 import { Item } from '@common/enums';
 import { DoorState, GamePhase, IRoom, PathInfo } from '@common/game';
 import { Entry } from '@common/journal';
+import {
+    ChangeTurnPayload,
+    DebugStateChangedPayload,
+    DispatchStatsPayload,
+    DoorStateChangedPayload,
+    DroppedItemPayload,
+    FightEndPayload,
+    FightTimerUpdatePayload,
+    InventoryFullPayload,
+    ItemCollectedPayload,
+    JournalEntryPayload,
+    MapUpdatePayload,
+    PlayerMovePayload,
+    TurnTimerUpdatePayload,
+    UpdatePlayersPayload,
+    WinnerPayload,
+} from '@common/payload';
 import { VirtualPlayerStyles } from '@common/player';
 import { Stats } from '@common/stats';
 import { EventEmitter2 } from 'eventemitter2';
@@ -44,44 +61,53 @@ export class Room implements IRoom {
         this.globalEmitter = globalEmitter;
         this.game = new Game(this.internalEmitter, board);
 
+        // When a player is removed, emit a typed payload.
         this.internalEmitter.on(InternalRoomEvents.PlayerRemoved, (playerId: string, message: string) => {
             this.globalEmitter.emit(InternalRoomEvents.PlayerRemoved, this.accessCode, playerId, message);
         });
 
         this.internalEmitter.on(InternalTimerEvents.TurnUpdate, (remainingTime) => {
-            this.globalEmitter.emit(InternalTimerEvents.TurnUpdate, { accessCode: this.accessCode, remainingTime });
+            const payload: TurnTimerUpdatePayload = { accessCode: this.accessCode, remainingTime };
+            this.globalEmitter.emit(InternalTimerEvents.TurnUpdate, payload);
         });
 
         this.internalEmitter.on(InternalStatsEvents.DispatchStats, (stats: Stats) => {
-            this.globalEmitter.emit(InternalStatsEvents.DispatchStats, { accessCode: this.accessCode, stats });
+            const payload: DispatchStatsPayload = { accessCode: this.accessCode, stats };
+            this.globalEmitter.emit(InternalStatsEvents.DispatchStats, payload);
         });
 
         this.internalEmitter.on(InternalJournalEvents.Add, (entry: Entry) => {
-            this.globalEmitter.emit(InternalJournalEvents.Add, { accessCode: this.accessCode, entry });
+            const payload: JournalEntryPayload = { accessCode: this.accessCode, entry };
+            this.globalEmitter.emit(InternalJournalEvents.Add, payload);
         });
 
         this.internalEmitter.on(InternalTimerEvents.FightUpdate, (remainingTime) => {
-            this.globalEmitter.emit(InternalTimerEvents.FightUpdate, { accessCode: this.accessCode, remainingTime });
+            const payload: FightTimerUpdatePayload = { accessCode: this.accessCode, remainingTime };
+            this.globalEmitter.emit(InternalTimerEvents.FightUpdate, payload);
         });
 
         this.internalEmitter.on(InternalGameEvents.MapUpdated, (map) => {
-            this.globalEmitter.emit(InternalGameEvents.MapUpdated, { accessCode: this.accessCode, map });
+            const payload: MapUpdatePayload = { accessCode: this.accessCode, map };
+            this.globalEmitter.emit(InternalGameEvents.MapUpdated, payload);
         });
 
         this.internalEmitter.on(InternalTurnEvents.Move, (movement: { previousPosition: Vec2; player: Player }) => {
-            this.globalEmitter.emit(InternalTurnEvents.Move, {
+            const payload: PlayerMovePayload = {
                 accessCode: this.accessCode,
                 previousPosition: movement.previousPosition,
                 player: movement.player,
-            });
+            };
+            this.globalEmitter.emit(InternalTurnEvents.Move, payload);
         });
 
         this.internalEmitter.on(InternalTurnEvents.Update, (turn: { player: Player; path: Record<string, PathInfo> }) => {
+            // Assuming the contract for InternalTurnEvents.Update remains unchanged.
             this.globalEmitter.emit(InternalTurnEvents.Update, turn);
         });
 
         this.internalEmitter.on(InternalTurnEvents.ChangeTurn, (turn: { player: Player; path: Record<string, PathInfo> }) => {
-            this.globalEmitter.emit(InternalTurnEvents.ChangeTurn, { accessCode: this.accessCode, player: turn.player, path: turn.path });
+            const payload: ChangeTurnPayload = { accessCode: this.accessCode, player: turn.player, path: turn.path };
+            this.globalEmitter.emit(InternalTurnEvents.ChangeTurn, payload);
         });
 
         this.internalEmitter.on(InternalTurnEvents.Start, (playerId: string) => {
@@ -93,10 +119,8 @@ export class Room implements IRoom {
         });
 
         this.internalEmitter.on(InternalTurnEvents.DoorStateChanged, (doorState: DoorState) => {
-            this.globalEmitter.emit(InternalTurnEvents.DoorStateChanged, {
-                accessCode: this.accessCode,
-                doorState,
-            });
+            const payload: DoorStateChangedPayload = { accessCode: this.accessCode, doorState };
+            this.globalEmitter.emit(InternalTurnEvents.DoorStateChanged, payload);
         });
 
         this.internalEmitter.on(InternalFightEvents.ChangeFighter, (fight: Fight) => {
@@ -104,39 +128,28 @@ export class Room implements IRoom {
         });
 
         this.internalEmitter.on(InternalFightEvents.End, (fightResult: FightResult) => {
-            this.globalEmitter.emit(InternalFightEvents.End, { accessCode: this.accessCode, fightResult });
+            const payload: FightEndPayload = { accessCode: this.accessCode, fightResult };
+            this.globalEmitter.emit(InternalFightEvents.End, payload);
         });
 
-        this.internalEmitter.on(InternalTurnEvents.ItemCollected, (payload: { player: Player; position: Vec2 }) => {
-            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, {
-                accessCode: this.accessCode,
-                player: payload.player,
-                position: payload.position,
-            });
+        this.internalEmitter.on(InternalTurnEvents.ItemCollected, (data: { player: Player; position: Vec2 }) => {
+            const payload: ItemCollectedPayload = { accessCode: this.accessCode, player: data.player, position: data.position };
+            this.globalEmitter.emit(InternalTurnEvents.ItemCollected, payload);
         });
 
-        this.internalEmitter.on(InternalTurnEvents.DroppedItem, (payload: { player: Player; droppedItems: { item: Item; position: Vec2 }[] }) => {
-            this.globalEmitter.emit(InternalTurnEvents.DroppedItem, {
-                accessCode: this.accessCode,
-                player: payload.player,
-                droppedItems: payload.droppedItems,
-            });
+        this.internalEmitter.on(InternalTurnEvents.DroppedItem, (data: { player: Player; droppedItems: { item: Item; position: Vec2 }[] }) => {
+            const payload: DroppedItemPayload = { accessCode: this.accessCode, player: data.player, droppedItems: data.droppedItems };
+            this.globalEmitter.emit(InternalTurnEvents.DroppedItem, payload);
         });
 
-        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (payload: { player: Player; item: Item; position: Vec2 }) => {
-            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, {
-                accessCode: this.accessCode,
-                player: payload.player,
-                item: payload.item,
-                position: payload.position,
-            });
+        this.internalEmitter.on(InternalTurnEvents.InventoryFull, (data: { player: Player; item: Item; position: Vec2 }) => {
+            const payload: InventoryFullPayload = { accessCode: this.accessCode, player: data.player, item: data.item, position: data.position };
+            this.globalEmitter.emit(InternalTurnEvents.InventoryFull, payload);
         });
 
         this.internalEmitter.on(InternalGameEvents.Winner, (player: Player) => {
-            this.globalEmitter.emit(InternalGameEvents.Winner, {
-                accessCode: this.accessCode,
-                player,
-            });
+            const payload: WinnerPayload = { accessCode: this.accessCode, player };
+            this.globalEmitter.emit(InternalGameEvents.Winner, payload);
         });
     }
 
@@ -174,7 +187,8 @@ export class Room implements IRoom {
 
     expelPlayer(playerId: string): void {
         this.game.removePlayer(playerId, this.playerBanMessage);
-        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
+        const payload: UpdatePlayersPayload = { accessCode: this.accessCode, players: this.getPlayers() };
+        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, payload);
     }
 
     removePlayer(playerId: string): void {
@@ -198,16 +212,12 @@ export class Room implements IRoom {
         if (this.game) {
             this.game.timer.stopTimer();
         }
-
         this.internalEmitter.removeAllListeners();
-
         this.removeAllPlayers();
-
         if (this.game) {
             this.game.closeGame();
             this.game = null;
         }
-
         this.globalEmitter = null;
         this.internalEmitter = null;
     }
@@ -231,7 +241,8 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
         } else {
             this.game.removePlayer(playerId, this.confirmDisconnectMessage);
-            this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
+            const payload: UpdatePlayersPayload = { accessCode: this.accessCode, players: this.getPlayers() };
+            this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, payload);
         }
     }
 
@@ -240,7 +251,6 @@ export class Room implements IRoom {
         this.game.removePlayerOnMap(playerId);
         this.game.removePlayer(playerId, this.confirmDisconnectMessage);
         this.game.dropItems(playerId);
-
         if (!this.game.canGameContinue()) {
             const lastPlayer = this.game.getPhysicalPlayers().pop();
             if (lastPlayer) {
@@ -249,16 +259,16 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
             return;
         }
-        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, { accessCode: this.accessCode, players: this.getPlayers() });
+        const updatePayload: UpdatePlayersPayload = { accessCode: this.accessCode, players: this.getPlayers() };
+        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, updatePayload);
         if (this.isPlayerAdmin(playerId) && this.game.isDebugMode) {
             this.game.isDebugMode = false;
-            this.globalEmitter.emit(InternalGameEvents.DebugStateChanged, { accessCode: this.accessCode, newState: false });
+            const debugPayload: DebugStateChangedPayload = { accessCode: this.accessCode, newState: false };
+            this.globalEmitter.emit(InternalGameEvents.DebugStateChanged, debugPayload);
         }
-
         if (this.game.isPlayerInFight(playerId)) {
             this.game.removePlayerFromFight(playerId);
         }
-
         if (wasPlayerTurn) {
             this.game.currentTurn = this.game.currentTurn % this.game.players.length;
             this.game.startTurn();
@@ -270,7 +280,6 @@ export class Room implements IRoom {
         const baseName = player.name;
         let nameToAssign = baseName;
         let suffix = 1;
-
         while (existingNames.includes(nameToAssign)) {
             suffix++;
             nameToAssign = `${baseName}-${suffix}`;
