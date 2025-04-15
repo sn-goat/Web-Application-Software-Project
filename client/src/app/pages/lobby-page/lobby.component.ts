@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
-import { SubscriptionLifecycleHandlerComponent } from '@app/components/common/subscription-lifecycle-handler/subscription-lifecycle-handler.component';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { FormVirtualPlayerComponent } from '@app/components/form-virtual-player/form-virtual-player.component';
 import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/player-constants';
@@ -24,7 +24,7 @@ import { firstValueFrom } from 'rxjs';
     styleUrls: ['./lobby.component.scss'],
     imports: [CommonModule, FormsModule, ChatComponent],
 })
-export class LobbyComponent extends SubscriptionLifecycleHandlerComponent implements OnInit {
+export class LobbyComponent extends SubLifecycleHandlerComponent implements OnInit {
     accessCode: string = '';
     players: IPlayer[] = [];
     isRoomLocked: boolean = false;
@@ -32,7 +32,6 @@ export class LobbyComponent extends SubscriptionLifecycleHandlerComponent implem
     maxPlayers: number = 0;
     readonly diceToImageLink = diceToImageLink;
 
-    // Dependencies are injected using the new inject() syntax.
     private readonly dialog = inject(MatDialog);
     private readonly socketEmitter = inject(SocketEmitterService);
     private readonly socketReceiver = inject(SocketReceiverService);
@@ -42,45 +41,12 @@ export class LobbyComponent extends SubscriptionLifecycleHandlerComponent implem
     private readonly playerService = inject(PlayerService);
 
     ngOnInit(): void {
-        // Synchronous initialization.
         this.isAdmin = this.playerService.isPlayerAdmin();
         this.accessCode = this.socketEmitter.getAccessCode();
 
-        // Subscribe to observables using the autoSubscribe helper.
-        this.autoSubscribe(this.roomService.connected, (players) => {
-            this.players = players;
-        });
+        this.subscribeToRoomService();
 
-        this.autoSubscribe(this.roomService.isRoomLocked, (isLocked) => {
-            this.isRoomLocked = isLocked;
-        });
-
-        this.autoSubscribe(this.roomService.maxPlayer, (maxPlayers) => {
-            this.maxPlayers = maxPlayers;
-        });
-
-        this.autoSubscribe(this.socketReceiver.onRoomUnlocked(), () => {
-            this.isRoomLocked = false;
-        });
-
-        this.autoSubscribe(this.socketReceiver.onPlayersUpdated(), (players: IPlayer[]) => {
-            this.players = players;
-        });
-
-        this.autoSubscribe(this.socketReceiver.onPlayerRemoved(), async (message: string) => {
-            await this.warning(message);
-            // Since navigating away destroys the component, no manual unsubscription is needed.
-            this.router.navigate(['/accueil']);
-        });
-
-        this.autoSubscribe(this.socketReceiver.onGameStartedError(), (message: string) => {
-            this.openDialog(message, Alert.WARNING);
-        });
-
-        this.autoSubscribe(this.socketReceiver.onGameStarted(), (game: IGame) => {
-            this.gameService.setGame(game);
-            this.router.navigate(['/jeu']);
-        });
+        this.subscribeToSocketReceiver();
     }
 
     getPlayerId(): string {
@@ -137,5 +103,43 @@ export class LobbyComponent extends SubscriptionLifecycleHandlerComponent implem
             panelClass: 'alert-dialog',
         });
         return firstValueFrom(dialogRef.afterClosed());
+    }
+
+    private subscribeToSocketReceiver() {
+        this.autoSubscribe(this.socketReceiver.onRoomUnlocked(), () => {
+            this.isRoomLocked = false;
+        });
+
+        this.autoSubscribe(this.socketReceiver.onPlayersUpdated(), (players: IPlayer[]) => {
+            this.players = players;
+        });
+
+        this.autoSubscribe(this.socketReceiver.onPlayerRemoved(), async (message: string) => {
+            await this.warning(message);
+            this.router.navigate(['/accueil']);
+        });
+
+        this.autoSubscribe(this.socketReceiver.onGameStartedError(), (message: string) => {
+            this.openDialog(message, Alert.WARNING);
+        });
+
+        this.autoSubscribe(this.socketReceiver.onGameStarted(), (game: IGame) => {
+            this.gameService.setGame(game);
+            this.router.navigate(['/jeu']);
+        });
+    }
+
+    private subscribeToRoomService() {
+        this.autoSubscribe(this.roomService.connected, (players) => {
+            this.players = players;
+        });
+
+        this.autoSubscribe(this.roomService.isRoomLocked, (isLocked) => {
+            this.isRoomLocked = isLocked;
+        });
+
+        this.autoSubscribe(this.roomService.maxPlayer, (maxPlayers) => {
+            this.maxPlayers = maxPlayers;
+        });
     }
 }

@@ -1,10 +1,10 @@
-import { AfterViewChecked, Component, ElementRef, OnDestroy, ViewChild, inject } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { ChatService } from '@app/services/chat/chat.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { PopupService } from '@app/services/popup/popup.service';
 import { IPlayer } from '@common/player';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-chat',
@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
-export class ChatComponent implements AfterViewChecked, OnDestroy {
+export class ChatComponent extends SubLifecycleHandlerComponent implements AfterViewChecked, OnInit {
     @ViewChild('scrollAnchor') scrollAnchor!: ElementRef;
     @ViewChild('chatHistory') chatHistory!: ElementRef;
     @ViewChild('messageInput') messageInput!: ElementRef;
@@ -21,20 +21,13 @@ export class ChatComponent implements AfterViewChecked, OnDestroy {
     myPlayer: IPlayer | null = null;
     readonly chatService = inject(ChatService);
     private previousMessageCount: number = 0;
-    private subscriptions: Subscription[] = [];
     private readonly popupService = inject(PopupService);
     private readonly playerService = inject(PlayerService);
 
-    constructor() {
-        this.subscriptions.push(
-            this.playerService.myPlayer.subscribe((player) => {
-                this.myPlayer = player;
-            }),
-        );
-    }
-
-    ngOnDestroy(): void {
-        this.subscriptions.forEach((s) => s.unsubscribe());
+    ngOnInit() {
+        this.autoSubscribe(this.playerService.myPlayer, (player) => {
+            this.myPlayer = player;
+        });
     }
 
     ngAfterViewChecked(): void {

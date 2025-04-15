@@ -5,7 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 @Component({
     template: '',
 })
-export abstract class SubscriptionLifecycleHandlerComponent implements OnDestroy {
+export abstract class SubLifecycleHandlerComponent implements OnDestroy {
     protected readonly destroy$ = new Subject<void>();
 
     ngOnDestroy(): void {
