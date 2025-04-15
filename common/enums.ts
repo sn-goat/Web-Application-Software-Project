@@ -3,7 +3,6 @@ export enum Tile {
     Water = 'Water',
     Wall = 'Wall',
     Floor = 'Floor',
-    Door = 'Door',
     ClosedDoor = 'ClosedDoor',
     OpenedDoor = 'OpenedDoor',
 }
