@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { FormVirtualPlayerComponent } from '@app/components/form-virtual-player/form-virtual-player.component';
 import { Alert } from '@app/constants/enums';
 import { diceToImageLink } from '@app/constants/player-constants';
@@ -15,7 +16,7 @@ import { SocketEmitterService } from '@app/services/socket/socket-emitter.servic
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { IGame } from '@common/game';
 import { IPlayer } from '@common/player';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-lobby',
@@ -23,7 +24,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
     styleUrls: ['./lobby.component.scss'],
     imports: [CommonModule, FormsModule, ChatComponent],
 })
-export class LobbyComponent implements OnInit, OnDestroy {
+export class LobbyComponent extends SubLifecycleHandlerComponent implements OnInit {
     accessCode: string = '';
     players: IPlayer[] = [];
     isRoomLocked: boolean = false;
@@ -38,61 +39,21 @@ export class LobbyComponent implements OnInit, OnDestroy {
     private readonly roomService = inject(RoomService);
     private readonly gameService = inject(GameService);
     private readonly playerService = inject(PlayerService);
-    private subscriptions: Subscription[] = [];
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.isAdmin = this.playerService.isPlayerAdmin();
         this.accessCode = this.socketEmitter.getAccessCode();
 
-        this.subscriptions.push(
-            this.roomService.connected.subscribe((players) => {
-                this.players = players;
-            }),
+        this.subscribeToRoomService();
 
-            this.roomService.isRoomLocked.subscribe((isLocked) => {
-                this.isRoomLocked = isLocked;
-            }),
-
-            this.roomService.maxPlayer.subscribe((maxPlayers) => {
-                this.maxPlayers = maxPlayers;
-            }),
-
-            this.socketReceiver.onRoomUnlocked().subscribe(() => {
-                this.isRoomLocked = false;
-            }),
-
-            this.socketReceiver.onPlayersUpdated().subscribe((players: IPlayer[]) => {
-                this.players = players;
-            }),
-
-            this.socketReceiver.onPlayerRemoved().subscribe(async (message: string) => {
-                await this.warning(message);
-                this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-                this.subscriptions = [];
-                this.router.navigate(['/accueil']);
-            }),
-
-            this.socketReceiver.onGameStartedError().subscribe((message: string) => {
-                this.openDialog(message, Alert.WARNING);
-            }),
-
-            this.socketReceiver.onGameStarted().subscribe((game: IGame) => {
-                this.gameService.setGame(game);
-                this.router.navigate(['/jeu']);
-            }),
-        );
-    }
-
-    ngOnDestroy(): void {
-        this.subscriptions.forEach((subscription) => subscription.unsubscribe());
-        this.subscriptions = [];
+        this.subscribeToSocketReceiver();
     }
 
     getPlayerId(): string {
         return this.playerService.getPlayer().id;
     }
 
-    toggleRoomLock() {
+    toggleRoomLock(): void {
         if (this.players.length >= this.maxPlayers) {
             return;
         }
@@ -105,20 +66,20 @@ export class LobbyComponent implements OnInit, OnDestroy {
         }
     }
 
-    startGame() {
+    startGame(): void {
         this.socketEmitter.startGame();
     }
 
-    expelPlayer(playerId: string) {
+    expelPlayer(playerId: string): void {
         this.socketEmitter.expelPlayer(playerId);
     }
 
-    disconnect() {
+    disconnect(): void {
         const currentId = this.playerService.getPlayer().id;
         this.socketEmitter.disconnect(currentId);
     }
 
-    openVirtualPlayerForm() {
+    openVirtualPlayerForm(): void {
         this.dialog.open(FormVirtualPlayerComponent, {
             width: '400px',
             disableClose: true,
@@ -142,5 +103,43 @@ export class LobbyComponent implements OnInit, OnDestroy {
             panelClass: 'alert-dialog',
         });
         return firstValueFrom(dialogRef.afterClosed());
+    }
+
+    private subscribeToSocketReceiver() {
+        this.autoSubscribe(this.socketReceiver.onRoomUnlocked(), () => {
+            this.isRoomLocked = false;
+        });
+
+        this.autoSubscribe(this.socketReceiver.onPlayersUpdated(), (players: IPlayer[]) => {
+            this.players = players;
+        });
+
+        this.autoSubscribe(this.socketReceiver.onPlayerRemoved(), async (message: string) => {
+            await this.warning(message);
+            this.router.navigate(['/accueil']);
+        });
+
+        this.autoSubscribe(this.socketReceiver.onGameStartedError(), (message: string) => {
+            this.openDialog(message, Alert.WARNING);
+        });
+
+        this.autoSubscribe(this.socketReceiver.onGameStarted(), (game: IGame) => {
+            this.gameService.setGame(game);
+            this.router.navigate(['/jeu']);
+        });
+    }
+
+    private subscribeToRoomService() {
+        this.autoSubscribe(this.roomService.connected, (players) => {
+            this.players = players;
+        });
+
+        this.autoSubscribe(this.roomService.isRoomLocked, (isLocked) => {
+            this.isRoomLocked = isLocked;
+        });
+
+        this.autoSubscribe(this.roomService.maxPlayer, (maxPlayers) => {
+            this.maxPlayers = maxPlayers;
+        });
     }
 }

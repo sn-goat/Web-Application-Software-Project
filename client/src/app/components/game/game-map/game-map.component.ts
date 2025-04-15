@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit, inject } from '@angular/core';
 import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { FightLogicService } from '@app/services/fight-logic/fight-logic.service';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -8,7 +9,6 @@ import { Cell, KEYPRESS_D } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { PathInfo } from '@common/game';
 import { IPlayer } from '@common/player';
-import { Subscription } from 'rxjs';
 import { MouseHandlerDirective } from './mouse-handler.directive';
 
 @Component({
@@ -17,7 +17,7 @@ import { MouseHandlerDirective } from './mouse-handler.directive';
     styleUrls: ['./game-map.component.scss'],
     imports: [BoardCellComponent, MouseHandlerDirective],
 })
-export class GameMapComponent implements OnInit, OnDestroy {
+export class GameMapComponent extends SubLifecycleHandlerComponent implements OnInit {
     boardGame: Cell[][] = [];
 
     isActionSelected = false;
@@ -37,7 +37,6 @@ export class GameMapComponent implements OnInit, OnDestroy {
     private readonly playerService = inject(PlayerService);
     private readonly popupService = inject(PopupService);
     private readonly cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
-    private subscriptions: Subscription[] = [];
 
     @HostListener('window:keydown', ['$event'])
     handleKeyboardEvent(event: KeyboardEvent): void {
@@ -48,47 +47,9 @@ export class GameMapComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.subscriptions.push(
-            this.gameService.map.subscribe((map: Cell[][]) => {
-                this.boardGame = map;
-            }),
-
-            this.playerService.isActivePlayer.subscribe((isPlayerTurn: boolean) => {
-                this.isPlayerTurn = isPlayerTurn;
-            }),
-
-            this.playerService.path.subscribe((path: Map<string, PathInfo> | null) => {
-                this.rightSelectedCell = null;
-                if (!path) {
-                    this.path = null;
-                    this.pathCells = new Set();
-                    this.highlightedPathCells.clear();
-                    this.rightSelectedCell = null;
-                    return;
-                }
-
-                this.path = new Map(path);
-                this.pathCells = new Set([...path.keys()]);
-                this.cdr.detectChanges();
-            }),
-
-            this.gameService.isActionSelected.subscribe((isAction) => {
-                this.isActionSelected = isAction;
-                this.actionCells = isAction ? this.gameService.findPossibleActions(this.playerService.getPlayer().position) : new Set<string>();
-            }),
-
-            this.gameService.isDebugMode.subscribe((isDebugMode) => {
-                this.isDebugMode = isDebugMode;
-            }),
-
-            this.popupService.popupVisible$.subscribe((isVisible) => {
-                this.popupVisible = isVisible;
-            }),
-
-            this.popupService.chatInputFocused$.subscribe((isFocused) => {
-                this.chatInputFocused = isFocused;
-            }),
-        );
+        this.subscribeToGameService();
+        this.subscribeToPlayerService();
+        this.subscribeToPopupService();
         this.getTooltipContent = this.gameService.getCellDescription.bind(this.gameService);
     }
 
@@ -175,7 +136,49 @@ export class GameMapComponent implements OnInit, OnDestroy {
         this.highlightedPathCells.clear();
     }
 
-    ngOnDestroy() {
-        this.subscriptions.forEach((sub) => sub.unsubscribe());
+    private subscribeToGameService() {
+        this.autoSubscribe(this.gameService.map, (map: Cell[][]) => {
+            this.boardGame = map;
+        });
+
+        this.autoSubscribe(this.gameService.isActionSelected, (isAction) => {
+            this.isActionSelected = isAction;
+            this.actionCells = isAction ? this.gameService.findPossibleActions(this.playerService.getPlayer().position) : new Set<string>();
+        });
+
+        this.autoSubscribe(this.gameService.isDebugMode, (isDebugMode) => {
+            this.isDebugMode = isDebugMode;
+        });
+    }
+
+    private subscribeToPlayerService() {
+        this.autoSubscribe(this.playerService.isActivePlayer, (isPlayerTurn: boolean) => {
+            this.isPlayerTurn = isPlayerTurn;
+        });
+
+        this.autoSubscribe(this.playerService.path, (path: Map<string, PathInfo> | null) => {
+            this.rightSelectedCell = null;
+            if (!path) {
+                this.path = null;
+                this.pathCells = new Set();
+                this.highlightedPathCells.clear();
+                this.rightSelectedCell = null;
+                return;
+            }
+
+            this.path = new Map(path);
+            this.pathCells = new Set([...path.keys()]);
+            this.cdr.detectChanges();
+        });
+    }
+
+    private subscribeToPopupService() {
+        this.autoSubscribe(this.popupService.popupVisible$, (isVisible) => {
+            this.popupVisible = isVisible;
+        });
+
+        this.autoSubscribe(this.popupService.chatInputFocused$, (isFocused) => {
+            this.chatInputFocused = isFocused;
+        });
     }
 }

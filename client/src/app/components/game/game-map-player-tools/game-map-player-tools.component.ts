@@ -1,20 +1,20 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackbarComponent } from '@app/components/common/snack-bar/snack-bar.component';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
+import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
 import { GameService } from '@app/services/game/game.service';
 import { PlayerService } from '@app/services/player/player.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { Item } from '@common/enums';
-import { Subscription } from 'rxjs';
-import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 
 @Component({
     selector: 'app-game-map-player-tools',
     templateUrl: './game-map-player-tools.component.html',
     styleUrls: ['./game-map-player-tools.component.scss'],
 })
-export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
+export class GameMapPlayerToolsComponent extends SubLifecycleHandlerComponent implements OnInit {
     items: Item[] = [];
     timer: string = '';
     isActivePlayer: boolean = false;
@@ -30,67 +30,67 @@ export class GameMapPlayerToolsComponent implements OnInit, OnDestroy {
     private readonly playerService: PlayerService = inject(PlayerService);
     private readonly socketReceiver: SocketReceiverService = inject(SocketReceiverService);
     private readonly snackBar: MatSnackBar = inject(MatSnackBar);
-    private subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        this.subscriptions.push(
-            this.playerService.isActivePlayer.subscribe((isActive) => {
-                this.isActivePlayer = isActive;
-            }),
+        this.subscribeToSocketReceiver();
+        this.subscribeToPlayerService();
 
-            this.playerService.myPlayer.subscribe((player) => {
-                this.playerHasAction = (player?.actions ?? 0) > 0;
-                this.items = player?.inventory ?? [];
-            }),
-
-            this.gameService.isActionSelected.subscribe((isActive) => {
-                this.isActionEnabled = isActive;
-            }),
-
-            this.socketReceiver.onTimerUpdate().subscribe((remainingTime) => {
-                this.timer = `${remainingTime.toString()} s`;
-            }),
-
-            this.socketReceiver.onPlayerTurnChanged().subscribe((turnInfo) => {
-                this.snackBar.openFromComponent(SnackbarComponent, {
-                    duration: 3000,
-                    horizontalPosition: 'center',
-                    verticalPosition: 'bottom',
-                    panelClass: ['custom-snackbar'],
-                    data: { message: `C'est au tour de ${turnInfo.player.name} de jouer` },
-                });
-            }),
-
-            this.socketReceiver.onWinner().subscribe(() => {
-                this.snackBar.openFromComponent(SnackbarComponent, {
-                    duration: 3000,
-                    horizontalPosition: 'center',
-                    verticalPosition: 'top',
-                    panelClass: ['custom-snackbar'],
-                    data: { message: 'Tu as gagné le combat!' },
-                });
-            }),
-
-            this.socketReceiver.onLoser().subscribe(() => {
-                this.snackBar.openFromComponent(SnackbarComponent, {
-                    duration: 3000,
-                    horizontalPosition: 'center',
-                    verticalPosition: 'top',
-                    panelClass: ['custom-snackbar'],
-                    data: { message: 'Tu as perdu le combat!' },
-                });
-            }),
-        );
+        this.autoSubscribe(this.gameService.isActionSelected, (isActive) => {
+            this.isActionEnabled = isActive;
+        });
 
         this.performAction = this.gameService.toggleActionMode.bind(this.gameService);
         this.endTurn = this.gameService.endTurn.bind(this.gameService);
     }
+
     getDescription(type: Item): string {
         return ASSETS_DESCRIPTION.get(type) ?? '';
     }
 
-    ngOnDestroy() {
-        this.subscriptions.forEach((sub) => sub.unsubscribe());
-        this.subscriptions = [];
+    private subscribeToSocketReceiver() {
+        this.autoSubscribe(this.socketReceiver.onTimerUpdate(), (remainingTime) => {
+            this.timer = `${remainingTime.toString()} s`;
+        });
+
+        this.autoSubscribe(this.socketReceiver.onPlayerTurnChanged(), (turnInfo) => {
+            this.snackBar.openFromComponent(SnackbarComponent, {
+                duration: 3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass: ['custom-snackbar'],
+                data: { message: `C'est au tour de ${turnInfo.player.name} de jouer` },
+            });
+        });
+
+        this.autoSubscribe(this.socketReceiver.onWinner(), () => {
+            this.snackBar.openFromComponent(SnackbarComponent, {
+                duration: 3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'top',
+                panelClass: ['custom-snackbar'],
+                data: { message: 'Tu as gagné le combat!' },
+            });
+        });
+
+        this.autoSubscribe(this.socketReceiver.onLoser(), () => {
+            this.snackBar.openFromComponent(SnackbarComponent, {
+                duration: 3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'top',
+                panelClass: ['custom-snackbar'],
+                data: { message: 'Tu as perdu le combat!' },
+            });
+        });
+    }
+
+    private subscribeToPlayerService() {
+        this.autoSubscribe(this.playerService.isActivePlayer, (isActive) => {
+            this.isActivePlayer = isActive;
+        });
+
+        this.autoSubscribe(this.playerService.myPlayer, (player) => {
+            this.playerHasAction = (player?.actions ?? 0) > 0;
+            this.items = player?.inventory ?? [];
+        });
     }
 }

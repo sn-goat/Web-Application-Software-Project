@@ -7,7 +7,7 @@ import { PlayerService } from '@app/services/player/player.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
 import { TurnInfo } from '@common/game';
 import { IPlayer } from '@common/player';
-import { Subject, Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 import { GameMapPlayerToolsComponent } from './game-map-player-tools.component';
 
 describe('GameMapPlayerToolsComponent', () => {
@@ -129,12 +129,5 @@ describe('GameMapPlayerToolsComponent', () => {
     it('should bind endTurn to gameService.endTurn', () => {
         component.endTurn();
         expect(gameServiceMock.endTurn).toHaveBeenCalled();
-    });
-
-    it('should unsubscribe from all subscriptions on destroy', () => {
-        const unsubscribeSpy = spyOn(Subscription.prototype, 'unsubscribe');
-        component.ngOnDestroy();
-
-        expect(unsubscribeSpy).toHaveBeenCalledTimes(7);
     });
 });

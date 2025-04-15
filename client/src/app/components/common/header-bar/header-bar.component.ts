@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,10 +19,9 @@ export class HeaderBarComponent {
     @Input() message: string = 'Êtes-vous sûre de vouloir revenir en arrière?';
     @Input() isGamePage: boolean = false;
 
-    constructor(
-        private router: Router,
-        private dialog: MatDialog,
-    ) {}
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
+
     async getBack() {
         if (this.showDialog) {
             const result = await this.openDialog(this.message, Alert.CONFIRM);

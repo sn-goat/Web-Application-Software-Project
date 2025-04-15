@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { diceToImageLink, MAX_PORTRAITS } from '@app/constants/player-constants';
 import { GameMapService } from '@app/services/game-map/game-map.service';
 import { PlayerService } from '@app/services/player/player.service';
@@ -22,7 +23,7 @@ type StatBonus = 'life' | 'speed';
     styleUrls: ['./form-character.component.scss'],
     imports: [CommonModule, FormsModule, RouterLink],
 })
-export class FormCharacterComponent implements OnInit, OnDestroy {
+export class FormCharacterComponent extends SubLifecycleHandlerComponent implements OnInit {
     @Output() closePopup: EventEmitter<void> = new EventEmitter<void>();
     @Input() isCreationPage: boolean = false;
     @Input() accessCode: string = '';
@@ -58,7 +59,7 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
         return ASSET_PATH_STATIC + (this.currentPortraitIndex + 1) + ASSET_EXT_STATIC;
     }
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.playerInput = {
             name: '',
             avatar: this.currentPortraitStaticImage,
@@ -69,28 +70,21 @@ export class FormCharacterComponent implements OnInit, OnDestroy {
             attackDice: DEFAULT_DICE,
             defenseDice: DEFAULT_DICE,
         };
-        this.subscriptions.push(
-            this.roomService.connected.subscribe((connectedPlayers) => {
-                if (!this.isCreationPage) {
-                    this.takenAvatars = connectedPlayers.map((player) => player.avatar);
-                }
-            }),
+        this.autoSubscribe(this.roomService.connected, (connectedPlayers) => {
+            if (!this.isCreationPage) {
+                this.takenAvatars = connectedPlayers.map((player) => player.avatar);
+            }
+        });
 
-            this.roomService.isRoomLocked.subscribe((isLocked) => {
-                this.isRoomLocked = isLocked;
-            }),
+        this.autoSubscribe(this.roomService.isRoomLocked, (isLocked) => {
+            this.isRoomLocked = isLocked;
+        });
 
-            this.socketReceiver.onRoomCreated().subscribe((room) => {
-                this.socketEmitter.shareCharacter(this.playerInput);
-                this.playerService.setAdmin(true);
-                this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
-            }),
-        );
-    }
-
-    ngOnDestroy(): void {
-        this.subscriptions.forEach((sub) => sub.unsubscribe());
-        this.subscriptions = [];
+        this.autoSubscribe(this.socketReceiver.onRoomCreated(), (room) => {
+            this.socketEmitter.shareCharacter(this.playerInput);
+            this.playerService.setAdmin(true);
+            this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
+        });
     }
 
     navigatePortrait(direction: 'prev' | 'next') {
