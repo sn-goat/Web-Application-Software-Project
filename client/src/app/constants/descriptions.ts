@@ -13,12 +13,6 @@ Le coût pour la traverser s'élève à 0 pts. Vous perdez 2 points à l'attaque
 Cette tuile bloque le joueur dans ses déplacements. Il ne peut pas la traverser.`,
     ],
     [
-        Tile.Door,
-        `Porte :
-Cette tuile est accessible si elle est ouverte.
-Pour changer son état, faites un clique droit sur une tuile porte.`,
-    ],
-    [
         Tile.ClosedDoor,
         `Porte fermée :
 Cette tuile est inaccessible. Le joueur ne peut pas la traverser.`,
