@@ -81,13 +81,22 @@ export class Fight implements IFight {
     }
 
     isPlayerInFight(playerId: string): boolean {
-        return this.player1.id === playerId || this.player2.id === playerId;
+        return this.hasFightStarted && (this.player1.id === playerId || this.player2.id === playerId);
     }
 
-    handleFightRemoval(playerId: string): FightResult {
+    handleFightRemoval(playerId: string): void {
         const winner = this.getOpponent(playerId);
         winner.wins += 1;
         const loser = this.getFighter(playerId);
-        return { type: FightResultType.Decisive, winner, loser };
+        const fightResult: FightResult = { type: FightResultType.Decisive, winner, loser };
+        this.endFight(fightResult);
+    }
+
+    endFight(fightResult: FightResult): void {
+        this.hasFightStarted = false;
+        this.player1 = undefined;
+        this.player2 = undefined;
+        this.currentPlayer = undefined;
+        this.internalEmitter.emit(InternalFightEvents.End, fightResult);
     }
 }

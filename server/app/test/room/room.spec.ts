@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable max-lines */
+import { Fight } from '@app/class/fight';
 import { Game } from '@app/class/game';
 import { Player } from '@app/class/player';
 import { Room } from '@app/class/room';
@@ -54,9 +55,11 @@ interface FakeGame extends Partial<Game> {
     removePlayerFromFight: jest.Mock<any, any>;
     isPlayerTurn: jest.Mock<any, any>;
     endTurn: jest.Mock<any, any>;
+    startTurn: jest.Mock<any, any>;
     dropItems: jest.Mock<any, any>;
     getPhysicalPlayers: jest.Mock<any, any>;
     canGameContinue: jest.Mock<any, any>;
+    fight: Fight;
 }
 
 const createFakeGame = (): FakeGame => {
@@ -76,9 +79,15 @@ const createFakeGame = (): FakeGame => {
         removePlayerFromFight: jest.fn(),
         isPlayerTurn: jest.fn(() => false),
         endTurn: jest.fn(),
+        startTurn: jest.fn(),
         dropItems: jest.fn(),
         getPhysicalPlayers: jest.fn(() => []),
         canGameContinue: jest.fn(() => true),
+        // Ajout du mock pour fight
+        fight: {
+            isPlayerInFight: jest.fn(() => false),
+            handleFightRemoval: jest.fn(),
+        } as unknown as Fight,
     } as FakeGame;
 };
 
@@ -343,13 +352,21 @@ describe('Room', () => {
                 });
             });
 
-            it('should remove player from fight if they were in one', () => {
+            it('should remove player from fight if they are in one', () => {
                 fakeGame.players = [player1, player2];
-                fakeGame.isPlayerInFight.mockReturnValueOnce(true);
+                fakeGame.isPlayerInFight.mockReturnValue(true);
+
+                // Ajoutez les méthodes nécessaires au mock fight
+                fakeGame.fight = {
+                    isPlayerInFight: jest.fn(() => true),
+                    handleFightRemoval: jest.fn(),
+                    player1,
+                    player2,
+                } as unknown as Fight;
 
                 room.removePlayer(player1.id);
 
-                expect(fakeGame.removePlayerFromFight).toHaveBeenCalledWith(player1.id);
+                expect(fakeGame.fight.handleFightRemoval).toHaveBeenCalledWith(player1.id);
             });
 
             it("should start new turn if it was player's turn", () => {
