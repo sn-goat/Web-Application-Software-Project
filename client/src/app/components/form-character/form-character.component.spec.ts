@@ -209,7 +209,7 @@ describe('FormCharacterComponent', () => {
     });
 
     it('should redirect to lobby when emit onPlayerJoin is called', () => {
-        mockSocketService.triggerPlayerJoined({ accessCode: 'accessCode' } as IRoom);
+        mockSocketService.triggerJoinedSuccess({ accessCode: 'accessCode' } as IRoom);
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/lobby'], { state: { accessCode: 'accessCode' } });
     });
 

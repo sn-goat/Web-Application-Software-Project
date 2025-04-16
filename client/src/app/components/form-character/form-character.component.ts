@@ -90,7 +90,7 @@ export class FormCharacterComponent extends SubLifecycleHandlerComponent impleme
             this.takenAvatars = data;
         });
 
-        this.autoSubscribe(this.socketReceiver.onPlayerJoined(), (room) => {
+        this.autoSubscribe(this.socketReceiver.onJoinSuccess(), (room) => {
             this.router.navigate(['/lobby'], { state: { accessCode: room.accessCode } });
         });
     }

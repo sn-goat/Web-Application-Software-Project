@@ -20,6 +20,7 @@ export class MockSocketService {
     };
 
     private playerJoinedSubject = new Subject<IRoom>();
+    private joinSuccessSubject = new Subject<IRoom>();
     private playerMovedSubject = new Subject<{ previousPosition: Vec2; player: IPlayer }>();
     private playerRemovedSubject = new Subject<unknown>();
     private playerUpdatedSubject = new Subject<IPlayer[]>();
@@ -58,6 +59,10 @@ export class MockSocketService {
 
     onPlayerJoined() {
         return this.playerJoinedSubject.asObservable();
+    }
+
+    onJoinSuccess() {
+        return this.joinSuccessSubject.asObservable();
     }
 
     onMapUpdated() {
@@ -200,6 +205,10 @@ export class MockSocketService {
 
     triggerPlayerJoined(data: IRoom) {
         this.playerJoinedSubject.next(data);
+    }
+
+    triggerJoinedSuccess(data: IRoom) {
+        this.joinSuccessSubject.next(data);
     }
 
     triggerOnJournalEntry(data: Entry) {
