@@ -13,7 +13,7 @@ import { SharedSocketService } from './shared-socket.service';
 import { SocketEmitterService } from './socket-emitter.service';
 import { SocketReceiverService } from './socket-receiver.service';
 import { Cell, Vec2 } from '@common/board';
-import { DoorState } from '@common/game';
+import { DoorState, IRoom } from '@common/game';
 import { Item, Tile } from '@common/enums';
 import { ChatEvents } from '@common/chat.gateway.events';
 import { ChatMessage } from '@common/chat';
@@ -96,6 +96,16 @@ describe('SocketReceiverService', () => {
         fakeSocket.callbacks[RoomEvents.JoinError](message);
     });
 
+    it('should emit join success room', (done) => {
+        const room = { accessCode: '112344' } as IRoom;
+        service.onJoinSuccess().subscribe((receivedRoom) => {
+            expect(receivedRoom).toEqual(room);
+            expect(socketEmitterSpy.setAccessCode).toHaveBeenCalledWith(room.accessCode);
+            done();
+        });
+        fakeSocket.onceCallbacks[RoomEvents.JoinSuccess](room);
+    });
+
     it('should emit updated players list', (done) => {
         const players = [{ id: 'p1' }, { id: 'p2' }] as any;
         service.onPlayersUpdated().subscribe((received) => {
@@ -146,6 +156,15 @@ describe('SocketReceiverService', () => {
             done();
         });
         fakeSocket.callbacks[RoomEvents.RoomUnlocked](null);
+    });
+
+    it('should emit on Avatar Error', (done) => {
+        const message = 'error';
+        service.onAvatarError().subscribe((received) => {
+            expect(received).toEqual(message);
+            done();
+        });
+        fakeSocket.callbacks[RoomEvents.AvatarError](message);
     });
 
     it('should emit on game start', (done) => {
@@ -312,14 +331,14 @@ describe('SocketReceiverService', () => {
         fakeSocket.callbacks[TurnEvents.PlayerMoved](movement);
     });
 
-    // it('should emit on door update', (done) => {
-    //     const data = { doorPosition: { x: 1, y: 1 }, newDoorState: Tile.ClosedDoor as Tile.ClosedDoor | Tile.OpenedDoor };
-    //     service.onDoorStateChanged().subscribe((received) => {
-    //         expect(received).toEqual(data);
-    //         done();
-    //     });
-    //     fakeSocket.callbacks[TurnEvents.DoorStateChanged](data);
-    // });
+    it('should emit on Item Dropped', (done) => {
+        const item = { player: { id: 'item1' } as IPlayer, droppedItems: [{ item: Item.Default, position: { x: 0, y: 0 } as Vec2 }] as any } as any;
+        service.onItemDropped().subscribe((received) => {
+            expect(received).toEqual(item);
+            done();
+        });
+        fakeSocket.callbacks[TurnEvents.DroppedItem](item);
+    });
 
     it('should emit on fight init', (done) => {
         const fight = { id: 'fight1' } as any;
