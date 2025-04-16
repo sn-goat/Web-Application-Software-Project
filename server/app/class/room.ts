@@ -165,6 +165,16 @@ export class Room implements IRoom {
 
     private removePlayerFromGame(playerId: string): void {
         const wasPlayerTurn = this.game.isPlayerTurn(playerId);
+        if (this.game.fight.isPlayerInFight(playerId)) {
+            this.game.fight.handleFightRemoval(playerId);
+        }
+
+        if (this.isPlayerAdmin(playerId) && this.game.isDebugMode) {
+            this.game.isDebugMode = false;
+            const debugPayload: DebugStateChangedPayload = { accessCode: this.accessCode, newState: false };
+            this.globalEmitter.emit(InternalGameEvents.DebugStateChanged, debugPayload);
+        }
+
         this.game.removePlayerOnMap(playerId);
         this.game.removePlayer(playerId, this.confirmDisconnectMessage);
         this.game.dropItems(playerId);
@@ -176,20 +186,13 @@ export class Room implements IRoom {
             this.globalEmitter.emit(InternalRoomEvents.CloseRoom, this.accessCode);
             return;
         }
-        const updatePayload: UpdatePlayersPayload = { accessCode: this.accessCode, players: this.getPlayers() };
-        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, updatePayload);
-        if (this.isPlayerAdmin(playerId) && this.game.isDebugMode) {
-            this.game.isDebugMode = false;
-            const debugPayload: DebugStateChangedPayload = { accessCode: this.accessCode, newState: false };
-            this.globalEmitter.emit(InternalGameEvents.DebugStateChanged, debugPayload);
-        }
-        if (this.game.isPlayerInFight(playerId)) {
-            this.game.removePlayerFromFight(playerId);
-        }
+
         if (wasPlayerTurn) {
             this.game.currentTurn = this.game.currentTurn % this.game.players.length;
             this.game.startTurn();
         }
+        const updatePayload: UpdatePlayersPayload = { accessCode: this.accessCode, players: this.getPlayers() };
+        this.globalEmitter.emit(InternalRoomEvents.PlayersUpdated, updatePayload);
     }
 
     private generateUniquePlayerName(player: Player): void {
