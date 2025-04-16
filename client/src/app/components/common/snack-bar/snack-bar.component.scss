@@ -1,0 +1,38 @@
+$scroll-gold: #d4af37;
+
+
+::ng-deep .custom-snackbar {
+        font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+        box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    animation: scrollReveal 1.4s ease-out;
+    font-weight: bold;
+    text-align: center;
+    padding: 14px 24px;
+    border-radius: 8px;
+    letter-spacing: 1px;
+}
+
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+span{
+    font-family: 'MedievalSharp', cursive;
+    background-color: transparent;
+}
+
+mat-snack-bar-label{
+    font-family: 'MedievalSharp', cursive;
+    background-color: transparent;
+}

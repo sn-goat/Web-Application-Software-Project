@@ -1,9 +1,9 @@
 import { Board, BoardDocument } from '@app/model/database/board';
 import { CreateBoardDto } from '@app/model/dto/board/create-board.dto';
 import { UpdateBoardDto } from '@app/model/dto/board/update-board-dto';
-import { MOCK_STORED_BOARD_ARRAY } from '@app/test/helpers/board/stored-board.mock';
-import { Cell, Vec2 } from '@common/board';
+import { Cell, Validation, Vec2 } from '@common/board';
 import { Tile, Visibility } from '@common/enums';
+import { DEFAULT_MOVEMENT_DIRECTIONS } from '@common/player';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,12 +14,6 @@ export class BoardService {
         private logger: Logger,
     ) {}
 
-    async start() {
-        if ((await this.boardModel.countDocuments()) === 0) {
-            await this.populateDB();
-        }
-    }
-
     async getAllBoards(): Promise<Board[]> {
         return this.boardModel.find({});
     }
@@ -28,21 +22,13 @@ export class BoardService {
         return this.boardModel.findOne({ name: boardName });
     }
 
-    async populateDB(): Promise<void> {
-        try {
-            await this.boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
-        } catch (error) {
-            return Promise.reject(`Error while trying to populate: ${error}`);
-        }
-    }
-
     async addBoard(board: CreateBoardDto): Promise<void> {
         const validation = await this.validateBoard(board, true);
         if (!validation.isValid) {
             return Promise.reject(`Jeu invalide: ${validation.error}`);
         }
         try {
-            await this.boardModel.create({ ...board, createdAt: new Date(), updatedAt: new Date(), visibility: Visibility.PRIVATE });
+            await this.boardModel.create({ ...board, createdAt: new Date(), updatedAt: new Date(), visibility: Visibility.Private });
         } catch (error) {
             return Promise.reject(`Failed to insert board: ${error}`);
         }
@@ -58,12 +44,13 @@ export class BoardService {
                 { _id: board._id },
                 {
                     ...board,
+                    visibility: Visibility.Private,
                 },
                 { new: true },
             )
             .exec();
         if (!updatedBoard) {
-            const newBoard = { ...board, createdAt: new Date(), updatedAt: new Date(), visibility: Visibility.PRIVATE };
+            const newBoard = { ...board, createdAt: new Date(), updatedAt: new Date(), visibility: Visibility.Private };
             try {
                 await this.boardModel.create(newBoard);
             } catch (error) {
@@ -82,7 +69,7 @@ export class BoardService {
             throw new NotFoundException(`Board with name "${name}" not found.`);
         }
 
-        const newVisibility = board.visibility === Visibility.PUBLIC ? Visibility.PRIVATE : Visibility.PUBLIC;
+        const newVisibility = board.visibility === Visibility.Public ? Visibility.Private : Visibility.Public;
         board.visibility = newVisibility;
         await board.save();
     }
@@ -124,9 +111,16 @@ export class BoardService {
     }
 
     private doorOnEdge(row: number, col: number, max: number): boolean {
-        if (row === 0 || col === 0 || row === max - 1 || col === max - 1) {
-            return true;
-        }
+        return row === 0 || col === 0 || row === max - 1 || col === max - 1;
+    }
+
+    private isDoorStructureValid(board: CreateBoardDto, row: number, col: number): boolean {
+        const horizontalFloors = board.board[row][col - 1].tile !== Tile.Wall && board.board[row][col + 1].tile !== Tile.Wall;
+        const verticalFloors = board.board[row - 1][col].tile !== Tile.Wall && board.board[row + 1][col].tile !== Tile.Wall;
+        const horizontalWalls = board.board[row][col - 1].tile === Tile.Wall && board.board[row][col + 1].tile === Tile.Wall;
+        const verticalWalls = board.board[row - 1][col].tile === Tile.Wall && board.board[row + 1][col].tile === Tile.Wall;
+
+        return !((horizontalFloors && verticalWalls) || (verticalFloors && horizontalWalls));
     }
 
     private areDoorsValid(board: CreateBoardDto): Validation {
@@ -134,18 +128,16 @@ export class BoardService {
         const cols = board.board[0].length;
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
-                if (board.board[i][j].tile === Tile.CLOSED_DOOR || board.board[i][j].tile === Tile.OPENED_DOOR) {
+                if (board.board[i][j].tile === Tile.ClosedDoor || board.board[i][j].tile === Tile.OpenedDoor) {
                     if (this.doorOnEdge(i, j, rows)) {
                         return { isValid: false, error: 'Des portes sont placées sur les rebords du jeu' };
                     }
 
-                    const horizontalFloors = board.board[i][j - 1].tile !== Tile.WALL && board.board[i][j + 1].tile !== Tile.WALL;
-                    const verticalFloors = board.board[i - 1][j].tile !== Tile.WALL && board.board[i + 1][j].tile !== Tile.WALL;
-                    const horizontalWalls = board.board[i][j - 1].tile === Tile.WALL && board.board[i][j + 1].tile === Tile.WALL;
-                    const verticalWalls = board.board[i - 1][j].tile === Tile.WALL && board.board[i + 1][j].tile === Tile.WALL;
-
-                    if (!((horizontalFloors && verticalWalls) || (verticalFloors && horizontalWalls))) {
-                        return { isValid: false, error: "Des portes n'ont pas de structure valide" };
+                    if (this.isDoorStructureValid(board, i, j)) {
+                        return {
+                            isValid: false,
+                            error: 'Les portes doivent être encadrées par deux murs parallèles, et les deux autres côtés doivent rester ouverts.',
+                        };
                     }
                 }
             }
@@ -158,7 +150,7 @@ export class BoardService {
 
         for (const row of boardGame.board) {
             for (const cell of row) {
-                if (cell.tile === Tile.WALL) {
+                if (cell.tile === Tile.Wall) {
                     wallcount++;
                 }
             }
@@ -181,7 +173,7 @@ export class BoardService {
 
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
-                if (board.board[i][j].tile !== Tile.WALL) {
+                if (board.board[i][j].tile !== Tile.Wall) {
                     totalAccessibleTiles++;
                     if (!start) {
                         start = { x: i, y: j };
@@ -197,18 +189,13 @@ export class BoardService {
     }
 
     private dfs(board: Cell[][], x: number, y: number, visited: Set<string>) {
-        const directions: Vec2[] = [
-            { x: 0, y: 1 },
-            { x: 1, y: 0 },
-            { x: 0, y: -1 },
-            { x: -1, y: 0 },
-        ];
+        const directions: Vec2[] = DEFAULT_MOVEMENT_DIRECTIONS;
 
         const rows = board.length;
         const cols = board[0]?.length || 0;
         if (x < 0 || y < 0 || x >= rows || y >= cols) return;
         const key = `${x},${y}`;
-        if (visited.has(key) || board[x][y].tile === Tile.WALL) return;
+        if (visited.has(key) || board[x][y].tile === Tile.Wall) return;
 
         visited.add(key);
         for (const dir of directions) {
@@ -216,8 +203,3 @@ export class BoardService {
         }
     }
 }
-
-export type Validation = {
-    isValid: boolean;
-    error?: string;
-};

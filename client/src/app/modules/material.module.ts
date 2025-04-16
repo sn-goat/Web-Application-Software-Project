@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialogContent, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,13 +21,7 @@ const modules = [
     MatTooltipModule,
     MatFormFieldModule,
     MatInputModule,
-    MatDialogContent,
 ];
-
-/**
- * Material module
- * IMPORTANT : Retirer les modules non utilisés et ajouter seulement ceux vraiment utilisés
- */
 @NgModule({
     imports: [...modules],
     exports: [...modules],

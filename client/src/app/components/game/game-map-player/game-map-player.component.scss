@@ -1,0 +1,190 @@
+$glow-teal: rgba(126, 224, 208, 0.3);
+$accent-color: #ff6b93;
+$active-player-color: #ff9800;
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    --base-font-size: min(0.9rem, 3.2vw);
+    --small-font-size: min(0.75rem, 2.4vw);
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'MedievalSharp', cursive;
+    text-shadow: 0 0 5px $glow-teal;
+    line-height: 1.1;
+}
+
+%blurred-gold-border {
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+    animation: scrollReveal 1.4s ease-out;
+}
+
+@keyframes scrollReveal {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.player-section {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.player {
+    @extend %blurred-gold-border;
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 6px;
+    min-height: 0;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+
+    .player-image {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex: 2 1 0; // give it more space to grow
+        min-width: 0;
+
+        h3 {
+            white-space: normal;
+            word-break: break-word;
+            overflow: visible;
+            text-overflow: unset;
+            height: auto;
+            text-align: center;
+            font-size: min(0.85rem, 2.8vw);
+            margin: 0;
+            padding: 0 4px;
+            width: 100%;
+        }
+    }
+
+    .player-info {
+        flex: 1 1 0;
+        flex-shrink: 1;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+
+        h3 {
+            white-space: nowrap;
+            font-size: min(0.75rem, 2.3vw);
+            margin: 0;
+        }
+
+        h3.admin {
+            padding-top: 2px;
+            border: 0.5px solid;
+            text-shadow: 0 0 4px rgba($accent-color, 0.6);
+            border-radius: 8px;
+        }
+        h3.admin,
+        h3.active {
+            font-size: min(0.75rem, 2.4vw);
+            padding: 1px 4px;
+        }
+
+        h3.active {
+            border: 1px solid;
+            border-radius: 8px;
+            animation: text-pulse 2s ease-in-out infinite;
+            font-weight: bold;
+        }
+
+        .flag-icon {
+        width: 20px;
+        height: auto;
+        margin-bottom: 4px;
+        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+        animation: flagWiggle 2.5s infinite ease-in-out;
+    }
+    @keyframes flagWiggle {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(25deg); }
+}
+    }
+}
+
+.team-label {
+    font-size: var(--small-font-size);
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 0 0 4px rgba(255, 105, 135, 0.4);
+    color: #f06292;
+
+    &.bleu {
+        color: #64b5f6;
+        text-shadow: 0 0 4px rgba(100, 181, 246, 0.4);
+    }
+
+    &.rouge {
+        color: #ef5350;
+        text-shadow: 0 0 4px rgba(239, 83, 80, 0.4);
+    }
+}
+
+.player-not-in-game {
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    opacity: 0.3;
+    color: #7a7a7a;
+}
+
+.player-image:has(.player-not-in-game) img {
+    opacity: 0.3;
+    filter: grayscale(100%);
+}
+
+.player:has(.player-not-in-game) {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-left: 2px solid #4a4a4a;
+
+    h3,
+    p {
+        opacity: 0.3;
+        color: #7a7a7a;
+    }
+}
+
+@keyframes text-pulse {
+    0%,
+    100% {
+        opacity: 0.9;
+        border-color: rgba($active-player-color, 0.9);
+        box-shadow: 0 0 5px rgba($active-player-color, 0.6);
+    }
+    50% {
+        opacity: 0.6;
+        border-color: rgba($active-player-color, 0.2);
+        box-shadow: 0 0 2px rgba($active-player-color, 0.2);
+    }
+}

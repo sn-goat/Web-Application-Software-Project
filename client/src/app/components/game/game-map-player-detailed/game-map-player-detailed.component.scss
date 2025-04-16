@@ -1,0 +1,316 @@
+$primary-bg: #1a1625;
+$secondary-bg: #12101b;
+$primary-text: #f2e5b8;
+$glow-teal: rgba(126, 224, 208, 0.2);
+$glow-gold: rgba(255, 215, 0, 0.2);
+$rectangle-border: 1px solid $primary-text;
+$accent-color: #ff6b93;
+$border-radius: 10px;
+
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.6rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+    font-family: 'MedievalSharp', cursive;
+    text-shadow: 0 0 5px $glow-teal;
+}
+
+.container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+
+    color: $primary-text;
+
+    .header {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        justify-content: space-between;
+
+        padding: 4px 6px;
+
+        h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: $primary-text;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px $glow-teal;
+        }
+
+        .player-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid $primary-text;
+            box-shadow: 0 0 6px $glow-teal;
+            object-fit: cover;
+        }
+    }
+
+    .info {
+        flex-grow: 1;
+        overflow: visible;
+        padding: 3px 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        background-color: rgba(0, 0, 0, 0.3);
+        flex: 1;
+        min-height: 0;
+
+        h3 {
+            margin: 0 0 2px 0;
+            color: $primary-text;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba($primary-text, 0.3);
+            padding-bottom: 1px;
+        }
+
+        h4 {
+            margin: 0;
+            color: $primary-text;
+            font-weight: normal;
+            display: inline-block;
+        }
+
+        p {
+            margin: 0 0 0 2px;
+            font-weight: bold;
+            display: inline-block;
+            text-shadow: 0 0 4px $glow-teal;
+        }
+    }
+
+    .stats-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        height: 100%;
+        overflow: visible;
+        flex: 1;
+    }
+
+    .life,
+    .attribute,
+    .dices,
+    .skills {
+        padding: 3px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        border-left: 2px solid;
+        flex-shrink: 0;
+        height: auto;
+        min-height: 0;
+        flex: 1;
+    }
+
+    .life {
+        border-color: $primary-text;
+        display: flex;
+        flex-direction: column;
+
+        h3 {
+            color: color-mix(in srgb, $primary-text, white 10%);
+            margin-bottom: 3px !important;
+        }
+
+        .life-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 4px;
+
+            h4 {
+                margin-right: 5px;
+                color: $primary-text;
+            }
+
+            p {
+                color: $primary-text;
+                text-shadow: 0 0 4px rgba($primary-text, 0.5);
+                font-weight: bold;
+            }
+        }
+
+        .health-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+            color: white;
+            text-shadow:
+                0 0 3px black,
+                0 0 2px black;
+            font-size: 12px;
+            left: 0;
+            z-index: 10;
+        }
+
+        .life-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0px;
+        }
+
+        .life-left,
+        .max-life {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0px;
+
+            h4 {
+                margin: 0;
+            }
+
+            p {
+                margin: 0;
+                color: $primary-text;
+            }
+        }
+    }
+
+    .health-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        line-height: 15px;
+        font-weight: bold;
+        color: white;
+        text-shadow:
+            0 0 3px black,
+            0 0 2px black;
+        font-size: 10px;
+        left: 0;
+        mix-blend-mode: difference;
+        z-index: 5;
+    }
+
+    .attribute {
+        border-color: $primary-text;
+
+        h3 {
+            color: color-mix(in srgb, $primary-text, white 10%);
+            margin-bottom: 4px;
+        }
+
+        .speed p,
+        .attack p,
+        .defense p {
+            color: $primary-text;
+            text-shadow: 0 0 4px rgba($primary-text, 0.5);
+        }
+
+        .attributes-container {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            flex: 1;
+            align-items: center;
+
+            .speed,
+            .attack,
+            .defense {
+                flex: 0 0 auto;
+            }
+        }
+    }
+
+    .dices {
+        border-color: $primary-text;
+
+        h3 {
+            color: color-mix(in srgb, $primary-text, white 10%);
+            margin-bottom: 4px;
+        }
+
+        .dice-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: flex-start;
+            flex: 1;
+
+            .dice-label {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+
+                h4 {
+                    margin-bottom: 5px;
+                }
+
+                .dice-image {
+                    width: 28px;
+                    height: 28px;
+                    margin-top: 3px;
+                    border: 1px solid $primary-text;
+                    border-radius: 2px;
+                    background-color: rgba(0, 0, 0, 0.3);
+                }
+            }
+        }
+    }
+
+    .skills {
+        border-color: $primary-text;
+
+        h3 {
+            color: color-mix(in srgb, $primary-text, white 10%);
+            margin-bottom: 4px;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            flex: 1;
+            align-items: center;
+        }
+    }
+
+    .life-left,
+    .max-life,
+    .speed,
+    .attack,
+    .defense,
+    .mouvements,
+    .actions {
+        margin-left: 2px;
+        padding: 0;
+    }
+
+    h3 {
+        margin-bottom: 6px !important;
+        font-size: 1.1rem !important;
+    }
+
+    h4,
+    p {
+        font-size: 0.95rem !important;
+    }
+
+    .dice-image {
+        width: 45px !important;
+        height: 45px !important;
+    }
+}

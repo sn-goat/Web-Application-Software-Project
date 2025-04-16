@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit } from '@angular/core';
-import { BoardCellComponent } from '@app/components/edit/board-cell/board-cell.component';
-import { MapService } from '@app/services/code/map.service';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
+import { BoardCellComponent } from '@app/components/common/board-cell/board-cell.component';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
+import { EditEventHandlerService } from '@app/services/edit-event-handler/edit-event-handler.service';
+import { MapService } from '@app/services/map/map.service';
 import { Board } from '@common/board';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-board-game',
@@ -12,57 +12,36 @@ import { Subscription } from 'rxjs';
     styleUrls: ['./board-game.component.scss'],
     imports: [CommonModule, BoardCellComponent],
 })
-export class BoardGameComponent implements OnInit, OnDestroy {
-    boardGame: Board;
-    private boardSubscription: Subscription;
-    private mapService = inject(MapService);
+export class BoardGameComponent extends SubLifecycleHandlerComponent implements OnInit {
+    elRef = inject(ElementRef);
 
-    constructor(
-        public elRef: ElementRef,
-        private tileApplicator: TileApplicatorService,
-    ) {}
+    boardGame: Board;
+    private mapService = inject(MapService);
+    private editEventHandlerService = inject(EditEventHandlerService);
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent) {
-        this.tileApplicator.handleMouseDown(event, this.elRef.nativeElement.getBoundingClientRect());
+        this.editEventHandlerService.handleMouseDown(event, this.elRef.nativeElement.getBoundingClientRect());
     }
 
     @HostListener('mouseup', ['$event'])
     onMouseUp(event: MouseEvent) {
-        this.tileApplicator.handleMouseUp(event);
+        this.editEventHandlerService.handleMouseUp(event);
     }
 
-    @HostListener('mouseleave')
-    onMouseLeave() {
-        this.tileApplicator.handleMouseLeave();
+    @HostListener('window:mousemove', ['$event'])
+    onMouseMove(event: MouseEvent) {
+        this.editEventHandlerService.handleMouseMove(event, this.elRef.nativeElement.getBoundingClientRect());
     }
 
-    @HostListener('window:mousemove')
-    onMouseMove() {
-        this.tileApplicator.handleMouseMove(this.elRef.nativeElement.getBoundingClientRect());
-    }
-
-    @HostListener('drop', ['$event'])
-    onDrop(event: DragEvent) {
-        event.preventDefault();
-        this.tileApplicator.handleDrop(this.elRef.nativeElement.getBoundingClientRect());
-    }
-
-    @HostListener('dragend', ['$event'])
-    onDragOver(event: DragEvent) {
-        event.preventDefault();
-        this.tileApplicator.setItemOutsideBoard(event.pageX, event.pageY, this.elRef.nativeElement.getBoundingClientRect());
+    @HostListener('window:dragend', ['$event'])
+    onDragEnd(event: DragEvent) {
+        this.editEventHandlerService.handleDragEnd(event, this.elRef.nativeElement.getBoundingClientRect());
     }
 
     ngOnInit() {
-        this.boardSubscription = this.mapService.getBoardToSave().subscribe((board: Board) => {
+        this.autoSubscribe(this.mapService.getBoardToSave(), (board: Board) => {
             this.boardGame = board;
         });
-    }
-
-    ngOnDestroy() {
-        if (this.boardSubscription) {
-            this.boardSubscription.unsubscribe();
-        }
     }
 }

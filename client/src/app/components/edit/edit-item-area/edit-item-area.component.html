@@ -3,11 +3,9 @@
         <mat-card-title>Tuiles</mat-card-title>
     </mat-card-header>
     <mat-card-content class="content">
-        @for(tile of tiles; track tile){
-            @if(tile !== tileType.FLOOR && tile !== tileType.OPENED_DOOR ){
-                <app-edit-tool-tile [type]="tile"></app-edit-tool-tile>
-            }
-        }
+        @for(tile of tiles; track tile){ @if(tile !== tileType.Floor && tile !== tileType.OpenedDoor){
+        <app-edit-tool-tile [type]="tile" (descriptionHovered)="selectedDescription = $event"></app-edit-tool-tile>
+        } }
     </mat-card-content>
 </mat-card>
 <mat-card appearance="outlined">
@@ -15,10 +13,15 @@
         <mat-card-title>Objets</mat-card-title>
     </mat-card-header>
     <mat-card-content class="content">
-        @for(item of items; track item){
-            @if (item !== '') {
-                <app-edit-tool-item [type]="item"></app-edit-tool-item>
-            }
-        }
+        @for(item of items; track item){ @if (item !== '') {
+        <app-edit-tool-item [type]="item" (descriptionHovered)="selectedDescription = $event"></app-edit-tool-item>
+        } }
+    </mat-card-content>
+</mat-card>
+<mat-card class="description-card ">
+    <mat-card-content>
+        <div class="description-box">
+            {{ selectedDescription || 'Passez votre souris sur un élément pour voir la description' }}
+        </div>
     </mat-card-content>
 </mat-card>

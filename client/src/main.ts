@@ -7,10 +7,12 @@ import { Routes, provideRouter, withHashLocation } from '@angular/router';
 import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { AppComponent } from '@app/pages/app/app.component';
 import { CreatePageComponent } from '@app/pages/create-page/create-page.component';
+import { MapMakerComponent } from '@app/pages/edit-page/map-maker.component';
+import { GamePageComponent } from '@app/pages/game-page/game-page.component';
+import { JoinRoomComponent } from '@app/pages/join-room-page/join-room.component';
+import { LobbyComponent } from '@app/pages/lobby-page/lobby.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { MapMakerComponent } from '@app/pages/map-maker/map-maker.component';
-import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
-import { WaitingPageComponent } from '@app/pages/waiting-page/waiting-page.component';
+import { StatsPageComponent } from '@app/pages/stats-page/stats-page.component';
 
 Component({
     template: `
@@ -19,14 +21,16 @@ Component({
 });
 
 const routes: Routes = [
-    { path: '', redirectTo: '/home', pathMatch: 'full' },
-    { path: 'home', component: MainPageComponent },
+    { path: '', redirectTo: '/accueil', pathMatch: 'full' },
+    { path: 'accueil', component: MainPageComponent },
     { path: 'creation', component: CreatePageComponent },
-    { path: 'material', component: MaterialPageComponent },
-    { path: 'edit', component: MapMakerComponent },
-    { path: 'waiting', component: WaitingPageComponent },
+    { path: 'edition', component: MapMakerComponent },
+    { path: 'jeu', component: GamePageComponent },
+    { path: 'lobby', component: LobbyComponent },
+    { path: 'joindre', component: JoinRoomComponent },
     { path: 'admin', component: AdminPageComponent },
-    { path: '**', redirectTo: '/home' },
+    { path: 'stats', component: StatsPageComponent },
+    { path: '**', redirectTo: '/accueil' },
 ];
 
 bootstrapApplication(AppComponent, {

@@ -80,14 +80,17 @@ describe('BoardController', () => {
     });
 
     it('oneBoard() should return NOT_FOUND if board does not exist', async () => {
-        boardService.getBoard.rejects();
+        boardService.getBoard.resolves(null);
 
         const res = {} as unknown as Response;
         res.status = (code) => {
             expect(code).toEqual(HttpStatus.NOT_FOUND);
             return res;
         };
-        res.send = () => res;
+        res.send = (msg) => {
+            expect(msg).toEqual('Board with name "Nonexistent Board" not found');
+            return res;
+        };
 
         await controller.oneBoard('Nonexistent Board', res);
     });
@@ -163,12 +166,12 @@ describe('BoardController', () => {
         await controller.toggleBoardVisibility('Test Board', res);
     });
 
-    it('toggleBoardVisibility() should return UNAUTHORIZED when service fails', async () => {
+    it('toggleBoardVisibility() should return 500 when service fails', async () => {
         boardService.toggleVisibility.rejects();
 
         const res = {} as unknown as Response;
         res.status = (code) => {
-            expect(code).toEqual(HttpStatus.UNAUTHORIZED);
+            expect(code).toEqual(HttpStatus.INTERNAL_SERVER_ERROR);
             return res;
         };
         res.send = () => res;

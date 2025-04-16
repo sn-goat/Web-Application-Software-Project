@@ -20,10 +20,4 @@ describe('EditItemAreaComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
-    it('should set selectedGrid to the provided gridId', () => {
-        const gridId = 'ItemsGrid';
-        component.showGrid(gridId);
-        expect(component.selectedGrid).toBe(gridId);
-    });
 });

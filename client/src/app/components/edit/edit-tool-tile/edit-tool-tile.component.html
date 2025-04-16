@@ -1,6 +1,6 @@
 <div class="item-container"
-     (mouseenter)="showTooltip = true"
-     (mouseleave)="showTooltip = false">
+     (mouseenter)="onMouseEnter()"
+     (mouseleave)="descriptionHovered.emit('')">
 
     <img
         (click)="onClick()"
@@ -10,8 +10,4 @@
         class="{{styleClass}}"
         [title]="''"
     >
-
-    @if(showTooltip){<div class="tooltip" [ngClass]="{'above': shouldShowAbove(type), 'below': !shouldShowAbove(type)}">
-        {{ getDescription(type) }}
-    </div>}
 </div>

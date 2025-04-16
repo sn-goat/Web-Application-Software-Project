@@ -1,0 +1,12 @@
+<div class="popup-container">
+    <h2>Inventaire plein!</h2>
+    <p>Choisissez l'objet à jeter :</p>
+    <div class="items">
+        @for (item of items; track item) {
+        <div class="item" (click)="selectItemToThrow(item)">
+            <img [src]="'./assets/items/' + item + '.png'" alt="item" />
+            <span>{{ item }}</span>
+        </div>
+        }
+    </div>
+</div>

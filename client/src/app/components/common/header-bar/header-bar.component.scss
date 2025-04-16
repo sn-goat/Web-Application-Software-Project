@@ -1,0 +1,51 @@
+$scroll-gold: #d4af37;
+
+mat-toolbar {
+  background-color: transparent;
+  display: flex;
+    align-items: center;
+}
+.backButton {
+  width: 48px;
+  height: 48px;
+  background-color: #d4af37;
+  color: #1a1625;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #d4af37;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    background-color: #ffd700;
+  }
+
+  mat-icon {
+    color: #1a1625;
+  }
+}
+
+mat-toolbar {
+  display: flex;
+  justify-content: center;
+  background-color: transparent;
+  margin-bottom: 16px;
+}
+
+.quitter{
+    border-radius: 10%;
+    width: 100%;
+    max-width: 160px;
+    align-self: center;
+    padding: 10px 16px;
+    margin-top: 8px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'MedievalSharp', cursive;
+
+
+        &:hover {
+            background: #b5942f;
+        }
+    }

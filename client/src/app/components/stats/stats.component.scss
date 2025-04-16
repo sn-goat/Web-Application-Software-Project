@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap');
+
+$primary-bg: rgba(36, 24, 10, 0.9);
+$primary-text: #f2e5b8;
+$scroll-gold: #d4af37;
+$accent-gold: #ffd700;
+$glow-gold: rgba(43, 38, 10, 0.3);
+$glow-teal: rgba(126, 224, 208, 0.2);
+
+%blurred-gold-border {
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+    border: 3px solid var(--scroll-gold);
+    box-shadow:
+        0 0 30px rgba(0, 0, 0, 0.5),
+        inset 0 0 10px #d2bb94;
+    backdrop-filter: blur(2px);
+        background-color: rgba(36, 24, 10, 0.6);
+
+}
+
+.container.justified {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 1300px;
+  padding: 30px;
+  box-sizing: border-box;
+  gap: 30px;
+  height: calc(100vh - 100px); // or a fixed px value if preferred
+  overflow: visible; // ✅ removes scroll
+  position: relative;
+
+  @extend %blurred-gold-border;
+}
+
+
+
+.stats-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  width: 100%;
+  max-width: 1300px;
+  padding: 30px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+
+
+
+.player-stats-card,
+.game-stats-card {
+  @extend %blurred-gold-border;
+  padding: 20px;
+}
+
+.mat-mdc-card-title {
+      font-size: 20px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: $accent-gold;
+  text-align: center;
+  text-shadow: 0 0 10px #000;
+}
+
+.mat-mdc-card-header {
+      padding-bottom: 8px;
+  border-bottom: 1px solid $primary-text;
+}
+
+mat-card-content {
+    overflow: auto;
+    table{
+        padding-top:16px;
+        @extend %blurred-gold-border;
+        background-color: transparent;
+        text-align: center;
+        th{
+            font-weight: bold;
+            color: $accent-gold;
+            background-color: transparent;
+            font-size: 12px;
+font-family: 'MedievalSharp', cursive;
+
+        }
+        td{
+            font-family: 'MedievalSharp', cursive;
+            font-size: 13px;
+            color: $primary-text;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        mat-chip{
+            margin-left: 8px;
+            font-size: 12px;
+            background-color: #800;
+            color: white;
+                        font-family: 'MedievalSharp', cursive;
+
+        }
+    }
+}
+
+
+.game-stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.section-title {
+  font-family: 'MedievalSharp', cursive;
+  color:$primary-text
+}
+
+.stat-item {
+  @extend %blurred-gold-border;
+  text-align: center;
+  color: $primary-text;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: $accent-gold;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+mat-chip {
+  margin-left: 8px;
+  font-size: 12px;
+  background-color: #800;
+  color: white;
+}
+
+.no-stats {
+  @extend %blurred-gold-border;
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: $primary-text;
+}
+
+@media (max-width: 768px) {
+  .game-stats-container {
+    grid-template-columns: 1fr;
+  }
+
+  .player-stats-table {
+    td.mat-cell,
+    th.mat-header-cell {
+      font-size: 12px;
+    }
+  }
+}

@@ -1,0 +1,41 @@
+<div
+    class="cell"
+    (dragover)="onDragOver($event)"
+    (drop)="onDrop($event)"
+    (mouseenter)="showTooltip = true"
+    (mouseleave)="showTooltip = false">
+    <div class="image-container">
+        <img
+            class="base-image"
+            [src]="srcTiles + cell.tile + fileType"
+            draggable="false">
+        @if (cell.item) {
+            <img
+                class="image-stack"
+                [draggable]="!isInGameView"
+                (dragstart)="onDragStart($event)"
+                (drag)="onDrag()"
+                [src]="srcItem + cell.item + fileType">
+
+            @if(!isInGameView && showTooltip) {
+                <div class="tooltip" [ngClass]="{ 'small-row': isSmallRow }">
+                    {{ cell.item ? getItemDescription(cell.item) : '' }}
+                </div>
+            }
+
+        }
+
+
+        @if (cell.player) {
+            <img
+            class="player-stack"
+            draggable="false"
+            [src]="cell.player">
+        }
+    </div>
+    @if(isInGameView && tooltipContent) {
+        <div class="tooltip-gameView" [ngClass]="{ 'small-row': isSmallRow }">
+            {{ tooltipContent }}
+        </div>
+    }
+</div>

@@ -1,73 +1,63 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, inject, Input, OnInit, OnDestroy, EventEmitter, Output } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { BOARD_SIZE_MAPPING } from '@app/constants/map-size-limitd';
-import { DEFAULT_PATH_ITEMS } from '@app/constants/path';
-import { MapService } from '@app/services/code/map.service';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
-import { Item, Size } from '@common/enums';
-import { Subject, takeUntil } from 'rxjs';
+import { DEFAULT_FILE_TYPE, DEFAULT_PATH_ITEMS } from '@app/constants/path';
+import { ItemApplicatorService } from '@app/services/item-applicator/item-applicator.service';
+import { MapService } from '@app/services/map/map.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
+import { Board } from '@common/board';
+import { Item } from '@common/enums';
+import { Subject, combineLatest, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-item',
     templateUrl: './edit-tool-item.component.html',
     styleUrls: ['./edit-tool-item.component.scss'],
-    standalone: true,
     imports: [MatBadgeModule, CommonModule],
 })
 export class EditToolItemComponent implements OnInit, OnDestroy {
+    @Output() descriptionHovered = new EventEmitter<string>();
     @Input() type: Item;
 
     readonly src = DEFAULT_PATH_ITEMS;
-    readonly fileType = '.png';
+    readonly fileType = DEFAULT_FILE_TYPE;
     isDraggable = true;
-    remainingItem: number = 1;
-    showTooltip = false;
+    remainingItem: number = 0;
 
-    private maxObjectByType: number;
-    private boardSize: Size;
     private readonly mapService = inject(MapService);
+    private readonly toolSelectionService = inject(ToolSelectionService);
+    private readonly itemSelectionService = inject(ItemApplicatorService);
     private destroy$ = new Subject<void>();
-
-    constructor(
-        private toolSelection: ToolSelectionService,
-        private tileApplicator: TileApplicatorService,
-    ) {}
+    private isItemPlaced = false;
 
     ngOnInit() {
-        this.boardSize = this.mapService.getBoardSize() as Size;
-        this.maxObjectByType = BOARD_SIZE_MAPPING[this.boardSize];
-        this.toolSelection.setMaxObjectByType(this.maxObjectByType);
-        this.toolSelection.setBoardSize(this.boardSize);
-
-        if (this.type === Item.SPAWN) {
-            this.toolSelection.nbrSpawnOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrSpawns) => {
-                if (this.maxObjectByType !== undefined) {
-                    this.remainingItem = this.maxObjectByType - nbrSpawns;
-                    this.isDraggable = this.remainingItem > 0;
-                    this.toolSelection.setIsSpawnPlaced(this.remainingItem === 0);
-                }
+        if (this.type === Item.Spawn) {
+            this.mapService.nbrSpawnsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingSpawns) => {
+                this.remainingItem = remainingSpawns;
+                this.isDraggable = this.remainingItem > 0;
             });
-        } else if (this.type === Item.CHEST) {
-            this.toolSelection.nbrChestOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((nbrChests) => {
-                if (this.maxObjectByType !== undefined) {
-                    this.remainingItem = this.maxObjectByType - nbrChests;
-                    this.isDraggable = this.remainingItem > 0;
-                }
+        } else if (this.type === Item.Flag) {
+            if (this.mapService.isModeCTF()) {
+                this.mapService.hasFlagOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((isFlagPlaced) => {
+                    this.isDraggable = !isFlagPlaced;
+                });
+            } else {
+                this.isDraggable = false;
+            }
+        } else if (this.type === Item.Chest) {
+            this.mapService.nbrItemsToPlace$.pipe(takeUntil(this.destroy$)).subscribe((remainingItems) => {
+                this.remainingItem = remainingItems;
+                this.isDraggable = this.remainingItem > 0;
             });
         } else {
-            this.toolSelection.itemOnBoard$.pipe(takeUntil(this.destroy$)).subscribe((items) => {
-                if (!this.mapService.getMode() && this.type === Item.FLAG) {
-                    this.isDraggable = false;
-                    this.remainingItem = 0;
-                } else {
-                    this.isDraggable = false;
-                    this.remainingItem = !items.has(this.type) ? 1 : 0;
-                    this.isDraggable = !items.has(this.type);
-                }
-            });
+            combineLatest([this.mapService.nbrItemsToPlace$, this.mapService.getBoardToSave()])
+                .pipe(takeUntil(this.destroy$))
+                .subscribe(([remainingItems, board]) => {
+                    this.isItemPlaced = this.checkIfItemIsOnBoard(board, this.type);
+                    this.remainingItem = remainingItems > 0 && !this.isItemPlaced ? 1 : 0;
+                    this.isDraggable = remainingItems > 0 && !this.isItemPlaced;
+                });
         }
     }
 
@@ -76,17 +66,37 @@ export class EditToolItemComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
+    onMouseEnter() {
+        this.descriptionHovered.emit(this.getDescription(this.type));
+    }
+
     onDragStart() {
-        this.toolSelection.updateSelectedItem(this.type);
-        this.tileApplicator.setDropOnItem(Item.DEFAULT);
+        this.toolSelectionService.updateSelectedItem(this.type);
     }
 
     onDragEnter(event: MouseEvent) {
         event.preventDefault();
-        this.tileApplicator.setDropOnItem(this.type);
+        this.itemSelectionService.setBackToContainer(this.type);
+    }
+    onDragLeave(event: MouseEvent) {
+        event.preventDefault();
+        this.itemSelectionService.setBackToContainer();
     }
 
     getDescription(type: Item): string {
         return ASSETS_DESCRIPTION.get(type) ?? '';
+    }
+
+    private checkIfItemIsOnBoard(board: Board, itemType: Item): boolean {
+        if (!board?.board) return false;
+
+        for (const row of board.board) {
+            for (const cell of row) {
+                if (cell.item === itemType) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -69,7 +69,7 @@ Prenez l'habitude de synchroniser régulièrement votre branche avec le dépôt 
 
 Utilisez toujours `git pull` avant de soumettre votre travail pour récupérer les derniers changements de la branche cible et `git push` pour pousser vos modifications.
 
-Rappel : un fichier est ajouté avec `git add nom-fichier`. La commande accepte également des expressions régulières. 
+Rappel : un fichier est ajouté avec `git add nom-fichier`. La commande accepte également des expressions régulières.
 \
 Ex : `git add services/communication/*` ajoute tous les fichiers dans le dossier `services/communication`, `git add` ajoute tous les fichiers modifiés (attention à ne pas ajouter de fichiers inutiles).
 
@@ -125,9 +125,9 @@ Les Demandes de Fusion (_Merge Requests_) ou MR sont essentielles pour intégrer
 ### Création d'une MR
 
 1. Assurez-vous que votre branche est à jour avec la dernière version de la branche cible. **Toujours règler les conflits en local avant votre MR**
-   1. Récupérer les derniers changements dans votre branche(`git pull`).
-   2. Intégrer les changements de la branche cible dans votre branche (`git merge cible`).
-   3. Résoudre les conflits si nécessaire. Vérifiez que le projet est encore fonctionnel (lancement, tests, lint, etc.)
+    1. Récupérer les derniers changements dans votre branche(`git pull`).
+    2. Intégrer les changements de la branche cible dans votre branche (`git merge cible`).
+    3. Résoudre les conflits si nécessaire. Vérifiez que le projet est encore fonctionnel (lancement, tests, lint, etc.)
 2. Poussez la mise à jour de votre branche vers le dépôt distant. **Astuce**: Si vous utilisez le terminal pour pousser votre branche, GitLab vous fournira automatiquement l'URL pour créer une Merge Request.
 3. Dans GitLab, créez une nouvelle Merge Request depuis votre branche vers la branche cible. Si tout est correct, seulement le code différent de la branche cible sera sujet à intégration.
 
@@ -202,3 +202,21 @@ Ce guide de contribution est conçu pour faciliter la collaboration et maintenir
 N'oubliez pas que ces lignes directrices sont là pour aider, pas pour limiter. Si vous avez des suggestions d'amélioration pour ce guide, n'hésitez pas à en discuter avec l'équipe.
 
 Bon développement à tou.te.s ! 🚀
+
+## 5. Conventions particulères à l'équipe 112
+
+Nous nous sommes mis d'accord en tant qu'équipe sur les particularités additionnelles suivantes concernant notre projet:
+
+### Contribution
+
+-   Les commits ou MRs peuvent être en français ou en anglais, sans mélanger les deux. Nous sommes une équipe bilingue et sont donc tous confortables dans les deux langues.
+-   Nous avons besoin de deux personnes qui chaque approuvent chaque MR
+
+### Arborescence
+
+-   Pour le `serveur`, les fichiers de tests se trouvent dans leur propre fichier pour faciliter l'usage et le partage des `helpers` functions
+-   Pour le `client`, les fichiers de tests seront groupés avec l'élément testé ainsi que les éléments statiques du composant.
+
+### Constantes
+
+-   Lorsque qu'une constante est utilisé uniquement au sein d'un seul fichier, nous considérons qu'il est préférable de la garder au sein du fichier concerné comme un attribut de classe. Cet attribut sera en `camelCase`.

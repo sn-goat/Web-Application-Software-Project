@@ -1,6 +1,6 @@
 <div class="object"
-    (mouseenter)="showTooltip = true"
-    (mouseleave)="showTooltip = false"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="descriptionHovered.emit('')"
     matBadge="{{remainingItem}}"
     matBadgePosition="below"
     matBadgeSize="medium"
@@ -13,12 +13,8 @@
         class="draggable-image"
         [draggable]="isDraggable"
         [class.item-moved]="!isDraggable"
-        (drag)="onDragStart()"
+        (dragstart)="onDragStart()"
         (dragleave)="onDragEnter($event)"
         [title]="''"
     >
-
-    @if(showTooltip){<div class="tooltip">
-        {{ getDescription(type) }}
-    </div>}
 </div>

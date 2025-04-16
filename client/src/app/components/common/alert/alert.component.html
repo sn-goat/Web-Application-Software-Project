@@ -1,0 +1,14 @@
+<div class="alert-container">
+    <h1 mat-dialog-title>{{ data.type }}</h1>
+    <mat-dialog-content>
+        <p [innerHTML]="formattedMessage"></p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        @if(data.type === alert.CONFIRM) {
+        <button mat-button mat-dialog-close cdkFocusInitial>Annuler</button>
+        <button mat-button [mat-dialog-close]="true">Confirmer</button>
+        } @else {
+        <button mat-button mat-dialog-close>Confirmer</button>
+        }
+    </mat-dialog-actions>
+</div>

@@ -1,0 +1,128 @@
+<div class="container justified">
+@if(stats) {
+    <div class="stats-container">
+        <mat-card class="player-stats-card">
+            <mat-card-header>
+                <mat-card-title class="section-title">Statistiques des joueurs</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)" class="player-stats-table">
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Nom</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected">
+                            {{ player.name }}
+                            @if(player.isDisconnected) {
+                                <mat-chip color="warn" selected>Déconnecté</mat-chip>
+                            }
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="wins">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Victoires</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.wins }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="losses">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Défaites</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.losses }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="totalFights">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Nombre de combats</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.totalFights }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="givenDamage">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Dégâts infligés</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.givenDamage }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="takenDamage">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Dégâts subis</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.takenDamage }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="itemsPickedCount">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Items collectés</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.itemsPickedCount }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="tilesVisitedPercentage">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Pourcentage de la carte explorée</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.tilesVisitedPercentage }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="fleeSuccess">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header >Fuites réussies</th>
+                        <td mat-cell *matCellDef="let player" [class.disconnected]="player.isDisconnected" >
+                            {{ player.fleeSuccess }}
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                </table>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="game-stats-card">
+            <mat-card-header>
+                <mat-card-title class="section-title">Statistiques de la partie</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="game-stats-container">
+                    <div class="stat-item">
+                        <div class="stat-label">Durée de la partie</div>
+                        <div class="stat-value">{{ stats.gameStats.gameDuration }}</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-label">Nombre de tours total</div>
+                        <div class="stat-value">{{ stats.gameStats.totalTurns }}</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-label">Pourcentage de la carte explorée</div>
+                        <div class="stat-value">{{ stats.gameStats.tilesVisitedPercentage }}</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-label">Portes manipulées</div>
+                        <div class="stat-value">{{ stats.gameStats.doorsHandledPercentage }}</div>
+                    </div>
+
+                    @if(stats.gameStats.flagsCapturedCount) {
+                        <div class="stat-item">
+                            <div class="stat-label">Joueurs ayant détenu un drapeau</div>
+                            <div class="stat-value">{{ stats.gameStats.flagsCapturedCount }}</div>
+                        </div>
+                    }
+
+                    <div class="stat-item">
+                        <div class="stat-label">Nombre de joueurs déconnectés</div>
+                        <div class="stat-value">{{ stats.disconnectedPlayersStats.length }}</div>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+} @else {
+    <div class="no-stats">
+        <p>Aucune statistique disponible.</p>
+    </div>
+}
+</div>

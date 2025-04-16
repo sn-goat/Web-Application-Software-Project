@@ -1,7 +1,6 @@
 img {
     width: 100%;
     height: auto;
-    border: 4px solid #000;
     border-radius: 4px;
 }
 
@@ -9,8 +8,8 @@ div {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     cursor: pointer;
     position: relative;
 }
@@ -38,11 +37,11 @@ img.item-moved {
 
 .tooltip {
     position: absolute;
-    bottom: calc(100% + 5px); /* Keeps a small gap above the tile */
+    bottom: calc(100% + 5px);
     left: 50%;
     transform: translateX(-50%);
-    background-color: #1a1625;
-    color: #7ee0d0;
+    background-color: rgba(36, 24, 10, 0.9);
+    color: #f2e5b8;
     padding: 10px 15px;
     border-radius: 6px;
     font-size: 14px;
@@ -63,7 +62,6 @@ img.item-moved {
     overflow-wrap: break-word;
     overflow: hidden;
     text-align: center;
-
 }
 
 .object:hover .tooltip,

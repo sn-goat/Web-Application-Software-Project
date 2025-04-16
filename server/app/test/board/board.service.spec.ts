@@ -10,57 +10,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
 
-describe('BoardServicePopulate', () => {
-    let service: BoardService;
-    let boardModel: Model<BoardDocument>;
-
-    beforeEach(async () => {
-        // notice that only the functions we call from the model are mocked
-        // we can´t use sinon because mongoose Model is an interface
-        boardModel = {
-            countDocuments: jest.fn(),
-            insertMany: jest.fn(),
-            create: jest.fn(),
-            find: jest.fn(),
-            findOne: jest.fn(),
-            deleteOne: jest.fn(),
-            update: jest.fn(),
-            updateOne: jest.fn(),
-        } as unknown as Model<BoardDocument>;
-
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                BoardService,
-                Logger,
-                {
-                    provide: getModelToken(Board.name),
-                    useValue: boardModel,
-                },
-            ],
-        }).compile();
-
-        service = module.get<BoardService>(BoardService);
-    });
-
-    it('should be defined', () => {
-        expect(service).toBeDefined();
-    });
-
-    it('database should be populated when there is no data', async () => {
-        jest.spyOn(boardModel, 'countDocuments').mockResolvedValue(0);
-        const spyPopulateDB = jest.spyOn(service, 'populateDB');
-        await service.start();
-        expect(spyPopulateDB).toHaveBeenCalled();
-    });
-
-    it('database should not be populated when there is some data', async () => {
-        jest.spyOn(boardModel, 'countDocuments').mockResolvedValue(1);
-        const spyPopulateDB = jest.spyOn(service, 'populateDB');
-        await service.start();
-        expect(spyPopulateDB).not.toHaveBeenCalled();
-    });
-});
-
 describe('BoardService', () => {
     let boardModel: Model<BoardDocument>;
     let service: BoardService;
@@ -70,7 +19,6 @@ describe('BoardService', () => {
     const MOREHALFSIZE = 8;
 
     beforeAll(async () => {
-        const timeoutdelay = 200;
         mongoServer = await MongoMemoryServer.create();
 
         const module: TestingModule = await Test.createTestingModule({
@@ -88,13 +36,6 @@ describe('BoardService', () => {
         boardModel = module.get<Model<BoardDocument>>(getModelToken(Board.name));
         service = module.get<BoardService>(BoardService);
         connection = module.get<Connection>(getConnectionToken());
-
-        /* 
-           Delay here to ensure that our database is properly initialized,
-           as the start function is asynchronous but cannot be awaited since it's 
-           in the constructor. 
-        */
-        await new Promise((resolve) => setTimeout(resolve, timeoutdelay));
     });
 
     beforeEach(async () => {
@@ -111,13 +52,17 @@ describe('BoardService', () => {
     });
 
     it('getAllBoards() should return all boards', async () => {
-        await service.populateDB();
+        if ((await boardModel.countDocuments()) === 0) {
+            await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
+        }
         const boards = await service.getAllBoards();
         expect(boards.length).toEqual(MOCK_STORED_BOARD_ARRAY.length);
     });
 
     it('getBoard() should return a specific board', async () => {
-        await service.populateDB();
+        if ((await boardModel.countDocuments()) === 0) {
+            await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
+        }
         const board = await service.getBoard(MOCK_STORED_BOARD_ARRAY[0].name);
         expect(board).toMatchObject(MOCK_STORED_BOARD_ARRAY[0]);
     });
@@ -128,7 +73,7 @@ describe('BoardService', () => {
         const boards = await boardModel.find({});
         expect(boards.length).toBe(1);
         expect(boards[0].name).toBe(VALID_BOARD.name);
-        expect(boards[0].visibility).toBe(Visibility.PRIVATE);
+        expect(boards[0].visibility).toBe(Visibility.Private);
     });
 
     it('addBoard() should reject an empty board', async () => {
@@ -147,7 +92,7 @@ describe('BoardService', () => {
         const board = createBoard(SIZE_10);
         for (let i = 0; i < MOREHALFSIZE; i++) {
             for (let j = 0; j < MOREHALFSIZE; j++) {
-                placeTile(board, Tile.WALL, { x: i, y: j });
+                placeTile(board, Tile.Wall, { x: i, y: j });
             }
         }
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual(
@@ -167,20 +112,22 @@ describe('BoardService', () => {
 
     it('addBoard() should reject a board with doors placed on the edge', async () => {
         const board = createBoard(SIZE_10);
-        placeTile(board, Tile.CLOSED_DOOR, { x: 9, y: 3 });
+        placeTile(board, Tile.ClosedDoor, { x: 9, y: 3 });
         await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual('Jeu invalide: Des portes sont placées sur les rebords du jeu');
     });
 
     it('addBoard() should reject a board with an incorrect door structure', async () => {
         const board = createBoard(SIZE_10);
-        placeTile(board, Tile.OPENED_DOOR, { x: 5, y: 5 });
-        placeTile(board, Tile.WALL, { x: 6, y: 5 });
-        placeTile(board, Tile.WALL, { x: 5, y: 6 });
-        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual("Jeu invalide: Des portes n'ont pas de structure valide");
+        placeTile(board, Tile.OpenedDoor, { x: 5, y: 5 });
+        placeTile(board, Tile.Wall, { x: 6, y: 5 });
+        placeTile(board, Tile.Wall, { x: 5, y: 6 });
+        await expect(service.addBoard({ ...VALID_BOARD, board })).rejects.toEqual(
+            'Jeu invalide: Les portes doivent être encadrées par deux murs parallèles, et les deux autres côtés doivent rester ouverts.',
+        );
 
-        placeTile(board, Tile.WALL, { x: 5, y: 4 });
-        placeTile(board, Tile.ICE, { x: 4, y: 5 });
-        placeTile(board, Tile.FLOOR, { x: 6, y: 5 });
+        placeTile(board, Tile.Wall, { x: 5, y: 4 });
+        placeTile(board, Tile.Ice, { x: 4, y: 5 });
+        placeTile(board, Tile.Floor, { x: 6, y: 5 });
         await service.addBoard({ ...VALID_BOARD, board });
         const validBoard = await service.getBoard(VALID_BOARD.name);
         expect(validBoard.board).toEqual(board);
@@ -188,11 +135,11 @@ describe('BoardService', () => {
 
     it('updateBoard() should correcty update a valid board', async () => {
         const boardToStore = createBoard(SIZE_10);
-        placeTile(boardToStore, Tile.WALL, { x: 3, y: 3 });
+        placeTile(boardToStore, Tile.Wall, { x: 3, y: 3 });
         await service.addBoard({ ...VALID_BOARD, board: boardToStore });
 
         const updatedBoard = createBoard(SIZE_10);
-        placeTile(updatedBoard, Tile.ICE, { x: 3, y: 3 });
+        placeTile(updatedBoard, Tile.Ice, { x: 3, y: 3 });
 
         const storedBoard = await service.getBoard(VALID_BOARD.name);
         const updatedBoardObject = { ...storedBoard, _id: storedBoard._id, board: updatedBoard };
@@ -213,7 +160,7 @@ describe('BoardService', () => {
         const updatedBoard = createBoard(SIZE_10);
         for (let i = 0; i < MOREHALFSIZE; i++) {
             for (let j = 0; j < MOREHALFSIZE; j++) {
-                placeTile(updatedBoard, Tile.WALL, { x: i, y: j });
+                placeTile(updatedBoard, Tile.Wall, { x: i, y: j });
             }
         }
 
@@ -238,7 +185,9 @@ describe('BoardService', () => {
     });
 
     it('deleteBoardByName() should delete a specific board', async () => {
-        await service.populateDB();
+        if ((await boardModel.countDocuments()) === 0) {
+            await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
+        }
         await service.deleteBoardByName(MOCK_STORED_BOARD_ARRAY[0].name);
         const boards = await boardModel.find({});
         expect(boards.length).toBe(MOCK_STORED_BOARD_ARRAY.length - 1);
@@ -249,7 +198,7 @@ describe('BoardService', () => {
     });
 
     it('deleteAllBoards should delete all boards', async () => {
-        await service.populateDB();
+        await boardModel.insertMany(MOCK_STORED_BOARD_ARRAY);
         await service.deleteAllBoards();
         const boards = await service.getAllBoards();
         expect(boards.length).toEqual(0);

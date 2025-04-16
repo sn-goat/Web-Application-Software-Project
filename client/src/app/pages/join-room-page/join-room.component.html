@@ -1,0 +1,24 @@
+<body>
+    <div class="background-gif" style="background-image: url('assets/backgrounds/lobby.gif')"></div>
+    <app-header-bar></app-header-bar>
+
+    <h1 class="medieval-title">Rejoignez une salle</h1>
+
+    @if (!showCharacterForm) {
+    <div class="form-wrapper">
+        <div class="container">
+            <label for="code">Code d'accès :</label>
+            <input id="code" [(ngModel)]="accessCode" placeholder="Entrez le code d'accès" (input)="validateCode()" (keyup.enter)="onEnterKey()" />
+            @if (!isValidCode && accessCode.length > 0) {
+            <p class="error">Le code doit contenir exactement 4 chiffres.</p>
+            }
+            <button (click)="joinRoom()" [disabled]="!isValidCode">Rejoindre</button>
+            @if(!characterFormOpened){
+            <p>{{ joinResult }}</p>
+            }
+        </div>
+    </div>
+    } @else {
+    <app-form-character [accessCode]="accessCode" (closePopup)="closeCharacterForm()"></app-form-character>
+    }
+</body>

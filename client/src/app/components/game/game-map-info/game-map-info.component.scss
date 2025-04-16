@@ -1,0 +1,128 @@
+$primary-bg: #1a1625;
+$secondary-bg: #12101b;
+$primary-text: #f2e5b8;
+$glow-teal: rgba(126, 224, 208, 0.3);
+$secondary-text: #c7ebf0;
+$accent-color: #ff6b93;
+$border-radius: 10px;
+$map-color: #f2e5b8;
+$player-color: #f2e5b8;
+$game-color: #f2e5b8;
+$rectangle-border: 1px solid $primary-text;
+
+h2,
+h3,
+p {
+    font-family: 'MedievalSharp', cursive;
+}
+
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+
+.container {
+    border-radius: $border-radius;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 8px;
+    color: #f2e5b8;
+    font-family: 'MedievalSharp', cursive;
+
+    .content {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 10px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+
+        &::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: $secondary-bg;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background-color: $glow-teal;
+            border-radius: 20px;
+        }
+
+        .info {
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition:
+                transform 0.2s,
+                box-shadow 0.2s;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            &:nth-child(1) {
+                border-left: 3px solid $map-color;
+
+                h3 {
+                    color: color-mix(in srgb, $map-color, white 10%);
+                }
+
+                p {
+                    color: $map-color;
+                    text-shadow: 0 0 5px rgba($map-color, 0.5);
+                }
+            }
+
+            &:nth-child(2) {
+                border-left: 3px solid $player-color;
+
+                h3 {
+                    color: color-mix(in srgb, $player-color, white 10%);
+                }
+
+                p {
+                    color: $player-color;
+                    text-shadow: 0 0 5px rgba($player-color, 0.5);
+                }
+            }
+
+            &:nth-child(3) {
+                border-left: 3px solid $game-color;
+
+                h3 {
+                    color: color-mix(in srgb, $game-color, white 10%);
+                }
+
+                p {
+                    color: $game-color;
+                    text-shadow: 0 0 5px rgba($game-color, 0.5);
+                }
+            }
+
+            h3 {
+                margin: 0 0 8px 0;
+                font-size: 1.1rem;
+                color: $secondary-text;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid rgba($primary-text, 0.3);
+                padding-bottom: 5px;
+            }
+
+            p {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-shadow: 0 0 5px $glow-teal;
+            }
+        }
+    }
+}

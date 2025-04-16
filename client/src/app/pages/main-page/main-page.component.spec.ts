@@ -3,28 +3,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, RouterLink, Routes } from '@angular/router';
 import { TEAM_MEMBERS } from '@app/constants/team-members';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { CommunicationService } from '@app/services/code/communication.service';
-import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
 
 describe('MainPageComponent', () => {
     let component: MainPageComponent;
     let fixture: ComponentFixture<MainPageComponent>;
-    let communicationServiceSpy: SpyObj<CommunicationService>;
 
     beforeEach(async () => {
-        communicationServiceSpy = jasmine.createSpyObj('ExampleService', ['basicGet', 'basicPost']);
         await TestBed.configureTestingModule({
             imports: [MainPageComponent, RouterLink],
-            providers: [
-                {
-                    provide: CommunicationService,
-                    useValue: communicationServiceSpy,
-                },
-                provideHttpClientTesting(),
-                provideRouter(routes),
-            ],
+            providers: [provideHttpClientTesting(), provideRouter(routes)],
         }).compileComponents();
     });
 
@@ -47,7 +36,7 @@ describe('MainPageComponent', () => {
     });
 
     it('should initialize with correct game logo path', () => {
-        expect(component.gameLogoPath).toBe('/assets/POLYTOPIA_game_logo.png');
+        expect(component.gameLogoPath).toContain('/assets/logo.png');
     });
 
     it('should initialize with gameLogoError as false', () => {
@@ -76,13 +65,13 @@ describe('MainPageComponent', () => {
 
     it('should render title in the template', () => {
         const compiled = fixture.nativeElement as HTMLElement;
-        expect(compiled.textContent).toContain('POLYTOPIA');
+        expect(compiled.textContent).toContain('Polytopiennes');
     });
 
     it('should render game logo with correct src', () => {
         const compiled = fixture.nativeElement as HTMLElement;
         const img = compiled.querySelector('img');
-        expect(img?.src).toContain('/assets/POLYTOPIA_game_logo.png');
+        expect(img?.src).toContain('/assets/logo.png');
     });
 
     it('should render team members list', () => {

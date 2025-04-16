@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MapService } from '@app/services/code/map.service';
-import { TileApplicatorService } from '@app/services/code/tile-applicator.service';
+import { EditEventHandlerService } from '@app/services/edit-event-handler/edit-event-handler.service';
+import { MapService } from '@app/services/map/map.service';
 import { Board } from '@common/board';
 import { BehaviorSubject } from 'rxjs';
 import { BoardGameComponent } from './board-game.component';
@@ -8,84 +8,89 @@ import { BoardGameComponent } from './board-game.component';
 describe('BoardGameComponent', () => {
     let component: BoardGameComponent;
     let fixture: ComponentFixture<BoardGameComponent>;
-    let mapService: jasmine.SpyObj<MapService>;
-    let tileApplicatorService: jasmine.SpyObj<TileApplicatorService>;
-    const POINTER_POSITION = 100;
+    let mapServiceSpy: jasmine.SpyObj<MapService>;
+    let editEventHandlerServiceSpy: jasmine.SpyObj<EditEventHandlerService>;
 
     beforeEach(async () => {
-        const mapServiceSpy = jasmine.createSpyObj('MapService', ['initializeBoard', 'getBoardToSave']);
-        const tileApplicatorServiceSpy = jasmine.createSpyObj('TileApplicatorService', [
+        const mapSpy = jasmine.createSpyObj('MapService', ['getBoardToSave']);
+        const editEventHandlerSpy = jasmine.createSpyObj('EditEventHandlerService', [
             'handleMouseDown',
             'handleMouseUp',
-            'handleMouseLeave',
             'handleMouseMove',
-            'handleDrop',
-            'setItemOutsideBoard',
+            'handleDragEnd',
         ]);
 
         await TestBed.configureTestingModule({
             imports: [BoardGameComponent],
             providers: [
-                { provide: MapService, useValue: mapServiceSpy },
-                { provide: TileApplicatorService, useValue: tileApplicatorServiceSpy },
+                { provide: MapService, useValue: mapSpy },
+                { provide: EditEventHandlerService, useValue: editEventHandlerSpy },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(BoardGameComponent);
         component = fixture.componentInstance;
-        mapService = TestBed.inject(MapService) as jasmine.SpyObj<MapService>;
-        tileApplicatorService = TestBed.inject(TileApplicatorService) as jasmine.SpyObj<TileApplicatorService>;
-        mapService.getBoardToSave.and.returnValue(new BehaviorSubject<Board>({} as Board));
+        mapServiceSpy = TestBed.inject(MapService) as jasmine.SpyObj<MapService>;
+        editEventHandlerServiceSpy = TestBed.inject(EditEventHandlerService) as jasmine.SpyObj<EditEventHandlerService>;
+
+        // Make getBoardToSave return a BehaviorSubject so that boardGame is updated
+        mapServiceSpy.getBoardToSave.and.returnValue(new BehaviorSubject<Board>({} as Board));
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should initialize board on init', () => {
+    it('should subscribe to board changes on init', () => {
         component.ngOnInit();
-        expect(mapService.getBoardToSave).toHaveBeenCalled();
+        expect(mapServiceSpy.getBoardToSave).toHaveBeenCalled();
     });
 
-    it('should handle mousedown event', () => {
+    it('should call handleMouseDown on mousedown event', () => {
         const event = new MouseEvent('mousedown');
-        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
+        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 100,
+            right: 100,
+            bottom: 100,
+        } as DOMRect);
         component.onMouseDown(event);
-        expect(tileApplicatorService.handleMouseDown).toHaveBeenCalledWith(event, jasmine.any(Object));
+        expect(editEventHandlerServiceSpy.handleMouseDown).toHaveBeenCalledWith(event, jasmine.any(Object));
     });
 
-    it('should handle mouseup event', () => {
+    it('should call handleMouseUp on mouseup event', () => {
         const event = new MouseEvent('mouseup');
         component.onMouseUp(event);
-        expect(tileApplicatorService.handleMouseUp).toHaveBeenCalledWith(event);
+        expect(editEventHandlerServiceSpy.handleMouseUp).toHaveBeenCalledWith(event);
     });
 
-    it('should handle mouseleave event', () => {
-        component.onMouseLeave();
-        expect(tileApplicatorService.handleMouseLeave).toHaveBeenCalled();
+    it('should call handleMouseMove on mousemove event', () => {
+        const event = new MouseEvent('mousemove');
+        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 100,
+            right: 100,
+            bottom: 100,
+        } as DOMRect);
+        component.onMouseMove(event);
+        expect(editEventHandlerServiceSpy.handleMouseMove).toHaveBeenCalledWith(event, jasmine.any(Object));
     });
 
-    it('should handle mousemove event', () => {
-        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
-        component.onMouseMove();
-        expect(tileApplicatorService.handleMouseMove).toHaveBeenCalledWith(jasmine.any(Object));
-    });
-
-    it('should handle drop event', () => {
-        const event = new DragEvent('drop');
-        spyOn(event, 'preventDefault');
-        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
-        component.onDrop(event);
-        expect(event.preventDefault).toHaveBeenCalled();
-        expect(tileApplicatorService.handleDrop).toHaveBeenCalledWith(jasmine.any(Object));
-    });
-
-    it('should handle dragend event', () => {
-        const event = new DragEvent('dragend', { clientX: POINTER_POSITION, clientY: POINTER_POSITION });
-        spyOn(event, 'preventDefault');
-        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({} as DOMRect);
-        component.onDragOver(event);
-        expect(event.preventDefault).toHaveBeenCalled();
-        expect(tileApplicatorService.setItemOutsideBoard).toHaveBeenCalledWith(POINTER_POSITION, POINTER_POSITION, jasmine.any(Object));
+    it('should call handleDragEnd on dragend event', () => {
+        const event = new DragEvent('dragend', { clientX: 50, clientY: 50 });
+        spyOn(component.elRef.nativeElement, 'getBoundingClientRect').and.returnValue({
+            left: 0,
+            top: 0,
+            width: 100,
+            height: 100,
+            right: 100,
+            bottom: 100,
+        } as DOMRect);
+        component.onDragEnd(event);
+        expect(editEventHandlerServiceSpy.handleDragEnd).toHaveBeenCalledWith(event, jasmine.any(Object));
     });
 });

@@ -1,0 +1,26 @@
+<div class="popup-container">
+  <h2>Création d'un joueur virtuel</h2>
+  <p>Choisissez un style à ce joueur virtuel</p>
+
+  <div class="items">
+    <div class="item" [class.selected]="virtualPlayerStyle === virtualPlayerStyles.Aggressive"
+         (click)="virtualPlayerStyle = virtualPlayerStyles.Aggressive">
+      <img src="assets/items/Sword.png" alt="Agressif">
+      <span>Agressif</span>
+    </div>
+
+    <div class="item" [class.selected]="virtualPlayerStyle === virtualPlayerStyles.Defensive"
+         (click)="virtualPlayerStyle = virtualPlayerStyles.Defensive">
+      <img src="assets/items/Shield.png" alt="Défensif">
+      <span>Défensif</span>
+    </div>
+  </div>
+
+  <div class="popup-actions">
+    <button mat-dialog-close>Annuler</button>
+    <button (click)="createVirtualPlayer()" [disabled]="!virtualPlayerStyle" mat-dialog-close>
+  Créer
+</button>
+
+  </div>
+</div>

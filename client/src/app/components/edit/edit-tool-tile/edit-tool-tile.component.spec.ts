@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Tile } from '@common/enums';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { EditToolTileComponent } from './edit-tool-tile.component';
 
 describe('EditToolTileComponent', () => {
@@ -10,11 +9,9 @@ describe('EditToolTileComponent', () => {
     let fixture: ComponentFixture<EditToolTileComponent>;
     let mockToolSelection: jasmine.SpyObj<ToolSelectionService>;
     let selectedTile$: BehaviorSubject<string>;
-    let destroy$: Subject<void>;
 
     beforeEach(async () => {
         selectedTile$ = new BehaviorSubject<string>('someType');
-        destroy$ = new Subject<void>();
         mockToolSelection = jasmine.createSpyObj('ToolSelectionService', ['updateSelectedTile'], { selectedTile$ });
 
         await TestBed.configureTestingModule({
@@ -24,8 +21,7 @@ describe('EditToolTileComponent', () => {
 
         fixture = TestBed.createComponent(EditToolTileComponent);
         component = fixture.componentInstance;
-        component.type = Tile.WALL;
-        component.destroy$ = destroy$;
+        component.type = Tile.Wall;
         fixture.detectChanges();
     });
 
@@ -34,16 +30,16 @@ describe('EditToolTileComponent', () => {
     });
 
     it('should update styleClass based on selectedTile$', () => {
-        selectedTile$.next(Tile.WALL);
+        selectedTile$.next(Tile.Wall);
         expect(component.styleClass).toBe('selected');
 
-        selectedTile$.next(Tile.ICE);
+        selectedTile$.next(Tile.Ice);
         expect(component.styleClass).toBe('unselected');
     });
 
     it('should call updateSelectedTile on click', () => {
         component.onClick();
-        expect(mockToolSelection.updateSelectedTile).toHaveBeenCalledWith(Tile.WALL);
+        expect(mockToolSelection.updateSelectedTile).toHaveBeenCalledWith(Tile.Wall);
     });
 
     it('should clean up subscription on destroy', () => {
@@ -53,28 +49,16 @@ describe('EditToolTileComponent', () => {
         expect(component.ngOnDestroy).toHaveBeenCalled();
     });
 
-    it('should set description correctly on init', () => {
-        component.type = Tile.FLOOR;
-        component.description = '';
-        component.ngOnInit();
-        expect(component.description).toBe(ASSETS_DESCRIPTION.get(Tile.FLOOR) ?? 'Pas de description');
-
-        component.type = 'invalid' as Tile;
-        component.description = 'Pas de description';
-        component.ngOnInit();
-        expect(component.description).toBe(ASSETS_DESCRIPTION.get('invalid' as Tile) ?? 'Pas de description');
+    it('returns true for Tile.Ice', () => {
+        expect(component.shouldShowAbove(Tile.Ice)).toBe(true);
     });
 
-    it('returns true for Tile.ICE', () => {
-        expect(component.shouldShowAbove(Tile.ICE)).toBe(true);
-    });
-
-    it('returns true for Tile.WATER', () => {
-        expect(component.shouldShowAbove(Tile.WATER)).toBe(true);
+    it('returns true for Tile.Water', () => {
+        expect(component.shouldShowAbove(Tile.Water)).toBe(true);
     });
 
     it('returns false for other Tile types', () => {
-        expect(component.shouldShowAbove(Tile.CLOSED_DOOR)).toBe(false);
-        expect(component.shouldShowAbove(Tile.WALL)).toBe(false);
+        expect(component.shouldShowAbove(Tile.ClosedDoor)).toBe(false);
+        expect(component.shouldShowAbove(Tile.Wall)).toBe(false);
     });
 });

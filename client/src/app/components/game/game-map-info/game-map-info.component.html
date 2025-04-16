@@ -1,0 +1,20 @@
+<div class="container">
+    <div class="content">
+        <div class="info">
+            <h3>Taille de la carte:</h3>
+            <p>{{ mapSize }} x {{ mapSize }}</p>
+        </div>
+        <div class="info">
+            <h3>Joueur actif:</h3>
+            @if (!activePlayer) {
+            <p>Aucun joueur actif...</p>
+            } @else {
+            <p>{{ activePlayer.name }}</p>
+            }
+        </div>
+        <div class="info">
+            <h3>Nombre de joueurs actuels:</h3>
+            <p>{{ playerCount }}</p>
+        </div>
+    </div>
+</div>

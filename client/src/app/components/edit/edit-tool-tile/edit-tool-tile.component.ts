@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
-import { ToolSelectionService } from '@app/services/code/tool-selection.service';
+import { ToolSelectionService } from '@app/services/tool-selection/tool-selection.service';
 import { Tile } from '@common/enums';
-import { Subject, takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-edit-tool-tile',
@@ -12,35 +12,28 @@ import { Subject, takeUntil } from 'rxjs';
     styleUrl: './edit-tool-tile.component.scss',
     imports: [CommonModule],
 })
-export class EditToolTileComponent implements OnInit, OnDestroy {
+export class EditToolTileComponent extends SubLifecycleHandlerComponent implements OnInit {
+    @Output() descriptionHovered = new EventEmitter<string>();
     @Input() type!: Tile;
     src: string = DEFAULT_PATH_TILES;
     extension: string = '.png';
-    description: string = '';
-    showTooltip = false;
     styleClass: string = 'unselected';
-    destroy$ = new Subject<void>();
-
-    constructor(public toolSelection: ToolSelectionService) {}
+    description: string = '';
+    private readonly toolSelectionService: ToolSelectionService = inject(ToolSelectionService);
 
     ngOnInit() {
-        this.toolSelection.selectedTile$.pipe(takeUntil(this.destroy$)).subscribe((tile) => {
-            if (tile === this.type) {
-                this.styleClass = 'selected';
-            } else {
-                this.styleClass = 'unselected';
-            }
+        this.autoSubscribe(this.toolSelectionService.selectedTile$, (tile) => {
+            this.styleClass = tile === this.type ? 'selected' : 'unselected';
         });
         this.getDescription(this.type);
     }
 
-    ngOnDestroy() {
-        this.destroy$.next();
-        this.destroy$.complete();
+    onMouseEnter() {
+        this.descriptionHovered.emit(this.getDescription(this.type));
     }
 
     onClick() {
-        this.toolSelection.updateSelectedTile(this.type);
+        this.toolSelectionService.updateSelectedTile(this.type);
     }
 
     getDescription(type: Tile): string {
@@ -48,6 +41,6 @@ export class EditToolTileComponent implements OnInit, OnDestroy {
     }
 
     shouldShowAbove(type: Tile): boolean {
-        return type === Tile.ICE || type === Tile.WATER;
+        return type === Tile.Ice || type === Tile.Water;
     }
 }

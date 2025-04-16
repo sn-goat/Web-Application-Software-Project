@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Polytopia - Salle d'attente</title>
+
+        <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&display=swap" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="background-gif" style="background-image: url('assets/backgrounds/lobby.gif')"></div>
+        <h1 class="medieval-title">Salle d'attente</h1>
+        <button class="top-left-button return-button" (click)="disconnect()">Déconnexion</button>
+
+        <div class="container justified">
+            <div class="main-content">
+                <div class="left-column">
+                    <div class="access-code-container">
+                        <h1>Code d'accès à la partie: {{ accessCode }}</h1>
+                        @if (isAdmin) {
+                        <button (click)="toggleRoomLock()" [disabled]="isRoomFull()">
+                            {{ isRoomLocked ? '🔓 Déverouiller la salle' : '🔒 Verouiller la salle' }}
+                        </button>
+                        @if(isRoomFull()){
+                        <p>La salle est pleine. Vous ne pouvez pas la déverouiller.</p>
+                        }
+                        <button [disabled]="isRoomFull()" (click)="openVirtualPlayerForm()">🧙‍♂️ Ajouter un Joueur Virtuel</button>
+                        @if (players.length >= 2 && isRoomLocked) {
+                        <button (click)="startGame()">⚔️ Démarrer la partie</button>
+                        }@else if (!(players.length >= 2)) {
+                        <p>Il vous faut un minimum de 2 joueurs pour démarrer la partie.</p>
+                        }@else {
+                        <p>Veuillez verouiller la salle pour démarrer la partie.</p>
+                        } }
+                    </div>
+
+                    <div class="players-list">
+                        <h2>Liste de joueurs</h2>
+                        <ul>
+                            @for (player of players; track player.id) {
+                            <li>
+                                <img class="avatar-image" [src]="player.avatar" alt="Avatar" />
+                                <span [ngStyle]="{ color: players[0].id === player.id ? 'yellow' : 'inherit' }">
+                                    @if(isVirtualPlayer(player)){
+                                        <strong>{{ player.name }} 🤖 JV</strong>
+                                    }@else{
+                                        <strong>{{ player.name }}</strong>>
+                                    }
+                                </span>
+
+                                @if (isAdmin && player.id !== getPlayerId()) {
+                                <button (click)="expelPlayer(player.id)">Bannir</button>
+                                }
+                            </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <app-chat></app-chat>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
