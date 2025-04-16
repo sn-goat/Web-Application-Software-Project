@@ -187,7 +187,7 @@ export class Game implements IGame, GameStats {
             this.movementInProgress = true;
             let index = 0;
             const path = pathInfo.path;
-            let effectiveCost = 0; // Coût accumulé effectif du déplacement
+            let effectiveCost = 0;
             const interval = setInterval(() => {
                 if (index >= path.length) {
                     clearInterval(interval);
@@ -196,7 +196,7 @@ export class Game implements IGame, GameStats {
                 } else {
                     const nextPos = path[index];
                     const currentCell = this.map[player.position.y][player.position.x];
-                    const stepCost = currentCell.cost;
+                    const stepCost = GameUtils.getTileCost(currentCell, true);
                     effectiveCost += stepCost;
                     this.movePlayer(nextPos, player);
                     if (!this.continueMovement) {
@@ -413,15 +413,9 @@ export class Game implements IGame, GameStats {
                 this.clearVpInterval();
                 return;
             }
-            let targetPath: Vec2[] = [];
-            const playerWithFlag = GameUtils.getPlayerWithFlag(this.players);
-            const shouldChaseFlag = playerWithFlag ? player.team !== playerWithFlag.team : false;
-            if (this.isCTF && shouldChaseFlag) {
-                targetPath = VPManager.lookForFlag(player, this.map, playerWithFlag);
-            } else {
-                targetPath = VPManager.lookForTarget(player, this.map, this.players);
-            }
-            const instruction: VirtualPlayerInstructions = VPManager.computePath(player, this.map, targetPath);
+
+            const instruction: VirtualPlayerInstructions = VPManager.getInstruction(player, this.isCTF, this.players, this.map);
+
             if (instruction.action === VirtualPlayerAction.EndTurn) {
                 this.clearVpInterval();
                 this.endTurn();
@@ -481,12 +475,14 @@ export class Game implements IGame, GameStats {
                     position,
                 });
             } else {
-                this.inventoryFull = true;
-                this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
-                    player,
-                    item: cell.item,
-                    position,
-                });
+                if (!(player instanceof VirtualPlayer)) {
+                    this.inventoryFull = true;
+                    this.internalEmitter.emit(InternalTurnEvents.InventoryFull, {
+                        player,
+                        item: cell.item,
+                        position,
+                    });
+                }
             }
             this.continueMovement = false;
         }
