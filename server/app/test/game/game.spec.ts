@@ -129,6 +129,7 @@ describe('Game', () => {
             expect(game.map).toEqual(dummyBoard.board);
             expect(game.players).toEqual([]);
             expect(game.currentTurn).toBe(0);
+            expect(game.totalTurns).toBe(0);
             expect(game.gamePhase).toBe(GamePhase.Lobby);
             expect(game.isCTF).toBe(dummyBoard.isCTF);
             expect(game.timer).toBeInstanceOf(Timer);

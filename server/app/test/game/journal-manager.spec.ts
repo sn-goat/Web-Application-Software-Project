@@ -95,7 +95,7 @@ describe('JournalManager', () => {
             const entry = JournalManager.processEntry(GameMessage.FleeSuccess, [player as any]);
 
             expect(entry).toBeDefined();
-            expect(entry.isFight).toBe(true);
+            expect(entry.isFight).toBe(false);
             expect(entry.message).toBe(`${GameMessage.FleeSuccess} ${player.name}`);
             expect(entry.playersInvolved).toEqual([player.id]);
         });

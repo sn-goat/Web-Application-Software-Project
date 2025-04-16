@@ -44,6 +44,7 @@ export class GameStatsUtils {
                 gameDuration: stats.gameStats.gameDuration,
                 tilesVisitedPercentage: stats.gameStats.tilesVisitedPercentage,
                 flagsCapturedCount: stats.gameStats.flagsCapturedCount,
+                totalTurns: stats.gameStats.totalTurns,
             },
         };
 

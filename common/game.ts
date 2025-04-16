@@ -31,6 +31,7 @@ export interface GameStats {
     doorsNumber?: number;
     timeStartOfGame?: Date;
     timeEndOfGame?: Date;
+    totalTurns?: number;
 }
 
 export interface GameFormData {

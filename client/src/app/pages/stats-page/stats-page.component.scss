@@ -77,12 +77,13 @@
   flex-direction: column;
 }
 
-app-chat {
+app-chat, app-journal {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
   font-family: 'MedievalSharp', cursive;
+  overflow: auto;
   color: #f2e5b8;
     background-color: rgba(36, 24, 10, 0.6);
     border: 3px solid var(--scroll-gold);
@@ -91,5 +92,3 @@ app-chat {
     backdrop-filter: blur(2px);
     padding: 0;
 }
-
-

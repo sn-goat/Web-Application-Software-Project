@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { AlertComponent } from '@app/components/common/alert/alert.component';
 import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar.component';
+import { JournalComponent } from '@app/components/journal/journal.component';
 import { StatsComponent } from '@app/components/stats/stats.component';
 import { Alert } from '@app/constants/enums';
 import { GameService } from '@app/services/game/game.service';
@@ -14,7 +15,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-stats-page',
-    imports: [StatsComponent, ChatComponent, HeaderBarComponent],
+    imports: [StatsComponent, HeaderBarComponent, JournalComponent, ChatComponent],
     templateUrl: './stats-page.component.html',
     styleUrl: './stats-page.component.scss',
 })

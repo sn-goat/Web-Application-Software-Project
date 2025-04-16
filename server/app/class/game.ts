@@ -71,6 +71,7 @@ export class Game implements IGame, GameStats {
     doorsNumber: number;
     timeStartOfGame: Date;
     timeEndOfGame: Date;
+    totalTurns: number;
 
     stats: Stats;
     inventoryFull: boolean;
@@ -91,6 +92,7 @@ export class Game implements IGame, GameStats {
         this.disconnectedPlayers = [];
         this.timeStartOfGame = null;
         this.timeEndOfGame = null;
+        this.totalTurns = 0;
         this.stats = null;
         this.players = [];
         this.currentTurn = 0;
@@ -251,6 +253,7 @@ export class Game implements IGame, GameStats {
     startTurn(): void {
         const player = this.players[this.currentTurn];
         player.initTurn();
+        this.totalTurns++;
         let turn: { player: Player; path: Record<string, PathInfo> };
         if (player instanceof VirtualPlayer) {
             turn = {
@@ -371,7 +374,7 @@ export class Game implements IGame, GameStats {
     flee(): void {
         if (this.fight.flee()) {
             const opponent = this.fight.getOpponent(this.fight.currentPlayer.id);
-            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer, opponent]);
+            this.dispatchJournalEntry(GameMessage.FleeSuccess, [this.fight.currentPlayer]);
             opponent.totalFights += 1;
             this.endFight();
             const fightResult: FightResult = { type: FightResultType.Tie };

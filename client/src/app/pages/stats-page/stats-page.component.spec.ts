@@ -15,6 +15,7 @@ import { SocketReceiverService } from '@app/services/socket/socket-receiver.serv
 import { IPlayer } from '@common/player';
 import { Subject, of } from 'rxjs';
 import { StatsPageComponent } from './stats-page.component';
+import { JournalComponent } from '@app/components/journal/journal.component';
 
 describe('StatsPageComponent', () => {
     let component: StatsPageComponent;
@@ -57,7 +58,7 @@ describe('StatsPageComponent', () => {
             ],
         })
             .overrideComponent(StatsPageComponent, {
-                remove: { imports: [StatsComponent, ChatComponent] },
+                remove: { imports: [StatsComponent, ChatComponent, JournalComponent] },
                 add: { imports: [] },
             })
             .compileComponents();

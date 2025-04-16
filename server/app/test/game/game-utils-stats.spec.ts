@@ -25,6 +25,7 @@ describe('GameStatsUtils', () => {
         gameStats.flagsCaptured = new Set(gameStats.flagsCaptured ? Array.from(gameStats.flagsCaptured) : []);
         gameStats.timeStartOfGame = new Date(gameStats.timeStartOfGame);
         gameStats.timeEndOfGame = new Date(gameStats.timeEndOfGame);
+        gameStats.totalTurns = gameStats.totalTurns || 0;
     });
 
     describe('calculateStats', () => {
@@ -43,6 +44,7 @@ describe('GameStatsUtils', () => {
             expect(stats.gameStats.doorsHandledPercentage).toBe('0%');
             expect(stats.gameStats.gameDuration).toBe('15:42');
             expect(stats.gameStats.flagsCapturedCount).toBe(0);
+            expect(stats.gameStats.totalTurns).toBe(0);
 
             expect(() => JSON.stringify(stats)).not.toThrow();
         });
