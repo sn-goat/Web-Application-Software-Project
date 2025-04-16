@@ -189,11 +189,17 @@ describe('Fight', () => {
             fight.initFight(player1, player2);
         });
 
-        it('should return fight result with opponent as winner when player disconnects', () => {
-            const result = fight.handleFightRemoval('p1');
-            expect(result.winner).toBe(player2);
-            expect(result.loser).toBe(player1);
+        it('should increment winner wins and call endFight with appropriate result', () => {
+            const endFightSpy = jest.spyOn(fight, 'endFight');
+
+            fight.handleFightRemoval('p1');
+
             expect(player2.wins).toBe(1);
+            expect(endFightSpy).toHaveBeenCalledWith({
+                type: 'decisive',
+                winner: player2,
+                loser: player1,
+            });
         });
     });
 

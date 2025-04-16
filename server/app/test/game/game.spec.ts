@@ -374,10 +374,6 @@ describe('Game', () => {
             game.addPlayer(player1);
         });
 
-        it('isPlayerInFight should return true when fight exists and player is in fight', () => {
-            expect(game.isPlayerInFight(player1.id)).toBe(true);
-        });
-
         it('removePlayerOnMap should update map cells for player', () => {
             player1.position = { x: 0, y: 0 };
             player1.spawnPosition = { x: 1, y: 1 };
@@ -938,43 +934,6 @@ describe('Tests spécifiques pour les méthodes demandées', () => {
             expect(endTurnSpy).toHaveBeenCalled();
             expect(game.timer.resumeTimer).not.toHaveBeenCalled(); // Ne devrait pas continuer après le return
             expect(game.decrementAction).not.toHaveBeenCalled(); // Ne devrait pas continuer après le return
-        });
-    });
-
-    describe('removePlayerFromFight', () => {
-        let game: Game;
-        let emitter: EventEmitter2;
-        let player: Player;
-        let fightResult: FightResult;
-
-        beforeEach(() => {
-            emitter = new EventEmitter2();
-            game = new Game(emitter, dummyBoard);
-            player = createDummyPlayer('p1');
-            game.addPlayer(player);
-
-            // Création d'un résultat de combat factice
-            fightResult = {
-                type: FightResultType.Decisive,
-                winner: createDummyPlayer('winner'),
-                loser: createDummyPlayer('loser'),
-            };
-
-            // Mock pour handleFightRemoval
-            game.fight = new Fight(emitter);
-            jest.spyOn(game.fight, 'handleFightRemoval').mockReturnValue(fightResult);
-        });
-
-        it('devrait appeler handleFightRemoval et émettre un événement de fin de combat', () => {
-            // Arrange
-            const emitSpy = jest.spyOn(emitter, 'emit');
-
-            // Act
-            game.removePlayerFromFight(player.id);
-
-            // Assert
-            expect(game.fight.handleFightRemoval).toHaveBeenCalledWith(player.id);
-            expect(emitSpy).toHaveBeenCalledWith(InternalFightEvents.End, fightResult);
         });
     });
 

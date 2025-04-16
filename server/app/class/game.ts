@@ -79,6 +79,8 @@ export class Game implements IGame, GameStats {
 
     movementInProgress: boolean;
     private continueMovement: boolean;
+    private currentVpTurnInterval: NodeJS.Timeout | null;
+    private currentVpFightTimeout: NodeJS.Timeout | null;
 
     constructor(internalEmitter: EventEmitter2, board: Board) {
         this.internalEmitter = internalEmitter;
@@ -114,6 +116,8 @@ export class Game implements IGame, GameStats {
     }
 
     closeGame(): void {
+        this.clearVpInterval();
+        this.clearVpFightTimeout();
         this.internalEmitter.removeAllListeners(InternalEvents.EndTimer);
         this.internalEmitter.removeAllListeners(InternalEvents.UpdateTimer);
 
@@ -377,6 +381,7 @@ export class Game implements IGame, GameStats {
     }
 
     playerAttack(): void {
+        if (!this.fight) return;
         const fightResult = this.fight.playerAttack(this.isDebugMode);
         if (fightResult === null) {
             this.changeFighter();
@@ -392,9 +397,6 @@ export class Game implements IGame, GameStats {
         }
     }
 
-    isPlayerInFight(playerId: string): boolean {
-        return this.fight.hasFight() && this.fight.isPlayerInFight(playerId);
-    }
     removePlayerOnMap(playerId: string): void {
         const player = this.getPlayerById(playerId);
         this.map[player.position.y][player.position.x].player = Avatar.Default;
@@ -402,16 +404,13 @@ export class Game implements IGame, GameStats {
         this.internalEmitter.emit(InternalGameEvents.MapUpdated, this.map);
         this.dispatchJournalEntry(GameMessage.Quit, [player]);
     }
-    removePlayerFromFight(playerId: string): void {
-        const fightResult = this.fight.handleFightRemoval(playerId);
-        this.internalEmitter.emit(InternalFightEvents.End, fightResult);
-    }
 
     computeVirtualPlayerTurn(player: VirtualPlayer): void {
+        this.clearVpInterval();
         let timeBeforeTurn = Math.max(MIN_VP_TURN_DELAY, Math.floor(Math.random() * MAX_VP_TURN_DELAY));
-        const vpTurnInterval = setInterval(() => {
+        this.currentVpTurnInterval = setInterval(() => {
             if (!this.isPlayerTurn(player.id)) {
-                clearInterval(vpTurnInterval);
+                this.clearVpInterval();
                 return;
             }
             let targetPath: Vec2[] = [];
@@ -424,13 +423,13 @@ export class Game implements IGame, GameStats {
             }
             const instruction: VirtualPlayerInstructions = VPManager.computePath(player, this.map, targetPath);
             if (instruction.action === VirtualPlayerAction.EndTurn) {
-                clearInterval(vpTurnInterval);
+                this.clearVpInterval();
                 this.endTurn();
             } else {
                 timeBeforeTurn = Math.max(MIN_VP_TURN_DELAY, Math.floor(Math.random() * MAX_VP_TURN_DELAY));
                 this.processVirtualPlayerInstructions(player, instruction);
                 if (instruction.action === VirtualPlayerAction.InitFight) {
-                    clearInterval(vpTurnInterval);
+                    this.clearVpInterval();
                 }
             }
         }, timeBeforeTurn);
@@ -499,6 +498,20 @@ export class Game implements IGame, GameStats {
         this.internalEmitter.emit(InternalTurnEvents.Move, { previousPosition, player });
     }
 
+    private clearVpInterval(): void {
+        if (this.currentVpTurnInterval) {
+            clearInterval(this.currentVpTurnInterval);
+            this.currentVpTurnInterval = null;
+        }
+    }
+
+    private clearVpFightTimeout(): void {
+        if (this.currentVpFightTimeout) {
+            clearTimeout(this.currentVpFightTimeout);
+            this.currentVpFightTimeout = null;
+        }
+    }
+
     private startGameTimer(): void {
         this.timeStartOfGame = new Date();
     }
@@ -560,7 +573,10 @@ export class Game implements IGame, GameStats {
     }
 
     private computeVirtualPlayerFight(vPlayer: VirtualPlayer): void {
-        setTimeout(() => {
+        this.clearVpFightTimeout();
+        this.currentVpFightTimeout = setTimeout(() => {
+            this.currentVpFightTimeout = null;
+            if (!this.fight) return;
             const fightAction = VPManager.processFightAction(vPlayer);
             if (fightAction === VirtualPlayerAction.Flee) {
                 this.flee();
