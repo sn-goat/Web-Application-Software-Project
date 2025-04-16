@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnInit } from '@angular/core';
+import { Component, inject, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { SubLifecycleHandlerComponent } from '@app/components/common/sub-lifecycle-handler/subscription-lifecycle-handler.component';
 import { ASSETS_DESCRIPTION } from '@app/constants/descriptions';
 import { DEFAULT_PATH_TILES } from '@app/constants/path';
@@ -13,10 +13,10 @@ import { Tile } from '@common/enums';
     imports: [CommonModule],
 })
 export class EditToolTileComponent extends SubLifecycleHandlerComponent implements OnInit {
+    @Output() descriptionHovered = new EventEmitter<string>();
     @Input() type!: Tile;
     src: string = DEFAULT_PATH_TILES;
     extension: string = '.png';
-    showTooltip = false;
     styleClass: string = 'unselected';
     description: string = '';
     private readonly toolSelectionService: ToolSelectionService = inject(ToolSelectionService);
@@ -26,6 +26,10 @@ export class EditToolTileComponent extends SubLifecycleHandlerComponent implemen
             this.styleClass = tile === this.type ? 'selected' : 'unselected';
         });
         this.getDescription(this.type);
+    }
+
+    onMouseEnter() {
+        this.descriptionHovered.emit(this.getDescription(this.type));
     }
 
     onClick() {

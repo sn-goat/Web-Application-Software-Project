@@ -42,6 +42,7 @@ export interface GameFormData {
 }
 
 export const MAX_FIGHT_WINS = 3;
+export const CODE_LENGTH_RESET_THRESHOLD = 3;
 
 export interface IFight {
     player1: IPlayer;

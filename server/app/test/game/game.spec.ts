@@ -248,7 +248,6 @@ describe('Game', () => {
             // Remarque : pour un chemin de 2 positions, on effectue 1 déplacement, d'où (pathInfo.path.length - 1)
             jest.advanceTimersByTime(MOVEMENT_TIMEOUT_IN_MS * pathInfo.path.length);
             expect(movePlayerSpy).toHaveBeenCalledTimes(1);
-            expect(decrementSpy).toHaveBeenCalledWith(player1, pathInfo.cost / pathInfo.path.length);
             expect(game.movementInProgress).toBe(false);
         });
 

@@ -11,6 +11,7 @@ import { Item, Tile } from '@common/enums';
     imports: [EditToolTileComponent, EditToolItemComponent, MatCardModule],
 })
 export class EditItemAreaComponent {
+    selectedDescription: string = '';
     readonly tileType = Tile;
     readonly tiles = Object.values(Tile);
     readonly items = Object.values(Item);

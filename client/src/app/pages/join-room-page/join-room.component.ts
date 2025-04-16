@@ -5,7 +5,7 @@ import { HeaderBarComponent } from '@app/components/common/header-bar/header-bar
 import { FormCharacterComponent } from '@app/components/form-character/form-character.component';
 import { SocketEmitterService } from '@app/services/socket/socket-emitter.service';
 import { SocketReceiverService } from '@app/services/socket/socket-receiver.service';
-import { ACCESS_CODE_REGEX } from '@common/game';
+import { ACCESS_CODE_REGEX, CODE_LENGTH_RESET_THRESHOLD } from '@common/game';
 
 @Component({
     selector: 'app-join-room',
@@ -24,8 +24,10 @@ export class JoinRoomComponent {
 
     validateCode(): void {
         this.isValidCode = ACCESS_CODE_REGEX.test(this.accessCode);
+        if (this.accessCode.length === CODE_LENGTH_RESET_THRESHOLD) {
+            this.joinResult = '';
+        }
     }
-
     joinRoom() {
         if (!this.isValidCode) return;
 
@@ -40,6 +42,13 @@ export class JoinRoomComponent {
             this.joinResult = message;
             this.showCharacterForm = false;
         });
+    }
+
+    onEnterKey(): void {
+        this.validateCode();
+        if (this.isValidCode) {
+            this.joinRoom();
+        }
     }
 
     closeCharacterForm(): void {
