@@ -155,8 +155,7 @@ describe('RoomGateway', () => {
             gateway.handleJoinRoom(client, accessCode);
 
             expect(client.join).toHaveBeenCalledWith(accessCode);
-            expect(server.to).toHaveBeenCalledWith(accessCode);
-            expect(emitMock).toHaveBeenCalledWith(RoomEvents.PlayerJoined, room);
+            expect(client.emit).toHaveBeenCalledWith(RoomEvents.PlayerJoined, room);
         });
 
         it('handleShareCharacter should add player to room and emit updates', () => {

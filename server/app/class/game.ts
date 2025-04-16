@@ -196,7 +196,7 @@ export class Game implements IGame, GameStats {
                 } else {
                     const nextPos = path[index];
                     const currentCell = this.map[player.position.y][player.position.x];
-                    const stepCost = GameUtils.getTileCost(currentCell, true);
+                    const stepCost = currentCell.cost;
                     effectiveCost += stepCost;
                     this.movePlayer(nextPos, player);
                     if (!this.continueMovement) {

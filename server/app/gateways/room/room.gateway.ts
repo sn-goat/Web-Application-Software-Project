@@ -63,8 +63,8 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             client.emit(RoomEvents.JoinError, 'Impossible de rejoindre la salle, car elle est verrouillée.');
         } else {
             client.join(accessCode);
-            this.server.to(accessCode).emit(RoomEvents.PlayerJoined, room);
         }
+        client.emit(RoomEvents.PlayerJoined, room);
     }
 
     @SubscribeMessage(RoomEvents.ShareCharacter)
@@ -74,6 +74,7 @@ export class RoomGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const avatars = room.addPlayer(player);
         if (!avatars) {
             client.emit(RoomEvents.SetCharacter, player);
+            client.emit(RoomEvents.JoinSuccess, room);
             this.server.to(payload.accessCode).emit(RoomEvents.PlayerJoined, room);
         } else {
             this.logger.log('Avatar already taken');

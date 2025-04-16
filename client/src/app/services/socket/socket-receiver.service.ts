@@ -39,6 +39,15 @@ export class SocketReceiverService {
         });
     }
 
+    onJoinSuccess(): Observable<IRoom> {
+        return new Observable((observer) => {
+            this.socket.once(RoomEvents.JoinSuccess, (room: IRoom) => {
+                this.socketEmitter.setAccessCode(room.accessCode);
+                observer.next(room);
+            });
+        });
+    }
+
     onJoinError(): Observable<string> {
         return new Observable((observer) => {
             this.socket.on(RoomEvents.JoinError, (message: string) => {

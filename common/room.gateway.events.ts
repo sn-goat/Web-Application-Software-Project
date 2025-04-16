@@ -7,6 +7,7 @@ export enum RoomEvents {
     JoinRoom = 'joinRoom',
     PlayerJoined = 'playerJoined',
     JoinError = 'joinError',
+    JoinSuccess = 'joinSuccess',
 
     ShareCharacter = 'shareCharacter',
     CreateVirtualPlayer = 'createVirtualPlayer',
