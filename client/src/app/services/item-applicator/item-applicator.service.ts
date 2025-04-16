@@ -55,6 +55,12 @@ export class ItemApplicatorService {
 
     private updatePosition(oldItemPos: Vec2, newItemPos: Vec2) {
         if (
+            this.mapService.getCellItem(newItemPos.x, newItemPos.y) !== Item.Default &&
+            (oldItemPos.x !== newItemPos.x || oldItemPos.y !== newItemPos.y)
+        ) {
+            return;
+        }
+        if (
             this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.Wall &&
             this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.OpenedDoor &&
             this.mapService.getCellTile(newItemPos.x, newItemPos.y) !== Tile.ClosedDoor

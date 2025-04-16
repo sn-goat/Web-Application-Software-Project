@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
@@ -34,7 +35,16 @@ describe('TileApplicatorService', () => {
         toolSelectionServiceSpy = jasmine.createSpyObj('ToolSelectionService', [], {
             selectedTile$: selectedTileSubject.asObservable(),
         });
-        mapServiceSpy = jasmine.createSpyObj('MapService', ['getCellItem', 'getCellTile', 'setCellTile', 'setCellItem', 'getBoardSize']);
+        mapServiceSpy = jasmine.createSpyObj('MapService', [
+            'getCellItem',
+            'getCellTile',
+            'setCellTile',
+            'setCellItem',
+            'getBoardSize',
+            'increaseSpawnsToPlace',
+            'setHasFlagOnBoard',
+            'increaseItemsToPlace',
+        ]);
         mapServiceSpy.getBoardSize.and.returnValue(boardSize);
 
         TestBed.configureTestingModule({
@@ -366,12 +376,31 @@ describe('TileApplicatorService', () => {
             expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(7, 7, Item.Default);
         });
 
-        it('should not clear the cell item if it is Default', () => {
-            mapServiceSpy.getCellItem.and.returnValue(Item.Default);
+        it('should increment spawns count when removing a Spawn item', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Spawn);
 
-            (service as any).applyDoor(8, 8);
+            (service as any).applyDoor(7, 7);
 
-            expect(mapServiceSpy.setCellItem).not.toHaveBeenCalled();
+            expect(mapServiceSpy.increaseSpawnsToPlace).toHaveBeenCalled();
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(7, 7, Item.Default);
+        });
+
+        it('should set flag as not on board when removing a Flag item', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Flag);
+
+            (service as any).applyDoor(7, 7);
+
+            expect(mapServiceSpy.setHasFlagOnBoard).toHaveBeenCalledWith(false);
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(7, 7, Item.Default);
+        });
+
+        it('should increment items count when removing other items', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Chest);
+
+            (service as any).applyDoor(7, 7);
+
+            expect(mapServiceSpy.increaseItemsToPlace).toHaveBeenCalled();
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(7, 7, Item.Default);
         });
 
         it('should set tile to OpenedDoor if current tile is ClosedDoor', () => {
@@ -400,12 +429,31 @@ describe('TileApplicatorService', () => {
             expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(1, 2, Item.Default);
         });
 
-        it('should not clear the cell item if it is Default', () => {
-            mapServiceSpy.getCellItem.and.returnValue(Item.Default);
+        it('should increment spawns count when removing a Spawn item', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Spawn);
 
-            (service as any).applyWall(2, 3);
+            (service as any).applyWall(1, 2);
 
-            expect(mapServiceSpy.setCellItem).not.toHaveBeenCalled();
+            expect(mapServiceSpy.increaseSpawnsToPlace).toHaveBeenCalled();
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(1, 2, Item.Default);
+        });
+
+        it('should set flag as not on board when removing a Flag item', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Flag);
+
+            (service as any).applyWall(1, 2);
+
+            expect(mapServiceSpy.setHasFlagOnBoard).toHaveBeenCalledWith(false);
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(1, 2, Item.Default);
+        });
+
+        it('should increment items count when removing other items', () => {
+            mapServiceSpy.getCellItem.and.returnValue(Item.Chest);
+
+            (service as any).applyWall(1, 2);
+
+            expect(mapServiceSpy.increaseItemsToPlace).toHaveBeenCalled();
+            expect(mapServiceSpy.setCellItem).toHaveBeenCalledWith(1, 2, Item.Default);
         });
 
         it('should set tile to Wall', () => {
