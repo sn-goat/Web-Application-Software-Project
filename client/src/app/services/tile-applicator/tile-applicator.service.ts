@@ -139,7 +139,15 @@ export class TileApplicatorService {
     }
 
     private applyDoor(col: number, row: number) {
-        if (this.mapService.getCellItem(col, row) !== Item.Default) {
+        const currentItem = this.mapService.getCellItem(col, row);
+        if (currentItem !== Item.Default) {
+            if (currentItem === Item.Spawn) {
+                this.mapService.increaseSpawnsToPlace();
+            } else if (currentItem === Item.Flag) {
+                this.mapService.setHasFlagOnBoard(false);
+            } else {
+                this.mapService.increaseItemsToPlace();
+            }
             this.mapService.setCellItem(col, row, Item.Default);
         }
         if (this.mapService.getCellTile(col, row) === Tile.ClosedDoor) {
@@ -150,7 +158,15 @@ export class TileApplicatorService {
     }
 
     private applyWall(col: number, row: number) {
-        if (this.mapService.getCellItem(col, row) !== Item.Default) {
+        const currentItem = this.mapService.getCellItem(col, row);
+        if (currentItem !== Item.Default) {
+            if (currentItem === Item.Spawn) {
+                this.mapService.increaseSpawnsToPlace();
+            } else if (currentItem === Item.Flag) {
+                this.mapService.setHasFlagOnBoard(false);
+            } else {
+                this.mapService.increaseItemsToPlace();
+            }
             this.mapService.setCellItem(col, row, Item.Default);
         }
         this.mapService.setCellTile(col, row, Tile.Wall);
