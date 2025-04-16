@@ -14,6 +14,21 @@ export class VPManager {
     private static readonly defensivePriorityPlayer = 1;
     private static readonly defensivePriorityItem = 2;
 
+    static getInstruction(vPlayer: VirtualPlayer, isCTF: boolean, players: Player[], map: Cell[][]) {
+        let targetPath: Vec2[] = [];
+        const playerWithFlag = GameUtils.getPlayerWithFlag(players);
+        const shouldChaseFlag = playerWithFlag ? vPlayer.team !== playerWithFlag.team : false;
+        if (isCTF && shouldChaseFlag) {
+            targetPath = VPManager.lookForFlag(vPlayer, map, playerWithFlag);
+            if (targetPath.length === 0) {
+                return { action: VirtualPlayerAction.EndTurn };
+            }
+        } else {
+            targetPath = VPManager.lookForTarget(vPlayer, map, players);
+        }
+        return VPManager.computePath(vPlayer, map, targetPath);
+    }
+
     static lookForTarget(player: VirtualPlayer, map: Cell[][], players: Player[]): Vec2[] {
         const queue: Vec2[] = [];
         const visited = new Set<string>();
@@ -39,6 +54,9 @@ export class VPManager {
 
     static lookForFlag(player: VirtualPlayer, map: Cell[][], playerWithFlag: Player): Vec2[] {
         if (player.virtualStyle === VirtualPlayerStyles.Defensive) {
+            if (playerWithFlag.spawnPosition.x === player.position.x && playerWithFlag.spawnPosition.y === player.position.y) {
+                return [];
+            }
             const validSpawnPosition: Vec2 = GameUtils.findValidSpawn(map, playerWithFlag.spawnPosition);
             return GameUtils.dijkstra(map, player.position, validSpawnPosition, true).path;
         } else {
