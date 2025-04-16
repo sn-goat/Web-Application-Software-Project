@@ -7,10 +7,10 @@ import { Player } from '@app/class/player';
 import { VPManager } from '@app/class/utils/vp-manager';
 import { VirtualPlayer } from '@app/class/virtual-player';
 import { GameUtils } from '@app/services/game/game-utils';
-import { Cell } from '@common/board';
+import { Cell, Vec2 } from '@common/board';
 import { Item, Tile } from '@common/enums';
 import { Avatar, VirtualPlayerAction } from '@common/game';
-import { VirtualPlayerStyles } from '@common/player';
+import { PlayerInput, Team, VirtualPlayerStyles } from '@common/player';
 
 describe('VPManager', () => {
     // Mocks
@@ -169,6 +169,150 @@ describe('VPManager', () => {
             const action = VPManager.processFightAction(mockVirtualPlayer);
 
             expect(action).toBe(VirtualPlayerAction.Attack);
+        });
+    });
+
+    describe('getInstruction', () => {
+        let map: Cell[][];
+        let players: Player[];
+        let vPlayer: VirtualPlayer;
+
+        beforeEach(() => {
+            // Mock map with a single tile
+            map = [[{ tile: Tile.Floor, item: Item.Default, position: { x: 0, y: 0 }, player: null } as Cell]];
+
+            // Create 2 dummy players with basic PlayerInput
+            const playerInput1 = { name: 'Ally', avatar: 'avatar1' } as PlayerInput;
+            const playerInput2 = { name: 'Enemy', avatar: 'avatar2' } as PlayerInput;
+
+            const ally = new Player('p1', playerInput1);
+            const enemy = new Player('p2', playerInput2);
+            ally.team = Team.Blue;
+            enemy.team = Team.Red;
+
+            players = [ally, enemy];
+
+            // VirtualPlayer constructor will internally randomize, so we pass dummy player list + style
+            vPlayer = new VirtualPlayer(players, VirtualPlayerStyles.Aggressive);
+            vPlayer.team = Team.Blue; // Force a team for tests
+        });
+
+        afterEach(() => {
+            jest.resetAllMocks();
+        });
+
+        it('should chase enemy flag holder in CTF mode', () => {
+            const enemy = players[1];
+            jest.spyOn(GameUtils, 'getPlayerWithFlag').mockReturnValueOnce(enemy);
+            jest.spyOn(VPManager, 'lookForFlag').mockReturnValue([{ x: 1, y: 1 }]);
+            jest.spyOn(VPManager, 'computePath').mockReturnValue({ action: VirtualPlayerAction.Move, pathInfo: { path: [{ x: 1, y: 1 }], cost: 1 } });
+
+            const result = VPManager.getInstruction(vPlayer, true, players, map);
+
+            expect(result).toEqual({
+                action: VirtualPlayerAction.Move,
+                pathInfo: { path: [{ x: 1, y: 1 }], cost: 1 },
+            });
+        });
+
+        it('should return EndTurn if flag cannot be reached in CTF mode', () => {
+            const enemy = players[1];
+            jest.spyOn(GameUtils, 'getPlayerWithFlag').mockReturnValueOnce(enemy);
+            jest.spyOn(VPManager, 'lookForFlag').mockReturnValue([]);
+
+            const result = VPManager.getInstruction(vPlayer, true, players, map);
+
+            expect(result).toEqual({ action: VirtualPlayerAction.EndTurn });
+        });
+
+        it('should look for regular target if not in CTF mode', () => {
+            jest.spyOn(VPManager, 'lookForTarget').mockReturnValue([{ x: 2, y: 2 }]);
+            jest.spyOn(VPManager, 'computePath').mockReturnValue({ action: VirtualPlayerAction.Move, pathInfo: { path: [{ x: 2, y: 2 }], cost: 1 } });
+
+            const result = VPManager.getInstruction(vPlayer, false, players, map);
+
+            expect(result).toEqual({
+                action: VirtualPlayerAction.Move,
+                pathInfo: { path: [{ x: 2, y: 2 }], cost: 1 },
+            });
+        });
+
+        it('should look for regular target if flag holder is ally', () => {
+            const ally = players[0];
+            jest.spyOn(GameUtils, 'getPlayerWithFlag').mockReturnValueOnce(ally);
+            jest.spyOn(VPManager, 'lookForTarget').mockReturnValue([{ x: 3, y: 3 }]);
+            jest.spyOn(VPManager, 'computePath').mockReturnValue({ action: VirtualPlayerAction.Move, pathInfo: { path: [{ x: 3, y: 3 }], cost: 1 } });
+
+            const result = VPManager.getInstruction(vPlayer, true, players, map);
+
+            expect(result).toEqual({
+                action: VirtualPlayerAction.Move,
+                pathInfo: { path: [{ x: 3, y: 3 }], cost: 1 },
+            });
+        });
+    });
+    describe('lookForFlag', () => {
+        let map: Cell[][];
+        let path: Vec2[];
+
+        beforeEach(() => {
+            map = [[{ tile: Tile.Floor, item: Item.Default, position: { x: 0, y: 0 }, player: null } as Cell]];
+            path = [
+                { x: 0, y: 1 },
+                { x: 0, y: 2 },
+            ];
+            jest.resetAllMocks();
+        });
+
+        const makePlayer = (name: string, position: Vec2, spawnPosition?: Vec2): Player => {
+            const playerInput = { name, avatar: 'avatar1' } as PlayerInput;
+            const player = new Player(name, playerInput);
+            if (spawnPosition) player.spawnPosition = spawnPosition;
+            return player;
+        };
+
+        it('should return path to spawn if defensive and not on spawn', () => {
+            const vPlayer = new VirtualPlayer([], VirtualPlayerStyles.Defensive);
+            vPlayer.position = { x: 2, y: 2 };
+
+            const flagHolder = makePlayer('flagHolder', { x: 1, y: 1 }, { x: 0, y: 0 });
+
+            jest.spyOn(GameUtils, 'findValidSpawn').mockReturnValueOnce({ x: 0, y: 0 });
+            jest.spyOn(GameUtils, 'dijkstra').mockReturnValueOnce({ path, cost: 2 });
+
+            const result = VPManager.lookForFlag(vPlayer, map, flagHolder);
+
+            expect(GameUtils.findValidSpawn).toHaveBeenCalledWith(map, flagHolder.spawnPosition);
+            expect(GameUtils.dijkstra).toHaveBeenCalledWith(map, vPlayer.position, { x: 0, y: 0 }, true);
+            expect(result).toEqual(path);
+        });
+
+        it('should return empty path if defensive and already at spawn', () => {
+            const vPlayer = new VirtualPlayer([], VirtualPlayerStyles.Defensive);
+            vPlayer.position = { x: 0, y: 0 };
+            jest.spyOn(GameUtils, 'findValidSpawn');
+            jest.spyOn(GameUtils, 'dijkstra');
+            const flagHolder = makePlayer('flagHolder', { x: 1, y: 1 }, { x: 0, y: 0 });
+
+            const result = VPManager.lookForFlag(vPlayer, map, flagHolder);
+
+            expect(result).toEqual([]);
+            expect(GameUtils.findValidSpawn).not.toHaveBeenCalled();
+            expect(GameUtils.dijkstra).not.toHaveBeenCalled();
+        });
+
+        it('should return path to flag holder if aggressive', () => {
+            const vPlayer = new VirtualPlayer([], VirtualPlayerStyles.Aggressive);
+            vPlayer.position = { x: 5, y: 5 };
+
+            const flagHolder = makePlayer('flagHolder', { x: 1, y: 1 });
+
+            (GameUtils.dijkstra as jest.Mock).mockReturnValue({ path });
+
+            const result = VPManager.lookForFlag(vPlayer, map, flagHolder);
+
+            expect(GameUtils.dijkstra).toHaveBeenCalledWith(map, vPlayer.position, flagHolder.position, true);
+            expect(result).toEqual(path);
         });
     });
 });
