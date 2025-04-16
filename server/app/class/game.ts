@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */ // TODO: fix this
 import { Fight } from '@app/class/fight';
-import { JournalManager } from '@app/class/utils/journal-manager';
 import { Player } from '@app/class/player';
+import { JournalManager } from '@app/class/utils/journal-manager';
 import { FightResult, FightResultType } from '@app/constants/fight-interface';
 import {
     InternalEvents,
@@ -195,17 +195,22 @@ export class Game implements IGame, GameStats {
             this.movementInProgress = true;
             let index = 0;
             const path = pathInfo.path;
+            let effectiveCost = 0; // Coût accumulé effectif du déplacement
             const interval = setInterval(() => {
                 if (index >= path.length) {
                     clearInterval(interval);
                     this.movementInProgress = false;
-                    this.decrementMovement(player, pathInfo.cost);
+                    this.decrementMovement(player, effectiveCost);
                 } else {
-                    this.movePlayer(path[index], player);
+                    const nextPos = path[index];
+                    const currentCell = this.map[player.position.y][player.position.x];
+                    const stepCost = currentCell.cost;
+                    effectiveCost += stepCost;
+                    this.movePlayer(nextPos, player);
                     if (!this.continueMovement) {
                         clearInterval(interval);
                         this.movementInProgress = false;
-                        this.decrementMovement(player, index + 1);
+                        this.decrementMovement(player, effectiveCost);
                     } else {
                         index++;
                     }
@@ -215,7 +220,7 @@ export class Game implements IGame, GameStats {
     }
 
     decrementMovement(player: Player, mvtCost: number): void {
-        player.movementPts -= mvtCost;
+        player.movementPts = Math.max(0, player.movementPts - mvtCost);
         if (!(player instanceof VirtualPlayer)) {
             this.checkForEndTurn(player);
         }
@@ -361,7 +366,7 @@ export class Game implements IGame, GameStats {
 
     changeFighter() {
         this.fight.changeFighter();
-        const fightTurnDuration = !this.fight.currentPlayer.fleeAttempts ? FIGHT_TURN_DURATION_NO_FLEE_IN_S : FIGHT_TURN_DURATION_IN_S;
+        const fightTurnDuration = this.fight.currentPlayer.fleeAttempts === 0 ? FIGHT_TURN_DURATION_NO_FLEE_IN_S : FIGHT_TURN_DURATION_IN_S;
         this.timer.startTimer(fightTurnDuration, TimerType.Combat);
         if (this.fight.currentPlayer instanceof VirtualPlayer) {
             this.computeVirtualPlayerFight(this.fight.currentPlayer);
