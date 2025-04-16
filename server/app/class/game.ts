@@ -104,21 +104,7 @@ export class Game implements IGame, GameStats {
         this.maxPlayers = getLobbyLimit(board.size);
         this.gamePhase = GamePhase.Lobby;
 
-        this.internalEmitter.on(InternalEvents.EndTimer, () => {
-            if (this.fight.hasFight()) {
-                this.playerAttack();
-            } else {
-                this.endTurnRequested();
-            }
-        });
-
-        this.internalEmitter.on(InternalEvents.UpdateTimer, (remainingTime) => {
-            if (this.fight.hasFight()) {
-                this.internalEmitter.emit(InternalTimerEvents.FightUpdate, remainingTime);
-            } else {
-                this.internalEmitter.emit(InternalTimerEvents.TurnUpdate, remainingTime);
-            }
-        });
+        this.setupTimerListeners();
     }
 
     addPlayer(player: Player): void {
@@ -599,5 +585,23 @@ export class Game implements IGame, GameStats {
             this.dispatchJournalEntry(GameMessage.EndGame, [player, ...playerWithoutWinner]);
             this.dispatchGameStats();
         }
+    }
+
+    private setupTimerListeners() {
+        this.internalEmitter.on(InternalEvents.EndTimer, () => {
+            if (this.fight.hasFight()) {
+                this.playerAttack();
+            } else {
+                this.endTurnRequested();
+            }
+        });
+
+        this.internalEmitter.on(InternalEvents.UpdateTimer, (remainingTime) => {
+            if (this.fight.hasFight()) {
+                this.internalEmitter.emit(InternalTimerEvents.FightUpdate, remainingTime);
+            } else {
+                this.internalEmitter.emit(InternalTimerEvents.TurnUpdate, remainingTime);
+            }
+        });
     }
 }
